@@ -1,5 +1,11 @@
 /local
+scripts/
 native/
+.agents/
+!.agents/docs/
+.claude/
+.screenshots/
+.playwright-cli/
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
