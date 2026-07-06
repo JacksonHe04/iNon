@@ -1,12 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Home, Library, Settings, UserCog } from 'lucide-react';
+import { LayoutDashboard, Library, Palette, UserCog } from 'lucide-react';
 
 export const DASHBOARD_TABS = [
-  { id: 'home', label: '主页概览', icon: Home },
-  { id: 'content', label: 'Block 内容编辑', icon: Library },
-  { id: 'settings', label: '公开网站配置', icon: Settings },
+  { id: 'home', label: '控制台', icon: LayoutDashboard },
+  { id: 'content', label: '内容管理', icon: Library },
+  { id: 'canvas', label: '公开网站', icon: Palette },
   { id: 'account', label: '账号管理', icon: UserCog },
 ] as const;
 
@@ -30,7 +30,7 @@ export default function DashboardSideNav({ activeTab, onTabChange, className = '
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
-                className={`relative flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs lg:text-sm font-medium transition-all whitespace-nowrap text-left w-full ${
+                className={`relative flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs lg:text-sm font-medium transition-all whitespace-nowrap text-left w-full cursor-pointer ${
                   isActive
                     ? 'bg-white/50 dark:bg-gray-800/60 text-gray-900 dark:text-white shadow-md font-bold'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-white/20 dark:hover:bg-gray-800/30'
@@ -53,3 +53,4 @@ export default function DashboardSideNav({ activeTab, onTabChange, className = '
     </aside>
   );
 }
+

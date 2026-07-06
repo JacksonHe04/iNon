@@ -3,40 +3,58 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { scrollToElement } from '@/lib/utils';
+import type { BlockConfig } from '@/types/layout';
 
-export const NAV_SECTIONS = [
-  { id: 'experience', label: '经历' },
-  { id: 'education', label: '教育' },
-  { id: 'work', label: '工作' },
-  { id: 'development', label: '开发' },
-  { id: 'products', label: '产品' },
-  { id: 'reading', label: '读书' },
-  { id: 'films', label: '影片' },
-  { id: 'creation', label: '创作' },
-  { id: 'music', label: '音乐' },
-  { id: 'hiphop', label: '嘻哈' },
-  { id: 'events', label: '活动' },
-  { id: 'tags', label: '标签' },
-  { id: 'contact', label: '联系' },
-  { id: 'message', label: '留言' },
-] as const;
+export interface NavItem {
+  id: string;
+  label: string;
+}
 
-type NavSectionId = (typeof NAV_SECTIONS)[number]['id'];
+export const DEFAULT_NAV_SECTIONS: NavItem[] = [
+  { id: 'bio', label: '个人简介' },
+  { id: 'bookmarks', label: '网站快捷' },
+  { id: 'projects', label: '项目展示' },
+  { id: 'timeline', label: '里程碑' },
+  { id: 'music', label: '音乐收藏' },
+  { id: 'movies', label: '影视墙' },
+  { id: 'books', label: '书单' },
+  { id: 'friend_links', label: '友情链接' },
+  { id: 'contact', label: '联系方式' },
+];
 
-export default function SideNav() {
-  const [activeSection, setActiveSection] = useState<NavSectionId>(
-    NAV_SECTIONS[0]?.id ?? 'experience'
+export const NAV_SECTIONS = DEFAULT_NAV_SECTIONS;
+
+interface SideNavProps {
+  blocks?: BlockConfig[];
+  customItems?: NavItem[];
+}
+
+export default function SideNav({ blocks, customItems }: SideNavProps) {
+  // Determine dynamic navigation items based on visible blocks or custom items
+  const navItems: NavItem[] = customItems
+    ? customItems
+    : blocks && blocks.length > 0
+    ? blocks
+        .filter((b) => b.visible)
+        .map((b) => ({
+          id: b.sectionId || b.id,
+          label: b.title.replace(/^[^\s]+\s*/, ''), // strip emoji icon prefix if present
+        }))
+    : DEFAULT_NAV_SECTIONS;
+
+  const [activeSection, setActiveSection] = useState<string>(
+    navItems[0]?.id ?? 'bio'
   );
   const [deepWaterActive, setDeepWaterActive] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 200;
-      
-      for (let i = NAV_SECTIONS.length - 1; i >= 0; i--) {
-        const element = document.getElementById(NAV_SECTIONS[i].id);
+
+      for (let i = navItems.length - 1; i >= 0; i--) {
+        const element = document.getElementById(navItems[i].id);
         if (element && element.offsetTop <= scrollPosition) {
-          setActiveSection(NAV_SECTIONS[i].id);
+          setActiveSection(navItems[i].id);
           break;
         }
       }
@@ -44,7 +62,7 @@ export default function SideNav() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [navItems]);
 
   useEffect(() => {
     const handleDeepWater = (event: Event) => {
@@ -58,7 +76,7 @@ export default function SideNav() {
     };
   }, []);
 
-  if (deepWaterActive) {
+  if (deepWaterActive || navItems.length === 0) {
     return null;
   }
 
@@ -69,23 +87,23 @@ export default function SideNav() {
       className="fixed left-2 lg:left-4 -translate-y-1/2 z-40 hidden md:block"
       style={{ top: 'calc(50% + 40px)' }}
     >
-      <div className="rounded-2xl border border-white/30 bg-white/30 backdrop-blur-xl p-4">
-        <div className="flex flex-col gap-0">
-          {NAV_SECTIONS.map((section) => (
+      <div className="rounded-2xl border border-white/30 bg-white/30 backdrop-blur-xl p-3 shadow-lg">
+        <div className="flex flex-col gap-0.5 max-h-[70vh] overflow-y-auto scrollbar-none">
+          {navItems.map((section) => (
             <button
               key={section.id}
               onClick={() => scrollToElement(section.id)}
-              className={`relative px-2 lg:px-3 py-1.5 lg:py-2 rounded-lg text-xs lg:text-sm transition-colors ${
+              className={`relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all text-left whitespace-nowrap cursor-pointer ${
                 activeSection === section.id
-                  ? 'bg-white/20 text-white'
+                  ? 'bg-white/30 dark:bg-gray-800/40 text-gray-900 dark:text-white font-bold'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-white/10'
               }`}
             >
-              {section.label}
+              <span className="relative z-10">{section.label}</span>
               {activeSection === section.id && (
                 <motion.div
                   layoutId="activeSection"
-                  className="absolute inset-0 bg-white/20 rounded-lg"
+                  className="absolute inset-0 bg-white/30 dark:bg-teal-500/20 rounded-xl border border-teal-500/30"
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 />
               )}
@@ -96,3 +114,4 @@ export default function SideNav() {
     </motion.nav>
   );
 }
+

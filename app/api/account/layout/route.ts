@@ -14,18 +14,34 @@ export async function GET() {
   const { profile } = userContext;
   const adminClient = createAdminClient();
 
-  const { data: profileRow } = await adminClient
-    .from('profiles')
-    .select('layout_config')
-    .eq('id', profile.id)
-    .maybeSingle();
+  try {
+    const { data: profileRow, error } = await adminClient
+      .from('profiles')
+      .select('layout_config')
+      .eq('id', profile.id)
+      .maybeSingle();
 
-  const layoutConfig: LayoutConfig = (profileRow?.layout_config as LayoutConfig) || DEFAULT_LAYOUT_CONFIG;
+    if (error) {
+      console.warn('Failed to query layout_config from Supabase profiles:', error.message);
+      return NextResponse.json({
+        ok: true,
+        layoutConfig: DEFAULT_LAYOUT_CONFIG,
+      });
+    }
 
-  return NextResponse.json({
-    ok: true,
-    layoutConfig,
-  });
+    const layoutConfig: LayoutConfig = (profileRow?.layout_config as LayoutConfig) || DEFAULT_LAYOUT_CONFIG;
+
+    return NextResponse.json({
+      ok: true,
+      layoutConfig,
+    });
+  } catch (err) {
+    console.error('Error in GET /api/account/layout:', err);
+    return NextResponse.json({
+      ok: true,
+      layoutConfig: DEFAULT_LAYOUT_CONFIG,
+    });
+  }
 }
 
 export async function PUT(req: Request) {
@@ -44,33 +60,48 @@ export async function PUT(req: Request) {
 
   const adminClient = createAdminClient();
 
-  const { error } = await adminClient
-    .from('profiles')
-    .update({
-      layout_config: layoutConfig,
-    })
-    .eq('id', profile.id)
-    .eq('user_id', user.id);
+  try {
+    const { error } = await adminClient
+      .from('profiles')
+      .update({
+        layout_config: layoutConfig,
+      })
+      .eq('id', profile.id)
+      .eq('user_id', user.id);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  revalidatePath('/');
-  revalidatePath('/i');
-  for (const s of profile.slugs) {
-    if (s) {
-      revalidatePath(`/${s}`);
-      revalidatePath(`/i/${s}`);
+    if (error) {
+      console.error('Failed to update layout_config in profiles:', error.message);
+      if (error.message.includes('layout_config') || error.message.includes('schema cache')) {
+        return NextResponse.json(
+          { error: '数据库尚未应用 layout_config 字段迁移，请在 Supabase 执行最新 SQL migration' },
+          { status: 500 }
+        );
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
-  }
-  if (profile.username) {
-    revalidatePath(`/${profile.username}`);
-    revalidatePath(`/i/${profile.username}`);
-  }
 
-  return NextResponse.json({
-    ok: true,
-    layoutConfig,
-  });
+    revalidatePath('/');
+    revalidatePath('/i');
+    for (const s of profile.slugs) {
+      if (s) {
+        revalidatePath(`/${s}`);
+        revalidatePath(`/i/${s}`);
+      }
+    }
+    if (profile.username) {
+      revalidatePath(`/${profile.username}`);
+      revalidatePath(`/i/${profile.username}`);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      layoutConfig,
+    });
+  } catch (err) {
+    console.error('Error in PUT /api/account/layout:', err);
+    return NextResponse.json(
+      { error: (err as Error).message || '保存排版设置失败' },
+      { status: 500 }
+    );
+  }
 }

@@ -335,17 +335,17 @@ export default function DashboardClient({ username, data }: DashboardClientProps
           </div>
         )}
 
-        {/* Tab 3: 公开网站配置 (Site Layout Canvas Editor) */}
-        {activeTab === 'settings' && (
+        {/* Tab 3: 公开网站 (Site Layout Canvas Editor) */}
+        {activeTab === 'canvas' && (
           <div className="space-y-6 animate-fadeIn">
             <GlassCard className="p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-white/20 pb-4">
                 <div>
                   <h2 className="font-extrabold text-lg text-gray-900 dark:text-white">
-                    公开个人网站 Block 画布与结构配置
+                    公开个人网站 Block 拖拽画板与结构配置
                   </h2>
                   <p className="text-xs text-gray-500">
-                    在下方自由拖拽调整 Block 顺序、显示/隐藏、单双栏宽度 (50%/100%)，实时决定公开主页 (/{username}) 效果
+                    在下方自由抓手拖拽 Block 决定顺序、显示/隐藏、单双栏宽度 (50%/100%)，与公开主页 (/{username}) 即时效果一致
                   </p>
                 </div>
                 <Link

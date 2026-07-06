@@ -733,7 +733,7 @@ export default function TopNav({ data, className }: TopNavProps) {
               <div className="flex-1 overflow-y-auto">
                 <p className="text-xs uppercase text-gray-400 mb-2">导航</p>
                 <div className="flex flex-col gap-2">
-                  {NAV_SECTIONS.map((section) => (
+                  {NAV_SECTIONS.map((section: { id: string; label: string }) => (
                     <button
                       key={section.id}
                       onClick={() => {
