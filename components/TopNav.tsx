@@ -491,24 +491,24 @@ export default function TopNav({ data, className }: TopNavProps) {
             </div>
           </div>
         </div>
-
-        <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} userEmail={userEmail} />
-
-        <Modal open={showNotifications} onClose={() => setShowNotifications(false)} position="top-right" className="max-w-sm">
-          <h3 className="font-bold mb-2 text-gray-900">通知</h3>
-          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-            {data.notifications.map((notif, idx) => (
-              <div key={idx} className="text-sm border-b border-gray-200 pb-2 last:border-0">
-                <div className="flex justify-between">
-                  <span className="text-xs text-gray-500">{notif.date}</span>
-                  <span className="text-xs px-2 py-0.5 bg-blue-100 rounded text-blue-700">{notif.type}</span>
-                </div>
-                <p className="mt-1 text-gray-700">{notif.text}</p>
-              </div>
-            ))}
-          </div>
-        </Modal>
       </motion.nav>
+
+      <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} userEmail={userEmail} />
+
+      <Modal open={showNotifications} onClose={() => setShowNotifications(false)} position="top-right" className="max-w-sm">
+        <h3 className="font-bold mb-2 text-gray-900">通知</h3>
+        <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+          {data.notifications.map((notif, idx) => (
+            <div key={idx} className="text-sm border-b border-gray-200 pb-2 last:border-0">
+              <div className="flex justify-between">
+                <span className="text-xs text-gray-500">{notif.date}</span>
+                <span className="text-xs px-2 py-0.5 bg-blue-100 rounded text-blue-700">{notif.type}</span>
+              </div>
+              <p className="mt-1 text-gray-700">{notif.text}</p>
+            </div>
+          ))}
+        </div>
+      </Modal>
 
       {/* AI 浮窗 */}
       <AnimatePresence>
