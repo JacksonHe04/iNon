@@ -1,12 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Home, Library, Settings } from 'lucide-react';
+import { Home, Library, Settings, UserCog } from 'lucide-react';
 
 export const DASHBOARD_TABS = [
   { id: 'home', label: '主页', icon: Home },
   { id: 'content', label: '内容库管理', icon: Library },
   { id: 'settings', label: '公开网站配置', icon: Settings },
+  { id: 'account', label: '账号管理', icon: UserCog },
 ] as const;
 
 export type DashboardTabId = (typeof DASHBOARD_TABS)[number]['id'];
