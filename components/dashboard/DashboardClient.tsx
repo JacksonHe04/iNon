@@ -34,22 +34,55 @@ interface DashboardClientProps {
 export default function DashboardClient({ username, data }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>('home');
 
-  // Interactive inline editing states for bookmarks and projects
-  const [bookmarks, setBookmarks] = useState([
-    { id: '1', title: 'GitHub', url: 'https://github.com', icon: '🐙' },
-    { id: '2', title: 'Vercel', url: 'https://vercel.com', icon: '▲' },
-    { id: '3', title: 'Supabase', url: 'https://supabase.com', icon: '⚡' },
-    { id: '4', title: 'Antigravity CLI', url: 'https://deepmind.google', icon: '🤖' },
-  ]);
+  // Initialize bookmarks from Supabase dev_tools or default
+  const initialBookmarks = data.development.dev_tools.length > 0
+    ? data.development.dev_tools.map((t, idx) => ({
+        id: String(idx),
+        title: t.name,
+        url: t.link,
+        icon: t.comment || '🔗',
+      }))
+    : [
+        { id: '1', title: 'GitHub', url: 'https://github.com', icon: '🐙' },
+        { id: '2', title: 'Vercel', url: 'https://vercel.com', icon: '▲' },
+        { id: '3', title: 'Supabase', url: 'https://supabase.com', icon: '⚡' },
+        { id: '4', title: 'Antigravity CLI', url: 'https://deepmind.google', icon: '🤖' },
+      ];
 
-  const [editingBookmarkId, setEditingBookmarkId] = useState<string | null>(null);
+  const [bookmarks, setBookmarks] = useState(initialBookmarks);
   const [newBookmarkTitle, setNewBookmarkTitle] = useState('');
   const [newBookmarkUrl, setNewBookmarkUrl] = useState('');
+  const [savingBookmark, setSavingBookmark] = useState(false);
 
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiLog, setAiLog] = useState<Array<{ role: 'user' | 'bot'; content: string }>>([
     { role: 'bot', content: `你好 ${data.basic.name}！我是你的 AI 分身助手。在主页随时与我测试对话吧！` },
   ]);
+
+  const saveBookmarksToSupabase = async (updatedBookmarks: typeof bookmarks) => {
+    try {
+      setSavingBookmark(true);
+      const devTools = updatedBookmarks.map((b) => ({
+        name: b.title,
+        link: b.url,
+        comment: b.icon || '',
+        tags: [],
+      }));
+
+      await fetch('/api/account/content/development', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data.development,
+          dev_tools: devTools,
+        }),
+      });
+    } catch (e) {
+      console.error('Failed to persist bookmarks to Supabase:', e);
+    } finally {
+      setSavingBookmark(false);
+    }
+  };
 
   const handleSendAi = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,24 +102,28 @@ export default function DashboardClient({ username, data }: DashboardClientProps
     }, 600);
   };
 
-  const handleAddBookmark = (e: React.FormEvent) => {
+  const handleAddBookmark = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newBookmarkTitle || !newBookmarkUrl) return;
-    setBookmarks((prev) => [
-      ...prev,
+    const nextList = [
+      ...bookmarks,
       {
         id: String(Date.now()),
         title: newBookmarkTitle,
         url: newBookmarkUrl,
         icon: '🔗',
       },
-    ]);
+    ];
+    setBookmarks(nextList);
     setNewBookmarkTitle('');
     setNewBookmarkUrl('');
+    await saveBookmarksToSupabase(nextList);
   };
 
-  const handleDeleteBookmark = (id: string) => {
-    setBookmarks((prev) => prev.filter((b) => b.id !== id));
+  const handleDeleteBookmark = async (id: string) => {
+    const nextList = bookmarks.filter((b) => b.id !== id);
+    setBookmarks(nextList);
+    await saveBookmarksToSupabase(nextList);
   };
 
   return (
