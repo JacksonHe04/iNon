@@ -13,20 +13,36 @@ function ensureStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.map((item) => ensureString(item)).filter(Boolean) : [];
 }
 
-async function getProfile(adminClient: SupabaseAdminClient) {
+export type MutationScope = { kind: 'admin' } | { kind: 'user'; userId: string };
+
+async function getProfile(adminClient: SupabaseAdminClient, scope: MutationScope = { kind: 'admin' }) {
+  if (scope.kind === 'user') {
+    const { data, error } = await adminClient
+      .from('profiles')
+      .select('id, slug, username')
+      .eq('user_id', scope.userId)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error('Profile not found for current user');
+    return data;
+  }
+
   const { getAdminContext } = await import('@/lib/admin/auth');
   const context = await getAdminContext();
 
-  if (context?.user?.id) {
-    const { data: userProfile } = await adminClient
-      .from('profiles')
-      .select('id, slug, username')
-      .eq('user_id', context.user.id)
-      .maybeSingle();
+  if (!context) {
+    throw new Error('Unauthorized');
+  }
 
-    if (userProfile) {
-      return userProfile;
-    }
+  const { data: userProfile } = await adminClient
+    .from('profiles')
+    .select('id, slug, username')
+    .eq('user_id', context.user.id)
+    .maybeSingle();
+
+  if (userProfile) {
+    return userProfile;
   }
 
   const { data, error } = await adminClient
@@ -96,9 +112,12 @@ function tagRows(profileId: string, tagType: string, values: string[]) {
   }));
 }
 
-export async function updateProfileSection(data: Pick<ReadmeData, 'meta' | 'basic'>) {
+export async function updateProfileSection(
+  data: Pick<ReadmeData, 'meta' | 'basic'>,
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   const { error: profileError } = await adminClient
     .from('profiles')
@@ -132,9 +151,9 @@ export async function updateProfileSection(data: Pick<ReadmeData, 'meta' | 'basi
   }
 }
 
-export async function updateLifeSection(data: ReadmeData['life']) {
+export async function updateLifeSection(data: ReadmeData['life'], scope: MutationScope = { kind: 'admin' }) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   const { error: lifeError } = await adminClient.from('profile_life').upsert({
     profile_id: profile.id,
@@ -172,9 +191,12 @@ export async function updateLifeSection(data: ReadmeData['life']) {
   revalidatePath('/admin/content');
 }
 
-export async function updateExperienceSection(data: ReadmeData['experience']) {
+export async function updateExperienceSection(
+  data: ReadmeData['experience'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceProfileScopedRows(
     adminClient,
@@ -193,9 +215,12 @@ export async function updateExperienceSection(data: ReadmeData['experience']) {
   revalidatePath('/admin/content');
 }
 
-export async function updateEducationSection(data: ReadmeData['education']) {
+export async function updateEducationSection(
+  data: ReadmeData['education'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceProfileScopedRows(
     adminClient,
@@ -223,9 +248,9 @@ export async function updateEducationSection(data: ReadmeData['education']) {
   revalidatePath('/admin/content');
 }
 
-export async function updateWorkSection(data: ReadmeData['work']) {
+export async function updateWorkSection(data: ReadmeData['work'], scope: MutationScope = { kind: 'admin' }) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   const { error: workMetaError } = await adminClient.from('work_meta').upsert({
     profile_id: profile.id,
@@ -272,9 +297,12 @@ export async function updateWorkSection(data: ReadmeData['work']) {
   revalidatePath('/admin/content');
 }
 
-export async function updateDevelopmentSection(data: ReadmeData['development']) {
+export async function updateDevelopmentSection(
+  data: ReadmeData['development'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceProfileScopedRows(adminClient, 'development_skills', profile.id, [
     ...ensureStringArray(data.skills.tech_stack).map((value, index) => ({
@@ -377,9 +405,12 @@ export async function updateDevelopmentSection(data: ReadmeData['development']) 
   revalidatePath('/admin/content');
 }
 
-export async function updateProductsSection(data: ReadmeData['products']) {
+export async function updateProductsSection(
+  data: ReadmeData['products'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   const existingItems = await adminClient
     .from('product_items')
@@ -470,9 +501,12 @@ export async function updateProductsSection(data: ReadmeData['products']) {
   revalidatePath('/admin/content');
 }
 
-export async function updateCreationSection(data: ReadmeData['creation']) {
+export async function updateCreationSection(
+  data: ReadmeData['creation'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceProfileScopedRows(adminClient, 'creation_items', profile.id, [
     ...data.videos.map((item, index) => ({
@@ -549,9 +583,12 @@ async function replaceMediaDomain(
   }
 }
 
-export async function updateReadingSection(data: ReadmeData['reading']) {
+export async function updateReadingSection(
+  data: ReadmeData['reading'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceMediaDomain(adminClient, profile.id, 'reading', [
     ...data.books.map((item, index) => ({
@@ -584,9 +621,9 @@ export async function updateReadingSection(data: ReadmeData['reading']) {
   revalidatePath('/admin/content');
 }
 
-export async function updateFilmsSection(data: ReadmeData['films']) {
+export async function updateFilmsSection(data: ReadmeData['films'], scope: MutationScope = { kind: 'admin' }) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceMediaDomain(adminClient, profile.id, 'films', [
     ...data.films.map((item, index) => ({
@@ -621,10 +658,11 @@ export async function updateFilmsSection(data: ReadmeData['films']) {
 
 export async function updateMusicSection(
   section: 'music' | 'hiphop',
-  data: ReadmeData['music'] | ReadmeData['hiphop']
+  data: ReadmeData['music'] | ReadmeData['hiphop'],
+  scope: MutationScope = { kind: 'admin' }
 ) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceMediaDomain(adminClient, profile.id, section, [
     ...data.albums.map((item, index) => ({
@@ -669,9 +707,12 @@ export async function updateMusicSection(
   revalidatePath('/admin/content');
 }
 
-export async function updateEventsSection(data: ReadmeData['events']) {
+export async function updateEventsSection(
+  data: ReadmeData['events'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceProfileScopedRows(
     adminClient,
@@ -692,9 +733,12 @@ export async function updateEventsSection(data: ReadmeData['events']) {
   revalidatePath('/admin/content');
 }
 
-export async function updateContactSection(data: ReadmeData['contact']) {
+export async function updateContactSection(
+  data: ReadmeData['contact'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceProfileScopedRows(
     adminClient,
@@ -725,9 +769,12 @@ export async function updateContactSection(data: ReadmeData['contact']) {
   revalidatePath('/admin/content');
 }
 
-export async function updateThoughtsSection(data: ReadmeData['thoughts']) {
+export async function updateThoughtsSection(
+  data: ReadmeData['thoughts'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   const { error: deleteListError } = await adminClient
     .from('profile_list_items')
@@ -774,9 +821,12 @@ export async function updateThoughtsSection(data: ReadmeData['thoughts']) {
   revalidatePath('/admin/content');
 }
 
-export async function updateNotificationsSection(data: ReadmeData['notifications']) {
+export async function updateNotificationsSection(
+  data: ReadmeData['notifications'],
+  scope: MutationScope = { kind: 'admin' }
+) {
   const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient);
+  const profile = await getProfile(adminClient, scope);
 
   await replaceProfileScopedRows(
     adminClient,

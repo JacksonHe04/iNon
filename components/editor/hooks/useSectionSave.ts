@@ -13,7 +13,7 @@ export function useSectionSave(sectionName: string) {
     setSaveStatus('saving');
     setErrorMessage('');
     try {
-      const res = await fetch(`/api/admin/content/${sectionName}`, {
+      const res = await fetch(`/api/account/content/${sectionName}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
