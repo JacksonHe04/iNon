@@ -12,10 +12,10 @@ export interface AppItem {
 }
 
 interface AppLauncherBlockProps {
-  apps: AppItem[];
+  apps?: AppItem[];
 }
 
-export default function AppLauncherBlock({ apps }: AppLauncherBlockProps) {
+export default function AppLauncherBlock({ apps = [] }: AppLauncherBlockProps) {
   return (
     <GlassCard className="p-5 space-y-4 hover:border-purple-400/40 transition">
       <div className="flex items-center justify-between">

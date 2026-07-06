@@ -14,7 +14,7 @@ interface ShellLayoutProps {
 export default function ShellLayout({
   children,
   data,
-  username = 'yingying',
+  username = '',
   showSideNav = true,
 }: ShellLayoutProps) {
   return (
@@ -22,7 +22,7 @@ export default function ShellLayout({
       <AnimatedGradientBackground />
       <HeaderNav data={data} username={username} />
       {showSideNav && <SideNav />}
-      <div className="pt-24 lg:pl-32 xl:pl-40 2xl:pl-48 transition-all duration-300">
+      <div className={`pt-24 transition-all duration-300 ${showSideNav ? 'lg:pl-32 xl:pl-40 2xl:pl-48' : 'px-4 sm:px-6 lg:px-8'}`}>
         {children}
       </div>
     </main>
