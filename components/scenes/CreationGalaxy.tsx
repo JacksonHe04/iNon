@@ -89,7 +89,7 @@ function Planet({
       <group position={[Math.cos(config.angle) * config.radius, 0, Math.sin(config.angle) * config.radius]}>
         <mesh position={[0, -0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[config.radius - 0.4, config.radius + 0.02, 64]} />
-          <meshBasicMaterial color="#ffffff08" transparent />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.03} />
         </mesh>
         <mesh
           ref={planetRef}
