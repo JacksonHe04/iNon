@@ -1,185 +1,194 @@
-# 缨缨的数字花园 · Yingying Digital Garden
+# iNon — Block-Based Personal OS & Digital Garden
 
-一个围绕“自我叙事 + 创作档案”的沉浸式数字花园。通过数据驱动的内容结构、毛玻璃视觉、3D 场景与 AI 小缨缨助手，展示缨缨在生活、学习、产品、音乐与思考层面的完整画像。
+> **iNon** — A local-first, customizable, block-based personal workspace and digital garden.
+> Powered by Next.js 16, Supabase, React Three Fiber, and a unified atomic component system ("Non").
+>
+> One personal OS: Console (`/i/:slug`) & Digital Garden (`/:slug`).
 
-## 界面预览
-<!-- 主页叙事区 -->
-| 主页叙事区 |
+🌐 **Read this README in another language:** [English](README.md) · [简体中文](docs/README_ZH_CN.md) · [繁體中文](docs/README_ZH_TW.md) · [日本語](docs/README_JA.md)
+
+## Interface Preview
+
+| Home Narrative |
 | --- |
-| ![主页叙事区](docs/images/desktop-home.png) |
+| ![Home Narrative](docs/images/desktop-home.png) |
 
-<!-- 问答（每对问答在同一行） -->
-| 提问 | 回答 |
+| AI Q&A Ask | AI Q&A Answer |
 | --- | --- |
-| ![兴趣爱好提问](docs/images/desktop-hobby-ask.png) | ![兴趣爱好回答](docs/images/desktop-hobby-anwser.png) |
-| ![MBTI匹配提问](docs/images/desktop-mbti-ask.png) | ![MBTI匹配问答](docs/images/desktop-mbti-anwser.png) |
+| ![Hobby Ask](docs/images/desktop-hobby-ask.png) | ![Hobby Answer](docs/images/desktop-hobby-anwser.png) |
+| ![MBTI Ask](docs/images/desktop-mbti-ask.png) | ![MBTI Answer](docs/images/desktop-mbti-anwser.png) |
 
-<!-- 移动端（4张在同一行） -->
-| 移动端首页 | 移动端菜单 | 移动端问答 | 移动端星系 |
+| Mobile Home | Mobile Menu | Mobile Ask | Mobile Galaxy |
 | --- | --- | --- | --- |
-| ![移动端首页](docs/images/mobile-home.png) | ![移动端菜单](docs/images/mobile-menu.png) | ![移动端问答](docs/images/mobile-ask.png) | ![移动端星系](docs/images/mobile-galaxy.png) |
+| ![Mobile Home](docs/images/mobile-home.png) | ![Mobile Menu](docs/images/mobile-menu.png) | ![Mobile Ask](docs/images/mobile-ask.png) | ![Mobile Galaxy](docs/images/mobile-galaxy.png) |
 
-<!-- 卡片（最后4张分2行，每行2张） -->
-| 音乐卡片 | 电影卡片 |
+| Music Cards | Film & Book Desk |
 | --- | --- |
-| ![音乐卡片](docs/images/desktop-music.png) | ![电影卡片](docs/images/desktop-desk.png) |
+| ![Music Card](docs/images/desktop-music.png) | ![Film Desk](docs/images/desktop-desk.png) |
 
-| 标签墙 | 进入深水区 |
+| Tag Wall | Deep Space Area |
 | --- | --- |
-| ![标签墙](docs/images/desktop-label.png) | ![进入深水区](docs/images/desktop-into-deepwater.png) |
+| ![Tag Wall](docs/images/desktop-label.png) | ![Deep Space](docs/images/desktop-into-deepwater.png) |
 
-
-## 项目亮点
-
-- 数据即内容：运行时内容全部来自 Supabase，`data/readme.json` 仅保留为导入源和备份快照。
-- 超过 15 个主题分区：基础信息、生活方式、经历教育、职业偏好、开发项目、产品好物、阅读观影、音乐与嘻哈、活动记录、标签墙、联系卡片、留言板以及彩蛋式深水区。
-- 沉浸式视觉体验：Canvas 动态渐变背景、毛玻璃卡片（`GlassCard`）、视差滚动和 Framer Motion 过渡让信息层级一目了然。
-- 三维交互：基于 React Three Fiber / drei 的 Product Desk、Creation Galaxy、Reading/Film Desk、Deep Space 等专属场景。
-- AI 小缨缨：内置 `/api/assistant` 路由，串流对接智谱 GLM (glm-4-flash)，读取本地 Markdown 化的档案内容进行问答。
-- 体验细节：年龄进度条 + 城市定位距离、灵动岛式通知、标签墙点亮、深水区“下拉潜水”机制等互动彩蛋。
-
-## 功能矩阵
-
-### 导航 / 身份
-
-- 顶栏 (`components/TopNav.tsx`) 集成头像、当前位置、时间、通知角标、平台链接、距离计算、年龄进度条与 AI 助手弹窗。
-- 侧边锚点 (`components/SideNav.tsx`) 监听滚动并与深水区联动，自动高亮当前版块。
-
-### 主题分区
-
-- `components/sections` 下的 17+ 区块将 `ReadmeData` 映射为不同布局：如经历瀑布流、开发与活动的不规则卡片、产品/阅读/影片的 3D 书桌、创作的星球切换、音乐/嘻哈横向滚动、标签墙、联系卡片及留言表单等。
-- `MessageSection` 目前为前端模拟提交，可在后端接入后扩展。
-
-### 沉浸式体验
-
-- `components/BackGround.tsx` 绘制多 Blob 流动 + 鼠标波纹的 Canvas 背景。
-- `components/scenes/*` 提供 Product Desk、Creation Galaxy、Deep Space 等 R3F 场景，并内置交互（点击设备查看产品、拉动把手解锁深水区等）。
-
-## 技术栈
-
-- **框架**：Next.js 15 (App Router, Turbopack Dev Server)
-- **语言**：TypeScript 5 + React 19
-- **样式**：Tailwind CSS 4（原子级 `@import "tailwindcss"` + `@theme inline`）
-- **三维 & 动画**：React Three Fiber、@react-three/drei、Framer Motion
-- **图标**：lucide-react
-- **数据**：Supabase Postgres + Supabase Storage + TypeScript 类型守护 (`types/index.ts`)
-
-## 项目结构
+## System Architecture
 
 ```
-yingyingdontkill
-├── app
-│   ├── api/assistant/route.ts     # AI 助手接口（GLM 流式回复）
-│   ├── globals.css                # Tailwind 4 + 全局样式
-│   ├── layout.tsx                 # 根布局、字体与动态 Metadata
-│   └── page.tsx                   # 主页面入口，串联所有 Section
-├── components
-│   ├── BackGround.tsx             # Canvas 动态背景
-│   ├── GlassCard.tsx / Modal.tsx  # 设计系统组件
-│   ├── sections/*                 # 功能分区
-│   └── scenes/*                   # React Three Fiber 场景
-├── data/readme.json               # 导入源 / 备份快照
-├── supabase/*                     # schema、migrations、Supabase 配置
-├── scripts/*                      # 导库、校验、上传资产、seed 管理员脚本
-├── lib
-│   ├── markdown.ts                # 将档案转 Markdown（AI prompt 用）
-│   └── utils.ts                   # 年龄/距离/滚动等工具函数
-├── local/getLocation.js           # 通过 IP 获取经纬度的 Node 脚本
-├── types/index.ts                 # ReadmeData 类型定义
-├── docs/*                         # 额外文档，可用于写作/策划
-└── package.json / pnpm-lock.yaml  # 依赖与脚本
+                        ┌──────────────────────────────┐
+                        │        Supabase DB           │
+                        │ (Postgres + Auth + Storage)  │
+                        └──────────────┬───────────────┘
+                                       │
+                ┌──────────────────────┴──────────────────────┐
+                │             iNon Core System                │
+                │     (Next.js 16 + React 19 + R3F)           │
+                └──────┬──────────────────────────────┬───────┘
+                       │                              │
+          ┌────────────▼────────────┐    ┌────────────▼────────────┐
+          │     Console /i/:slug    │    │    Public Site /:slug   │
+          │                         │    │                         │
+          │ • Home (Bookmarks & AI) │    │ • Glassmorphism Design  │
+          │ • Content CRUD Manager  │    │ • 3D Desk & R3F Galaxy  │
+          │ • Block Canvas Builder  │    │ • Dynamic Non Blocks    │
+          │ • Account Settings      │    │ • AI Avatar Assistant   │
+          └─────────────────────────┘    └─────────────────────────┘
 ```
 
-## 数据驱动内容
+## What it is
 
-- `data/readme.json` 覆盖基础、生活、教育、工作、项目、产品、创作、阅读、影视、音乐、嘻哈、活动、联系、深水区思想与通知等字段，并通过脚本导入 Supabase。
-- `types/index.ts` 继续作为前台兼容视图类型，便于组件在不重写的情况下消费数据库聚合结果。
-- 任何对内容的编辑都应通过 Supabase 后台或脚本完成，而不是直接修改运行时数据源。
-- 若需要新增城市以完成距离计算，请同步在 `lib/utils.ts` 的 `cityCoordinates` 中维护经纬度。
+iNon elevates personal website creation into a **block-based operating system**. It seamlessly drives both the private workspace console (`/i/:slug`) and the public digital showcase (`/:slug`) using a unified component architecture. Users can effortlessly customize their content, layout structure, media collections, bookmarks, and AI avatar assistant.
 
-## 三维场景与动画
+## Key Features
 
-- `components/scenes/ProductDeskScene.tsx`：使用 @react-three/fiber 构建的 3D 书桌；设备点击后触发 `Modal` 展示细节。
-- `components/scenes/CreationGalaxy.tsx`：星球轨道/颜色根据分类动态生成，可拓展至真实创作数据。
-- `components/scenes/DeepSpaceScene.tsx`：深水区背景，与 `DeepWaterSection` 的拖拽手势联动。
-- 所有场景默认禁用缩放/平移以保持视觉一致，如需解锁 OrbitControls 交互，可在对应组件中修改 props。
+- **Block-Based OS ("Non" System)**: Modular component architecture driving both personal dashboard and public site.
+- **Visual Canvas Builder**: Real-time canvas engine (`BlockCanvasEngine`) supporting drag-and-drop reordering, visibility toggle, and responsive column sizing (50% / 100% width).
+- **Multi-Slug & Permission Design**:
+  - `/:slug`: Public read-only digital garden accessible to guests.
+  - `/i/:slug`: Private dashboard for account owner to edit content, layout, and settings.
+  - `/admin`: Superadmin asset library & object storage manager.
+- **AI Avatar Assistant**: Built-in `/api/assistant` streaming GLM / LLM model responses populated by user markdown knowledge base.
+- **Immersive 3D & Micro-Animations**: React Three Fiber 3D interactive desks, creation galaxies, dynamic Canvas background, dark mode, and Framer Motion transitions.
 
-## AI 小缨缨助手
+## Atomic Definition: Non Components
 
-- 接口：`app/api/assistant/route.ts`。
-- 行为：读取本地档案并通过 `lib/markdown.ts` 转 Markdown，作为 system prompt 调用 `glm-4-flash`，以 SSE 形式推送回复。
-- 环境变量：在 `.env.local` 中配置 `OPENAI_API_KEY`。
-- 前端：`TopNav` 中的灵动岛 UI 负责展示 Docked/Floating 状态、建议问题、串流内容与报错提示。
+iNon defines system capabilities through granular, reusable "Non" atomic blocks:
 
-### 运行所需环境变量
+| Block Component | Description |
+| --- | --- |
+| **Bio Header** (`BioHeaderBlock`) | Profile avatar, name, bio, city distance calculator, age progress bar, and social links. |
+| **Website Bookmarks** (`BookmarkBlock`) | Quick launch web shortcuts and dev tool grid. |
+| **Project Showcase** (`ProjectBlock`) | Rich project cards with covers, tech stack badges, status, and quick links. |
+| **Music Card** (`MusicBlock`) | Artist & album collection grid with horizontal scroll. |
+| **Movie Posters** (`MovieBlock`) | Film wall and 3D desk scene integrations. |
+| **Bookshelf** (`BookBlock`) | Reading desk and book summary cards. |
+| **Game Collection** (`GameBlock`) | Gaming library and interactive shelf. |
+| **AI Avatar Entrance** (`AiCloneBlock`) | Floating AI dialog & streaming assistant interface. |
+| **Activity Timeline** (`TimelineBlock`) | Public personal milestones and career waterfall. |
+| **Friend Links** (`FriendLinkBlock`) | Interactive friend link matrix. |
+| **Contact Card** (`ContactBlock`) | Direct message form and social touchpoints. |
+| **App Launcher** (`AppLauncherBlock`) | Application launcher and utility tool matrix. |
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Language**: TypeScript 6 + React 19
+- **Database & Auth**: Supabase Postgres + Supabase Auth (`@supabase/ssr`, `@supabase/supabase-js`)
+- **Styling & UI**: Tailwind CSS 4 + Glassmorphism design system + Framer Motion
+- **3D Graphics**: Three.js + React Three Fiber + @react-three/drei
+- **State & Utilities**: Zustand, TanStack React Query, Nuqs, Zod, Lucide React
+
+## Project Structure
 
 ```
-OPENAI_API_KEY=xxxxxxxxxxxxxxxx
-NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx
-SUPABASE_SECRET_KEY=sb_secret_xxx
+iNon/
+├── app/
+│   ├── [slug]/                  # Public user page (/:slug)
+│   ├── i/                       # Private user dashboard (/i/:slug)
+│   ├── admin/                   # Asset library manager (/admin)
+│   ├── api/assistant/route.ts   # AI assistant streaming route
+│   └── globals.css              # Tailwind 4 & global styles
+├── components/
+│   ├── blocks/                  # "Non" atomic block components & canvas engine
+│   ├── scenes/                  # React Three Fiber 3D scenes (ProductDesk, Galaxy, etc.)
+│   ├── dashboard/               # Console UI components (/i/:slug)
+│   ├── editor/                  # Visual content block editors
+│   ├── layout/                  # Shell layouts, top nav, side nav
+│   ├── BackGround.tsx           # Dynamic Canvas background
+│   └── GlassCard.tsx            # Glassmorphism UI primitive
+├── data/readme.json             # Seed data & backup snapshot
+├── lib/
+│   ├── auth/                    # Supabase session & permission helpers
+│   ├── content.ts               # Data fetching & schema mapping
+│   ├── markdown.ts              # Knowledge base to Markdown generator for AI
+│   └── utils.ts                 # Location/distance/age helpers
+├── supabase/                    # Schema migrations & Supabase config
+├── scripts/                     # Seed admin, asset upload, data validation scripts
+├── types/                       # TypeScript interfaces & layout definitions
+└── docs/                        # Multi-language README documentation & images
 ```
 
-若暂不启用 AI，可缺省该变量，前端会提示“服务不可用”并继续运行其他功能。
+## Getting Started
 
-## 本地开发
+### Prerequisites
 
-1. **环境**：Node.js ≥ 20，推荐使用 `pnpm`（锁文件已提供）。
-2. **安装依赖**
-   ```bash
-   pnpm install
-   ```
-3. **启动开发服务器**
-   ```bash
-   pnpm dev
-   ```
-   - 默认地址：<http://localhost:3000>
-4. **检查与构建**
-   ```bash
-   pnpm lint     # ESLint (Next.js preset)
-   pnpm build    # 生产构建
-   pnpm start    # 运行产物
-   ```
+- Node.js ≥ 20
+- pnpm (recommended)
 
-## 内容更新流程
+### Environment Setup
 
-1. 通过 `/admin/content` 编辑内容，或更新 `data/readme.json` 后执行导入脚本。
-2. 如新增结构字段：
-   - 更新 Supabase migration
-   - 更新 `types/index.ts`
-   - 更新 `lib/content` 的查询/映射
-   - 如需被 AI 使用，更新 `lib/markdown.ts`
-3. 如有图片或文档资产，上传到 `/admin/assets` 或执行 `pnpm db:upload-assets`。
+Create `.env.local` based on `.env.example`:
 
-## 组件与设计规范
+```env
+OPENAI_API_KEY=your_openai_or_zhipu_api_key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+SUPABASE_SECRET_KEY=your_secret_key
+```
 
-- `GlassCard`：统一的毛玻璃卡片，默认带 hover 动效，可通过 `hover={false}` 关闭。
-- `Modal`：支持居中和右上两种定位，TopNav/产品弹窗均依赖该组件。
-- `OverflowTooltip`：用于截断文本的 hover 展示（可在多行列表中复用）。
-- 留言区目前为前端表单校验示例，可改造成真正的后端 API（POST /api/messages）。
+### Installation & Development
 
-## 实用脚本
+```bash
+# Install dependencies
+pnpm install
 
-- `local/getLocation.js`：Node 脚本，通过 `ip-api.com` 获取公网 IP 对应的经纬度，方便在 `lib/utils.ts` 或数据源里调试定位相关功能。
+# Start local development server with Turbopack
+pnpm dev
 
-## Roadmap / 待办
+# Lint & build
+pnpm lint
+pnpm build
+```
 
-- [x] 运行时内容迁移到 Supabase，支持后台 CMS、留言审核与资产上传。
-- [ ] 教育 & 工作区的 2D/3D 场景细化（目前为栅格占位，可迁移到 `components/scenes`）。
-- [ ] 深水区宇宙飞行器 / 互动彩蛋进一步打磨。
-- [ ] AI 问答接入记忆 / 多模型策略，并允许访客上传提问上下文。
-- [ ] 留言审核增加通知与反垃圾策略。
-- [ ] CMS 增加更细的资产引用和发布流。
+The application will run locally at `http://localhost:3000`.
 
-## 部署提示
+### Database Scripts
 
-- 任何支持 Next.js 15 的平台（Vercel、Netlify、Node 服务器等）均可部署。
-- 若部署在无服务器平台，请确保环境变量 `OPENAI_API_KEY` 已配置，且目标平台允许访问 `https://open.bigmodel.cn/`。
+```bash
+# Push database migrations to Supabase
+pnpm db:push
 
-## 许可证
+# Import seed json data into Supabase
+pnpm db:import
+
+# Validate database contents against schema
+pnpm db:validate
+
+# Seed initial admin user
+pnpm db:seed-admin
+```
+
+## Roadmap
+
+- [x] Runtime migration to Supabase Postgres & Storage with CMS console.
+- [x] Visual block canvas layout builder (`BlockCanvasEngine`) with drag-and-drop support.
+- [x] Full Non component system rollout (14+ atomic blocks).
+- [ ] 3D scene refinements for Education & Experience waterfall.
+- [ ] Multi-agent memory support and context upload for AI Avatar.
+- [ ] Granular asset publishing pipeline and moderation.
+
+## License
 
 [MIT](LICENSE)
 
-## 作者
+## Author
 
-YingYingDontKill
+[YingYingDontKill (Jackson He)](https://github.com/JacksonHe04)
