@@ -1,11 +1,13 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { LayoutDashboard, Globe, ShieldCheck, User } from 'lucide-react';
 import type { ReadmeData } from '@/types';
 import TopNav from '@/components/TopNav';
+import AuthModal from '@/components/auth/AuthModal';
+import { createClient } from '@/lib/supabase/client';
 
 interface HeaderNavProps {
   data: ReadmeData;
@@ -14,10 +16,31 @@ interface HeaderNavProps {
 
 export default function HeaderNav({ data, username = 'yingying' }: HeaderNavProps) {
   const pathname = usePathname();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  const isPublicPage = pathname === '/' || (pathname.startsWith('/') && !pathname.startsWith('/i/') && !pathname.startsWith('/admin'));
+  const isPublicPage =
+    pathname === '/' ||
+    (pathname.startsWith('/') && !pathname.startsWith('/i/') && !pathname.startsWith('/admin'));
   const isDashboardPage = pathname.startsWith('/i/');
   const isAdminPage = pathname.startsWith('/admin');
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50">
@@ -29,7 +52,9 @@ export default function HeaderNav({ data, username = 'yingying' }: HeaderNavProp
             iNon OS
           </div>
           <span className="text-white/20">|</span>
-          <span className="text-white/60 hidden sm:inline">当前视界: <strong className="text-white">{username}</strong></span>
+          <span className="text-white/60 hidden sm:inline">
+            当前视界: <strong className="text-white">{username}</strong>
+          </span>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2">
@@ -69,6 +94,20 @@ export default function HeaderNav({ data, username = 'yingying' }: HeaderNavProp
             <ShieldCheck className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">后台管理</span>
           </Link>
+
+          <span className="text-white/20 ml-1">|</span>
+
+          {/* User Auth Trigger Button */}
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white/90 text-xs font-medium transition ml-1"
+            title={userEmail ? `已登录: ${userEmail}` : '登录 / 注册'}
+          >
+            <User className="w-3.5 h-3.5 text-teal-400" />
+            <span className="hidden md:inline max-w-[100px] truncate">
+              {userEmail ? userEmail.split('@')[0] : '登录'}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -76,6 +115,9 @@ export default function HeaderNav({ data, username = 'yingying' }: HeaderNavProp
       <div className="relative">
         <TopNav data={data} className="relative bg-white/20 border-b border-white/30 backdrop-blur-[40px]" />
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} userEmail={userEmail} />
     </div>
   );
 }

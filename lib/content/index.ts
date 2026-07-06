@@ -284,12 +284,18 @@ async function loadProfile(slug: string): Promise<MaybeSingleResult<ProfileRow>>
 
 export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<ReadmeData> {
   try {
-    const profileResult = await loadProfile(slug);
+    let profileResult = await loadProfile(slug);
+    if (!profileResult.data) {
+      profileResult = await loadProfile(DEFAULT_PROFILE_SLUG);
+    }
     if (profileResult.error || !profileResult.data) {
       throw profileResult.error ?? new Error(`Profile "${slug}" not found`);
     }
 
     const profile = profileResult.data;
+    if (slug !== DEFAULT_PROFILE_SLUG && profile.slug === DEFAULT_PROFILE_SLUG) {
+      profile.name = slug;
+    }
 
     const [
       lifeResult,
