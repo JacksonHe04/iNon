@@ -14,7 +14,6 @@ type AdminNavProps = {
 
 export default function AdminNav({ email }: AdminNavProps) {
   const pathname = usePathname();
-  const isLoginPage = pathname === '/admin/login';
 
   return (
     <div className="sticky top-0 z-40 border-b border-white/30 bg-white/80 backdrop-blur-2xl">
@@ -24,34 +23,30 @@ export default function AdminNav({ email }: AdminNavProps) {
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             iNon 后台管理
           </Link>
-          {!isLoginPage && (
-            <nav className="flex flex-wrap gap-2">
-              {navItems.map((item) => {
-                const active = pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-                      active
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-white/70 text-gray-600 hover:bg-white hover:text-gray-900'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          )}
+          <nav className="flex flex-wrap gap-2">
+            {navItems.map((item) => {
+              const active = pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                    active
+                      ? 'bg-gray-900 text-white'
+                      : 'bg-white/70 text-gray-600 hover:bg-white hover:text-gray-900'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        {!isLoginPage && (
-          <div className="flex items-center gap-3 text-xs text-gray-600">
-            {email && <span className="hidden sm:inline font-mono">{email}</span>}
-            <AdminSignOutButton />
-          </div>
-        )}
+        <div className="flex items-center gap-3 text-xs text-gray-600">
+          {email && <span className="hidden sm:inline font-mono">{email}</span>}
+          <AdminSignOutButton />
+        </div>
       </div>
     </div>
   );

@@ -38,12 +38,15 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims()
   const isAuthenticated = Boolean(data?.claims?.sub)
   const pathname = request.nextUrl.pathname
-  const isAdminPage = pathname.startsWith('/admin') && pathname !== '/admin/login'
+  // 需要登录才能访问的页面：后台管理 /admin/* 和个人管理页 /i/*
+  const isProtectedPage =
+    pathname.startsWith('/admin') || pathname === '/i' || pathname.startsWith('/i/')
   const isAdminApi = pathname.startsWith('/api/admin')
 
-  if (!isAuthenticated && isAdminPage) {
+  if (!isAuthenticated && isProtectedPage) {
     const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = '/admin/login'
+    loginUrl.pathname = '/login'
+    loginUrl.search = ''
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)
   }

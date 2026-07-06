@@ -63,7 +63,7 @@ export async function requireAdminPage(next = '/admin') {
   const context = await getAdminContext();
 
   if (!context) {
-    redirect(`/admin/login?next=${encodeURIComponent(next)}`);
+    redirect(`/login?next=${encodeURIComponent(next)}`);
   }
 
   return context;

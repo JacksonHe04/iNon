@@ -12,7 +12,7 @@ export default function AdminSignOutButton() {
     const supabase = createClient();
     await supabase.auth.signOut();
     startTransition(() => {
-      router.push('/admin/login');
+      router.push('/login');
       router.refresh();
     });
   };
