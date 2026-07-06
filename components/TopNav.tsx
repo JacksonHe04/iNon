@@ -35,6 +35,7 @@ function TwitterIcon(props: React.SVGProps<SVGSVGElement>) {
 
 interface TopNavProps {
   data: ReadmeData;
+  className?: string;
 }
 
 type ChatMessage = {
@@ -48,7 +49,7 @@ const platformIconMap = {
   Twitter: TwitterIcon,
 } as const;
 
-export default function TopNav({ data }: TopNavProps) {
+export default function TopNav({ data, className }: TopNavProps) {
   const [currentTime, setCurrentTime] = useState('');
   const [yearProgress, setYearProgress] = useState({ daysPassed: 0, totalDays: 0, percentage: 0 });
   const [distance, setDistance] = useState<number | null>(null);
@@ -250,7 +251,7 @@ export default function TopNav({ data }: TopNavProps) {
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/20 border-b border-white/30 backdrop-blur-[40px]"
+        className={className || "fixed top-0 left-0 right-0 z-50 bg-white/20 border-b border-white/30 backdrop-blur-[40px]"}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative flex items-center justify-between h-14 lg:h-16">

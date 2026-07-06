@@ -21,11 +21,16 @@ import DeepWaterSection from '@/components/sections/DeepWaterSection';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
-  const data = await getReadmeData();
+interface UserPublicPageProps {
+  params: Promise<{ username: string }>;
+}
+
+export default async function UserPublicPage({ params }: UserPublicPageProps) {
+  const { username } = await params;
+  const data = await getReadmeData(username);
 
   return (
-    <ShellLayout data={data} username="JacksonHe04" showSideNav={true}>
+    <ShellLayout data={data} username={username} showSideNav={true}>
       <BasicSection data={data.basic} />
       <LifeSection data={data.life} />
       <ExperienceSection data={data.experience} />
