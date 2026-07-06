@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, type KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, MapPin, RefreshCw, User, LayoutDashboard } from 'lucide-react';
+import { Bell, MapPin, RefreshCw, User, LayoutDashboard, Sun, Moon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { ReadmeData } from '@/types';
 import {
   calculateAge,
@@ -54,6 +55,7 @@ const platformIconMap = {
 
 export default function TopNav({ data, className }: TopNavProps) {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [currentTime, setCurrentTime] = useState('');
   const [yearProgress, setYearProgress] = useState({ daysPassed: 0, totalDays: 0, percentage: 0 });
   const [distance, setDistance] = useState<number | null>(null);
@@ -450,6 +452,16 @@ export default function TopNav({ data, className }: TopNavProps) {
                     {data.notifications.length}
                   </span>
                 )}
+              </button>
+
+              {/* Theme Switcher Button */}
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 transition hover:border-teal-300 hover:text-teal-500"
+                aria-label="切换主题"
+                title="切换暗黑/亮色主题"
+              >
+                {theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-700" />}
               </button>
 
               <div className="hidden md:block text-xs lg:text-sm font-mono">{isMounted ? currentTime : ''}</div>
