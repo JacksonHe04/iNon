@@ -6,17 +6,17 @@ import DashboardClient from '@/components/dashboard/DashboardClient';
 export const dynamic = 'force-dynamic';
 
 interface UserDashboardPageProps {
-  params: Promise<{ username: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export default async function UserDashboardPage({ params }: UserDashboardPageProps) {
-  const { username } = await params;
-  await requireOwnerPage(username, `/i/${username}`);
-  const data = await getReadmeData(username);
+  const { slug } = await params;
+  await requireOwnerPage(slug, `/i/${slug}`);
+  const data = await getReadmeData(slug);
 
   return (
-    <ShellLayout data={data} username={username} showSideNav={false}>
-      <DashboardClient username={username} data={data} />
+    <ShellLayout data={data} username={slug} showSideNav={false}>
+      <DashboardClient username={slug} data={data} />
     </ShellLayout>
   );
 }

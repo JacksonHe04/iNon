@@ -22,10 +22,10 @@ import DeepWaterSection from '@/components/sections/DeepWaterSection';
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const data = await getReadmeData();
+  const data = await getReadmeData('');
 
   return (
-    <ShellLayout data={data} username="JacksonHe04" showSideNav={true}>
+    <ShellLayout data={data} username={data.basic.name || ''} showSideNav={true}>
       <BasicSection data={data.basic} />
       <LifeSection data={data.life} />
       <ExperienceSection data={data.experience} />

@@ -8,17 +8,17 @@ export const dynamic = 'force-dynamic';
 
 export default async function DefaultUserDashboardPage() {
   const context = await requireUserPage('/i');
-  const username = getPrimaryUsername(context.profile);
+  const targetSlug = getPrimaryUsername(context.profile) || context.profile.slug;
 
-  if (username) {
-    redirect(`/i/${username}`);
+  if (targetSlug) {
+    redirect(`/i/${targetSlug}`);
   }
 
   const data = await getReadmeData('');
 
   return (
-    <ShellLayout data={data} username={username} showSideNav={false}>
-      <DashboardClient username={username} data={data} />
+    <ShellLayout data={data} username={targetSlug} showSideNav={false}>
+      <DashboardClient username={targetSlug} data={data} />
     </ShellLayout>
   );
 }
