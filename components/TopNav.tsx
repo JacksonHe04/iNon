@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, type KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, MapPin, RefreshCw } from 'lucide-react';
+import { Bell, MapPin, RefreshCw, User, LayoutDashboard } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { ReadmeData } from '@/types';
 import {
   calculateAge,
@@ -14,6 +15,8 @@ import {
   scrollToElement,
 } from '@/lib/utils';
 import Modal from './Modal';
+import AuthModal from '@/components/auth/AuthModal';
+import { createClient } from '@/lib/supabase/client';
 import { NAV_SECTIONS } from './SideNav';
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -50,10 +53,13 @@ const platformIconMap = {
 } as const;
 
 export default function TopNav({ data, className }: TopNavProps) {
+  const router = useRouter();
   const [currentTime, setCurrentTime] = useState('');
   const [yearProgress, setYearProgress] = useState({ daysPassed: 0, totalDays: 0, percentage: 0 });
   const [distance, setDistance] = useState<number | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [aiState, setAIState] = useState<'closed' | 'docked' | 'floating'>('closed');
   const [isHovered, setIsHovered] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -73,6 +79,23 @@ export default function TopNav({ data, className }: TopNavProps) {
   const age = calculateAge(data.life.birth_date);
   const cityCoords = getCityCoordinates(data.life.current_city);
   const shouldShowBadge = data.notifications.length > notificationsViewed;
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const markNotificationsRead = () => {
     if (typeof window === 'undefined') return;
@@ -430,9 +453,34 @@ export default function TopNav({ data, className }: TopNavProps) {
               </button>
 
               <div className="hidden md:block text-xs lg:text-sm font-mono">{isMounted ? currentTime : ''}</div>
+
+              {/* UserInfo Button */}
+              {userEmail ? (
+                <button
+                  onClick={() => {
+                    const name = userEmail.split('@')[0];
+                    router.push(`/i/${name}`);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-500/30 text-teal-700 dark:text-teal-300 font-medium text-xs hover:scale-105 transition shadow-sm"
+                  title="进入我的个人 OS 控制台"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  <span className="max-w-[80px] lg:max-w-[120px] truncate">{userEmail.split('@')[0]}</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/40 hover:bg-white/60 border border-white/50 text-gray-700 font-semibold text-xs transition shadow-sm"
+                >
+                  <User className="w-3.5 h-3.5 text-teal-600" />
+                  <span>登录</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
+
+        <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} userEmail={userEmail} />
 
         <Modal open={showNotifications} onClose={() => setShowNotifications(false)} position="top-right" className="max-w-sm">
           <h3 className="font-bold mb-2 text-gray-900">通知</h3>
