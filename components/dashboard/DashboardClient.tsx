@@ -23,6 +23,7 @@ import {
   Bot,
   Layers,
 } from 'lucide-react';
+import BlockContentEditorManager from '@/components/editor/BlockContentEditorManager';
 
 interface DashboardClientProps {
   username: string;
@@ -89,10 +90,7 @@ export default function DashboardClient({ username, data }: DashboardClientProps
 
   return (
     <div className="relative min-h-screen">
-      <DashboardSideNav activeTab={activeTab} onTabChange={setActiveTab} />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Banner Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/20 pb-4">
           <div>
@@ -120,6 +118,12 @@ export default function DashboardClient({ username, data }: DashboardClientProps
             </Link>
           </div>
         </div>
+
+        {/* Side Nav & Main Body Layout */}
+        <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
+          <DashboardSideNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+          <main className="flex-1 min-w-0 space-y-6 w-full">
 
         {/* Tab 1: 主页 (Home: AI对话框、网页快捷入口、项目快捷入口) */}
         {activeTab === 'home' && (
@@ -272,104 +276,22 @@ export default function DashboardClient({ username, data }: DashboardClientProps
           </div>
         )}
 
-        {/* Tab 2: 内容库管理 (Content Libraries) */}
+        {/* Tab 2: 内容库与公开页 Block 全量可视化编辑 (Block Editor Manager) */}
         {activeTab === 'content' && (
           <div className="space-y-6 animate-fadeIn">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* 音乐库 */}
-              <GlassCard className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 font-bold text-base">
-                    <Music className="w-5 h-5 text-pink-500" />
-                    <h3>音乐 / 歌曲库 ({data.music.songs.length})</h3>
-                  </div>
-                  <button className="text-xs text-teal-600 dark:text-teal-400 font-semibold flex items-center gap-1">
-                    <Edit3 className="w-3.5 h-3.5" />
-                    <span>原位编辑</span>
-                  </button>
-                </div>
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
-                  {data.music.songs.map((song, i) => (
-                    <div key={i} className="flex justify-between p-2 rounded-lg bg-white/30 dark:bg-gray-800/30">
-                      <div>
-                        <span className="font-semibold text-gray-800 dark:text-gray-100">{song.name}</span>
-                        <span className="text-gray-400 ml-2">— {song.artist}</span>
-                      </div>
-                      <span className="text-gray-400 italic">{song.album}</span>
-                    </div>
-                  ))}
-                </div>
-              </GlassCard>
-
-              {/* 影视海报墙 */}
-              <GlassCard className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 font-bold text-base">
-                    <Film className="w-5 h-5 text-amber-500" />
-                    <h3>影视海报墙 ({data.films.films.length})</h3>
-                  </div>
-                  <button className="text-xs text-teal-600 dark:text-teal-400 font-semibold flex items-center gap-1">
-                    <Edit3 className="w-3.5 h-3.5" />
-                    <span>原位编辑</span>
-                  </button>
-                </div>
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
-                  {data.films.films.map((film, i) => (
-                    <div key={i} className="p-2 rounded-lg bg-white/30 dark:bg-gray-800/30 flex justify-between">
-                      <span className="font-semibold text-gray-800 dark:text-gray-100">{film.name}</span>
-                      <span className="text-gray-400">导演: {film.director}</span>
-                    </div>
-                  ))}
-                </div>
-              </GlassCard>
-
-              {/* 书架档案 */}
-              <GlassCard className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 font-bold text-base">
-                    <BookOpen className="w-5 h-5 text-indigo-500" />
-                    <h3>在读与推荐书单 ({data.reading.books.length})</h3>
-                  </div>
-                  <button className="text-xs text-teal-600 dark:text-teal-400 font-semibold flex items-center gap-1">
-                    <Edit3 className="w-3.5 h-3.5" />
-                    <span>原位编辑</span>
-                  </button>
-                </div>
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
-                  {data.reading.books.map((book, i) => (
-                    <div key={i} className="p-2 rounded-lg bg-white/30 dark:bg-gray-800/30 flex justify-between">
-                      <span className="font-semibold text-gray-800 dark:text-gray-100">{book.name}</span>
-                      <span className="text-gray-400">作者: {book.author}</span>
-                    </div>
-                  ))}
-                </div>
-              </GlassCard>
-
-              {/* 经历管理 */}
-              <GlassCard className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 font-bold text-base">
-                    <Layers className="w-5 h-5 text-emerald-500" />
-                    <h3>个人经历档案 ({data.experience.experience.length})</h3>
-                  </div>
-                  <button className="text-xs text-teal-600 dark:text-teal-400 font-semibold flex items-center gap-1">
-                    <Edit3 className="w-3.5 h-3.5" />
-                    <span>原位编辑</span>
-                  </button>
-                </div>
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
-                  {data.experience.experience.map((exp, i) => (
-                    <div key={i} className="p-2 rounded-lg bg-white/30 dark:bg-gray-800/30 space-y-1">
-                      <div className="flex justify-between font-semibold">
-                        <span>{exp.city}</span>
-                        <span className="text-gray-400 font-mono text-[10px]">{exp.date}</span>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-300">{exp.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </GlassCard>
+            <div className="border-b border-white/20 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-extrabold text-xl text-gray-900 dark:text-white flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-teal-500" />
+                  <span>公开页 Block 全量可视化编辑控制台</span>
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  彻底编辑公开个人网站的所有 16 个核心 Block 分区，实时同步 Supabase 数据库
+                </p>
+              </div>
             </div>
+
+            <BlockContentEditorManager data={data} />
           </div>
         )}
 
@@ -421,6 +343,8 @@ export default function DashboardClient({ username, data }: DashboardClientProps
             <PasswordResetForm />
           </div>
         )}
+          </main>
+        </div>
       </div>
     </div>
   );
