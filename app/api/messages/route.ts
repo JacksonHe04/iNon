@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-
-const DEFAULT_PROFILE_SLUG = 'yingying';
+import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
 
 type MessagePayload = {
   nickname?: string;
