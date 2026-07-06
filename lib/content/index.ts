@@ -267,17 +267,59 @@ async function listByForeignIds<T>(
   };
 }
 
-async function loadProfile(slug: string): Promise<MaybeSingleResult<ProfileRow>> {
+async function loadProfile(identifier: string): Promise<MaybeSingleResult<ProfileRow>> {
   const supabase = await createClient();
-  const response = await supabase
+
+  // 1. Check profiles by slug or username
+  let query = supabase
     .from('profiles')
-    .select('id, slug, name, intro, current_status, meta_title, meta_description, meta_author')
-    .eq('slug', slug)
-    .eq('is_published', true)
-    .maybeSingle();
+    .select('id, slug, username, name, intro, current_status, meta_title, meta_description, meta_author')
+    .eq('is_published', true);
+
+  if (identifier) {
+    query = query.or(`slug.eq.${identifier},username.eq.${identifier}`);
+  } else {
+    // If identifier is empty string (root / or /i), try searching slug = '' or fallback
+    query = query.eq('slug', '');
+  }
+
+  const response = await query.maybeSingle();
+  if (response.data) {
+    return {
+      data: response.data as ProfileRow,
+      error: null,
+    };
+  }
+
+  // 2. Check profile_slugs table for alias slugs
+  try {
+    const slugRes = await supabase
+      .from('profile_slugs')
+      .select('profile_id')
+      .eq('slug', identifier ?? '')
+      .maybeSingle();
+
+    if (slugRes.data?.profile_id) {
+      const profRes = await supabase
+        .from('profiles')
+        .select('id, slug, username, name, intro, current_status, meta_title, meta_description, meta_author')
+        .eq('id', slugRes.data.profile_id)
+        .eq('is_published', true)
+        .maybeSingle();
+
+      if (profRes.data) {
+        return {
+          data: profRes.data as ProfileRow,
+          error: null,
+        };
+      }
+    }
+  } catch (_e) {
+    // profile_slugs table might not exist yet
+  }
 
   return {
-    data: (response.data as ProfileRow | null) ?? null,
+    data: null,
     error: response.error ? new Error(response.error.message) : null,
   };
 }
@@ -285,17 +327,17 @@ async function loadProfile(slug: string): Promise<MaybeSingleResult<ProfileRow>>
 export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<ReadmeData> {
   try {
     let profileResult = await loadProfile(slug);
-    if (!profileResult.data) {
+    if (!profileResult.data && slug !== DEFAULT_PROFILE_SLUG) {
       profileResult = await loadProfile(DEFAULT_PROFILE_SLUG);
+    }
+    if (!profileResult.data) {
+      profileResult = await loadProfile('');
     }
     if (profileResult.error || !profileResult.data) {
       throw profileResult.error ?? new Error(`Profile "${slug}" not found`);
     }
 
     const profile = profileResult.data;
-    if (slug !== DEFAULT_PROFILE_SLUG && profile.slug === DEFAULT_PROFILE_SLUG) {
-      profile.name = slug;
-    }
 
     const [
       lifeResult,

@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { SaveStatus } from '../EditorSectionCard';
 
 export function useSectionSave(sectionName: string) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const router = useRouter();
 
   const saveSection = async (payload: any) => {
     setSaveStatus('saving');
@@ -23,6 +25,7 @@ export function useSectionSave(sectionName: string) {
       }
 
       setSaveStatus('saved');
+      router.refresh();
       setTimeout(() => {
         setSaveStatus('idle');
       }, 3000);

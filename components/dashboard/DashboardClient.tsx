@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { ReadmeData } from '@/types';
 import GlassCard from '@/components/GlassCard';
 import DashboardSideNav, { type DashboardTabId } from '@/components/layout/DashboardSideNav';
+import AccountSettingsForm from '@/components/account/AccountSettingsForm';
 import PasswordResetForm from '@/components/auth/PasswordResetForm';
 import Link from 'next/link';
 import {
@@ -332,15 +333,15 @@ export default function DashboardClient({ username, data }: DashboardClientProps
           </div>
         )}
 
-        {/* Tab 4: 账号管理 (Account & Password Reset) */}
+        {/* Tab 4: 账号管理 (Account, Username, Slugs & Password Reset) */}
         {activeTab === 'account' && (
           <div className="space-y-6 animate-fadeIn">
             <div className="border-b border-white/20 pb-4">
               <h2 className="font-bold text-lg text-gray-900 dark:text-white">账号管理与安全</h2>
-              <p className="text-xs text-gray-500">管理你的 iNon OS 账号信息与安全凭证</p>
+              <p className="text-xs text-gray-500">管理你的 iNon OS 用户名、路径 Slug 及安全凭证</p>
             </div>
 
-            <PasswordResetForm />
+            <AccountSettingsForm currentUsername={username} />
           </div>
         )}
           </main>

@@ -14,9 +14,24 @@ function ensureStringArray(value: unknown): string[] {
 }
 
 async function getProfile(adminClient: SupabaseAdminClient) {
+  const { getAdminContext } = await import('@/lib/admin/auth');
+  const context = await getAdminContext();
+
+  if (context?.user?.id) {
+    const { data: userProfile } = await adminClient
+      .from('profiles')
+      .select('id, slug, username')
+      .eq('user_id', context.user.id)
+      .maybeSingle();
+
+    if (userProfile) {
+      return userProfile;
+    }
+  }
+
   const { data, error } = await adminClient
     .from('profiles')
-    .select('id, slug')
+    .select('id, slug, username')
     .eq('slug', DEFAULT_PROFILE_SLUG)
     .maybeSingle();
 
@@ -105,7 +120,16 @@ export async function updateProfileSection(data: Pick<ReadmeData, 'meta' | 'basi
   ]);
 
   revalidatePath('/');
+  revalidatePath('/i');
   revalidatePath('/admin/content');
+  if (profile.username) {
+    revalidatePath(`/${profile.username}`);
+    revalidatePath(`/i/${profile.username}`);
+  }
+  if (profile.slug) {
+    revalidatePath(`/${profile.slug}`);
+    revalidatePath(`/i/${profile.slug}`);
+  }
 }
 
 export async function updateLifeSection(data: ReadmeData['life']) {
