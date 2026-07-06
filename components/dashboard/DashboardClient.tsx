@@ -25,6 +25,8 @@ import {
   Layers,
 } from 'lucide-react';
 import BlockContentEditorManager from '@/components/editor/BlockContentEditorManager';
+import BlockCanvasEngine from '@/components/blocks/BlockCanvasEngine';
+import type { LayoutConfig } from '@/types/layout';
 
 interface DashboardClientProps {
   username: string;
@@ -333,14 +335,18 @@ export default function DashboardClient({ username, data }: DashboardClientProps
           </div>
         )}
 
-        {/* Tab 3: 公开网站配置 (Site Settings & Live Preview) */}
+        {/* Tab 3: 公开网站配置 (Site Layout Canvas Editor) */}
         {activeTab === 'settings' && (
           <div className="space-y-6 animate-fadeIn">
-            <GlassCard className="p-6 space-y-6">
+            <GlassCard className="p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-white/20 pb-4">
                 <div>
-                  <h2 className="font-bold text-lg text-gray-900 dark:text-white">公开个人网站实时配置</h2>
-                  <p className="text-xs text-gray-500">配置并在下方实时预览你的个人公开主页 (/:username)</p>
+                  <h2 className="font-extrabold text-lg text-gray-900 dark:text-white">
+                    公开个人网站 Block 画布与结构配置
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    在下方自由拖拽调整 Block 顺序、显示/隐藏、单双栏宽度 (50%/100%)，实时决定公开主页 (/{username}) 效果
+                  </p>
                 </div>
                 <Link
                   href={`/${username}`}
@@ -348,24 +354,26 @@ export default function DashboardClient({ username, data }: DashboardClientProps
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-500 text-white text-xs font-semibold shadow hover:bg-teal-600 transition"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  <span>新标签页打开</span>
+                  <span>打开公开主页预览</span>
                 </Link>
               </div>
 
-              {/* Live Preview Iframe Box */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-gray-500 font-mono">
-                  <span>LIVE PREVIEW</span>
-                  <span>URL: /{username}</span>
-                </div>
-                <div className="w-full h-[600px] rounded-2xl overflow-hidden border border-white/30 shadow-2xl bg-black">
-                  <iframe
-                    src={`/${username}`}
-                    title="Public Site Preview"
-                    className="w-full h-full border-0"
-                  />
-                </div>
-              </div>
+              {/* Block Canvas Layout Engine Editor */}
+              <BlockCanvasEngine
+                data={data}
+                mode="edit"
+                onSave={async (layoutConfig: LayoutConfig) => {
+                  const res = await fetch('/api/account/layout', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ layoutConfig }),
+                  });
+                  if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.error || '保存排版方案失败');
+                  }
+                }}
+              />
             </GlassCard>
           </div>
         )}
