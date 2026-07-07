@@ -703,11 +703,14 @@ export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<Readme
           date: item.qa_date,
         })),
       },
-      notifications: sortByOrder(notificationsResult.data ?? []).map((item) => ({
-        date: item.notification_date,
-        text: item.text,
-        type: item.type,
-      })),
+      notifications: (notificationsResult.data ?? [])
+        .slice()
+        .sort((a, b) => (b.notification_date ?? '').localeCompare(a.notification_date ?? ''))
+        .map((item) => ({
+          date: item.notification_date,
+          text: item.text,
+          type: item.type,
+        })),
     };
   } catch (error) {
     throw new Error(`Failed to load readme data from Supabase: ${(error as Error).message}`);

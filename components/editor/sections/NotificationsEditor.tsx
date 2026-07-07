@@ -8,7 +8,12 @@ import { useSectionSave } from '../hooks/useSectionSave';
 import { Bell } from 'lucide-react';
 
 export default function NotificationsEditor({ initialData }: { initialData: ReadmeData }) {
-  const [notifications, setNotifications] = useState(initialData.notifications || []);
+  const [notifications, setNotifications] = useState(
+    () =>
+      (initialData.notifications || [])
+        .slice()
+        .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
+  );
   const { saveStatus, errorMessage, saveSection } = useSectionSave('notifications');
 
   const handleSave = () => {
