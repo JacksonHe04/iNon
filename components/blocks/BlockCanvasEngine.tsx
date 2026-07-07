@@ -66,31 +66,6 @@ export default function BlockCanvasEngine({
     { id: '4', title: 'Antigravity CLI', url: 'https://deepmind.google', icon: '🤖' },
   ];
 
-  const musicItems = data.music.albums.map((a, i) => ({
-    id: String(i),
-    name: a.name,
-    artist: a.artist,
-    link: a.link,
-    comment: a.comment,
-  }));
-
-  const movieItems = data.films.films.map((f, i) => ({
-    id: String(i),
-    name: f.name,
-    director: f.director,
-    country: f.country,
-    link: f.link,
-    comment: f.comment,
-  }));
-
-  const bookItems = data.reading.books.map((b, i) => ({
-    id: String(i),
-    name: b.name,
-    author: b.author,
-    country: b.country,
-    link: b.link,
-    comment: b.comment,
-  }));
 
   const timelineItems = data.experience.experience.map((e, i) => ({
     id: String(i),
@@ -185,11 +160,30 @@ export default function BlockCanvasEngine({
       case 'timeline':
         return <TimelineBlock items={timelineItems} />;
       case 'music':
-        return <MusicBlock items={musicItems} />;
+        return (
+          <MusicBlock
+            albums={data.music.albums}
+            songs={data.music.songs}
+            musicians={data.music.musicians}
+            colSpan={block.colSpan}
+          />
+        );
       case 'movies':
-        return <MovieBlock items={movieItems} />;
+        return (
+          <MovieBlock
+            films={data.films.films}
+            directors={data.films.directors}
+            colSpan={block.colSpan}
+          />
+        );
       case 'books':
-        return <BookBlock items={bookItems} />;
+        return (
+          <BookBlock
+            books={data.reading.books}
+            authors={data.reading.authors}
+            colSpan={block.colSpan}
+          />
+        );
       case 'friend_links':
         return <FriendLinkBlock items={friendLinks} />;
       case 'contact':
