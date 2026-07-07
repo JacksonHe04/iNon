@@ -26,6 +26,11 @@ body {
   overflow-x: hidden;
   position: relative;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  background: #040b08;
 }
 
 /* 平滑滚动 */
