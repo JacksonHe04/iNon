@@ -16,7 +16,7 @@ export default function HeaderNav({ data, username, blocks, navSections }: Heade
         data={data}
         blocks={blocks}
         navSections={navSections}
-        className="relative bg-white/20 border-b border-white/30 backdrop-blur-[40px]"
+        className="relative z-40 bg-white/20 border-b border-white/30 backdrop-blur-[40px]"
       />
     </div>
   );
