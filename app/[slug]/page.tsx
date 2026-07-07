@@ -17,7 +17,13 @@ export default async function UserPublicPage({ params }: UserPublicPageProps) {
   ]);
 
   return (
-    <ShellLayout data={data} username={slug} showSideNav={true} blocks={layoutConfig.blocks}>
+    <ShellLayout
+      data={data}
+      username={slug}
+      showSideNav={true}
+      blocks={layoutConfig.blocks}
+      navSections={layoutConfig.navSections}
+    >
       <PublicBlockRenderer data={data} layoutConfig={layoutConfig} />
     </ShellLayout>
   );

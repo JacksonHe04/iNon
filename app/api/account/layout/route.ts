@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUserContext } from '@/lib/auth/user';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
+import { mergeWithDefaultLayoutConfig } from '@/lib/content/layout';
 import type { LayoutConfig } from '@/types/layout';
 import { revalidatePath } from 'next/cache';
 
@@ -29,7 +30,7 @@ export async function GET() {
       });
     }
 
-    const layoutConfig: LayoutConfig = (profileRow?.layout_config as LayoutConfig) || DEFAULT_LAYOUT_CONFIG;
+    const layoutConfig = mergeWithDefaultLayoutConfig(profileRow?.layout_config);
 
     return NextResponse.json({
       ok: true,

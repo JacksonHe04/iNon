@@ -13,7 +13,13 @@ export default async function Home() {
   ]);
 
   return (
-    <ShellLayout data={data} username={data.basic.name || ''} showSideNav={true} blocks={layoutConfig.blocks}>
+    <ShellLayout
+      data={data}
+      username={data.basic.name || ''}
+      showSideNav={true}
+      blocks={layoutConfig.blocks}
+      navSections={layoutConfig.navSections}
+    >
       <PublicBlockRenderer data={data} layoutConfig={layoutConfig} />
     </ShellLayout>
   );

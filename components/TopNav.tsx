@@ -18,7 +18,9 @@ import {
 import Modal from './Modal';
 import AuthModal from '@/components/auth/AuthModal';
 import { createClient } from '@/lib/supabase/client';
-import { NAV_SECTIONS } from './SideNav';
+import { DEFAULT_NAV_SECTIONS } from './SideNav';
+import type { BlockConfig, NavSectionConfig } from '@/types/layout';
+import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -40,6 +42,8 @@ function TwitterIcon(props: React.SVGProps<SVGSVGElement>) {
 interface TopNavProps {
   data: ReadmeData;
   className?: string;
+  blocks?: BlockConfig[];
+  navSections?: NavSectionConfig[];
 }
 
 type ChatMessage = {
@@ -53,7 +57,30 @@ const platformIconMap = {
   Twitter: TwitterIcon,
 } as const;
 
-export default function TopNav({ data, className }: TopNavProps) {
+export default function TopNav({ data, className, blocks, navSections }: TopNavProps) {
+  const effectiveBlocks = blocks || DEFAULT_LAYOUT_CONFIG.blocks;
+  const effectiveNavSections = navSections || DEFAULT_LAYOUT_CONFIG.navSections;
+
+  const navItems = effectiveBlocks && effectiveBlocks.length > 0
+    ? effectiveNavSections
+        .filter((section) => {
+          const sectionBlocks = effectiveBlocks.filter(
+            (b) => b.sectionId === section.id || b.id === section.targetBlockId
+          );
+          return sectionBlocks.some((b) => b.visible);
+        })
+        .map((section) => {
+          const firstVisibleBlock = effectiveBlocks.find(
+            (b) =>
+              (b.sectionId === section.id || b.id === section.targetBlockId) &&
+              b.visible
+          );
+          return {
+            id: firstVisibleBlock?.sectionId || firstVisibleBlock?.id || section.id,
+            label: section.label,
+          };
+        })
+    : DEFAULT_NAV_SECTIONS;
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [currentTime, setCurrentTime] = useState('');
@@ -762,7 +789,7 @@ export default function TopNav({ data, className }: TopNavProps) {
               <div className="flex-1 overflow-y-auto">
                 <p className="text-xs uppercase text-gray-400 mb-2">导航</p>
                 <div className="flex flex-col gap-2">
-                  {NAV_SECTIONS.map((section: { id: string; label: string }) => (
+                  {navItems.map((section) => (
                     <button
                       key={section.id}
                       onClick={() => {

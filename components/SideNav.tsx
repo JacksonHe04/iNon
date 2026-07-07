@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { scrollToElement } from '@/lib/utils';
-import type { BlockConfig } from '@/types/layout';
+import type { BlockConfig, NavSectionConfig } from '@/types/layout';
+import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
 
 export interface NavItem {
   id: string;
@@ -26,20 +27,36 @@ export const NAV_SECTIONS = DEFAULT_NAV_SECTIONS;
 
 interface SideNavProps {
   blocks?: BlockConfig[];
+  navSections?: NavSectionConfig[];
   customItems?: NavItem[];
 }
 
-export default function SideNav({ blocks, customItems }: SideNavProps) {
+export default function SideNav({ blocks, navSections, customItems }: SideNavProps) {
+  const effectiveBlocks = blocks || DEFAULT_LAYOUT_CONFIG.blocks;
+  const effectiveNavSections = navSections || DEFAULT_LAYOUT_CONFIG.navSections;
+
   // Determine dynamic navigation items based on visible blocks or custom items
   const navItems: NavItem[] = customItems
     ? customItems
-    : blocks && blocks.length > 0
-    ? blocks
-        .filter((b) => b.visible)
-        .map((b) => ({
-          id: b.sectionId || b.id,
-          label: b.title.replace(/^[^\s]+\s*/, ''), // strip emoji icon prefix if present
-        }))
+    : effectiveBlocks && effectiveBlocks.length > 0
+    ? effectiveNavSections
+        .filter((section) => {
+          const sectionBlocks = effectiveBlocks.filter(
+            (b) => b.sectionId === section.id || b.id === section.targetBlockId
+          );
+          return sectionBlocks.some((b) => b.visible);
+        })
+        .map((section) => {
+          const firstVisibleBlock = effectiveBlocks.find(
+            (b) =>
+              (b.sectionId === section.id || b.id === section.targetBlockId) &&
+              b.visible
+          );
+          return {
+            id: firstVisibleBlock?.sectionId || firstVisibleBlock?.id || section.id,
+            label: section.label,
+          };
+        })
     : DEFAULT_NAV_SECTIONS;
 
   const [activeSection, setActiveSection] = useState<string>(
