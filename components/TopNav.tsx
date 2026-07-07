@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, type KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, MapPin, RefreshCw, User, LayoutDashboard, Sun, Moon } from 'lucide-react';
+import { Bell, MapPin, RefreshCw, User, Sun, Moon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { ReadmeData } from '@/types';
@@ -310,13 +310,13 @@ export default function TopNav({ data, className, blocks, navSections }: TopNavP
               <button
                 type="button"
                 onClick={() => setShowMobilePanel(true)}
-                className="sm:hidden w-9 h-9 rounded-full bg-gradient-to-br from-green-400 to-teal-400 text-white font-semibold"
+                className="sm:hidden w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 font-semibold"
                 aria-label="打开个人面板"
               >
                 {data.basic.name[0]}
               </button>
               <div className="hidden sm:flex items-center gap-3">
-                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center text-white font-bold text-sm lg:text-base">
+                <div className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 font-bold text-sm">
                   {data.basic.name[0]}
                 </div>
                 <motion.button
@@ -506,27 +506,21 @@ export default function TopNav({ data, className, blocks, navSections }: TopNavP
               <div className="hidden md:block text-xs lg:text-sm font-mono">{isMounted ? currentTime : ''}</div>
 
               {/* UserInfo Button */}
-              {userEmail ? (
-                <button
-                  onClick={() => {
+              <button
+                onClick={() => {
+                  if (userEmail) {
                     const name = userEmail.split('@')[0];
                     router.push(`/i/${name}`);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-500/30 text-teal-700 dark:text-teal-300 font-medium text-xs hover:scale-105 transition shadow-sm"
-                  title="进入我的个人 OS 控制台"
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span className="max-w-[80px] lg:max-w-[120px] truncate">{userEmail.split('@')[0]}</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/40 hover:bg-white/60 border border-white/50 text-gray-700 font-semibold text-xs transition shadow-sm"
-                >
-                  <User className="w-3.5 h-3.5 text-teal-600" />
-                  <span>登录</span>
-                </button>
-              )}
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
+                title={userEmail ? "进入我的个人 OS 控制台" : "登录"}
+                aria-label={userEmail ? "进入控制台" : "登录"}
+              >
+                <User className="h-4 w-4" />
+              </button>
             </div>
           </div>
         </div>
@@ -709,7 +703,7 @@ export default function TopNav({ data, className, blocks, navSections }: TopNavP
               transition={{ type: 'spring', stiffness: 260, damping: 30 }}
               className="fixed inset-y-0 left-0 z-50 w-[min(24rem,50vw)] max-w-full bg-white/85 backdrop-blur-2xl border-r border-white/40 p-5 flex flex-col gap-6 text-gray-800 sm:hidden"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-teal-400 text-white font-semibold flex items-center justify-center">
                     {data.basic.name[0]}
@@ -729,82 +723,85 @@ export default function TopNav({ data, className, blocks, navSections }: TopNavP
                 </button>
               </div>
 
-              <div className="space-y-3 text-sm">
-                <p className="text-xs uppercase text-gray-400">地点与等级</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (distance !== null) {
-                      setShowLocationModal(true);
-                      setShowMobilePanel(false);
-                    } else {
-                      updateUserLocation();
-                    }
-                  }}
-                  className="w-full text-left rounded-2xl border border-white/40 bg-white/60 px-3 py-2 transition hover:bg-white/80 active:scale-[0.98] cursor-pointer"
-                >
-                  <p className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                    <MapPin className="h-4 w-4 text-green-500" />
-                    {data.life.current_city}
-                  </p>
-                  {isRefreshingLocation ? (
-                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                      <RefreshCw className="h-3 w-3 animate-spin text-blue-500" />
-                      计算中...
+              {/* Scrollable Container for all panels */}
+              <div className="flex-1 overflow-y-auto flex flex-col gap-6 pr-1 -mr-1">
+                <div className="space-y-3 text-sm">
+                  <p className="text-xs uppercase text-gray-400">地点与等级</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (distance !== null) {
+                        setShowLocationModal(true);
+                        setShowMobilePanel(false);
+                      } else {
+                        updateUserLocation();
+                      }
+                    }}
+                    className="w-full text-left rounded-2xl border border-white/40 bg-white/60 px-3 py-2 transition hover:bg-white/80 active:scale-[0.98] cursor-pointer"
+                  >
+                    <p className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <MapPin className="h-4 w-4 text-green-500" />
+                      {data.life.current_city}
                     </p>
-                  ) : distance !== null ? (
-                    <p className="text-xs text-gray-500 mt-1">与你相距约 {formatDistanceMeters(distance)}</p>
-                  ) : (
-                    <p className="text-xs text-green-600 font-medium mt-1">算算离我多远？</p>
-                  )}
-                </button>
-                <div className="rounded-2xl border border-white/40 bg-white/60 px-3 py-2">
-                  <p className="text-sm font-medium">Lv.{age}</p>
-                  <p className="text-xs text-gray-500 mb-1">
-                    {yearProgress.daysPassed}/{yearProgress.totalDays}
-                  </p>
-                  <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-green-500 to-teal-500"
-                      style={{ width: `${yearProgress.percentage}%` }}
-                    />
+                    {isRefreshingLocation ? (
+                      <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                        <RefreshCw className="h-3 w-3 animate-spin text-blue-500" />
+                        计算中...
+                      </p>
+                    ) : distance !== null ? (
+                      <p className="text-xs text-gray-500 mt-1">与你相距约 {formatDistanceMeters(distance)}</p>
+                    ) : (
+                      <p className="text-xs text-green-600 font-medium mt-1">算算离我多远？</p>
+                    )}
+                  </button>
+                  <div className="rounded-2xl border border-white/40 bg-white/60 px-3 py-2">
+                    <p className="text-sm font-medium">Lv.{age}</p>
+                    <p className="text-xs text-gray-500 mb-1">
+                      {yearProgress.daysPassed}/{yearProgress.totalDays}
+                    </p>
+                    <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-green-500 to-teal-500"
+                        style={{ width: `${yearProgress.percentage}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <p className="text-xs uppercase text-gray-400 mb-1">社交平台</p>
-                <div className="space-y-2 text-sm">
-                  {data.contact.platform_accounts.map((platform) => (
-                    <a
-                      key={platform.platform_name}
-                      href={platform.homepage_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-gray-700"
-                    >
-                      <span>{platform.platform_name}</span>
-                      <span className="text-xs text-gray-500">{platform.username}</span>
-                    </a>
-                  ))}
+                <div>
+                  <p className="text-xs uppercase text-gray-400 mb-1">社交平台</p>
+                  <div className="space-y-2 text-sm">
+                    {data.contact.platform_accounts.map((platform) => (
+                      <a
+                        key={platform.platform_name}
+                        href={platform.homepage_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-gray-700"
+                      >
+                        <span>{platform.platform_name}</span>
+                        <span className="text-xs text-gray-500">{platform.username}</span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex-1 overflow-y-auto">
-                <p className="text-xs uppercase text-gray-400 mb-2">导航</p>
-                <div className="flex flex-col gap-2">
-                  {navItems.map((section) => (
-                    <button
-                      key={section.id}
-                      onClick={() => {
-                        scrollToElement(section.id);
-                        setShowMobilePanel(false);
-                      }}
-                      className="w-full rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-left text-sm text-gray-700"
-                    >
-                      {section.label}
-                    </button>
-                  ))}
+                <div>
+                  <p className="text-xs uppercase text-gray-400 mb-2">导航</p>
+                  <div className="flex flex-col gap-2">
+                    {navItems.map((section) => (
+                      <button
+                        key={section.id}
+                        onClick={() => {
+                          scrollToElement(section.id);
+                          setShowMobilePanel(false);
+                        }}
+                        className="w-full rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-left text-sm text-gray-700"
+                      >
+                        {section.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </motion.div>
