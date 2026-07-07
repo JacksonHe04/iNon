@@ -139,9 +139,7 @@ export default function TopNav({ data, className }: TopNavProps) {
     }
   }, [cityCoords]);
 
-  useEffect(() => {
-    updateUserLocation();
-  }, [updateUserLocation]);
+
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -296,15 +294,28 @@ export default function TopNav({ data, className }: TopNavProps) {
                 <motion.button
                   type="button"
                   whileHover={{ scale: 1.04, y: -2 }}
-                  className="hidden sm:flex flex-col text-left text-gray-700 rounded-2xl px-3 py-1.5 bg-white/30 border border-white/40"
-                  onClick={() => setShowLocationModal(true)}
+                  className="hidden sm:flex flex-col text-left text-gray-700 rounded-2xl px-3 py-1.5 bg-white/30 border border-white/40 cursor-pointer"
+                  onClick={() => {
+                    if (distance !== null) {
+                      setShowLocationModal(true);
+                    } else {
+                      updateUserLocation();
+                    }
+                  }}
                 >
                   <span className="flex items-center gap-1 text-xs lg:text-sm font-medium">
                     <MapPin className="h-3 w-3 text-green-500" />
                     {data.life.current_city}
                   </span>
-                  {distance !== null && (
+                  {isRefreshingLocation ? (
+                    <span className="text-xs text-gray-500 flex items-center gap-1">
+                      <RefreshCw className="h-2.5 w-2.5 animate-spin text-blue-500" />
+                      计算中...
+                    </span>
+                  ) : distance !== null ? (
                     <span className="text-xs text-gray-500">距离约 {formatDistanceMeters(distance)}</span>
+                  ) : (
+                    <span className="text-xs text-gray-500/80 hover:text-green-600 transition-colors">算算离我多远？</span>
                   )}
                 </motion.button>
                 <motion.button
@@ -689,15 +700,33 @@ export default function TopNav({ data, className }: TopNavProps) {
 
               <div className="space-y-3 text-sm">
                 <p className="text-xs uppercase text-gray-400">地点与等级</p>
-                <div className="rounded-2xl border border-white/40 bg-white/60 px-3 py-2">
-                  <p className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (distance !== null) {
+                      setShowLocationModal(true);
+                      setShowMobilePanel(false);
+                    } else {
+                      updateUserLocation();
+                    }
+                  }}
+                  className="w-full text-left rounded-2xl border border-white/40 bg-white/60 px-3 py-2 transition hover:bg-white/80 active:scale-[0.98] cursor-pointer"
+                >
+                  <p className="flex items-center gap-2 text-sm font-medium text-gray-700">
                     <MapPin className="h-4 w-4 text-green-500" />
                     {data.life.current_city}
                   </p>
-                  {distance !== null && (
+                  {isRefreshingLocation ? (
+                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                      <RefreshCw className="h-3 w-3 animate-spin text-blue-500" />
+                      计算中...
+                    </p>
+                  ) : distance !== null ? (
                     <p className="text-xs text-gray-500 mt-1">与你相距约 {formatDistanceMeters(distance)}</p>
+                  ) : (
+                    <p className="text-xs text-green-600 font-medium mt-1">算算离我多远？</p>
                   )}
-                </div>
+                </button>
                 <div className="rounded-2xl border border-white/40 bg-white/60 px-3 py-2">
                   <p className="text-sm font-medium">Lv.{age}</p>
                   <p className="text-xs text-gray-500 mb-1">

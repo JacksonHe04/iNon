@@ -1,4 +1,5 @@
 import { getReadmeData } from '@/lib/content';
+import { getLayoutConfig } from '@/lib/content/layout';
 import { requireOwnerPage } from '@/lib/auth/user';
 import ShellLayout from '@/components/layout/ShellLayout';
 import DashboardClient from '@/components/dashboard/DashboardClient';
@@ -12,11 +13,14 @@ interface UserDashboardPageProps {
 export default async function UserDashboardPage({ params }: UserDashboardPageProps) {
   const { slug } = await params;
   await requireOwnerPage(slug, `/i/${slug}`);
-  const data = await getReadmeData(slug);
+  const [data, layoutConfig] = await Promise.all([
+    getReadmeData(slug),
+    getLayoutConfig(slug),
+  ]);
 
   return (
     <ShellLayout data={data} username={slug} showSideNav={false}>
-      <DashboardClient username={slug} data={data} />
+      <DashboardClient username={slug} data={data} initialLayoutConfig={layoutConfig} />
     </ShellLayout>
   );
 }

@@ -11,7 +11,16 @@ export type BlockType =
   | 'timeline'
   | 'friend_links'
   | 'contact'
-  | 'thoughts';
+  | 'thoughts'
+  | 'education'
+  | 'work'
+  | 'products'
+  | 'creation'
+  | 'hiphop'
+  | 'events'
+  | 'tags'
+  | 'skills'
+  | 'dev_tools';
 
 export type BlockConfig = {
   id: string;

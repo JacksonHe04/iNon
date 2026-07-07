@@ -1,4 +1,5 @@
 import { getReadmeData } from '@/lib/content';
+import { getLayoutConfig } from '@/lib/content/layout';
 import ShellLayout from '@/components/layout/ShellLayout';
 import PublicBlockRenderer from '@/components/blocks/PublicBlockRenderer';
 
@@ -10,11 +11,14 @@ interface UserPublicPageProps {
 
 export default async function UserPublicPage({ params }: UserPublicPageProps) {
   const { slug } = await params;
-  const data = await getReadmeData(slug);
+  const [data, layoutConfig] = await Promise.all([
+    getReadmeData(slug),
+    getLayoutConfig(slug),
+  ]);
 
   return (
-    <ShellLayout data={data} username={slug} showSideNav={true}>
-      <PublicBlockRenderer data={data} />
+    <ShellLayout data={data} username={slug} showSideNav={true} blocks={layoutConfig.blocks}>
+      <PublicBlockRenderer data={data} layoutConfig={layoutConfig} />
     </ShellLayout>
   );
 }

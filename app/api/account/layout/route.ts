@@ -83,10 +83,8 @@ export async function PUT(req: Request) {
     revalidatePath('/');
     revalidatePath('/i');
     for (const s of profile.slugs) {
-      if (s) {
-        revalidatePath(`/${s}`);
-        revalidatePath(`/i/${s}`);
-      }
+      revalidatePath(s ? `/${s}` : '/');
+      revalidatePath(s ? `/i/${s}` : '/i');
     }
     if (profile.username) {
       revalidatePath(`/${profile.username}`);

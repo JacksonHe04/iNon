@@ -31,9 +31,10 @@ import type { LayoutConfig } from '@/types/layout';
 interface DashboardClientProps {
   username: string;
   data: ReadmeData;
+  initialLayoutConfig?: LayoutConfig;
 }
 
-export default function DashboardClient({ username, data }: DashboardClientProps) {
+export default function DashboardClient({ username, data, initialLayoutConfig }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>('home');
 
   // Initialize bookmarks from Supabase dev_tools or default
@@ -362,6 +363,7 @@ export default function DashboardClient({ username, data }: DashboardClientProps
               <BlockCanvasEngine
                 data={data}
                 mode="edit"
+                initialLayoutConfig={initialLayoutConfig}
                 onSave={async (layoutConfig: LayoutConfig) => {
                   const res = await fetch('/api/account/layout', {
                     method: 'PUT',
