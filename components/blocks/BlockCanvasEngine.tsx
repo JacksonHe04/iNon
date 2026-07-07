@@ -16,6 +16,15 @@ import TimelineBlock from '@/components/blocks/TimelineBlock';
 import FriendLinkBlock from '@/components/blocks/FriendLinkBlock';
 import ContactBlock from '@/components/blocks/ContactBlock';
 import GlassCard from '@/components/GlassCard';
+import EducationBlock from '@/components/blocks/EducationBlock';
+import WorkBlock from '@/components/blocks/WorkBlock';
+import ProductsBlock from '@/components/blocks/ProductsBlock';
+import CreationBlock from '@/components/blocks/CreationBlock';
+import HiphopBlock from '@/components/blocks/HiphopBlock';
+import EventsBlock from '@/components/blocks/EventsBlock';
+import TagsBlock from '@/components/blocks/TagsBlock';
+import SkillsBlock from '@/components/blocks/SkillsBlock';
+import DevToolsBlock from '@/components/blocks/DevToolsBlock';
 import { Reorder } from 'framer-motion';
 import {
   GripVertical,
@@ -190,14 +199,111 @@ export default function BlockCanvasEngine({
               📫 联系方式与社交账号
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-              {data.contact.contact_info.map((c, idx) => (
-                <div key={idx} className="p-3 rounded-xl bg-white/40 border border-white/20">
-                  <div className="text-[10px] text-gray-400 font-mono">{c.method_name}</div>
-                  <div className="font-bold text-gray-800 dark:text-gray-200 mt-1">{c.content}</div>
-                </div>
-              ))}
+              {data.contact.contact_info.map((c, idx) => {
+                const isEmail = c.method_name === '邮箱' || c.content.includes('@');
+                const isLink = c.content.startsWith('http') || c.method_name === '个人网站';
+                return (
+                  <div key={idx} className="p-3 rounded-xl bg-white/40 border border-white/20 hover:border-teal-500/30 transition">
+                    <div className="text-[10px] text-gray-400 font-mono">{c.method_name}</div>
+                    {isEmail ? (
+                      <a href={`mailto:${c.content}`} className="font-bold text-teal-600 dark:text-teal-400 hover:underline mt-1 block">
+                        {c.content}
+                      </a>
+                    ) : isLink ? (
+                      <a href={c.content} target="_blank" rel="noopener noreferrer" className="font-bold text-teal-600 dark:text-teal-400 hover:underline mt-1 block truncate">
+                        {c.content}
+                      </a>
+                    ) : (
+                      <div className="font-bold text-gray-800 dark:text-gray-200 mt-1">{c.content}</div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </GlassCard>
+        );
+      case 'education':
+        return (
+          <EducationBlock
+            schools={data.education.schools}
+            undergraduateMajor={data.education.undergraduate_major}
+            undergraduateAdvisor={data.education.undergraduate_advisor}
+            colSpan={block.colSpan}
+          />
+        );
+      case 'work':
+        return (
+          <WorkBlock
+            currentJob={data.work.current_job}
+            jobs={data.work.jobs}
+            workPreferences={data.work.work_preferences}
+            colSpan={block.colSpan}
+          />
+        );
+      case 'products':
+        return (
+          <ProductsBlock
+            favoriteProducts={data.products.favorite_products}
+            recommendedProducts={data.products.recommended_products}
+            myHardware={data.products.my_hardware}
+            favoriteBrands={data.products.favorite_brands}
+            colSpan={block.colSpan}
+          />
+        );
+      case 'creation':
+        return (
+          <CreationBlock
+            videos={data.creation.videos}
+            articles={data.creation.articles}
+            speeches={data.creation.speeches}
+            mottos={data.creation.mottos}
+            quotes={data.creation.quotes}
+            colSpan={block.colSpan}
+          />
+        );
+      case 'hiphop':
+        return (
+          <HiphopBlock
+            albums={data.hiphop.albums}
+            songs={data.hiphop.songs}
+            musicians={data.hiphop.musicians}
+            colSpan={block.colSpan}
+          />
+        );
+      case 'events':
+        return (
+          <EventsBlock
+            performances={data.events.performances}
+            colSpan={block.colSpan}
+          />
+        );
+      case 'tags':
+        return (
+          <TagsBlock
+            keywords={data.basic.keywords}
+            values={data.basic.values}
+            tags={data.basic.tags}
+            habits={data.life.habits}
+            workPreferences={data.work.work_preferences}
+            techStack={data.development.skills.tech_stack}
+            expertise={data.development.skills.expertise}
+            colSpan={block.colSpan}
+          />
+        );
+      case 'skills':
+        return (
+          <SkillsBlock
+            techStack={data.development.skills.tech_stack}
+            expertise={data.development.skills.expertise}
+            colSpan={block.colSpan}
+          />
+        );
+      case 'dev_tools':
+        return (
+          <DevToolsBlock
+            devTools={data.development.dev_tools}
+            colSpan={block.colSpan}
+          />
         );
       default:
         return null;
