@@ -482,12 +482,10 @@ export default function TopNav({ data, className, blocks, navSections }: TopNavP
                     return next;
                   });
                 }}
-                className="relative h-8 px-2.5 flex items-center justify-center gap-1 rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
+                className="relative w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
                 aria-label="查看通知"
-                title={`当前版本: v${pkg.version}`}
               >
                 <Bell className="h-4 w-4" />
-                <span className="hidden sm:inline text-[10px] font-bold font-mono">v{pkg.version}</span>
                 {shouldShowBadge && (
                   <span className="absolute -top-1 -right-1 min-w-[1.2rem] h-4 px-1 bg-gray-100 text-gray-700 rounded-full text-[10px] flex items-center justify-center font-semibold">
                     {data.notifications.length}
@@ -537,7 +535,10 @@ export default function TopNav({ data, className, blocks, navSections }: TopNavP
       <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} userEmail={userEmail} />
 
       <Modal open={showNotifications} onClose={() => setShowNotifications(false)} position="top-right" className="max-w-sm">
-        <h3 className="font-bold mb-2 text-gray-900">通知</h3>
+        <div className="flex items-center justify-between mb-2 pb-1 border-b border-gray-100 dark:border-gray-800">
+          <h3 className="font-bold text-gray-900 dark:text-white">通知</h3>
+          <span className="text-[10px] font-bold font-mono text-gray-400 dark:text-gray-500">v{pkg.version}</span>
+        </div>
         <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
           {data.notifications.map((notif, idx) => (
             <div key={idx} className="text-sm border-b border-gray-200 pb-2 last:border-0">
