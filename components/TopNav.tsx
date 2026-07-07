@@ -6,6 +6,7 @@ import { Bell, MapPin, RefreshCw, User, LayoutDashboard, Sun, Moon } from 'lucid
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { ReadmeData } from '@/types';
+import pkg from '@/package.json';
 import {
   calculateAge,
   getYearProgress,
@@ -481,10 +482,12 @@ export default function TopNav({ data, className, blocks, navSections }: TopNavP
                     return next;
                   });
                 }}
-                className="relative w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600"
+                className="relative h-8 px-2.5 flex items-center justify-center gap-1 rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
                 aria-label="查看通知"
+                title={`当前版本: v${pkg.version}`}
               >
                 <Bell className="h-4 w-4" />
+                <span className="hidden sm:inline text-[10px] font-bold font-mono">v{pkg.version}</span>
                 {shouldShowBadge && (
                   <span className="absolute -top-1 -right-1 min-w-[1.2rem] h-4 px-1 bg-gray-100 text-gray-700 rounded-full text-[10px] flex items-center justify-center font-semibold">
                     {data.notifications.length}
