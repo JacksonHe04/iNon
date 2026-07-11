@@ -354,8 +354,8 @@ export default function BlockCanvasEngine({
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
       {/* 左侧竖直 Block 目录列表 */}
-      <div className="w-full lg:w-72 shrink-0 md:sticky md:top-24 z-20">
-        <div className="rounded-2xl border border-white/20 bg-white/10 dark:bg-black/10 p-4 space-y-4 backdrop-blur-md">
+      <div className="w-full lg:w-72 shrink-0 lg:sticky lg:top-24 z-20">
+        <div className="rounded-2xl border border-white/20 bg-white/10 dark:bg-black/10 p-4 space-y-4 backdrop-blur-md flex flex-col h-auto lg:h-[calc(100vh-140px)]">
           <div className="flex items-center justify-between border-b border-white/10 pb-2">
             <span className="font-extrabold text-xs text-gray-900 dark:text-white flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-teal-500" />
@@ -376,7 +376,7 @@ export default function BlockCanvasEngine({
             axis="y"
             values={layoutConfig.blocks}
             onReorder={handleReorderBlocks}
-            className="space-y-2 max-h-[60vh] overflow-y-auto pr-1 scrollbar-none"
+            className="space-y-2 flex-1 overflow-y-auto pr-1 scrollbar-none max-h-[50vh] lg:max-h-none"
           >
             {layoutConfig.blocks.map((block, index) => (
               <Reorder.Item

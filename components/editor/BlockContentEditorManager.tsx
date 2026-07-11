@@ -33,11 +33,9 @@ import {
   Send,
   Compass,
   Bell,
-  Layers,
 } from 'lucide-react';
 
 const BLOCK_CATEGORIES = [
-  { id: 'all', label: '全部 Block 分区', icon: Layers },
   { id: 'basic', label: '1. 基本信息 (Basic)', icon: User },
   { id: 'life', label: '2. 生活状态 (Life)', icon: Heart },
   { id: 'experience', label: '3. 个人经历 (Experience)', icon: MapPin },
@@ -62,7 +60,7 @@ interface BlockContentEditorManagerProps {
 }
 
 export default function BlockContentEditorManager({ data }: BlockContentEditorManagerProps) {
-  const [activeCategory, setActiveCategory] = useState<CategoryId>('all');
+  const [activeCategory, setActiveCategory] = useState<CategoryId>('basic');
 
   return (
     <div className="space-y-6">
@@ -90,49 +88,49 @@ export default function BlockContentEditorManager({ data }: BlockContentEditorMa
 
       {/* Content Sections */}
       <div className="space-y-6 animate-fadeIn">
-        {(activeCategory === 'all' || activeCategory === 'basic') && (
+        {activeCategory === 'basic' && (
           <BasicEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'life') && (
+        {activeCategory === 'life' && (
           <LifeEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'experience') && (
+        {activeCategory === 'experience' && (
           <ExperienceEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'education') && (
+        {activeCategory === 'education' && (
           <EducationEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'work') && (
+        {activeCategory === 'work' && (
           <WorkEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'development') && (
+        {activeCategory === 'development' && (
           <DevelopmentEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'products') && (
+        {activeCategory === 'products' && (
           <ProductsEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'creation') && (
+        {activeCategory === 'creation' && (
           <CreationEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'reading') && (
+        {activeCategory === 'reading' && (
           <ReadingEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'films') && (
+        {activeCategory === 'films' && (
           <FilmsEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'music') && (
+        {activeCategory === 'music' && (
           <MusicEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'events') && (
+        {activeCategory === 'events' && (
           <EventsEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'contact') && (
+        {activeCategory === 'contact' && (
           <ContactEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'thoughts') && (
+        {activeCategory === 'thoughts' && (
           <ThoughtsEditor initialData={data} />
         )}
-        {(activeCategory === 'all' || activeCategory === 'notifications') && (
+        {activeCategory === 'notifications' && (
           <NotificationsEditor initialData={data} />
         )}
       </div>
