@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import AdminSignOutButton from './AdminSignOutButton';
 
 const navItems = [
-  { href: '/admin/assets', label: '资产库 (对象存储)' },
+  { href: '/admin/assets', label: '图床管理' },
 ];
 
 type AdminNavProps = {
