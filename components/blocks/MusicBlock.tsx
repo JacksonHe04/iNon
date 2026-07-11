@@ -4,12 +4,14 @@ import { useState } from 'react';
 import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { Music, Disc, Play, Disc2, ExternalLink } from 'lucide-react';
+import BlockImage from './BlockImage';
 
 export interface MusicAlbum {
   name: string;
   artist: string;
   link: string;
   comment: string;
+  image_url?: string;
 }
 
 export interface MusicSong {
@@ -18,6 +20,7 @@ export interface MusicSong {
   album: string;
   link: string;
   comment: string;
+  image_url?: string;
 }
 
 export interface MusicMusician {
@@ -25,6 +28,7 @@ export interface MusicMusician {
   region: string;
   link: string;
   comment: string;
+  image_url?: string;
 }
 
 interface MusicBlockProps {
@@ -126,7 +130,13 @@ export default function MusicBlock({
                     </span>
                     <Disc className="w-3.5 h-3.5 text-emerald-500" />
                   </div>
-                  <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
+                  <BlockImage
+                    src={album.image_url}
+                    alt={album.name}
+                    fallback={
+                      <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
+                    }
+                  />
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
                     {album.name}
                   </h4>
@@ -159,7 +169,13 @@ export default function MusicBlock({
                     </span>
                     <Play className="w-3 h-3 text-emerald-500" />
                   </div>
-                  <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 2)} opacity-80`} />
+                  <BlockImage
+                    src={song.image_url}
+                    alt={song.name}
+                    fallback={
+                      <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 2)} opacity-80`} />
+                    }
+                  />
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
                     {song.name}
                   </h4>
@@ -194,7 +210,13 @@ export default function MusicBlock({
                     </span>
                     <Disc2 className="w-3.5 h-3.5 text-emerald-500" />
                   </div>
-                  <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 4)} opacity-80`} />
+                  <BlockImage
+                    src={mus.image_url}
+                    alt={mus.name}
+                    fallback={
+                      <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 4)} opacity-80`} />
+                    }
+                  />
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
                     {mus.name}
                   </h4>

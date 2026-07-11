@@ -70,13 +70,14 @@ export default function ProductsEditor({ initialData }: { initialData: ReadmeDat
           title="最喜爱的产品 Favorite Products"
           items={products.favorite_products}
           onChange={(next) => setProducts({ ...products, favorite_products: next })}
-          createItem={() => ({ name: '', link: '', intro: '', tags: [] })}
+          createItem={() => ({ name: '', link: '', intro: '', tags: [], image_url: '' })}
           getItemTitle={(item) => item.name || '产品名称'}
           fields={[
             { key: 'name', label: '产品名称' },
             { key: 'link', label: '产品链接' },
             { key: 'intro', label: '简短介绍', type: 'textarea' },
             { key: 'tags', label: '标签', type: 'string-list' },
+            { key: 'image_url', label: '产品配图 URL', type: 'image' },
           ]}
         />
       </div>
@@ -86,13 +87,14 @@ export default function ProductsEditor({ initialData }: { initialData: ReadmeDat
           title="推荐产品 Recommended Products"
           items={products.recommended_products}
           onChange={(next) => setProducts({ ...products, recommended_products: next })}
-          createItem={() => ({ name: '', link: '', intro: '', tags: [] })}
+          createItem={() => ({ name: '', link: '', intro: '', tags: [], image_url: '' })}
           getItemTitle={(item) => item.name || '产品名称'}
           fields={[
             { key: 'name', label: '产品名称' },
             { key: 'link', label: '产品链接' },
             { key: 'intro', label: '简短介绍', type: 'textarea' },
             { key: 'tags', label: '标签', type: 'string-list' },
+            { key: 'image_url', label: '产品配图 URL', type: 'image' },
           ]}
         />
       </div>
@@ -102,13 +104,14 @@ export default function ProductsEditor({ initialData }: { initialData: ReadmeDat
           title="喜爱品牌 Favorite Brands"
           items={products.favorite_brands}
           onChange={(next) => setProducts({ ...products, favorite_brands: next })}
-          createItem={() => ({ name: '', link: '', intro: '', tags: [] })}
+          createItem={() => ({ name: '', link: '', intro: '', tags: [], image_url: '' })}
           getItemTitle={(item) => item.name || '品牌名称'}
           fields={[
             { key: 'name', label: '品牌名称' },
             { key: 'link', label: '品牌官网' },
             { key: 'intro', label: '品牌介绍', type: 'textarea' },
             { key: 'tags', label: '标签', type: 'string-list' },
+            { key: 'image_url', label: '品牌配图 / Logo URL', type: 'image' },
           ]}
         />
       </div>

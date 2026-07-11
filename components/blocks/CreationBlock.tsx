@@ -4,18 +4,21 @@ import { useState } from 'react';
 import GlassCard from '@/components/GlassCard';
 import { PenTool, Video, FileText, Mic, BookOpen, Quote, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import CreationGalaxy from '@/components/scenes/CreationGalaxy';
+import BlockImage from './BlockImage';
 
 export interface VideoItem {
   series: string;
   title: string;
   video_link: string;
   podcast_link: string;
+  image_url?: string;
 }
 
 export interface ArticleItem {
   title: string;
   link: string;
   excerpt: string;
+  image_url?: string;
 }
 
 export interface SpeechItem {
@@ -23,6 +26,7 @@ export interface SpeechItem {
   link: string;
   outline_doc: string;
   presentation_link: string;
+  image_url?: string;
 }
 
 interface CreationBlockProps {
@@ -149,6 +153,14 @@ export default function CreationBlock({
                 className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-purple-400/30 transition flex flex-col justify-between"
               >
                 <div>
+                  {vid.image_url && (
+                    <BlockImage
+                      src={vid.image_url}
+                      alt={vid.title}
+                      className="w-full aspect-video rounded-lg mb-2 object-cover"
+                      fallback={null}
+                    />
+                  )}
                   <span className="text-[10px] text-gray-400 font-mono">{vid.series}</span>
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white mt-0.5">
                     {vid.title}
@@ -190,6 +202,14 @@ export default function CreationBlock({
                 key={idx}
                 className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-purple-400/30 transition space-y-1.5"
               >
+                {art.image_url && (
+                  <BlockImage
+                    src={art.image_url}
+                    alt={art.title}
+                    className="w-full aspect-video rounded-lg mb-2 object-cover"
+                    fallback={null}
+                  />
+                )}
                 <div className="flex items-start justify-between gap-3">
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white leading-tight">
                     {art.title}
@@ -217,11 +237,20 @@ export default function CreationBlock({
             {speeches.map((sp, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-purple-400/30 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-purple-400/30 transition flex flex-col gap-3"
               >
-                <h4 className="font-bold text-xs text-gray-800 dark:text-white leading-tight">
-                  🎤 {sp.speech_name}
-                </h4>
+                {sp.image_url && (
+                  <BlockImage
+                    src={sp.image_url}
+                    alt={sp.speech_name}
+                    className="w-full aspect-video rounded-lg object-cover"
+                    fallback={null}
+                  />
+                )}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <h4 className="font-bold text-xs text-gray-800 dark:text-white leading-tight">
+                    🎤 {sp.speech_name}
+                  </h4>
                 <div className="flex flex-wrap gap-2.5">
                   {sp.link && sp.link.trim() !== '' && (
                     <a
@@ -255,7 +284,8 @@ export default function CreationBlock({
                   )}
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
           </div>
         )}
 

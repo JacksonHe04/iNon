@@ -4,6 +4,7 @@ import { useState } from 'react';
 import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { Film, User, ExternalLink } from 'lucide-react';
+import BlockImage from './BlockImage';
 
 export interface MovieItem {
   name: string;
@@ -11,6 +12,7 @@ export interface MovieItem {
   country: string;
   link: string;
   comment: string;
+  image_url?: string;
 }
 
 export interface DirectorItem {
@@ -18,6 +20,7 @@ export interface DirectorItem {
   country: string;
   link: string;
   comment: string;
+  image_url?: string;
 }
 
 interface MovieBlockProps {
@@ -115,7 +118,13 @@ export default function MovieBlock({
                     </span>
                     <Film className="w-3.5 h-3.5 text-amber-500" />
                   </div>
-                  <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
+                  <BlockImage
+                    src={film.image_url}
+                    alt={film.name}
+                    fallback={
+                      <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
+                    }
+                  />
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
                     {film.name}
                   </h4>
@@ -148,7 +157,13 @@ export default function MovieBlock({
                     </span>
                     <User className="w-3.5 h-3.5 text-amber-500" />
                   </div>
-                  <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 2)} opacity-80`} />
+                  <BlockImage
+                    src={director.image_url}
+                    alt={director.name}
+                    fallback={
+                      <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 2)} opacity-80`} />
+                    }
+                  />
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
                     {director.name}
                   </h4>

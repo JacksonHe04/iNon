@@ -4,6 +4,7 @@ import { useState } from 'react';
 import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { BookOpen, User, ExternalLink } from 'lucide-react';
+import BlockImage from './BlockImage';
 
 export interface BookItem {
   name: string;
@@ -11,6 +12,7 @@ export interface BookItem {
   country: string;
   link: string;
   comment: string;
+  image_url?: string;
 }
 
 export interface AuthorItem {
@@ -18,6 +20,7 @@ export interface AuthorItem {
   country: string;
   link: string;
   comment: string;
+  image_url?: string;
 }
 
 interface BookBlockProps {
@@ -115,7 +118,13 @@ export default function BookBlock({
                     </span>
                     <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
                   </div>
-                  <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
+                  <BlockImage
+                    src={book.image_url}
+                    alt={book.name}
+                    fallback={
+                      <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
+                    }
+                  />
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
                     {book.name}
                   </h4>
@@ -148,7 +157,13 @@ export default function BookBlock({
                     </span>
                     <User className="w-3.5 h-3.5 text-indigo-500" />
                   </div>
-                  <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 2)} opacity-80`} />
+                  <BlockImage
+                    src={author.image_url}
+                    alt={author.name}
+                    fallback={
+                      <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 2)} opacity-80`} />
+                    }
+                  />
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
                     {author.name}
                   </h4>

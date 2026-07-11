@@ -70,7 +70,7 @@ export default function MusicEditor({ initialData }: { initialData: ReadmeData }
         title="单曲 / 歌曲 Songs"
         items={currentData.songs}
         onChange={(next) => setCurrentData({ ...currentData, songs: next })}
-        createItem={() => ({ name: '', artist: '', album: '', link: '', comment: '' })}
+        createItem={() => ({ name: '', artist: '', album: '', link: '', comment: '', image_url: '' })}
         getItemTitle={(item) => `${item.name || '歌名'} — ${item.artist || '歌手'}`}
         fields={[
           { key: 'name', label: '歌曲名称' },
@@ -78,6 +78,7 @@ export default function MusicEditor({ initialData }: { initialData: ReadmeData }
           { key: 'album', label: '所属专辑' },
           { key: 'link', label: '网易云 / Spotify 链接' },
           { key: 'comment', label: '推荐评语', type: 'textarea' },
+          { key: 'image_url', label: '歌曲封面 URL', type: 'image' },
         ]}
       />
 
@@ -86,13 +87,14 @@ export default function MusicEditor({ initialData }: { initialData: ReadmeData }
           title="专辑 Albums"
           items={currentData.albums}
           onChange={(next) => setCurrentData({ ...currentData, albums: next })}
-          createItem={() => ({ name: '', artist: '', link: '', comment: '' })}
+          createItem={() => ({ name: '', artist: '', link: '', comment: '', image_url: '' })}
           getItemTitle={(item) => `${item.name || '专辑名'} — ${item.artist || '艺人'}`}
           fields={[
             { key: 'name', label: '专辑名称' },
             { key: 'artist', label: '艺人 / 乐队' },
             { key: 'link', label: '专辑链接' },
             { key: 'comment', label: '推荐评语', type: 'textarea' },
+            { key: 'image_url', label: '专辑封面 URL', type: 'image' },
           ]}
         />
       </div>
@@ -102,13 +104,14 @@ export default function MusicEditor({ initialData }: { initialData: ReadmeData }
           title="音乐人 / 厂牌 Musicians"
           items={currentData.musicians}
           onChange={(next) => setCurrentData({ ...currentData, musicians: next })}
-          createItem={() => ({ name: '', region: '', link: '', comment: '' })}
+          createItem={() => ({ name: '', region: '', link: '', comment: '', image_url: '' })}
           getItemTitle={(item) => item.name || '音乐人'}
           fields={[
             { key: 'name', label: '音乐人 / 厂牌名称' },
             { key: 'region', label: '地区 / 风格' },
             { key: 'link', label: '主页链接' },
             { key: 'comment', label: '评价', type: 'textarea' },
+            { key: 'image_url', label: '音乐人图片 URL', type: 'image' },
           ]}
         />
       </div>

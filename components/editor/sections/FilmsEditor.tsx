@@ -28,7 +28,7 @@ export default function FilmsEditor({ initialData }: { initialData: ReadmeData }
         title="电影与剧集 Films"
         items={films.films}
         onChange={(next) => setFilms({ ...films, films: next })}
-        createItem={() => ({ name: '', director: '', country: '', link: '', comment: '' })}
+        createItem={() => ({ name: '', director: '', country: '', link: '', comment: '', image_url: '' })}
         getItemTitle={(item) => `${item.name || '片名'} — 导演: ${item.director || '未知'}`}
         fields={[
           { key: 'name', label: '影片名称' },
@@ -36,6 +36,7 @@ export default function FilmsEditor({ initialData }: { initialData: ReadmeData }
           { key: 'country', label: '出品国家 / 地区' },
           { key: 'link', label: '豆瓣 / IMDb 链接' },
           { key: 'comment', label: '影评与观影感受', type: 'textarea' },
+          { key: 'image_url', label: '影片封面 URL', type: 'image' },
         ]}
       />
 
@@ -44,13 +45,14 @@ export default function FilmsEditor({ initialData }: { initialData: ReadmeData }
           title="喜爱导演 Directors"
           items={films.directors}
           onChange={(next) => setFilms({ ...films, directors: next })}
-          createItem={() => ({ name: '', country: '', link: '', comment: '' })}
+          createItem={() => ({ name: '', country: '', link: '', comment: '', image_url: '' })}
           getItemTitle={(item) => item.name || '导演姓名'}
           fields={[
             { key: 'name', label: '导演姓名' },
             { key: 'country', label: '国家 / 地区' },
             { key: 'link', label: '介绍链接' },
             { key: 'comment', label: '评价与推介', type: 'textarea' },
+            { key: 'image_url', label: '导演图片 URL', type: 'image' },
           ]}
         />
       </div>

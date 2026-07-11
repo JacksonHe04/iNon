@@ -5,12 +5,14 @@ import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { Monitor, Heart, Star, Laptop, Compass, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import ProductDeskScene from '@/components/scenes/ProductDeskScene';
+import BlockImage from './BlockImage';
 
 export interface ProductItem {
   name: string;
   link: string;
   intro: string;
   tags: string[];
+  image_url?: string;
 }
 
 export interface HardwareInfo {
@@ -26,6 +28,7 @@ export interface BrandItem {
   link: string;
   intro: string;
   tags: string[];
+  image_url?: string;
 }
 
 interface ProductsBlockProps {
@@ -158,6 +161,14 @@ export default function ProductsBlock({
                 className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-amber-400/40 transition cursor-pointer flex flex-col justify-between"
               >
                 <div>
+                  {prod.image_url && (
+                    <BlockImage
+                      src={prod.image_url}
+                      alt={prod.name}
+                      className="w-full aspect-video rounded-lg mb-2 object-cover"
+                      fallback={null}
+                    />
+                  )}
                   <h4 className="font-bold text-sm text-gray-900 dark:text-white">{prod.name}</h4>
                   <p className="text-xs text-gray-500 mt-1 line-clamp-2">{prod.intro}</p>
                 </div>
@@ -192,6 +203,14 @@ export default function ProductsBlock({
                 className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-amber-400/40 transition cursor-pointer flex flex-col justify-between"
               >
                 <div>
+                  {prod.image_url && (
+                    <BlockImage
+                      src={prod.image_url}
+                      alt={prod.name}
+                      className="w-full aspect-video rounded-lg mb-2 object-cover"
+                      fallback={null}
+                    />
+                  )}
                   <h4 className="font-bold text-sm text-gray-900 dark:text-white">{prod.name}</h4>
                   <p className="text-xs text-gray-500 mt-1 line-clamp-2">{prod.intro}</p>
                 </div>
@@ -257,6 +276,14 @@ export default function ProductsBlock({
                 className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-amber-400/40 transition cursor-pointer flex flex-col justify-between"
               >
                 <div>
+                  {brand.image_url && (
+                    <BlockImage
+                      src={brand.image_url}
+                      alt={brand.name}
+                      className="w-full aspect-video rounded-lg mb-2 object-cover"
+                      fallback={null}
+                    />
+                  )}
                   <h4 className="font-bold text-sm text-gray-900 dark:text-white">{brand.name}</h4>
                   <p className="text-xs text-gray-500 mt-1 line-clamp-2">{brand.intro}</p>
                 </div>

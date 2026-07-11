@@ -28,12 +28,13 @@ export default function CreationEditor({ initialData }: { initialData: ReadmeDat
         title="文章 Articles"
         items={creation.articles}
         onChange={(next) => setCreation({ ...creation, articles: next })}
-        createItem={() => ({ title: '', link: '', excerpt: '' })}
+        createItem={() => ({ title: '', link: '', excerpt: '', image_url: '' })}
         getItemTitle={(item) => item.title || '文章标题'}
         fields={[
           { key: 'title', label: '文章标题' },
           { key: 'link', label: '阅读链接' },
           { key: 'excerpt', label: '内容摘要', type: 'textarea' },
+          { key: 'image_url', label: '文章封面 URL', type: 'image' },
         ]}
       />
 
@@ -42,13 +43,14 @@ export default function CreationEditor({ initialData }: { initialData: ReadmeDat
           title="视频与播客 Videos & Podcasts"
           items={creation.videos}
           onChange={(next) => setCreation({ ...creation, videos: next })}
-          createItem={() => ({ series: '', title: '', video_link: '', podcast_link: '' })}
+          createItem={() => ({ series: '', title: '', video_link: '', podcast_link: '', image_url: '' })}
           getItemTitle={(item) => item.title || '节目名称'}
           fields={[
             { key: 'series', label: '所属系列' },
             { key: 'title', label: '节目/视频标题' },
             { key: 'video_link', label: '视频播放链接 (Bilibili/YouTube)' },
             { key: 'podcast_link', label: '播客音频链接' },
+            { key: 'image_url', label: '视频封面 URL', type: 'image' },
           ]}
         />
       </div>
@@ -58,13 +60,14 @@ export default function CreationEditor({ initialData }: { initialData: ReadmeDat
           title="演讲与汇报 Speeches"
           items={creation.speeches}
           onChange={(next) => setCreation({ ...creation, speeches: next })}
-          createItem={() => ({ speech_name: '', link: '', outline_doc: '', presentation_link: '' })}
+          createItem={() => ({ speech_name: '', link: '', outline_doc: '', presentation_link: '', image_url: '' })}
           getItemTitle={(item) => item.speech_name || '演讲主题'}
           fields={[
             { key: 'speech_name', label: '演讲/汇报主题' },
             { key: 'link', label: '回放链接' },
             { key: 'presentation_link', label: 'PPT / 幻灯片链接' },
             { key: 'outline_doc', label: '大纲文档链接' },
+            { key: 'image_url', label: '演讲封面 / 配图 URL', type: 'image' },
           ]}
         />
       </div>
