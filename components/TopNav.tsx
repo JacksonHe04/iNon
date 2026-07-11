@@ -63,24 +63,27 @@ export default function TopNav({ data, className, blocks, navSections }: TopNavP
   const effectiveNavSections = navSections || DEFAULT_LAYOUT_CONFIG.navSections;
 
   const navItems = effectiveBlocks && effectiveBlocks.length > 0
-    ? effectiveNavSections
-        .filter((section) => {
-          const sectionBlocks = effectiveBlocks.filter(
-            (b) => b.sectionId === section.id || b.id === section.targetBlockId
+    ? (() => {
+        const items = [];
+        const seenSectionIds = new Set();
+
+        for (const block of effectiveBlocks) {
+          if (!block.visible) continue;
+
+          const section = effectiveNavSections.find(
+            (s) => s.id === block.sectionId || s.targetBlockId === block.id
           );
-          return sectionBlocks.some((b) => b.visible);
-        })
-        .map((section) => {
-          const firstVisibleBlock = effectiveBlocks.find(
-            (b) =>
-              (b.sectionId === section.id || b.id === section.targetBlockId) &&
-              b.visible
-          );
-          return {
-            id: firstVisibleBlock?.sectionId || firstVisibleBlock?.id || section.id,
-            label: section.label,
-          };
-        })
+
+          if (section && !seenSectionIds.has(section.id)) {
+            seenSectionIds.add(section.id);
+            items.push({
+              id: block.sectionId || block.id,
+              label: section.label,
+            });
+          }
+        }
+        return items;
+      })()
     : DEFAULT_NAV_SECTIONS;
   const router = useRouter();
   const { theme, setTheme } = useTheme();

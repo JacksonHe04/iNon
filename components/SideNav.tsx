@@ -39,24 +39,27 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
   const navItems: NavItem[] = customItems
     ? customItems
     : effectiveBlocks && effectiveBlocks.length > 0
-    ? effectiveNavSections
-        .filter((section) => {
-          const sectionBlocks = effectiveBlocks.filter(
-            (b) => b.sectionId === section.id || b.id === section.targetBlockId
+    ? (() => {
+        const items: NavItem[] = [];
+        const seenSectionIds = new Set<string>();
+
+        for (const block of effectiveBlocks) {
+          if (!block.visible) continue;
+
+          const section = effectiveNavSections.find(
+            (s) => s.id === block.sectionId || s.targetBlockId === block.id
           );
-          return sectionBlocks.some((b) => b.visible);
-        })
-        .map((section) => {
-          const firstVisibleBlock = effectiveBlocks.find(
-            (b) =>
-              (b.sectionId === section.id || b.id === section.targetBlockId) &&
-              b.visible
-          );
-          return {
-            id: firstVisibleBlock?.sectionId || firstVisibleBlock?.id || section.id,
-            label: section.label,
-          };
-        })
+
+          if (section && !seenSectionIds.has(section.id)) {
+            seenSectionIds.add(section.id);
+            items.push({
+              id: block.sectionId || block.id,
+              label: section.label,
+            });
+          }
+        }
+        return items;
+      })()
     : DEFAULT_NAV_SECTIONS;
 
   const [activeSection, setActiveSection] = useState<string>(
