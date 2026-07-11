@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { ReadmeData } from '@/types';
-import GlassCard from '@/components/GlassCard';
+import GlassCard, { GlassCardContext } from '@/components/GlassCard';
 import DashboardSideNav, { type DashboardTabId } from '@/components/layout/DashboardSideNav';
 import AccountSettingsForm from '@/components/account/AccountSettingsForm';
 import PasswordResetForm from '@/components/auth/PasswordResetForm';
@@ -131,38 +131,10 @@ export default function DashboardClient({ username, data, initialLayoutConfig }:
 
   return (
     <div className="relative min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/20 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/30">
-                iNon Personal OS
-              </span>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                {data.basic.name} 的个人控制台
-              </h1>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-mono">
-              /i/{username} — 直接管理你的核心 Block 与个人网站
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/${username}`}
-              target="_blank"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-medium text-sm shadow-md hover:opacity-90 transition"
-            >
-              <Eye className="w-4 h-4" />
-              <span>访客视角预览</span>
-            </Link>
-          </div>
-        </div>
-
+      <div className="w-full py-2">
         {/* Side Nav & Main Body Layout */}
         <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
-          <DashboardSideNav activeTab={activeTab} onTabChange={setActiveTab} />
+          <DashboardSideNav username={username} activeTab={activeTab} onTabChange={setActiveTab} />
 
           <main className="flex-1 min-w-0 space-y-6 w-full">
 
@@ -339,7 +311,7 @@ export default function DashboardClient({ username, data, initialLayoutConfig }:
         {/* Tab 3: 公开网站 (Site Layout Canvas Editor) */}
         {activeTab === 'canvas' && (
           <div className="space-y-6 animate-fadeIn">
-            <GlassCard className="p-6 space-y-4">
+            <GlassCard className="p-6 space-y-4" hover={false}>
               <div className="flex items-center justify-between border-b border-white/20 pb-4">
                 <div>
                   <h2 className="font-extrabold text-lg text-gray-900 dark:text-white">
@@ -360,22 +332,24 @@ export default function DashboardClient({ username, data, initialLayoutConfig }:
               </div>
 
               {/* Block Canvas Layout Engine Editor */}
-              <BlockCanvasEngine
-                data={data}
-                mode="edit"
-                initialLayoutConfig={initialLayoutConfig}
-                onSave={async (layoutConfig: LayoutConfig) => {
-                  const res = await fetch('/api/account/layout', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ layoutConfig }),
-                  });
-                  if (!res.ok) {
-                    const errData = await res.json();
-                    throw new Error(errData.error || '保存排版方案失败');
-                  }
-                }}
-              />
+              <GlassCardContext.Provider value={{ hoverEnabled: false }}>
+                <BlockCanvasEngine
+                  data={data}
+                  mode="edit"
+                  initialLayoutConfig={initialLayoutConfig}
+                  onSave={async (layoutConfig: LayoutConfig) => {
+                    const res = await fetch('/api/account/layout', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ layoutConfig }),
+                    });
+                    if (!res.ok) {
+                      const errData = await res.json();
+                      throw new Error(errData.error || '保存排版方案失败');
+                    }
+                  }}
+                />
+              </GlassCardContext.Provider>
             </GlassCard>
           </div>
         )}

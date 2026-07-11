@@ -39,6 +39,7 @@ import {
   Check,
   Loader2,
   Sparkles,
+  Layers,
 } from 'lucide-react';
 import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
 
@@ -339,7 +340,7 @@ export default function BlockCanvasEngine({
               公开页 Block 画布排版配置器
             </h2>
             <p className="text-[11px] text-gray-500">
-              按住抓手拖拽 Block 自由排列位置，可随时切换显隐及宽度 (50%/100%)。
+              在左侧目录或右侧画板拖拽 Block 自由排列位置，可随时切换显隐及宽度 (50%/100%)。
             </p>
           </div>
         </div>
@@ -379,105 +380,159 @@ export default function BlockCanvasEngine({
         </div>
       </GlassCard>
 
-      {/* Drag and Drop Reorder Canvas */}
-      <Reorder.Group
-        axis="y"
-        values={layoutConfig.blocks}
-        onReorder={handleReorderBlocks}
-        className="space-y-4"
-      >
-        {layoutConfig.blocks.map((block, index) => {
-          const isFullWidth = block.colSpan === 2;
-
-          return (
-            <Reorder.Item
-              key={block.id}
-              value={block}
-              className={`relative rounded-2xl border-2 transition-shadow select-none ${
-                block.visible
-                  ? 'border-teal-500/40 hover:border-teal-400 bg-white/20 dark:bg-black/20 shadow-sm'
-                  : 'border-dashed border-gray-400/40 opacity-60 bg-gray-500/5'
-              }`}
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* 左侧竖直 Block 目录列表 */}
+        <div className="w-full lg:w-72 shrink-0 md:sticky md:top-24 z-20">
+          <div className="rounded-2xl border border-white/20 bg-white/10 dark:bg-black/10 p-4 space-y-4 backdrop-blur-md">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <span className="font-extrabold text-xs text-gray-900 dark:text-white flex items-center gap-1.5">
+                <Layers className="w-4 h-4 text-teal-500" />
+                Block 目录排版
+              </span>
+              <span className="text-[10px] text-gray-400 font-mono">共 {layoutConfig.blocks.length} 个</span>
+            </div>
+            
+            <Reorder.Group
+              axis="y"
+              values={layoutConfig.blocks}
+              onReorder={handleReorderBlocks}
+              className="space-y-2 max-h-[60vh] overflow-y-auto pr-1 scrollbar-none"
             >
-              {/* Controls Bar in Edit Mode */}
-              <div className="flex items-center justify-between bg-gray-900/90 text-white px-3 py-2 rounded-t-xl text-xs font-semibold backdrop-blur-md">
-                <div className="flex items-center gap-2 cursor-grab active:cursor-grabbing">
-                  <GripVertical className="w-4 h-4 text-teal-400 shrink-0" />
-                  <span className="font-mono text-[11px] text-teal-300">#{index + 1}</span>
-                  <span className="truncate max-w-[200px] font-bold">{block.title}</span>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  {/* Up / Down Reorder buttons */}
-                  <button
-                    onClick={() => handleMoveBlock(index, 'up')}
-                    disabled={index === 0}
-                    className="p-1 rounded hover:bg-white/20 text-gray-300 disabled:opacity-30 transition cursor-pointer"
-                    title="上移"
-                  >
-                    <ArrowUp className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleMoveBlock(index, 'down')}
-                    disabled={index === layoutConfig.blocks.length - 1}
-                    className="p-1 rounded hover:bg-white/20 text-gray-300 disabled:opacity-30 transition cursor-pointer"
-                    title="下移"
-                  >
-                    <ArrowDown className="w-3.5 h-3.5" />
-                  </button>
-
-                  {/* ColSpan Toggle button */}
-                  <button
-                    onClick={() => handleToggleColSpan(block.id)}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono transition ml-1 cursor-pointer"
-                    title="切换宽度 (50% / 100%)"
-                  >
-                    {isFullWidth ? (
-                      <>
-                        <Square className="w-3 h-3 text-emerald-400" />
-                        <span>全宽 100%</span>
-                      </>
-                    ) : (
-                      <>
-                        <Columns className="w-3 h-3 text-purple-400" />
-                        <span>半宽 50%</span>
-                      </>
-                    )}
-                  </button>
-
-                  {/* Visibility Toggle button */}
+              {layoutConfig.blocks.map((block, index) => (
+                <Reorder.Item
+                  key={`list-${block.id}`}
+                  value={block}
+                  className={`flex items-center justify-between p-2.5 rounded-xl border text-xs transition-colors cursor-grab active:cursor-grabbing select-none ${
+                    block.visible
+                      ? 'bg-white/30 dark:bg-gray-800/30 border-teal-500/20 hover:border-teal-500/40 text-gray-800 dark:text-gray-200'
+                      : 'bg-gray-500/5 border-dashed border-gray-400/20 opacity-60 text-gray-400'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <GripVertical className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                    <span className="font-mono text-[10px] text-gray-400 shrink-0">#{index + 1}</span>
+                    <span className="truncate font-semibold">{block.title}</span>
+                  </div>
+                  
                   <button
                     onClick={() => handleToggleVisibility(block.id)}
-                    className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold transition ml-1 cursor-pointer ${
+                    className={`p-1.5 rounded-lg transition ml-2 cursor-pointer shrink-0 ${
                       block.visible
-                        ? 'bg-teal-500/30 text-teal-300 border border-teal-400/40'
-                        : 'bg-rose-500/30 text-rose-300 border border-rose-400/40'
+                        ? 'text-teal-600 dark:text-teal-400 hover:bg-teal-500/10'
+                        : 'text-rose-500 hover:bg-rose-500/10'
                     }`}
-                    title="显示/隐藏此 Block"
+                    title={block.visible ? "隐藏此 Block" : "显示此 Block"}
                   >
-                    {block.visible ? (
-                      <>
-                        <Eye className="w-3 h-3" />
-                        <span>显示</span>
-                      </>
-                    ) : (
-                      <>
-                        <EyeOff className="w-3 h-3" />
-                        <span>隐藏</span>
-                      </>
-                    )}
+                    {block.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                   </button>
-                </div>
-              </div>
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
+          </div>
+        </div>
 
-              {/* Block Content Container */}
-              <div className="p-3">
-                <div id={block.sectionId || block.id}>{renderBlockContent(block)}</div>
-              </div>
-            </Reorder.Item>
-          );
-        })}
-      </Reorder.Group>
+        {/* 右侧大画板主区域 */}
+        <div className="flex-1 min-w-0 w-full">
+          <Reorder.Group
+            axis="y"
+            values={layoutConfig.blocks}
+            onReorder={handleReorderBlocks}
+            className="space-y-4"
+          >
+            {layoutConfig.blocks.map((block, index) => {
+              const isFullWidth = block.colSpan === 2;
+
+              return (
+                <Reorder.Item
+                  key={block.id}
+                  value={block}
+                  className={`relative rounded-2xl border-2 transition-shadow select-none ${
+                    block.visible
+                      ? 'border-teal-500/40 hover:border-teal-400 bg-white/20 dark:bg-black/20 shadow-sm'
+                      : 'border-dashed border-gray-400/40 opacity-60 bg-gray-500/5'
+                  }`}
+                >
+                  {/* Controls Bar in Edit Mode */}
+                  <div className="flex items-center justify-between bg-gray-900/90 text-white px-3 py-2 rounded-t-xl text-xs font-semibold backdrop-blur-md">
+                    <div className="flex items-center gap-2 cursor-grab active:cursor-grabbing">
+                      <GripVertical className="w-4 h-4 text-teal-400 shrink-0" />
+                      <span className="font-mono text-[11px] text-teal-300">#{index + 1}</span>
+                      <span className="truncate max-w-[200px] font-bold">{block.title}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      {/* Up / Down Reorder buttons */}
+                      <button
+                        onClick={() => handleMoveBlock(index, 'up')}
+                        disabled={index === 0}
+                        className="p-1 rounded hover:bg-white/20 text-gray-300 disabled:opacity-30 transition cursor-pointer"
+                        title="上移"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveBlock(index, 'down')}
+                        disabled={index === layoutConfig.blocks.length - 1}
+                        className="p-1 rounded hover:bg-white/20 text-gray-300 disabled:opacity-30 transition cursor-pointer"
+                        title="下移"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* ColSpan Toggle button */}
+                      <button
+                        onClick={() => handleToggleColSpan(block.id)}
+                        className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono transition ml-1 cursor-pointer"
+                        title="切换宽度 (50% / 100%)"
+                      >
+                        {isFullWidth ? (
+                          <>
+                            <Square className="w-3 h-3 text-emerald-400" />
+                            <span>全宽 100%</span>
+                          </>
+                        ) : (
+                          <>
+                            <Columns className="w-3 h-3 text-purple-400" />
+                            <span>半宽 50%</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Visibility Toggle button */}
+                      <button
+                        onClick={() => handleToggleVisibility(block.id)}
+                        className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold transition ml-1 cursor-pointer ${
+                          block.visible
+                            ? 'bg-teal-500/30 text-teal-300 border border-teal-400/40'
+                            : 'bg-rose-500/30 text-rose-300 border border-rose-400/40'
+                        }`}
+                        title="显示/隐藏此 Block"
+                      >
+                        {block.visible ? (
+                          <>
+                            <Eye className="w-3 h-3" />
+                            <span>显示</span>
+                          </>
+                        ) : (
+                          <>
+                            <EyeOff className="w-3 h-3" />
+                            <span>隐藏</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Block Content Container */}
+                  <div className="p-3">
+                    <div id={block.sectionId || block.id}>{renderBlockContent(block)}</div>
+                  </div>
+                </Reorder.Item>
+              );
+            })}
+          </Reorder.Group>
+        </div>
+      </div>
     </div>
   );
 }
