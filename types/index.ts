@@ -88,12 +88,14 @@ export interface ReadmeData {
       link: string;
       intro: string;
       tags: string[];
+      image_url?: string;
     }>;
     recommended_products: Array<{
       name: string;
       link: string;
       intro: string;
       tags: string[];
+      image_url?: string;
     }>;
     my_hardware: {
       phone: string;
@@ -107,6 +109,7 @@ export interface ReadmeData {
       link: string;
       intro: string;
       tags: string[];
+      image_url?: string;
     }>;
   };
   creation: {
@@ -115,17 +118,20 @@ export interface ReadmeData {
       title: string;
       video_link: string;
       podcast_link: string;
+      image_url?: string;
     }>;
     articles: Array<{
       title: string;
       link: string;
       excerpt: string;
+      image_url?: string;
     }>;
     speeches: Array<{
       speech_name: string;
       link: string;
       outline_doc: string;
       presentation_link: string;
+      image_url?: string;
     }>;
     mottos: string[];
     quotes: string[];
@@ -137,12 +143,14 @@ export interface ReadmeData {
       country: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
     authors: Array<{
       name: string;
       country: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
   };
   films: {
@@ -152,12 +160,14 @@ export interface ReadmeData {
       country: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
     directors: Array<{
       name: string;
       country: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
   };
   music: {
@@ -166,6 +176,7 @@ export interface ReadmeData {
       artist: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
     songs: Array<{
       name: string;
@@ -173,12 +184,14 @@ export interface ReadmeData {
       album: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
     musicians: Array<{
       name: string;
       region: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
   };
   hiphop: {
@@ -187,6 +200,7 @@ export interface ReadmeData {
       artist: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
     songs: Array<{
       name: string;
@@ -194,12 +208,14 @@ export interface ReadmeData {
       album: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
     musicians: Array<{
       name: string;
       region: string;
       link: string;
       comment: string;
+      image_url?: string;
     }>;
   };
   events: {

@@ -13,6 +13,7 @@ scripts/
 _satellites/
 .agents/
 .claude/
+.codex/
 .trae/
 .cursor/
 .screenshots/

@@ -2,20 +2,6 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getAdminContext } from '@/lib/admin/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
-
-async function getProfileId() {
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient
-    .from('profiles')
-    .select('id')
-    .eq('slug', DEFAULT_PROFILE_SLUG)
-    .maybeSingle();
-
-  if (error) throw error;
-  if (!data) throw new Error(`Profile "${DEFAULT_PROFILE_SLUG}" not found`);
-  return data.id;
-}
 
 export async function POST(req: Request) {
   const admin = await getAdminContext();
@@ -36,11 +22,23 @@ export async function POST(req: Request) {
     }
 
     const adminClient = createAdminClient();
-    const profileId = await getProfileId();
+
+    // 查找审计用 profile_id：当前管理员本人。null 表示 admin_users 行未绑定到
+    // 某个 profile（极少数情况），不阻塞上传；profile_id 仅为审计字段。
+    const { data: adminProfile } = await adminClient
+      .from('profiles')
+      .select('id')
+      .eq('user_id', admin.user.id)
+      .maybeSingle();
+    const uploaderProfileId = adminProfile?.id ?? null;
+
     const arrayBuffer = await file.arrayBuffer();
     const fileBuffer = Buffer.from(arrayBuffer);
     const safeName = file.name.replace(/\s+/g, '-');
-    const objectPath = `profiles/${DEFAULT_PROFILE_SLUG}/${folder}/${Date.now()}-${safeName}`;
+    // 注意：对象路径里的 "profiles/JacksonHe04" 是历史前缀（来自旧「图床归属
+    // 默认 profile」语义），现在不再具所有权意义。改这条路径会移动现存 14 个
+    // 对象的位置，先保留。
+    const objectPath = `profiles/JacksonHe04/${folder}/${Date.now()}-${safeName}`;
 
     const uploadResult = await adminClient.storage
       .from('public-assets')
@@ -61,7 +59,7 @@ export async function POST(req: Request) {
 
     const insertResult = await adminClient.from('media_assets').upsert(
       {
-        profile_id: profileId,
+        profile_id: uploaderProfileId,
         bucket: 'public-assets',
         object_path: objectPath,
         asset_type: assetType,

@@ -427,6 +427,7 @@ export async function updateProductsSection(
       name: ensureString(item.name),
       link: ensureString(item.link),
       intro: ensureString(item.intro),
+      image_url: ensureString(item.image_url),
       sort_order: index,
     })),
     ...data.recommended_products.map((item, index) => ({
@@ -435,6 +436,7 @@ export async function updateProductsSection(
       name: ensureString(item.name),
       link: ensureString(item.link),
       intro: ensureString(item.intro),
+      image_url: ensureString(item.image_url),
       sort_order: index,
     })),
     ...data.favorite_brands.map((item, index) => ({
@@ -443,6 +445,7 @@ export async function updateProductsSection(
       name: ensureString(item.name),
       link: ensureString(item.link),
       intro: ensureString(item.intro),
+      image_url: ensureString(item.image_url),
       sort_order: index,
     })),
   ]);
@@ -518,6 +521,7 @@ export async function updateCreationSection(
       link_secondary: ensureString(item.podcast_link),
       excerpt: '',
       outline_doc: '',
+      image_url: ensureString(item.image_url),
       sort_order: index,
     })),
     ...data.articles.map((item, index) => ({
@@ -529,6 +533,7 @@ export async function updateCreationSection(
       link_secondary: '',
       excerpt: ensureString(item.excerpt),
       outline_doc: '',
+      image_url: ensureString(item.image_url),
       sort_order: index,
     })),
     ...data.speeches.map((item, index) => ({
@@ -540,6 +545,7 @@ export async function updateCreationSection(
       link_secondary: ensureString(item.presentation_link),
       excerpt: '',
       outline_doc: ensureString(item.outline_doc),
+      image_url: ensureString(item.image_url),
       sort_order: index,
     })),
   ]);
@@ -601,6 +607,7 @@ export async function updateReadingSection(
       country_or_region: ensureString(item.country),
       link: ensureString(item.link),
       comment: ensureString(item.comment),
+      image_url: ensureString(item.image_url),
       sort_order: index,
     })),
     ...data.authors.map((item, index) => ({
@@ -613,6 +620,7 @@ export async function updateReadingSection(
       country_or_region: ensureString(item.country),
       link: ensureString(item.link),
       comment: ensureString(item.comment),
+      image_url: ensureString(item.image_url),
       sort_order: data.books.length + index,
     })),
   ]);
@@ -636,6 +644,7 @@ export async function updateFilmsSection(data: ReadmeData['films'], scope: Mutat
       country_or_region: ensureString(item.country),
       link: ensureString(item.link),
       comment: ensureString(item.comment),
+      image_url: ensureString(item.image_url),
       sort_order: index,
     })),
     ...data.directors.map((item, index) => ({
@@ -648,6 +657,7 @@ export async function updateFilmsSection(data: ReadmeData['films'], scope: Mutat
       country_or_region: ensureString(item.country),
       link: ensureString(item.link),
       comment: ensureString(item.comment),
+      image_url: ensureString(item.image_url),
       sort_order: data.films.length + index,
     })),
   ]);
@@ -675,6 +685,7 @@ export async function updateMusicSection(
       country_or_region: '',
       link: ensureString(item.link),
       comment: ensureString(item.comment),
+      image_url: ensureString(item.image_url),
       sort_order: index,
     })),
     ...data.songs.map((item, index) => ({
@@ -687,6 +698,7 @@ export async function updateMusicSection(
       country_or_region: '',
       link: ensureString(item.link),
       comment: ensureString(item.comment),
+      image_url: ensureString(item.image_url),
       sort_order: data.albums.length + index,
     })),
     ...data.musicians.map((item, index) => ({
@@ -699,6 +711,7 @@ export async function updateMusicSection(
       country_or_region: ensureString(item.region),
       link: ensureString(item.link),
       comment: ensureString(item.comment),
+      image_url: ensureString(item.image_url),
       sort_order: data.albums.length + data.songs.length + index,
     })),
   ]);
