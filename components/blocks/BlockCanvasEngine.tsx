@@ -40,8 +40,19 @@ import {
   Loader2,
   Sparkles,
   Layers,
+  Palette,
 } from 'lucide-react';
 import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
+import { getBlockTitle } from '@/lib/blocks/registry';
+
+const THEMES = [
+  { id: 'green', name: '翠绿 (Green)', previewBg: 'linear-gradient(135deg, #22c55e, #14b8a6)' },
+  { id: 'red', name: '红粉 (Red-Pink)', previewBg: 'linear-gradient(135deg, #fb7185, #ec4899)' },
+  { id: 'orange', name: '橙黄 (Orange-Yellow)', previewBg: 'linear-gradient(135deg, #fbbf24, #f97316)' },
+  { id: 'blue', name: '天蓝 (Sky Blue)', previewBg: 'linear-gradient(135deg, #38bdf8, #3b82f6)' },
+  { id: 'gray', name: '黑灰 (Black-Gray)', previewBg: 'linear-gradient(135deg, #9ca3af, #4b5563)' },
+] as const;
+
 
 interface BlockCanvasEngineProps {
   data: ReadmeData;
@@ -59,6 +70,22 @@ export default function BlockCanvasEngine({
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(initialLayoutConfig);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  useEffect(() => {
+    const currentTheme = layoutConfig.theme || 'green';
+    document.documentElement.setAttribute('data-color-theme', currentTheme);
+    window.dispatchEvent(new CustomEvent('color-theme-changed', { detail: { theme: currentTheme } }));
+  }, [layoutConfig.theme]);
+
+  const handleThemeChange = (newTheme: typeof THEMES[number]['id']) => {
+    setLayoutConfig((prev) => {
+      const nextConfig: LayoutConfig = { ...prev, theme: newTheme };
+      document.documentElement.setAttribute('data-color-theme', newTheme);
+      window.dispatchEvent(new CustomEvent('color-theme-changed', { detail: { theme: newTheme } }));
+      autoSave(nextConfig);
+      return nextConfig;
+    });
+  };
 
   const defaultBookmarks = [
     { id: '1', title: 'GitHub', url: 'https://github.com', icon: '🐙' },
@@ -160,6 +187,7 @@ export default function BlockCanvasEngine({
   };
 
   const renderBlockContent = (block: BlockConfig) => {
+    const title = getBlockTitle(block.blockType);
     switch (block.blockType) {
       case 'bio':
         return (
@@ -173,21 +201,22 @@ export default function BlockCanvasEngine({
           />
         );
       case 'bookmarks':
-        return <BookmarkBlock items={defaultBookmarks} />;
+        return <BookmarkBlock items={defaultBookmarks} title={title} />;
       case 'ai_clone':
-        return <AiCloneBlock name={data.basic.name} />;
+        return <AiCloneBlock name={data.basic.name} title={title} />;
       case 'app_launcher':
-        return <AppLauncherBlock />;
+        return <AppLauncherBlock title={title} />;
       case 'projects':
-        return <ProjectBlock projects={data.development.projects} />;
+        return <ProjectBlock projects={data.development.projects} title={title} />;
       case 'timeline':
-        return <TimelineBlock items={timelineItems} />;
+        return <TimelineBlock items={timelineItems} title={title} />;
       case 'music':
         return (
           <MusicBlock
             albums={data.music.albums}
             songs={data.music.songs}
             musicians={data.music.musicians}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -196,6 +225,7 @@ export default function BlockCanvasEngine({
           <MovieBlock
             films={data.films.films}
             directors={data.films.directors}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -204,16 +234,17 @@ export default function BlockCanvasEngine({
           <BookBlock
             books={data.reading.books}
             authors={data.reading.authors}
+            title={title}
             colSpan={block.colSpan}
           />
         );
       case 'friend_links':
-        return <FriendLinkBlock items={friendLinks} />;
+        return <FriendLinkBlock items={friendLinks} title={title} />;
       case 'contact':
         return (
           <GlassCard className="p-6 space-y-4">
             <h3 className="font-extrabold text-base text-gray-900 dark:text-white">
-              📫 联系方式与社交账号
+              {title}
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
               {data.contact.contact_info.map((c, idx) => {
@@ -245,6 +276,7 @@ export default function BlockCanvasEngine({
             schools={data.education.schools}
             undergraduateMajor={data.education.undergraduate_major}
             undergraduateAdvisor={data.education.undergraduate_advisor}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -254,6 +286,7 @@ export default function BlockCanvasEngine({
             currentJob={data.work.current_job}
             jobs={data.work.jobs}
             workPreferences={data.work.work_preferences}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -264,6 +297,7 @@ export default function BlockCanvasEngine({
             recommendedProducts={data.products.recommended_products}
             myHardware={data.products.my_hardware}
             favoriteBrands={data.products.favorite_brands}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -275,6 +309,7 @@ export default function BlockCanvasEngine({
             speeches={data.creation.speeches}
             mottos={data.creation.mottos}
             quotes={data.creation.quotes}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -284,6 +319,7 @@ export default function BlockCanvasEngine({
             albums={data.hiphop.albums}
             songs={data.hiphop.songs}
             musicians={data.hiphop.musicians}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -291,6 +327,7 @@ export default function BlockCanvasEngine({
         return (
           <EventsBlock
             performances={data.events.performances}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -304,6 +341,7 @@ export default function BlockCanvasEngine({
             workPreferences={data.work.work_preferences}
             techStack={data.development.skills.tech_stack}
             expertise={data.development.skills.expertise}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -312,6 +350,7 @@ export default function BlockCanvasEngine({
           <SkillsBlock
             techStack={data.development.skills.tech_stack}
             expertise={data.development.skills.expertise}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -319,6 +358,7 @@ export default function BlockCanvasEngine({
         return (
           <DevToolsBlock
             devTools={data.development.dev_tools}
+            title={title}
             colSpan={block.colSpan}
           />
         );
@@ -372,6 +412,36 @@ export default function BlockCanvasEngine({
             </span>
           </div>
           
+          {/* 主题配色选择 */}
+          <div className="border-b border-white/10 pb-3.5 space-y-2">
+            <span className="font-extrabold text-xs text-gray-900 dark:text-white flex items-center gap-1.5">
+              <Palette className="w-4 h-4 text-teal-500" />
+              个性化主题配色
+            </span>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {THEMES.map((t) => {
+                const isActive = (layoutConfig.theme || 'green') === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => handleThemeChange(t.id)}
+                    className={`relative w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center cursor-pointer ${
+                      isActive
+                        ? 'border-white scale-110 shadow-md ring-2 ring-teal-500/50'
+                        : 'border-transparent hover:scale-105'
+                    }`}
+                    style={{ background: t.previewBg }}
+                    title={t.name}
+                  >
+                    {isActive && (
+                      <Check className="w-3.5 h-3.5 text-white drop-shadow-md" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <Reorder.Group
             axis="y"
             values={layoutConfig.blocks}
@@ -391,7 +461,7 @@ export default function BlockCanvasEngine({
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <GripVertical className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                   <span className="font-mono text-[10px] text-gray-400 shrink-0">#{index + 1}</span>
-                  <span className="truncate font-semibold">{block.title}</span>
+                  <span className="truncate font-semibold">{getBlockTitle(block.blockType)}</span>
                 </div>
                 
                 <button
@@ -437,7 +507,7 @@ export default function BlockCanvasEngine({
                     <div className="flex items-center gap-2 cursor-grab active:cursor-grabbing">
                       <GripVertical className="w-4 h-4 text-teal-400 shrink-0" />
                       <span className="font-mono text-[11px] text-teal-300">#{index + 1}</span>
-                      <span className="truncate max-w-[200px] font-bold">{block.title}</span>
+                      <span className="truncate max-w-[200px] font-bold">{getBlockTitle(block.blockType)}</span>
                     </div>
 
                     <div className="flex items-center gap-1">

@@ -3,6 +3,15 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Default theme (green) values */
+  --theme-primary: #14b8a6;
+  --theme-primary-hover: #0d9488;
+  --theme-primary-light: rgba(20, 184, 166, 0.1);
+  --theme-primary-border: rgba(20, 184, 166, 0.3);
+  --theme-grad-from: #22c55e;
+  --theme-grad-to: #14b8a6;
+  --theme-bg-body: #bce5d6;
 }
 
 @theme inline {
@@ -10,27 +19,192 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-theme-primary: var(--theme-primary);
+  --color-theme-primary-hover: var(--theme-primary-hover);
+  --color-theme-primary-light: var(--theme-primary-light);
+  --color-theme-primary-border: var(--theme-primary-border);
+  --color-theme-grad-from: var(--theme-grad-from);
+  --color-theme-grad-to: var(--theme-grad-to);
+
+  /* Remap teal, emerald, and green colors to the active theme's CSS variables */
+  --color-teal-300: var(--theme-primary);
+  --color-teal-400: var(--theme-primary);
+  --color-teal-500: var(--theme-primary);
+  --color-teal-600: var(--theme-primary-hover);
+  --color-teal-700: var(--theme-primary-hover);
+  
+  --color-emerald-400: var(--theme-grad-to);
+  --color-emerald-500: var(--theme-grad-to);
+  --color-emerald-600: var(--theme-grad-to);
+  
+  --color-green-400: var(--theme-grad-from);
+  --color-green-500: var(--theme-grad-from);
+  --color-green-600: var(--theme-grad-from);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --theme-bg-body: #040b08;
   }
 }
 
+.dark :root, .dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --theme-bg-body: #040b08;
+}
+
+/* Green Theme */
+[data-color-theme="green"] {
+  --theme-primary: #14b8a6;
+  --theme-primary-hover: #0d9488;
+  --theme-primary-light: rgba(20, 184, 166, 0.1);
+  --theme-primary-border: rgba(20, 184, 166, 0.3);
+  --theme-grad-from: #22c55e;
+  --theme-grad-to: #14b8a6;
+  --theme-bg-body: #bce5d6;
+
+  --color-teal-300: #5eead4;
+  --color-teal-400: #2dd4bf;
+  --color-teal-500: #14b8a6;
+  --color-teal-600: #0d9488;
+  --color-teal-700: #0f766e;
+  
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+  --color-green-600: #16a34a;
+}
+.dark[data-color-theme="green"], .dark [data-color-theme="green"] {
+  --theme-bg-body: #040b08;
+}
+
+/* Red Theme */
+[data-color-theme="red"] {
+  --theme-primary: #f43f5e;
+  --theme-primary-hover: #e11d48;
+  --theme-primary-light: rgba(244, 63, 94, 0.1);
+  --theme-primary-border: rgba(244, 63, 94, 0.3);
+  --theme-grad-from: #fb7185;
+  --theme-grad-to: #ec4899;
+  --theme-bg-body: #fcdada;
+
+  --color-teal-300: #fecdd3;
+  --color-teal-400: #fb7185;
+  --color-teal-500: #f43f5e;
+  --color-teal-600: #e11d48;
+  --color-teal-700: #be123c;
+  
+  --color-emerald-400: #f472b6;
+  --color-emerald-500: #ec4899;
+  --color-emerald-600: #db2777;
+  
+  --color-green-400: #fca5a5;
+  --color-green-500: #ef4444;
+  --color-green-600: #dc2626;
+}
+.dark[data-color-theme="red"], .dark [data-color-theme="red"] {
+  --theme-bg-body: #0f0204;
+}
+
+/* Orange Theme */
+[data-color-theme="orange"] {
+  --theme-primary: #f59e0b;
+  --theme-primary-hover: #d97706;
+  --theme-primary-light: rgba(245, 158, 11, 0.1);
+  --theme-primary-border: rgba(245, 158, 11, 0.3);
+  --theme-grad-from: #fbbf24;
+  --theme-grad-to: #f97316;
+  --theme-bg-body: #fbf0cf;
+
+  --color-teal-300: #fcd34d;
+  --color-teal-400: #fbbf24;
+  --color-teal-500: #f59e0b;
+  --color-teal-600: #d97706;
+  --color-teal-700: #b45309;
+  
+  --color-emerald-400: #fb923c;
+  --color-emerald-500: #f97316;
+  --color-emerald-600: #ea580c;
+  
+  --color-green-400: #fde047;
+  --color-green-500: #eab308;
+  --color-green-600: #ca8a04;
+}
+.dark[data-color-theme="orange"], .dark [data-color-theme="orange"] {
+  --theme-bg-body: #100a01;
+}
+
+/* Blue Theme */
+[data-color-theme="blue"] {
+  --theme-primary: #0ea5e9;
+  --theme-primary-hover: #0284c7;
+  --theme-primary-light: rgba(14, 165, 233, 0.1);
+  --theme-primary-border: rgba(14, 165, 233, 0.3);
+  --theme-grad-from: #38bdf8;
+  --theme-grad-to: #3b82f6;
+  --theme-bg-body: #cfe3f8;
+
+  --color-teal-300: #7dd3fc;
+  --color-teal-400: #38bdf8;
+  --color-teal-500: #0ea5e9;
+  --color-teal-600: #0284c7;
+  --color-teal-700: #0369a1;
+  
+  --color-emerald-400: #60a5fa;
+  --color-emerald-500: #3b82f6;
+  --color-emerald-600: #2563eb;
+  
+  --color-green-400: #a5f3fc;
+  --color-green-500: #06b6d4;
+  --color-green-600: #0891b2;
+}
+.dark[data-color-theme="blue"], .dark [data-color-theme="blue"] {
+  --theme-bg-body: #010a15;
+}
+
+/* Gray Theme */
+[data-color-theme="gray"] {
+  --theme-primary: #737373;
+  --theme-primary-hover: #525252;
+  --theme-primary-light: rgba(115, 115, 115, 0.1);
+  --theme-primary-border: rgba(115, 115, 115, 0.3);
+  --theme-grad-from: #9ca3af;
+  --theme-grad-to: #4b5563;
+  --theme-bg-body: #e5e5e5;
+
+  --color-teal-300: #d4d4d4;
+  --color-teal-400: #a3a3a3;
+  --color-teal-500: #737373;
+  --color-teal-600: #525252;
+  --color-teal-700: #404040;
+  
+  --color-emerald-400: #a1a1aa;
+  --color-emerald-500: #71717a;
+  --color-emerald-600: #52525b;
+  
+  --color-green-400: #cbd5e1;
+  --color-green-500: #64748b;
+  --color-green-600: #475569;
+}
+.dark[data-color-theme="gray"], .dark [data-color-theme="gray"] {
+  --theme-bg-body: #0c0c0c;
+}
+
 body {
-  background: #bce5d6;
+  background: var(--theme-bg-body);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
   position: relative;
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.dark body {
-  background: #040b08;
 }
 
 /* 平滑滚动 */

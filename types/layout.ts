@@ -37,7 +37,11 @@ export type NavSectionConfig = {
   targetBlockId: string;
 };
 
+export type ThemeType = 'green' | 'red' | 'orange' | 'blue' | 'gray';
+
 export type LayoutConfig = {
   blocks: BlockConfig[];
   navSections: NavSectionConfig[];
+  theme?: ThemeType;
 };
+

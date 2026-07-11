@@ -18,7 +18,7 @@ export default async function Home() {
       username={data.basic.name || ''}
       showSideNav={true}
       blocks={layoutConfig.blocks}
-      navSections={layoutConfig.navSections}
+      theme={layoutConfig.theme}
     >
       <PublicBlockRenderer data={data} layoutConfig={layoutConfig} />
     </ShellLayout>

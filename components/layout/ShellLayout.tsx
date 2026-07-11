@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { ReadmeData } from '@/types';
-import type { BlockConfig, NavSectionConfig } from '@/types/layout';
+import type { BlockConfig, ThemeType } from '@/types/layout';
 import HeaderNav from '@/components/layout/HeaderNav';
 import SideNav from '@/components/SideNav';
 import { AnimatedGradientBackground } from '@/components/BackGround';
@@ -11,7 +11,7 @@ interface ShellLayoutProps {
   username?: string;
   showSideNav?: boolean;
   blocks?: BlockConfig[];
-  navSections?: NavSectionConfig[];
+  theme?: ThemeType;
 }
 
 export default function ShellLayout({
@@ -20,17 +20,21 @@ export default function ShellLayout({
   username = '',
   showSideNav = true,
   blocks,
-  navSections,
+  theme = 'green',
 }: ShellLayoutProps) {
   return (
     <main className="relative min-h-screen">
-      <AnimatedGradientBackground />
-      <HeaderNav data={data} username={username} blocks={blocks} navSections={navSections} />
-      {showSideNav && <SideNav blocks={blocks} navSections={navSections} />}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `document.documentElement.setAttribute('data-color-theme', ${JSON.stringify(theme)})`,
+        }}
+      />
+      <AnimatedGradientBackground theme={theme} />
+      <HeaderNav data={data} username={username} blocks={blocks} />
+      {showSideNav && <SideNav blocks={blocks} />}
       <div className={`pt-24 transition-all duration-300 ${showSideNav ? 'lg:pl-32 xl:pl-40 2xl:pl-48' : 'px-4 sm:px-6 lg:px-8'}`}>
         {children}
       </div>
     </main>
   );
 }
-

@@ -22,7 +22,7 @@ export default async function UserPublicPage({ params }: UserPublicPageProps) {
       username={slug}
       showSideNav={true}
       blocks={layoutConfig.blocks}
-      navSections={layoutConfig.navSections}
+      theme={layoutConfig.theme}
     >
       <PublicBlockRenderer data={data} layoutConfig={layoutConfig} />
     </ShellLayout>

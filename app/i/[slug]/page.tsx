@@ -19,7 +19,7 @@ export default async function UserDashboardPage({ params }: UserDashboardPagePro
   ]);
 
   return (
-    <ShellLayout data={data} username={slug} showSideNav={false}>
+    <ShellLayout data={data} username={slug} showSideNav={false} theme={layoutConfig.theme}>
       <DashboardClient username={slug} data={data} initialLayoutConfig={layoutConfig} />
     </ShellLayout>
   );

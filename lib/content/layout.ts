@@ -1,12 +1,16 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
 import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
+import { getBlockTitle } from '@/lib/blocks/registry';
 import type { LayoutConfig, BlockConfig, NavSectionConfig } from '@/types/layout';
 
 /**
  * 辅助函数：将用户数据库中保存的 layout_config 与系统默认配置 DEFAULT_LAYOUT_CONFIG 进行合并。
  * 保证新增的原子 Block 组件能自动出现在已有用户的配置列表中（以默认可见度与大小呈现），
  * 同时保留用户已有 Block 的排序、宽度及可见度设置。
+ *
+ * title 字段不再从 DB 读取，统一从 registry 反填——避免历史数据里的
+ * 旧文案（如 "音乐收藏卡片 (Music)"）穿透到 UI 上。
  */
 export function mergeWithDefaultLayoutConfig(userConfig: any): LayoutConfig {
   if (!userConfig || typeof userConfig !== 'object') {
@@ -17,13 +21,15 @@ export function mergeWithDefaultLayoutConfig(userConfig: any): LayoutConfig {
   const dbNavs = (Array.isArray(userConfig.navSections) ? userConfig.navSections : []) as NavSectionConfig[];
 
   // 合并 Blocks：保留用户已有的设置，补全系统默认新增的 Block
-  const mergedBlocks = [...dbBlocks];
+  // title 字段统一从 registry 派生，丢弃 DB 中可能存在的旧文案
+  const fillTitle = (b: BlockConfig): BlockConfig => ({ ...b, title: getBlockTitle(b.blockType) });
+  const mergedBlocks = dbBlocks.map(fillTitle);
   for (const defBlock of DEFAULT_LAYOUT_CONFIG.blocks) {
     const exists = dbBlocks.some(
       (b) => b.blockType === defBlock.blockType || b.id === defBlock.id
     );
     if (!exists) {
-      mergedBlocks.push(defBlock);
+      mergedBlocks.push(fillTitle(defBlock));
     }
   }
 
@@ -39,6 +45,7 @@ export function mergeWithDefaultLayoutConfig(userConfig: any): LayoutConfig {
   return {
     blocks: mergedBlocks,
     navSections: mergedNavs,
+    theme: userConfig.theme || 'green',
   };
 }
 
