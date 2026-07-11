@@ -165,7 +165,7 @@ export default function ProductsBlock({
                     <BlockImage
                       src={prod.image_url}
                       alt={prod.name}
-                      className="w-full aspect-video rounded-lg mb-2 object-cover"
+                      className="w-full aspect-square rounded-lg mb-2 object-cover"
                       fallback={null}
                     />
                   )}
@@ -207,7 +207,7 @@ export default function ProductsBlock({
                     <BlockImage
                       src={prod.image_url}
                       alt={prod.name}
-                      className="w-full aspect-video rounded-lg mb-2 object-cover"
+                      className="w-full aspect-square rounded-lg mb-2 object-cover"
                       fallback={null}
                     />
                   )}
@@ -280,7 +280,7 @@ export default function ProductsBlock({
                     <BlockImage
                       src={brand.image_url}
                       alt={brand.name}
-                      className="w-full aspect-video rounded-lg mb-2 object-cover"
+                      className="w-full aspect-square rounded-lg mb-2 object-cover"
                       fallback={null}
                     />
                   )}

@@ -97,7 +97,7 @@ export default function BookBlock({
 
       <div className="space-y-3 min-h-[160px]">
         {activeTab === 'books' && (
-          <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4' : 'grid-cols-2'}`}>
             {books.map((book, idx) => (
               <div
                 key={idx}
@@ -122,7 +122,7 @@ export default function BookBlock({
                     src={book.image_url}
                     alt={book.name}
                     fallback={
-                      <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
+                      <div className={`aspect-square rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
                     }
                   />
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
@@ -136,7 +136,7 @@ export default function BookBlock({
         )}
 
         {activeTab === 'authors' && (
-          <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4' : 'grid-cols-2'}`}>
             {authors.map((author, idx) => (
               <div
                 key={idx}
@@ -161,7 +161,7 @@ export default function BookBlock({
                     src={author.image_url}
                     alt={author.name}
                     fallback={
-                      <div className={`aspect-video rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 2)} opacity-80`} />
+                      <div className={`aspect-square rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 2)} opacity-80`} />
                     }
                   />
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">

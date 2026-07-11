@@ -157,7 +157,7 @@ export default function CreationBlock({
                     <BlockImage
                       src={vid.image_url}
                       alt={vid.title}
-                      className="w-full aspect-video rounded-lg mb-2 object-cover"
+                      className="w-full aspect-square rounded-lg mb-2 object-cover"
                       fallback={null}
                     />
                   )}
@@ -206,7 +206,7 @@ export default function CreationBlock({
                   <BlockImage
                     src={art.image_url}
                     alt={art.title}
-                    className="w-full aspect-video rounded-lg mb-2 object-cover"
+                    className="w-full aspect-square rounded-lg mb-2 object-cover"
                     fallback={null}
                   />
                 )}
@@ -243,7 +243,7 @@ export default function CreationBlock({
                   <BlockImage
                     src={sp.image_url}
                     alt={sp.speech_name}
-                    className="w-full aspect-video rounded-lg object-cover"
+                    className="w-full aspect-square rounded-lg object-cover"
                     fallback={null}
                   />
                 )}

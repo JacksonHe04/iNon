@@ -7,7 +7,7 @@ interface BlockImageProps {
   fallback: React.ReactNode;
 }
 
-export default function BlockImage({ src, alt, className = "aspect-video rounded-lg mb-2 object-cover w-full", fallback }: BlockImageProps) {
+export default function BlockImage({ src, alt, className = "aspect-square rounded-lg mb-2 object-cover w-full", fallback }: BlockImageProps) {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
