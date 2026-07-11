@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { scrollToElement } from '@/lib/utils';
 import type { BlockConfig, NavSectionConfig } from '@/types/layout';
@@ -64,21 +64,59 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
   );
   const [deepWaterActive, setDeepWaterActive] = useState(false);
 
+  const isClickScrolling = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200;
+      // 如果是点击触发的平滑滚动，在滚动完成前不根据位置重新计算激活项，防止高亮框乱跳
+      if (isClickScrolling.current) return;
 
-      for (let i = navItems.length - 1; i >= 0; i--) {
-        const element = document.getElementById(navItems[i].id);
-        if (element && element.offsetTop <= scrollPosition) {
-          setActiveSection(navItems[i].id);
-          break;
+      // 1. 优先判断是否滚动到了页面底部
+      const isAtBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 50;
+      if (isAtBottom && navItems.length > 0) {
+        setActiveSection(navItems[navItems.length - 1].id);
+        return;
+      }
+
+      // 2. 正常滚动情况：找到当前最符合可见性的 section
+      let activeId = navItems[0]?.id;
+      let minDiff = Infinity;
+      const targetLine = 120; // 触发线：距离视口顶部 120px 处（避开顶栏高度）
+
+      for (const item of navItems) {
+        const element = document.getElementById(item.id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          // 如果元素刚好跨越触发线，则当前激活项必定是它
+          if (rect.top <= targetLine && rect.bottom >= targetLine) {
+            activeId = item.id;
+            break;
+          }
+
+          // 否则，找到距离触发线最近的元素
+          const diff = Math.abs(rect.top - targetLine);
+          if (diff < minDiff) {
+            minDiff = diff;
+            activeId = item.id;
+          }
         }
+      }
+
+      if (activeId) {
+        setActiveSection(activeId);
       }
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, [navItems]);
 
   useEffect(() => {
@@ -109,7 +147,18 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
           {navItems.map((section) => (
             <button
               key={section.id}
-              onClick={() => scrollToElement(section.id)}
+              onClick={() => {
+                setActiveSection(section.id);
+                isClickScrolling.current = true;
+                scrollToElement(section.id);
+
+                if (scrollTimeoutRef.current) {
+                  clearTimeout(scrollTimeoutRef.current);
+                }
+                scrollTimeoutRef.current = setTimeout(() => {
+                  isClickScrolling.current = false;
+                }, 800);
+              }}
               className={`relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all text-left whitespace-nowrap cursor-pointer ${
                 activeSection === section.id
                   ? 'bg-white/30 dark:bg-gray-800/40 text-gray-900 dark:text-white font-bold'
