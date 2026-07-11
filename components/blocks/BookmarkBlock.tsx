@@ -14,6 +14,7 @@ export interface BookmarkItem {
 interface BookmarkBlockProps {
   items: BookmarkItem[];
   editable?: boolean;
+  title?: string;
   onAdd?: (title: string, url: string) => void;
   onDelete?: (id: string) => void;
 }
@@ -21,6 +22,7 @@ interface BookmarkBlockProps {
 export default function BookmarkBlock({
   items,
   editable = false,
+  title,
   onAdd,
   onDelete,
 }: BookmarkBlockProps) {
@@ -31,7 +33,7 @@ export default function BookmarkBlock({
           <div className="p-2 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
             <Bookmark className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-base text-gray-900 dark:text-white">网站收藏夹</h3>
+          {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
         </div>
         <span className="text-xs text-gray-400 font-mono">{items.length} 个收藏</span>
       </div>

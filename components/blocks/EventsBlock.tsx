@@ -13,10 +13,11 @@ export interface PerformanceItem {
 
 interface EventsBlockProps {
   performances: PerformanceItem[];
+  title?: string;
   colSpan?: number;
 }
 
-export default function EventsBlock({ performances, colSpan = 2 }: EventsBlockProps) {
+export default function EventsBlock({ performances, title, colSpan = 2 }: EventsBlockProps) {
   // Let the first performance be the featured one
   const featured = performances[0];
   const list = performances.slice(1);
@@ -29,7 +30,7 @@ export default function EventsBlock({ performances, colSpan = 2 }: EventsBlockPr
             <CalendarDays className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">Live 与活动</h3>
+            {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
           </div>
         </div>
         <span className="text-xs text-gray-400 font-mono">{performances.length} 场活动</span>

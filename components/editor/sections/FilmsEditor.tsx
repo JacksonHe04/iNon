@@ -9,11 +9,7 @@ import { Film } from 'lucide-react';
 
 export default function FilmsEditor({ initialData }: { initialData: ReadmeData }) {
   const [films, setFilms] = useState(initialData.films);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('films');
-
-  const handleSave = () => {
-    saveSection(films);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('films', films);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function FilmsEditor({ initialData }: { initialData: ReadmeData }
       icon={Film}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <ObjectArrayEditor
         title="电影与剧集 Films"

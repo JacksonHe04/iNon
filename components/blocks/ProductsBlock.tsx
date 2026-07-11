@@ -36,6 +36,7 @@ interface ProductsBlockProps {
   recommendedProducts: ProductItem[];
   myHardware: HardwareInfo;
   favoriteBrands: BrandItem[];
+  title?: string;
   colSpan?: number;
 }
 
@@ -51,6 +52,7 @@ export default function ProductsBlock({
   recommendedProducts,
   myHardware,
   favoriteBrands,
+  title,
   colSpan = 2,
 }: ProductsBlockProps) {
   const [selectedProduct, setSelectedProduct] = useState<SelectedDetail | null>(null);
@@ -67,7 +69,7 @@ export default function ProductsBlock({
             <Monitor className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">爱用产品与设备</h3>
+            {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
           </div>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-auto">

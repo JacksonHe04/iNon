@@ -5,6 +5,7 @@ import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { Music, Disc, Play, Disc2, ExternalLink } from 'lucide-react';
 import BlockImage from './BlockImage';
+import { getBlockTitle } from '@/lib/blocks/registry';
 
 export interface MusicAlbum {
   name: string;
@@ -50,7 +51,7 @@ export default function MusicBlock({
   albums = [],
   songs = [],
   musicians = [],
-  title = '音乐收藏卡片',
+  title = getBlockTitle('music'),
   colSpan = 2,
 }: MusicBlockProps) {
   const [activeTab, setActiveTab] = useState<'albums' | 'songs' | 'musicians'>('albums');

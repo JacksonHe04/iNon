@@ -17,6 +17,7 @@ interface EducationBlockProps {
   schools: SchoolItem[];
   undergraduateMajor?: string;
   undergraduateAdvisor?: string;
+  title?: string;
   colSpan?: number;
 }
 
@@ -24,6 +25,7 @@ export default function EducationBlock({
   schools,
   undergraduateMajor,
   undergraduateAdvisor,
+  title,
   colSpan = 2,
 }: EducationBlockProps) {
   const [showScene, setShowScene] = useState(true);
@@ -35,7 +37,7 @@ export default function EducationBlock({
           <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
             <GraduationCap className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-base text-gray-900 dark:text-white">教育背景</h3>
+          {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
         </div>
         <div className="flex items-center gap-2">
           {colSpan === 2 && (

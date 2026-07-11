@@ -2,6 +2,7 @@
 
 import GlassCard from '@/components/GlassCard';
 import { Milestone, Calendar } from 'lucide-react';
+import { getBlockTitle } from '@/lib/blocks/registry';
 
 export interface TimelineItem {
   id: string;
@@ -15,7 +16,7 @@ interface TimelineBlockProps {
   title?: string;
 }
 
-export default function TimelineBlock({ items, title = '动态时间线' }: TimelineBlockProps) {
+export default function TimelineBlock({ items, title = getBlockTitle('timeline') }: TimelineBlockProps) {
   return (
     <GlassCard className="p-5 space-y-4 hover:border-pink-400/40 transition">
       <div className="flex items-center justify-between">

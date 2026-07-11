@@ -9,11 +9,7 @@ import { MapPin } from 'lucide-react';
 
 export default function ExperienceEditor({ initialData }: { initialData: ReadmeData }) {
   const [experience, setExperience] = useState(initialData.experience);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('experience');
-
-  const handleSave = () => {
-    saveSection(experience);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('experience', experience);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function ExperienceEditor({ initialData }: { initialData: ReadmeD
       icon={MapPin}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <ObjectArrayEditor
         title="经历条目"

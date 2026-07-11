@@ -19,9 +19,8 @@ import {
 import Modal from './Modal';
 import AuthModal from '@/components/auth/AuthModal';
 import { createClient } from '@/lib/supabase/client';
-import { DEFAULT_NAV_SECTIONS } from './SideNav';
-import type { BlockConfig, NavSectionConfig } from '@/types/layout';
-import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
+import type { BlockConfig } from '@/types/layout';
+import { getBlockTitle } from '@/lib/blocks/registry';
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -44,7 +43,6 @@ interface TopNavProps {
   data: ReadmeData;
   className?: string;
   blocks?: BlockConfig[];
-  navSections?: NavSectionConfig[];
 }
 
 type ChatMessage = {
@@ -58,33 +56,16 @@ const platformIconMap = {
   Twitter: TwitterIcon,
 } as const;
 
-export default function TopNav({ data, className, blocks, navSections }: TopNavProps) {
-  const effectiveBlocks = blocks || DEFAULT_LAYOUT_CONFIG.blocks;
-  const effectiveNavSections = navSections || DEFAULT_LAYOUT_CONFIG.navSections;
-
-  const navItems = effectiveBlocks && effectiveBlocks.length > 0
-    ? (() => {
-        const items = [];
-        const seenSectionIds = new Set();
-
-        for (const block of effectiveBlocks) {
-          if (!block.visible) continue;
-
-          const section = effectiveNavSections.find(
-            (s) => s.id === block.sectionId || s.targetBlockId === block.id
-          );
-
-          if (section && !seenSectionIds.has(section.id)) {
-            seenSectionIds.add(section.id);
-            items.push({
-              id: block.sectionId || block.id,
-              label: section.label,
-            });
-          }
-        }
-        return items;
-      })()
-    : DEFAULT_NAV_SECTIONS;
+export default function TopNav({ data, className, blocks }: TopNavProps) {
+  // 每个可见的 block 在导航中独立成项；title 全部从 registry 单一事实源读取
+  const navItems = blocks && blocks.length > 0
+    ? blocks
+        .filter((block) => block.visible)
+        .map((block) => ({
+          id: block.sectionId || block.id,
+          label: getBlockTitle(block.blockType),
+        }))
+    : [];
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [currentTime, setCurrentTime] = useState('');

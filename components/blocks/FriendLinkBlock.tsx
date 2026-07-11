@@ -2,6 +2,7 @@
 
 import GlassCard from '@/components/GlassCard';
 import { Users, ExternalLink } from 'lucide-react';
+import { getBlockTitle } from '@/lib/blocks/registry';
 
 export interface FriendLinkItem {
   id: string;
@@ -16,7 +17,7 @@ interface FriendLinkBlockProps {
   title?: string;
 }
 
-export default function FriendLinkBlock({ items, title = '友情链接' }: FriendLinkBlockProps) {
+export default function FriendLinkBlock({ items, title = getBlockTitle('friend_links') }: FriendLinkBlockProps) {
   return (
     <GlassCard className="p-5 space-y-4 hover:border-blue-400/40 transition">
       <div className="flex items-center justify-between">

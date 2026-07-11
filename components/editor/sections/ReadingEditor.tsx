@@ -9,11 +9,7 @@ import { BookOpen } from 'lucide-react';
 
 export default function ReadingEditor({ initialData }: { initialData: ReadmeData }) {
   const [reading, setReading] = useState(initialData.reading);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('reading');
-
-  const handleSave = () => {
-    saveSection(reading);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('reading', reading);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function ReadingEditor({ initialData }: { initialData: ReadmeData
       icon={BookOpen}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <ObjectArrayEditor
         title="书籍档案 Books"

@@ -6,12 +6,14 @@ import { Cpu } from 'lucide-react';
 interface SkillsBlockProps {
   techStack: string[];
   expertise: string[];
+  title?: string;
   colSpan?: number;
 }
 
 export default function SkillsBlock({
   techStack = [],
   expertise = [],
+  title,
   colSpan = 2,
 }: SkillsBlockProps) {
   return (
@@ -22,14 +24,14 @@ export default function SkillsBlock({
             <Cpu className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">专业技能</h3>
+            {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
           </div>
         </div>
       </div>
 
       <div className={`grid gap-4 ${colSpan === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-gray-400">技术栈 (Tech Stack)</h4>
+          <h4 className="text-xs font-bold text-gray-400">技术栈</h4>
           <div className="flex flex-wrap gap-2">
             {techStack.map((tech, idx) => (
               <span
@@ -43,7 +45,7 @@ export default function SkillsBlock({
         </div>
 
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-gray-400">专长领域 (Expertise)</h4>
+          <h4 className="text-xs font-bold text-gray-400">专长领域</h4>
           <div className="flex flex-wrap gap-2">
             {expertise.map((exp, idx) => (
               <span

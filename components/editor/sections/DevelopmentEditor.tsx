@@ -9,11 +9,7 @@ import { Code2 } from 'lucide-react';
 
 export default function DevelopmentEditor({ initialData }: { initialData: ReadmeData }) {
   const [development, setDevelopment] = useState(initialData.development);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('development');
-
-  const handleSave = () => {
-    saveSection(development);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('development', development);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function DevelopmentEditor({ initialData }: { initialData: Readme
       icon={Code2}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
         <StringListEditor

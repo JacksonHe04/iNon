@@ -9,11 +9,7 @@ import { Compass } from 'lucide-react';
 
 export default function ThoughtsEditor({ initialData }: { initialData: ReadmeData }) {
   const [thoughts, setThoughts] = useState(initialData.thoughts);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('thoughts');
-
-  const handleSave = () => {
-    saveSection(thoughts);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('thoughts', thoughts);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function ThoughtsEditor({ initialData }: { initialData: ReadmeDat
       icon={Compass}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
         <StringListEditor

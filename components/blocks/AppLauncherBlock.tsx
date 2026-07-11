@@ -13,9 +13,10 @@ export interface AppItem {
 
 interface AppLauncherBlockProps {
   apps?: AppItem[];
+  title?: string;
 }
 
-export default function AppLauncherBlock({ apps = [] }: AppLauncherBlockProps) {
+export default function AppLauncherBlock({ apps = [], title }: AppLauncherBlockProps) {
   return (
     <GlassCard className="p-5 space-y-4 hover:border-purple-400/40 transition">
       <div className="flex items-center justify-between">
@@ -23,7 +24,7 @@ export default function AppLauncherBlock({ apps = [] }: AppLauncherBlockProps) {
           <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
             <AppWindow className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-base text-gray-900 dark:text-white">App 快捷启动</h3>
+          {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
         </div>
         <span className="text-xs text-gray-400 font-mono">{apps.length} 个应用</span>
       </div>

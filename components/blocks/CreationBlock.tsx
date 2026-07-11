@@ -35,6 +35,7 @@ interface CreationBlockProps {
   speeches: SpeechItem[];
   mottos: string[];
   quotes: string[];
+  title?: string;
   colSpan?: number;
 }
 
@@ -52,6 +53,7 @@ export default function CreationBlock({
   speeches,
   mottos,
   quotes,
+  title,
   colSpan = 2,
 }: CreationBlockProps) {
   const [activeCategory, setActiveCategory] = useState<string>('videos');
@@ -82,7 +84,7 @@ export default function CreationBlock({
             <PenTool className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">个人创作</h3>
+            {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
           </div>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-auto">

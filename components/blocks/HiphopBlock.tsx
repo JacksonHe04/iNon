@@ -35,6 +35,7 @@ interface HiphopBlockProps {
   albums: HiphopAlbum[];
   songs: HiphopSong[];
   musicians: HiphopMusician[];
+  title?: string;
   colSpan?: number;
 }
 
@@ -49,6 +50,7 @@ export default function HiphopBlock({
   albums,
   songs,
   musicians,
+  title,
   colSpan = 2,
 }: HiphopBlockProps) {
   const [activeTab, setActiveTab] = useState<'albums' | 'songs' | 'musicians'>('albums');
@@ -74,7 +76,7 @@ export default function HiphopBlock({
             <Mic2 className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">嘻哈音乐</h3>
+            {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
           </div>
         </div>
       </div>

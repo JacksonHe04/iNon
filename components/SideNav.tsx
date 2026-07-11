@@ -4,26 +4,12 @@ import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { scrollToElement } from '@/lib/utils';
 import type { BlockConfig, NavSectionConfig } from '@/types/layout';
-import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
+import { getBlockTitle } from '@/lib/blocks/registry';
 
 export interface NavItem {
   id: string;
   label: string;
 }
-
-export const DEFAULT_NAV_SECTIONS: NavItem[] = [
-  { id: 'bio', label: '个人简介' },
-  { id: 'bookmarks', label: '网站快捷' },
-  { id: 'projects', label: '项目展示' },
-  { id: 'timeline', label: '里程碑' },
-  { id: 'music', label: '音乐收藏' },
-  { id: 'movies', label: '影视墙' },
-  { id: 'books', label: '书单' },
-  { id: 'friend_links', label: '友情链接' },
-  { id: 'contact', label: '联系方式' },
-];
-
-export const NAV_SECTIONS = DEFAULT_NAV_SECTIONS;
 
 interface SideNavProps {
   blocks?: BlockConfig[];
@@ -32,35 +18,17 @@ interface SideNavProps {
 }
 
 export default function SideNav({ blocks, navSections, customItems }: SideNavProps) {
-  const effectiveBlocks = blocks || DEFAULT_LAYOUT_CONFIG.blocks;
-  const effectiveNavSections = navSections || DEFAULT_LAYOUT_CONFIG.navSections;
-
-  // Determine dynamic navigation items based on visible blocks or custom items
+  // 每个可见的 block 在导航中独立成项；title 全部从 registry 单一事实源读取
   const navItems: NavItem[] = customItems
     ? customItems
-    : effectiveBlocks && effectiveBlocks.length > 0
-    ? (() => {
-        const items: NavItem[] = [];
-        const seenSectionIds = new Set<string>();
-
-        for (const block of effectiveBlocks) {
-          if (!block.visible) continue;
-
-          const section = effectiveNavSections.find(
-            (s) => s.id === block.sectionId || s.targetBlockId === block.id
-          );
-
-          if (section && !seenSectionIds.has(section.id)) {
-            seenSectionIds.add(section.id);
-            items.push({
-              id: block.sectionId || block.id,
-              label: section.label,
-            });
-          }
-        }
-        return items;
-      })()
-    : DEFAULT_NAV_SECTIONS;
+    : blocks && blocks.length > 0
+    ? blocks
+        .filter((block) => block.visible)
+        .map((block) => ({
+          id: block.sectionId || block.id,
+          label: getBlockTitle(block.blockType),
+        }))
+    : [];
 
   const [activeSection, setActiveSection] = useState<string>(
     navItems[0]?.id ?? 'bio'

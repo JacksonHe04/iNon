@@ -5,10 +5,11 @@ import { Bot, Sparkles, MessageSquare } from 'lucide-react';
 
 interface AiCloneBlockProps {
   name: string;
+  title?: string;
   onOpenChat?: () => void;
 }
 
-export default function AiCloneBlock({ name, onOpenChat }: AiCloneBlockProps) {
+export default function AiCloneBlock({ name, title, onOpenChat }: AiCloneBlockProps) {
   return (
     <GlassCard className="p-6 space-y-4 border-teal-500/40 relative overflow-hidden bg-gradient-to-br from-teal-500/10 via-transparent to-purple-500/10">
       <div className="flex items-center justify-between">
@@ -17,7 +18,7 @@ export default function AiCloneBlock({ name, onOpenChat }: AiCloneBlockProps) {
             <Bot className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <h3 className="font-extrabold text-base text-gray-900 dark:text-white">AI 分身助手</h3>
+            {title && <h3 className="font-extrabold text-base text-gray-900 dark:text-white">{title}</h3>}
             <p className="text-[11px] text-gray-500">24h 智能对话 & 知识库互动</p>
           </div>
         </div>

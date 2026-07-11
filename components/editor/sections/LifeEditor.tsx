@@ -9,11 +9,7 @@ import { Heart } from 'lucide-react';
 
 export default function LifeEditor({ initialData }: { initialData: ReadmeData }) {
   const [life, setLife] = useState(initialData.life);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('life');
-
-  const handleSave = () => {
-    saveSection(life);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('life', life);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function LifeEditor({ initialData }: { initialData: ReadmeData })
       icon={Heart}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <TextInput

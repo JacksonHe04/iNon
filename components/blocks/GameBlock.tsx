@@ -2,6 +2,7 @@
 
 import GlassCard from '@/components/GlassCard';
 import { Gamepad2, ExternalLink } from 'lucide-react';
+import { getBlockTitle } from '@/lib/blocks/registry';
 
 export interface GameItem {
   id: string;
@@ -16,7 +17,7 @@ interface GameBlockProps {
   title?: string;
 }
 
-export default function GameBlock({ items, title = '游戏收藏网格' }: GameBlockProps) {
+export default function GameBlock({ items, title = getBlockTitle('games') }: GameBlockProps) {
   return (
     <GlassCard className="p-5 space-y-4 hover:border-cyan-400/40 transition">
       <div className="flex items-center justify-between">

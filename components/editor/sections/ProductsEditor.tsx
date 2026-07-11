@@ -9,11 +9,7 @@ import { Laptop } from 'lucide-react';
 
 export default function ProductsEditor({ initialData }: { initialData: ReadmeData }) {
   const [products, setProducts] = useState(initialData.products);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('products');
-
-  const handleSave = () => {
-    saveSection(products);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('products', products);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function ProductsEditor({ initialData }: { initialData: ReadmeDat
       icon={Laptop}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <div className="space-y-3 pb-2">
         <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">我的硬件设备 My Hardware</h4>

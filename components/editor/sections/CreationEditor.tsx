@@ -9,11 +9,7 @@ import { PenTool } from 'lucide-react';
 
 export default function CreationEditor({ initialData }: { initialData: ReadmeData }) {
   const [creation, setCreation] = useState(initialData.creation);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('creation');
-
-  const handleSave = () => {
-    saveSection(creation);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('creation', creation);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function CreationEditor({ initialData }: { initialData: ReadmeDat
       icon={PenTool}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <ObjectArrayEditor
         title="文章 Articles"

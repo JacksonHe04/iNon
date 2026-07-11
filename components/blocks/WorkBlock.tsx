@@ -21,6 +21,7 @@ interface WorkBlockProps {
   currentJob: string;
   jobs: JobItem[];
   workPreferences: string[];
+  title?: string;
   colSpan?: number;
 }
 
@@ -28,6 +29,7 @@ export default function WorkBlock({
   currentJob,
   jobs,
   workPreferences,
+  title,
   colSpan = 2,
 }: WorkBlockProps) {
   const [selectedJob, setSelectedJob] = useState<JobItem | null>(null);
@@ -41,7 +43,7 @@ export default function WorkBlock({
             <Briefcase className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">工作履历</h3>
+            {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
             <p className="text-[11px] text-gray-500 mt-0.5">{currentJob}</p>
           </div>
         </div>

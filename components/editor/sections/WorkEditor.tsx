@@ -9,11 +9,7 @@ import { Briefcase } from 'lucide-react';
 
 export default function WorkEditor({ initialData }: { initialData: ReadmeData }) {
   const [work, setWork] = useState(initialData.work);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('work');
-
-  const handleSave = () => {
-    saveSection(work);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('work', work);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function WorkEditor({ initialData }: { initialData: ReadmeData })
       icon={Briefcase}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <div className="pb-2">
         <TextInput

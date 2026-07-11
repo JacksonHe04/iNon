@@ -10,11 +10,7 @@ import { User } from 'lucide-react';
 export default function BasicEditor({ initialData }: { initialData: ReadmeData }) {
   const [basic, setBasic] = useState(initialData.basic);
   const [meta, setMeta] = useState(initialData.meta);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('profile');
-
-  const handleSave = () => {
-    saveSection({ basic, meta });
-  };
+  const { saveStatus, errorMessage } = useSectionSave('profile', { basic, meta });
 
   return (
     <EditorSectionCard
@@ -23,7 +19,6 @@ export default function BasicEditor({ initialData }: { initialData: ReadmeData }
       icon={User}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TextInput

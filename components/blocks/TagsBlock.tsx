@@ -13,6 +13,7 @@ interface TagsBlockProps {
   workPreferences: string[];
   techStack: string[];
   expertise: string[];
+  title?: string;
   colSpan?: number;
 }
 
@@ -24,6 +25,7 @@ export default function TagsBlock({
   workPreferences = [],
   techStack = [],
   expertise = [],
+  title,
   colSpan = 2,
 }: TagsBlockProps) {
   // Collect all unique tags
@@ -59,7 +61,7 @@ export default function TagsBlock({
             <Tag className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">同频标签墙</h3>
+            {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
             <p className="text-[10px] text-gray-500 mt-0.5">点亮标签表示你与我有相同特质或看法</p>
           </div>
         </div>

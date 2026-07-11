@@ -35,22 +35,29 @@ import {
   Bell,
 } from 'lucide-react';
 
+/**
+ * 内容管理 tab 的数据编辑分组。注意：这是「数据编辑主题」分类，
+ * 不是 blockType 维度——一组 block 的数据可能由一个 category 编辑
+ * （例如 development 同时编辑 skills + projects + dev_tools）。
+ * label 直接在此声明，不再从 registry 取（registry 是 blockType 级，
+ * 与这种聚合维度不是 1:1 关系）。label 保持纯中文、无中英混排。
+ */
 const BLOCK_CATEGORIES = [
-  { id: 'basic', label: '1. 基本信息 (Basic)', icon: User },
-  { id: 'life', label: '2. 生活状态 (Life)', icon: Heart },
-  { id: 'experience', label: '3. 个人经历 (Experience)', icon: MapPin },
-  { id: 'education', label: '4. 教育背景 (Education)', icon: GraduationCap },
-  { id: 'work', label: '5. 工作履历 (Work)', icon: Briefcase },
-  { id: 'development', label: '6. 技术与项目 (Development)', icon: Code2 },
-  { id: 'products', label: '7. 硬件与产品 (Products)', icon: Laptop },
-  { id: 'creation', label: '8. 内容创作 (Creation)', icon: PenTool },
-  { id: 'reading', label: '9. 在读书单 (Reading)', icon: BookOpen },
-  { id: 'films', label: '10. 影视墙 (Films)', icon: Film },
-  { id: 'music', label: '11. 音乐库 (Music)', icon: Music },
-  { id: 'events', label: '12. 里程碑事件 (Events)', icon: Calendar },
-  { id: 'contact', label: '13. 联系方式 (Contact)', icon: Send },
-  { id: 'thoughts', label: '14. 思考与 Q&A (Thoughts)', icon: Compass },
-  { id: 'notifications', label: '15. 动态公告 (Notifications)', icon: Bell },
+  { id: 'basic', label: '基本信息', icon: User },
+  { id: 'life', label: '生活状态', icon: Heart },
+  { id: 'experience', label: '个人经历', icon: MapPin },
+  { id: 'education', label: '教育背景', icon: GraduationCap },
+  { id: 'work', label: '工作履历', icon: Briefcase },
+  { id: 'development', label: '技术与项目', icon: Code2 },
+  { id: 'products', label: '硬件与产品', icon: Laptop },
+  { id: 'creation', label: '内容创作', icon: PenTool },
+  { id: 'reading', label: '在读书单', icon: BookOpen },
+  { id: 'films', label: '影视墙', icon: Film },
+  { id: 'music', label: '音乐库', icon: Music },
+  { id: 'events', label: '里程碑事件', icon: Calendar },
+  { id: 'contact', label: '联系方式', icon: Send },
+  { id: 'thoughts', label: '思考与 Q&A', icon: Compass },
+  { id: 'notifications', label: '动态公告', icon: Bell },
 ] as const;
 
 type CategoryId = (typeof BLOCK_CATEGORIES)[number]['id'];

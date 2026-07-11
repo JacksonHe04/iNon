@@ -14,9 +14,10 @@ export interface ProjectItem {
 
 interface ProjectBlockProps {
   projects: ProjectItem[];
+  title?: string;
 }
 
-export default function ProjectBlock({ projects }: ProjectBlockProps) {
+export default function ProjectBlock({ projects, title }: ProjectBlockProps) {
   return (
     <GlassCard className="p-5 space-y-4 hover:border-emerald-400/40 transition">
       <div className="flex items-center justify-between">
@@ -24,7 +25,7 @@ export default function ProjectBlock({ projects }: ProjectBlockProps) {
           <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             <Briefcase className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-base text-gray-900 dark:text-white">项目状态卡片</h3>
+          {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
         </div>
         <span className="text-xs text-gray-400 font-mono">{projects.length} 项</span>
       </div>

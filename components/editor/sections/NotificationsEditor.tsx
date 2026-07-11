@@ -14,11 +14,7 @@ export default function NotificationsEditor({ initialData }: { initialData: Read
         .slice()
         .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
   );
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('notifications');
-
-  const handleSave = () => {
-    saveSection(notifications);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('notifications', notifications);
 
   return (
     <EditorSectionCard
@@ -27,7 +23,6 @@ export default function NotificationsEditor({ initialData }: { initialData: Read
       icon={Bell}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <ObjectArrayEditor
         title="动态列表 Notifications"

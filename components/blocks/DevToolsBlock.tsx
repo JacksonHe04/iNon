@@ -12,10 +12,11 @@ export interface DevToolItem {
 
 interface DevToolsBlockProps {
   devTools: DevToolItem[];
+  title?: string;
   colSpan?: number;
 }
 
-export default function DevToolsBlock({ devTools = [], colSpan = 2 }: DevToolsBlockProps) {
+export default function DevToolsBlock({ devTools = [], title, colSpan = 2 }: DevToolsBlockProps) {
   return (
     <GlassCard className="p-5 space-y-4 hover:border-blue-400/40 transition-all duration-300">
       <div className="flex items-center justify-between">
@@ -24,7 +25,7 @@ export default function DevToolsBlock({ devTools = [], colSpan = 2 }: DevToolsBl
             <Wrench className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">开发工具</h3>
+            {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
           </div>
         </div>
         <span className="text-xs text-gray-400 font-mono">{devTools.length} 款工具</span>

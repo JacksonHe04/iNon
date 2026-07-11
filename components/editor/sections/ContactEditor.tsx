@@ -9,11 +9,7 @@ import { Send } from 'lucide-react';
 
 export default function ContactEditor({ initialData }: { initialData: ReadmeData }) {
   const [contact, setContact] = useState(initialData.contact);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('contact');
-
-  const handleSave = () => {
-    saveSection(contact);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('contact', contact);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function ContactEditor({ initialData }: { initialData: ReadmeData
       icon={Send}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <ObjectArrayEditor
         title="联系方式 Contact Info"

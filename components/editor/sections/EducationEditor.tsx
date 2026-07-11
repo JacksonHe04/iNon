@@ -9,11 +9,7 @@ import { GraduationCap } from 'lucide-react';
 
 export default function EducationEditor({ initialData }: { initialData: ReadmeData }) {
   const [education, setEducation] = useState(initialData.education);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('education');
-
-  const handleSave = () => {
-    saveSection(education);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('education', education);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function EducationEditor({ initialData }: { initialData: ReadmeDa
       icon={GraduationCap}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
         <TextInput

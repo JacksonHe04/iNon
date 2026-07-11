@@ -9,11 +9,7 @@ import { Calendar } from 'lucide-react';
 
 export default function EventsEditor({ initialData }: { initialData: ReadmeData }) {
   const [events, setEvents] = useState(initialData.events);
-  const { saveStatus, errorMessage, saveSection } = useSectionSave('events');
-
-  const handleSave = () => {
-    saveSection(events);
-  };
+  const { saveStatus, errorMessage } = useSectionSave('events', events);
 
   return (
     <EditorSectionCard
@@ -22,7 +18,6 @@ export default function EventsEditor({ initialData }: { initialData: ReadmeData 
       icon={Calendar}
       saveStatus={saveStatus}
       errorMessage={errorMessage}
-      onSave={handleSave}
     >
       <ObjectArrayEditor
         title="演出与活动 Performances & Milestones"
