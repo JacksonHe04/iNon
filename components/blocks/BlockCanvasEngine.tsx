@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ReadmeData } from '@/types';
 import type { LayoutConfig, BlockConfig } from '@/types/layout';
 import BioHeaderBlock from '@/components/blocks/BioHeaderBlock';
@@ -81,20 +81,53 @@ export default function BlockCanvasEngine({
     link: acc.homepage_link,
   }));
 
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const autoSave = (newConfig: LayoutConfig) => {
+    if (!onSave) return;
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+    autoSaveTimeoutRef.current = setTimeout(async () => {
+      try {
+        setSaving(true);
+        await onSave(newConfig);
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 2000);
+      } catch (e) {
+        console.error('Failed to auto save layout:', e);
+      } finally {
+        setSaving(false);
+      }
+    }, 800);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleToggleVisibility = (blockId: string) => {
-    setLayoutConfig((prev) => ({
-      ...prev,
-      blocks: prev.blocks.map((b) => (b.id === blockId ? { ...b, visible: !b.visible } : b)),
-    }));
+    setLayoutConfig((prev) => {
+      const nextBlocks: BlockConfig[] = prev.blocks.map((b) => (b.id === blockId ? { ...b, visible: !b.visible } : b));
+      const nextConfig: LayoutConfig = { ...prev, blocks: nextBlocks };
+      autoSave(nextConfig);
+      return nextConfig;
+    });
   };
 
   const handleToggleColSpan = (blockId: string) => {
-    setLayoutConfig((prev) => ({
-      ...prev,
-      blocks: prev.blocks.map((b) =>
-        b.id === blockId ? { ...b, colSpan: b.colSpan === 2 ? 1 : 2 } : b
-      ),
-    }));
+    setLayoutConfig((prev) => {
+      const nextBlocks: BlockConfig[] = prev.blocks.map((b) =>
+        b.id === blockId ? { ...b, colSpan: (b.colSpan === 2 ? 1 : 2) as (1 | 2) } : b
+      );
+      const nextConfig: LayoutConfig = { ...prev, blocks: nextBlocks };
+      autoSave(nextConfig);
+      return nextConfig;
+    });
   };
 
   const handleMoveBlock = (index: number, direction: 'up' | 'down') => {
@@ -106,35 +139,24 @@ export default function BlockCanvasEngine({
     nextBlocks[index] = nextBlocks[targetIndex];
     nextBlocks[targetIndex] = temp;
 
-    setLayoutConfig((prev) => ({
-      ...prev,
-      blocks: nextBlocks,
-    }));
+    setLayoutConfig((prev) => {
+      const nextConfig: LayoutConfig = { ...prev, blocks: nextBlocks };
+      autoSave(nextConfig);
+      return nextConfig;
+    });
   };
 
   const handleReorderBlocks = (newBlocks: BlockConfig[]) => {
-    setLayoutConfig((prev) => ({
-      ...prev,
-      blocks: newBlocks,
-    }));
+    setLayoutConfig((prev) => {
+      const nextConfig: LayoutConfig = { ...prev, blocks: newBlocks };
+      autoSave(nextConfig);
+      return nextConfig;
+    });
   };
 
   const handleResetLayout = () => {
     setLayoutConfig(DEFAULT_LAYOUT_CONFIG);
-  };
-
-  const handleSaveLayout = async () => {
-    if (!onSave) return;
-    try {
-      setSaving(true);
-      await onSave(layoutConfig);
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 2500);
-    } catch (e) {
-      console.error('Failed to save layout:', e);
-    } finally {
-      setSaving(false);
-    }
+    autoSave(DEFAULT_LAYOUT_CONFIG);
   };
 
   const renderBlockContent = (block: BlockConfig) => {
@@ -330,106 +352,64 @@ export default function BlockCanvasEngine({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Editor Top Toolbar */}
-      <GlassCard className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-teal-500/30 bg-teal-500/5">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-teal-500" />
-          <div>
-            <h2 className="font-bold text-sm text-gray-900 dark:text-white">
-              公开页 Block 画布排版配置器
-            </h2>
-            <p className="text-[11px] text-gray-500">
-              在左侧目录或右侧画板拖拽 Block 自由排列位置，可随时切换显隐及宽度 (50%/100%)。
-            </p>
+    <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
+      {/* 左侧竖直 Block 目录列表 */}
+      <div className="w-full lg:w-72 shrink-0 md:sticky md:top-24 z-20">
+        <div className="rounded-2xl border border-white/20 bg-white/10 dark:bg-black/10 p-4 space-y-4 backdrop-blur-md">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2">
+            <span className="font-extrabold text-xs text-gray-900 dark:text-white flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-teal-500" />
+              Block 目录排版
+            </span>
+            <span className="text-[10px] text-gray-400 font-mono">
+              {saving ? (
+                <span className="text-teal-500 animate-pulse">● 正在保存...</span>
+              ) : savedSuccess ? (
+                <span className="text-emerald-500">✓ 已保存</span>
+              ) : (
+                <span>共 {layoutConfig.blocks.length} 个</span>
+              )}
+            </span>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={handleResetLayout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-300 transition"
-            title="重置为默认结构"
+          
+          <Reorder.Group
+            axis="y"
+            values={layoutConfig.blocks}
+            onReorder={handleReorderBlocks}
+            className="space-y-2 max-h-[60vh] overflow-y-auto pr-1 scrollbar-none"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>重置默认</span>
-          </button>
-
-          <button
-            onClick={handleSaveLayout}
-            disabled={saving}
-            className="flex items-center gap-1.5 px-5 py-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-xs font-bold shadow-md hover:opacity-90 transition disabled:opacity-50 cursor-pointer"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>保存中...</span>
-              </>
-            ) : savedSuccess ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                <span>排版已保存！</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-3.5 h-3.5" />
-                <span>保存画板排版</span>
-              </>
-            )}
-          </button>
-        </div>
-      </GlassCard>
-
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* 左侧竖直 Block 目录列表 */}
-        <div className="w-full lg:w-72 shrink-0 md:sticky md:top-24 z-20">
-          <div className="rounded-2xl border border-white/20 bg-white/10 dark:bg-black/10 p-4 space-y-4 backdrop-blur-md">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2">
-              <span className="font-extrabold text-xs text-gray-900 dark:text-white flex items-center gap-1.5">
-                <Layers className="w-4 h-4 text-teal-500" />
-                Block 目录排版
-              </span>
-              <span className="text-[10px] text-gray-400 font-mono">共 {layoutConfig.blocks.length} 个</span>
-            </div>
-            
-            <Reorder.Group
-              axis="y"
-              values={layoutConfig.blocks}
-              onReorder={handleReorderBlocks}
-              className="space-y-2 max-h-[60vh] overflow-y-auto pr-1 scrollbar-none"
-            >
-              {layoutConfig.blocks.map((block, index) => (
-                <Reorder.Item
-                  key={`list-${block.id}`}
-                  value={block}
-                  className={`flex items-center justify-between p-2.5 rounded-xl border text-xs transition-colors cursor-grab active:cursor-grabbing select-none ${
+            {layoutConfig.blocks.map((block, index) => (
+              <Reorder.Item
+                key={`list-${block.id}`}
+                value={block}
+                className={`flex items-center justify-between p-2.5 rounded-xl border text-xs transition-colors cursor-grab active:cursor-grabbing select-none ${
+                  block.visible
+                    ? 'bg-white/30 dark:bg-gray-800/30 border-teal-500/20 hover:border-teal-500/40 text-gray-800 dark:text-gray-200'
+                    : 'bg-gray-500/5 border-dashed border-gray-400/20 opacity-60 text-gray-400'
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <GripVertical className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  <span className="font-mono text-[10px] text-gray-400 shrink-0">#{index + 1}</span>
+                  <span className="truncate font-semibold">{block.title}</span>
+                </div>
+                
+                <button
+                  onClick={() => handleToggleVisibility(block.id)}
+                  className={`p-1.5 rounded-lg transition ml-2 cursor-pointer shrink-0 ${
                     block.visible
-                      ? 'bg-white/30 dark:bg-gray-800/30 border-teal-500/20 hover:border-teal-500/40 text-gray-800 dark:text-gray-200'
-                      : 'bg-gray-500/5 border-dashed border-gray-400/20 opacity-60 text-gray-400'
+                      ? 'text-teal-600 dark:text-teal-400 hover:bg-teal-500/10'
+                      : 'text-rose-500 hover:bg-rose-500/10'
                   }`}
+                  title={block.visible ? "隐藏此 Block" : "显示此 Block"}
                 >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <GripVertical className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                    <span className="font-mono text-[10px] text-gray-400 shrink-0">#{index + 1}</span>
-                    <span className="truncate font-semibold">{block.title}</span>
-                  </div>
-                  
-                  <button
-                    onClick={() => handleToggleVisibility(block.id)}
-                    className={`p-1.5 rounded-lg transition ml-2 cursor-pointer shrink-0 ${
-                      block.visible
-                        ? 'text-teal-600 dark:text-teal-400 hover:bg-teal-500/10'
-                        : 'text-rose-500 hover:bg-rose-500/10'
-                    }`}
-                    title={block.visible ? "隐藏此 Block" : "显示此 Block"}
-                  >
-                    {block.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                  </button>
-                </Reorder.Item>
-              ))}
-            </Reorder.Group>
-          </div>
+                  {block.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
         </div>
+      </div>
 
         {/* 右侧大画板主区域 */}
         <div className="flex-1 min-w-0 w-full">
@@ -533,7 +513,6 @@ export default function BlockCanvasEngine({
           </Reorder.Group>
         </div>
       </div>
-    </div>
   );
 }
 

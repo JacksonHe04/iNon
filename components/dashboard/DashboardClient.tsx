@@ -311,46 +311,24 @@ export default function DashboardClient({ username, data, initialLayoutConfig }:
         {/* Tab 3: 公开网站 (Site Layout Canvas Editor) */}
         {activeTab === 'canvas' && (
           <div className="space-y-6 animate-fadeIn">
-            <GlassCard className="p-6 space-y-4" hover={false}>
-              <div className="flex items-center justify-between border-b border-white/20 pb-4">
-                <div>
-                  <h2 className="font-extrabold text-lg text-gray-900 dark:text-white">
-                    公开个人网站 Block 拖拽画板与结构配置
-                  </h2>
-                  <p className="text-xs text-gray-500">
-                    在下方自由抓手拖拽 Block 决定顺序、显示/隐藏、单双栏宽度 (50%/100%)，与公开主页 (/{username}) 即时效果一致
-                  </p>
-                </div>
-                <Link
-                  href={`/${username}`}
-                  target="_blank"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-500 text-white text-xs font-semibold shadow hover:bg-teal-600 transition"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span>打开公开主页预览</span>
-                </Link>
-              </div>
-
-              {/* Block Canvas Layout Engine Editor */}
-              <GlassCardContext.Provider value={{ hoverEnabled: false }}>
-                <BlockCanvasEngine
-                  data={data}
-                  mode="edit"
-                  initialLayoutConfig={initialLayoutConfig}
-                  onSave={async (layoutConfig: LayoutConfig) => {
-                    const res = await fetch('/api/account/layout', {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ layoutConfig }),
-                    });
-                    if (!res.ok) {
-                      const errData = await res.json();
-                      throw new Error(errData.error || '保存排版方案失败');
-                    }
-                  }}
-                />
-              </GlassCardContext.Provider>
-            </GlassCard>
+            <GlassCardContext.Provider value={{ hoverEnabled: false }}>
+              <BlockCanvasEngine
+                data={data}
+                mode="edit"
+                initialLayoutConfig={initialLayoutConfig}
+                onSave={async (layoutConfig: LayoutConfig) => {
+                  const res = await fetch('/api/account/layout', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ layoutConfig }),
+                  });
+                  if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.error || '保存排版方案失败');
+                  }
+                }}
+              />
+            </GlassCardContext.Provider>
           </div>
         )}
 
