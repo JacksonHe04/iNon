@@ -22,7 +22,6 @@ import {
   Check,
   ExternalLink,
   Bot,
-  Layers,
 } from 'lucide-react';
 import BlockContentEditorManager from '@/components/editor/BlockContentEditorManager';
 import BlockCanvasEngine from '@/components/blocks/BlockCanvasEngine';
@@ -292,18 +291,6 @@ export default function DashboardClient({ username, data, initialLayoutConfig }:
         {/* Tab 2: 内容库与公开页 Block 全量可视化编辑 (Block Editor Manager) */}
         {activeTab === 'content' && (
           <div className="space-y-6 animate-fadeIn">
-            <div className="border-b border-white/20 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h2 className="font-extrabold text-xl text-gray-900 dark:text-white flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-teal-500" />
-                  <span>公开页 Block 全量可视化编辑控制台</span>
-                </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  彻底编辑公开个人网站的所有 16 个核心 Block 分区，实时同步 Supabase 数据库
-                </p>
-              </div>
-            </div>
-
             <BlockContentEditorManager data={data} />
           </div>
         )}
@@ -335,11 +322,6 @@ export default function DashboardClient({ username, data, initialLayoutConfig }:
         {/* Tab 4: 账号管理 (Account, Username, Slugs & Password Reset) */}
         {activeTab === 'account' && (
           <div className="space-y-6 animate-fadeIn">
-            <div className="border-b border-white/20 pb-4">
-              <h2 className="font-bold text-lg text-gray-900 dark:text-white">账号管理与安全</h2>
-              <p className="text-xs text-gray-500">管理你的 iNon OS 用户名、路径 Slug 及安全凭证</p>
-            </div>
-
             <AccountSettingsForm currentUsername={username} />
           </div>
         )}
