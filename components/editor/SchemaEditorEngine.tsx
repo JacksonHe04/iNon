@@ -9,40 +9,7 @@ import { StringListEditor } from './StringListEditor';
 import { ImageInput } from './ImageInput';
 import { ObjectArrayEditor } from './ObjectArrayEditor';
 import { useSectionSave } from './hooks/useSectionSave';
-
-export interface SubFieldConfig {
-  key: string;
-  label: string;
-  type?: 'text' | 'textarea' | 'image';
-  placeholder?: string;
-}
-
-export interface FieldConfig {
-  key: string;
-  label: string;
-  type: 'text' | 'textarea' | 'string-list' | 'image' | 'object-array';
-  placeholder?: string;
-  required?: boolean;
-  // 仅用于 object-array
-  createItem?: () => any;
-  getItemTitle?: (item: any) => string;
-  subFields?: SubFieldConfig[];
-}
-
-export interface FieldGroup {
-  id: string;
-  label: string;
-  fields: string[];
-}
-
-export interface EditorSchema {
-  id: string; // db mutations 中的表名/对应节名，例如 'reading', 'education', 'films'
-  title: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  fields: FieldConfig[];
-  groups?: FieldGroup[];
-}
+import type { EditorSchema } from './types';
 
 function getDeepValue(obj: any, path: string): any {
   if (!obj) return undefined;
@@ -210,4 +177,3 @@ export default function SchemaEditorEngine({ initialData, schema, onDataChange }
     </EditorSectionCard>
   );
 }
-

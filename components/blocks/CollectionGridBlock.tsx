@@ -79,6 +79,7 @@ export default function CollectionGridBlock({
     amber: 'hover:border-amber-400/40',
     emerald: 'hover:border-emerald-400/40',
     cyan: 'hover:border-cyan-400/40',
+    orange: 'hover:border-orange-400/40',
   };
 
   const textColors: Record<string, string> = {
@@ -86,6 +87,7 @@ export default function CollectionGridBlock({
     amber: 'text-amber-600 dark:text-amber-400',
     emerald: 'text-emerald-600 dark:text-emerald-400',
     cyan: 'text-cyan-600 dark:text-cyan-400',
+    orange: 'text-orange-600 dark:text-orange-400',
   };
 
   const bgClasses: Record<string, string> = {
@@ -93,6 +95,7 @@ export default function CollectionGridBlock({
     amber: 'bg-amber-500/10 border-amber-500/30',
     emerald: 'bg-emerald-500/10 border-emerald-500/30',
     cyan: 'bg-cyan-500/10 border-cyan-500/30',
+    orange: 'bg-orange-500/10 border-orange-500/30',
   };
 
   const iconColors: Record<string, string> = {
@@ -100,13 +103,22 @@ export default function CollectionGridBlock({
     amber: 'text-amber-500',
     emerald: 'text-emerald-500',
     cyan: 'text-cyan-500',
+    orange: 'text-orange-500',
+  };
+
+  const iconBgClasses: Record<string, string> = {
+    indigo: 'bg-indigo-500/10',
+    amber: 'bg-amber-500/10',
+    emerald: 'bg-emerald-500/10',
+    cyan: 'bg-cyan-500/10',
+    orange: 'bg-orange-500/10',
   };
 
   return (
     <GlassCard className={`p-5 space-y-5 transition-all duration-300 ${hoverBorderClasses[themeColorClass] || hoverBorderClasses.indigo}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className={`p-2 rounded-lg bg-${themeColorClass}-500/10 ${textColors[themeColorClass] || textColors.indigo}`}>
+          <div className={`p-2 rounded-lg ${iconBgClasses[themeColorClass] || iconBgClasses.indigo} ${textColors[themeColorClass] || textColors.indigo}`}>
             <BlockIcon className="w-5 h-5" />
           </div>
           <div>

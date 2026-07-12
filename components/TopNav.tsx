@@ -80,6 +80,12 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
   } = useAIAssistant({ data });
 
   useEffect(() => {
+    const handleOpenAIPanel = () => setAIState('floating');
+    window.addEventListener('inon-open-ai-panel', handleOpenAIPanel);
+    return () => window.removeEventListener('inon-open-ai-panel', handleOpenAIPanel);
+  }, [setAIState]);
+
+  useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user?.email) {

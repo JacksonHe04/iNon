@@ -31,13 +31,6 @@ interface BlockRendererProps {
   mode?: 'readonly' | 'edit';
 }
 
-const defaultBookmarks = [
-  { id: '1', title: 'GitHub', url: 'https://github.com', icon: '🐙' },
-  { id: '2', title: 'Vercel', url: 'https://vercel.com', icon: '▲' },
-  { id: '3', title: 'Supabase', url: 'https://supabase.com', icon: '⚡' },
-  { id: '4', title: 'Antigravity CLI', url: 'https://deepmind.google', icon: '🤖' },
-];
-
 export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererProps) {
   const title = getBlockTitle(block.blockType);
 
@@ -54,6 +47,13 @@ export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererP
     link: acc.homepage_link,
   }));
 
+  const bookmarkItems = data.development.dev_tools.map((tool, i) => ({
+    id: `${tool.name}-${i}`,
+    title: tool.name,
+    url: tool.link,
+    icon: tool.comment || '🔗',
+  }));
+
   switch (block.blockType) {
     case 'bio':
       return (
@@ -67,7 +67,7 @@ export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererP
         />
       );
     case 'bookmarks':
-      return <BookmarkBlock items={defaultBookmarks} title={title} />;
+      return <BookmarkBlock items={bookmarkItems} title={title} />;
     case 'ai_clone':
       return <AiCloneBlock name={data.basic.name} title={title} />;
     case 'app_launcher':

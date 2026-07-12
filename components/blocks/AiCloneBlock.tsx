@@ -10,6 +10,14 @@ interface AiCloneBlockProps {
 }
 
 export default function AiCloneBlock({ name, title, onOpenChat }: AiCloneBlockProps) {
+  const handleOpenChat = () => {
+    if (onOpenChat) {
+      onOpenChat();
+      return;
+    }
+    window.dispatchEvent(new CustomEvent('inon-open-ai-panel'));
+  };
+
   return (
     <GlassCard className="p-6 space-y-4 border-teal-500/40 relative overflow-hidden bg-gradient-to-br from-teal-500/10 via-transparent to-purple-500/10">
       <div className="flex items-center justify-between">
@@ -32,7 +40,7 @@ export default function AiCloneBlock({ name, title, onOpenChat }: AiCloneBlockPr
       </p>
 
       <button
-        onClick={onOpenChat}
+        onClick={handleOpenChat}
         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-semibold text-xs shadow-md hover:opacity-90 transition"
       >
         <MessageSquare className="w-4 h-4" />

@@ -4,14 +4,14 @@ import { TextInput } from './TextInput';
 import { TextAreaInput } from './TextAreaInput';
 import { StringListEditor } from './StringListEditor';
 import { ImageInput } from './ImageInput';
-import type { FieldConfig } from './types';
+import type { SubFieldConfig } from './types';
 
 interface ObjectArrayEditorProps<T extends Record<string, any>> {
   title: string;
   items: T[];
   onChange: (next: T[]) => void;
   createItem: () => T;
-  fields: FieldConfig[];
+  fields: SubFieldConfig[];
   getItemTitle?: (item: T, index: number) => string;
 }
 

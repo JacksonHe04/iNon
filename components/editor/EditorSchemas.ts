@@ -14,7 +14,7 @@ import {
   Bell,
   Sparkles,
 } from 'lucide-react';
-import type { EditorSchema } from './SchemaEditorEngine';
+import type { EditorSchema } from './types';
 
 export const EDITOR_SCHEMAS: Record<string, EditorSchema> = {
   profile: {
