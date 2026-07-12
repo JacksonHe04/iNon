@@ -20,7 +20,8 @@ export type BlockType =
   | 'events'
   | 'tags'
   | 'skills'
-  | 'dev_tools';
+  | 'dev_tools'
+  | 'messages';
 
 export type BlockConfig = {
   id: string;

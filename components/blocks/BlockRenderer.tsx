@@ -22,6 +22,7 @@ import EventsBlock from '@/components/blocks/EventsBlock';
 import TagsBlock from '@/components/blocks/TagsBlock';
 import SkillsBlock from '@/components/blocks/SkillsBlock';
 import DevToolsBlock from '@/components/blocks/DevToolsBlock';
+import MessagesBlock from '@/components/blocks/MessagesBlock';
 import { getBlockTitle } from '@/lib/blocks/registry';
 
 interface BlockRendererProps {
@@ -199,6 +200,14 @@ export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererP
       return (
         <DevToolsBlock
           devTools={data.development.dev_tools}
+          title={title}
+          colSpan={block.colSpan}
+        />
+      );
+    case 'messages':
+      return (
+        <MessagesBlock
+          messages={data.messages}
           title={title}
           colSpan={block.colSpan}
         />

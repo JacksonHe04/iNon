@@ -257,5 +257,11 @@ export interface ReadmeData {
     text: string;
     type: string;
   }>;
+  messages: Array<{
+    id: string;
+    nickname: string;
+    content: string;
+    created_at: string;
+  }>;
 }
 

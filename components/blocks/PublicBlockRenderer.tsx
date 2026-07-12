@@ -2,19 +2,16 @@
 
 import type { ReadmeData } from '@/types';
 import type { LayoutConfig } from '@/types/layout';
-import type { PublicMessage } from '@/lib/content/messages';
 import BlockCanvasEngine from '@/components/blocks/BlockCanvasEngine';
-import MessageSection from '@/components/sections/MessageSection';
 import FooterSection from '@/components/sections/FooterSection';
 import DeepWaterSection from '@/components/sections/DeepWaterSection';
 
 interface PublicBlockRendererProps {
   data: ReadmeData;
   layoutConfig?: LayoutConfig;
-  messages?: PublicMessage[];
 }
 
-export default function PublicBlockRenderer({ data, layoutConfig, messages = [] }: PublicBlockRendererProps) {
+export default function PublicBlockRenderer({ data, layoutConfig }: PublicBlockRendererProps) {
   return (
     <div className="space-y-8 animate-fadeIn max-w-7xl mx-auto">
       {/* Dynamic Non Block Canvas Layout Engine (Readonly Mode) */}
@@ -25,7 +22,6 @@ export default function PublicBlockRenderer({ data, layoutConfig, messages = [] 
       />
 
       {/* Interactive Footer & DeepWater Sections */}
-      <MessageSection initialMessages={messages} />
       <FooterSection />
       <DeepWaterSection data={data.thoughts} />
     </div>

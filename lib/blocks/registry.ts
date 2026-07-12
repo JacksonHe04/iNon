@@ -22,6 +22,7 @@ import {
   Tag,
   Wrench,
   Code2,
+  MessageSquare,
 } from 'lucide-react';
 import type { BlockType } from '@/types/layout';
 
@@ -66,6 +67,7 @@ export const BLOCK_REGISTRY: Record<BlockType, BlockDisplayConfig> = {
   tags: { type: 'tags', title: '标签墙', icon: Tag },
   skills: { type: 'skills', title: '专业技能', icon: Code2 },
   dev_tools: { type: 'dev_tools', title: '开发工具', icon: Wrench },
+  messages: { type: 'messages', title: '留言板', icon: MessageSquare },
 };
 
 /** 取一个 blockType 的展示标题（所有 UI 共用）。 */

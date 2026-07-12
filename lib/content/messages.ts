@@ -82,6 +82,21 @@ export async function setMessageVisibility(
     throw new Error('留言不存在或无权操作');
   }
 
+  // 取出 owner 的所有 slug（包含 aliases），确保公开页 / 控制台缓存都能被清掉
+  const { data: profile } = await adminClient
+    .from('profiles')
+    .select('slug, profile_slugs(slug)')
+    .eq('id', profileId)
+    .maybeSingle();
+  const ownerSlugs: string[] = [];
+  if (profile) {
+    if (profile.slug) ownerSlugs.push(profile.slug);
+    const aliases = (profile as { profile_slugs?: Array<{ slug: string }> }).profile_slugs ?? [];
+    for (const row of aliases) {
+      if (row.slug) ownerSlugs.push(row.slug);
+    }
+  }
+
   const status = visible ? 'approved' : 'rejected';
   const { error } = await adminClient
     .from('messages')
@@ -93,5 +108,11 @@ export async function setMessageVisibility(
 
   if (error) throw error;
 
+  // 公开页 / 控制台均涉及多种路径：根、所有公开 slug、控制台 slug、管理页。
+  // 这里显式 revalidate 而非依赖父层布局 catch，确保公开页立刻反映隐藏/恢复。
   revalidatePath('/');
+  for (const slug of ownerSlugs) {
+    revalidatePath(`/${slug}`);
+    revalidatePath(`/i/${slug}`);
+  }
 }

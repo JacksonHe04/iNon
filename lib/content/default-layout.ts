@@ -33,6 +33,7 @@ const DEFAULT_BLOCKS: Omit<BlockConfig, 'title'>[] = [
   { id: 'block-hiphop', blockType: 'hiphop', visible: true, colSpan: 2, sectionId: 'hiphop' },
   { id: 'block-events', blockType: 'events', visible: true, colSpan: 2, sectionId: 'events' },
   { id: 'block-tags', blockType: 'tags', visible: true, colSpan: 2, sectionId: 'tags' },
+  { id: 'block-messages', blockType: 'messages', visible: true, colSpan: 2, sectionId: 'messages' },
 ];
 
 export const DEFAULT_LAYOUT_CONFIG: LayoutConfig = {

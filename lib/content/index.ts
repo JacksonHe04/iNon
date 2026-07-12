@@ -6,6 +6,7 @@ import {
   listByForeignIds,
   loadProfile,
 } from './db-helpers';
+import { listVisibleMessages } from './messages';
 import {
   mapProfileAndBasic,
   mapLife,
@@ -192,6 +193,7 @@ export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<Readme
     const contact = mapContact(contactMethodsResult.data ?? [], platformAccountsResult.data ?? []);
     const thoughts = mapThoughts(listItems, thoughtQaResult.data ?? []);
     const notifications = mapNotifications(notificationsResult.data ?? []);
+    const messages = await listVisibleMessages(profile.id);
 
     return {
       ...profileAndBasic,
@@ -210,6 +212,7 @@ export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<Readme
       contact,
       thoughts,
       notifications,
+      messages,
     };
   } catch (error) {
     throw new Error(`Failed to load readme data from Supabase: ${(error as Error).message}`);
