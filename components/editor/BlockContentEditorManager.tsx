@@ -30,10 +30,27 @@ interface BlockContentEditorManagerProps {
 
 export default function BlockContentEditorManager({ data }: BlockContentEditorManagerProps) {
   const [activeCategory, setActiveCategory] = useState<CategoryId>('basic');
+  const [localData, setLocalData] = useState<ReadmeData>(data);
 
   // 由于 profile 编辑器需要处理 basic 与 meta 的两级联动，我们把它的 Schema ID 映射回 profile 
   const schemaId = activeCategory === 'basic' ? 'profile' : activeCategory;
   const currentSchema = EDITOR_SCHEMAS[schemaId];
+
+  const handleSectionDataChange = (sectionId: string, nextSectionData: any) => {
+    setLocalData((prev) => {
+      if (sectionId === 'profile') {
+        return {
+          ...prev,
+          basic: nextSectionData.basic,
+          meta: nextSectionData.meta,
+        };
+      }
+      return {
+        ...prev,
+        [sectionId]: nextSectionData,
+      };
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -64,8 +81,9 @@ export default function BlockContentEditorManager({ data }: BlockContentEditorMa
         {currentSchema ? (
           <SchemaEditorEngine
             key={currentSchema.id}
-            initialData={data}
+            initialData={localData}
             schema={currentSchema}
+            onDataChange={(nextData) => handleSectionDataChange(schemaId, nextData)}
           />
         ) : (
           <div className="text-sm text-gray-400">找不到对应版块的表单配置。</div>

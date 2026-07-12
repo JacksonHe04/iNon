@@ -140,6 +140,11 @@ export const EDITOR_SCHEMAS: Record<string, EditorSchema> = {
     title: '6. 技术与项目 (Development)',
     description: '管理所掌握的技术栈、核心开源或商业项目、开发工具箱',
     icon: Code2,
+    groups: [
+      { id: 'skills', label: '技术与专长', fields: ['skills.tech_stack', 'skills.expertise'] },
+      { id: 'projects', label: '代表作品', fields: ['projects'] },
+      { id: 'tools', label: '开发工具箱', fields: ['dev_tools'] },
+    ],
     fields: [
       { key: 'skills.tech_stack', label: '技术栈 Tech Stack', type: 'string-list' },
       { key: 'skills.expertise', label: '专长领域 Expertise', type: 'string-list' },
@@ -189,6 +194,11 @@ export const EDITOR_SCHEMAS: Record<string, EditorSchema> = {
     title: '7. 装备好物 (Products)',
     description: '展示你的日常随身数码装备、主力数码硬件及喜爱品牌',
     icon: Gamepad2,
+    groups: [
+      { id: 'hardware', label: '主力硬件', fields: ['my_hardware.phone', 'my_hardware.computer', 'my_hardware.tablet', 'my_hardware.smartwatch', 'my_hardware.headphones'] },
+      { id: 'products', label: '好物推荐', fields: ['favorite_products'] },
+      { id: 'brands', label: '偏爱品牌', fields: ['favorite_brands'] },
+    ],
     fields: [
       { key: 'my_hardware.phone', label: '主力手机', type: 'text' },
       { key: 'my_hardware.computer', label: '主力电脑', type: 'text' },
@@ -229,6 +239,11 @@ export const EDITOR_SCHEMAS: Record<string, EditorSchema> = {
     title: '8. 创意作品 (Creation)',
     description: '管理制作的视频节目、个人文章专栏、公开演讲、座右铭及名言格言',
     icon: Sparkles,
+    groups: [
+      { id: 'motto_quote', label: '座右铭与名言', fields: ['mottos', 'quotes'] },
+      { id: 'media', label: '视频与播客', fields: ['videos'] },
+      { id: 'writing', label: '文章与演讲', fields: ['articles', 'speeches'] },
+    ],
     fields: [
       { key: 'mottos', label: '座右铭 Mottos', type: 'string-list' },
       { key: 'quotes', label: '喜爱名言 Quotes', type: 'string-list' },
@@ -516,6 +531,11 @@ export const EDITOR_SCHEMAS: Record<string, EditorSchema> = {
     title: '14. 个人思想 (Thoughts)',
     description: '记录关于技术、生活、世界的思想切片以及常见的问答记录',
     icon: MessageSquare,
+    groups: [
+      { id: 'philosophy', label: '个人与行业哲学', fields: ['personal_philosophy', 'industry_views', 'ideology'] },
+      { id: 'vision', label: '人生要素与愿景', fields: ['life_elements', 'macro_vision', 'personal_vision'] },
+      { id: 'qa', label: '常见 Q&A', fields: ['qa'] },
+    ],
     fields: [
       { key: 'personal_philosophy', label: '技术与个人哲学 Philosophy', type: 'string-list' },
       { key: 'industry_views', label: '行业观点 Industry Views', type: 'string-list' },

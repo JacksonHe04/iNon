@@ -29,12 +29,19 @@ export interface FieldConfig {
   subFields?: SubFieldConfig[];
 }
 
+export interface FieldGroup {
+  id: string;
+  label: string;
+  fields: string[];
+}
+
 export interface EditorSchema {
   id: string; // db mutations 中的表名/对应节名，例如 'reading', 'education', 'films'
   title: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   fields: FieldConfig[];
+  groups?: FieldGroup[];
 }
 
 function getDeepValue(obj: any, path: string): any {
@@ -58,9 +65,10 @@ function setDeepValue(obj: any, path: string, value: any): any {
 interface SchemaEditorEngineProps {
   initialData: ReadmeData;
   schema: EditorSchema;
+  onDataChange: (nextData: any) => void;
 }
 
-export default function SchemaEditorEngine({ initialData, schema }: SchemaEditorEngineProps) {
+export default function SchemaEditorEngine({ initialData, schema, onDataChange }: SchemaEditorEngineProps) {
   // 绑定特定模块的数据状态
   const [formData, setFormData] = useState(() => {
     // profile 需要特殊合并 basic 和 meta，因为它在 API 层面保存时是 { basic, meta }
@@ -75,9 +83,25 @@ export default function SchemaEditorEngine({ initialData, schema }: SchemaEditor
 
   const { saveStatus, errorMessage } = useSectionSave(schema.id, formData);
 
+  // Stateful tracking of active sub-tab group
+  const [activeGroupId, setActiveGroupId] = useState(() => {
+    return schema.groups && schema.groups.length > 0 ? schema.groups[0].id : null;
+  });
+
   const handleFieldChange = (path: string, value: any) => {
-    setFormData((prev: any) => setDeepValue(prev, path, value));
+    setFormData((prev: any) => {
+      const next = setDeepValue(prev, path, value);
+      onDataChange(next);
+      return next;
+    });
   };
+
+  // Filter fields based on selected sub-tab group if groups are defined
+  const visibleFields = schema.fields.filter((field) => {
+    if (!schema.groups || schema.groups.length === 0 || !activeGroupId) return true;
+    const currentGroup = schema.groups.find((g) => g.id === activeGroupId);
+    return currentGroup ? currentGroup.fields.includes(field.key) : true;
+  });
 
   return (
     <EditorSectionCard
@@ -88,77 +112,103 @@ export default function SchemaEditorEngine({ initialData, schema }: SchemaEditor
       errorMessage={errorMessage}
     >
       <div className="space-y-6">
-        {schema.fields.map((field) => {
-          const val = getDeepValue(formData, field.key);
-
-          switch (field.type) {
-            case 'text':
+        {/* Render sub-tabs if schema has groups config */}
+        {schema.groups && schema.groups.length > 0 && (
+          <div className="flex items-center gap-1.5 p-1 bg-gray-500/5 dark:bg-gray-900/40 rounded-2xl border border-white/10 dark:border-gray-800/40 w-full overflow-x-auto whitespace-nowrap scrollbar-none">
+            {schema.groups.map((group) => {
+              const isActive = activeGroupId === group.id;
               return (
-                <TextInput
-                  key={field.key}
-                  label={field.label}
-                  value={val || ''}
-                  placeholder={field.placeholder}
-                  required={field.required}
-                  onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
-                />
+                <button
+                  key={group.id}
+                  type="button"
+                  onClick={() => setActiveGroupId(group.id)}
+                  className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                    isActive
+                      ? 'bg-white dark:bg-gray-800 text-teal-600 dark:text-teal-400 shadow-sm border border-teal-500/10'
+                      : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  {group.label}
+                </button>
               );
+            })}
+          </div>
+        )}
 
-            case 'textarea':
-              return (
-                <TextAreaInput
-                  key={field.key}
-                  label={field.label}
-                  value={val || ''}
-                  placeholder={field.placeholder}
-                  onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
-                />
-              );
+        <div className="space-y-6">
+          {visibleFields.map((field) => {
+            const val = getDeepValue(formData, field.key);
 
-            case 'image':
-              return (
-                <ImageInput
-                  key={field.key}
-                  label={field.label}
-                  value={val || ''}
-                  placeholder={field.placeholder}
-                  onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
-                />
-              );
+            switch (field.type) {
+              case 'text':
+                return (
+                  <TextInput
+                    key={field.key}
+                    label={field.label}
+                    value={val || ''}
+                    placeholder={field.placeholder}
+                    required={field.required}
+                    onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
+                  />
+                );
 
-            case 'string-list':
-              return (
-                <StringListEditor
-                  key={field.key}
-                  label={field.label}
-                  value={val || []}
-                  onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
-                />
-              );
+              case 'textarea':
+                return (
+                  <TextAreaInput
+                    key={field.key}
+                    label={field.label}
+                    value={val || ''}
+                    placeholder={field.placeholder}
+                    onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
+                  />
+                );
 
-            case 'object-array':
-              return (
-                <ObjectArrayEditor
-                  key={field.key}
-                  title={field.label}
-                  items={val || []}
-                  createItem={field.createItem || (() => ({}))}
-                  getItemTitle={field.getItemTitle || ((item) => item.name || '项目')}
-                  fields={(field.subFields || []).map((sf) => ({
-                    key: sf.key,
-                    label: sf.label,
-                    type: sf.type || 'text',
-                    placeholder: sf.placeholder,
-                  }))}
-                  onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
-                />
-              );
+              case 'image':
+                return (
+                  <ImageInput
+                    key={field.key}
+                    label={field.label}
+                    value={val || ''}
+                    placeholder={field.placeholder}
+                    onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
+                  />
+                );
 
-            default:
-              return null;
-          }
-        })}
+              case 'string-list':
+                return (
+                  <StringListEditor
+                    key={field.key}
+                    label={field.label}
+                    value={val || []}
+                    onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
+                  />
+                );
+
+              case 'object-array':
+                return (
+                  <ObjectArrayEditor
+                    key={field.key}
+                    title={field.label}
+                    items={val || []}
+                    createItem={field.createItem || (() => ({}))}
+                    getItemTitle={field.getItemTitle || ((item) => item.name || '项目')}
+                    fields={(field.subFields || []).map((sf) => ({
+                      key: sf.key,
+                      label: sf.label,
+                      type: sf.type || 'text',
+                      placeholder: sf.placeholder,
+                    }))}
+                    onChange={(nextVal) => handleFieldChange(field.key, nextVal)}
+                  />
+                );
+
+              default:
+                return null;
+            }
+          })}
+        </div>
       </div>
     </EditorSectionCard>
   );
 }
+
