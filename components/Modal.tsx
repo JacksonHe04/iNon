@@ -1,7 +1,8 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ModalProps {
   open: boolean;
@@ -12,11 +13,19 @@ interface ModalProps {
 }
 
 export default function Modal({ open, onClose, children, className = '', position = 'center' }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   const containerClass =
     position === 'top-right'
       ? 'items-start justify-end pt-24 pr-6'
       : 'items-center justify-center';
-  return (
+
+  const modalElement = (
     <AnimatePresence>
       {open && (
         <motion.div
@@ -40,4 +49,9 @@ export default function Modal({ open, onClose, children, className = '', positio
       )}
     </AnimatePresence>
   );
+
+  if (!mounted) return null;
+
+  return createPortal(modalElement, document.body);
 }
+
