@@ -2,29 +2,11 @@
 
 import { useState } from 'react';
 import type { ReadmeData } from '@/types';
-import BasicEditor from './sections/BasicEditor';
-import LifeEditor from './sections/LifeEditor';
-import ExperienceEditor from './sections/ExperienceEditor';
-import EducationEditor from './sections/EducationEditor';
-import WorkEditor from './sections/WorkEditor';
-import DevelopmentEditor from './sections/DevelopmentEditor';
-import ProductsEditor from './sections/ProductsEditor';
-import CreationEditor from './sections/CreationEditor';
-import ReadingEditor from './sections/ReadingEditor';
-import FilmsEditor from './sections/FilmsEditor';
-import MusicEditor from './sections/MusicEditor';
-import EventsEditor from './sections/EventsEditor';
-import ContactEditor from './sections/ContactEditor';
-import ThoughtsEditor from './sections/ThoughtsEditor';
-import NotificationsEditor from './sections/NotificationsEditor';
-import { Heart, Code2, Bell } from 'lucide-react';
+import SchemaEditorEngine from './SchemaEditorEngine';
+import { EDITOR_SCHEMAS } from './EditorSchemas';
 import { BLOCK_REGISTRY } from '@/lib/blocks/registry';
+import { Heart, Code2, Bell } from 'lucide-react';
 
-/**
- * 内容管理 tab 的数据编辑分组。注意：这是「数据编辑主题」分类，
- * 部分分类直接引用 BLOCK_REGISTRY 关联 Block 的 title 与 icon，
- * 确保文案与图标全局统一。
- */
 const BLOCK_CATEGORIES = [
   { id: 'basic', label: BLOCK_REGISTRY.bio.title, icon: BLOCK_REGISTRY.bio.icon },
   { id: 'life', label: '生活状态', icon: Heart },
@@ -52,6 +34,10 @@ interface BlockContentEditorManagerProps {
 export default function BlockContentEditorManager({ data }: BlockContentEditorManagerProps) {
   const [activeCategory, setActiveCategory] = useState<CategoryId>('basic');
 
+  // 由于 profile 编辑器需要处理 basic 与 meta 的两级联动，我们把它的 Schema ID 映射回 profile 
+  const schemaId = activeCategory === 'basic' ? 'profile' : activeCategory;
+  const currentSchema = EDITOR_SCHEMAS[schemaId];
+
   return (
     <div className="space-y-6">
       {/* Category Pills Header */}
@@ -63,7 +49,7 @@ export default function BlockContentEditorManager({ data }: BlockContentEditorMa
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all border ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all border cursor-pointer ${
                 isActive
                   ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white border-teal-400 shadow-md scale-[1.02]'
                   : 'bg-white/40 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 border-white/20 hover:bg-white/60 dark:hover:bg-gray-800/60'
@@ -76,52 +62,16 @@ export default function BlockContentEditorManager({ data }: BlockContentEditorMa
         })}
       </div>
 
-      {/* Content Sections */}
+      {/* Content Sections - 统一使用声明式配置表单引擎渲染 */}
       <div className="space-y-6 animate-fadeIn">
-        {activeCategory === 'basic' && (
-          <BasicEditor initialData={data} />
-        )}
-        {activeCategory === 'life' && (
-          <LifeEditor initialData={data} />
-        )}
-        {activeCategory === 'experience' && (
-          <ExperienceEditor initialData={data} />
-        )}
-        {activeCategory === 'education' && (
-          <EducationEditor initialData={data} />
-        )}
-        {activeCategory === 'work' && (
-          <WorkEditor initialData={data} />
-        )}
-        {activeCategory === 'development' && (
-          <DevelopmentEditor initialData={data} />
-        )}
-        {activeCategory === 'products' && (
-          <ProductsEditor initialData={data} />
-        )}
-        {activeCategory === 'creation' && (
-          <CreationEditor initialData={data} />
-        )}
-        {activeCategory === 'reading' && (
-          <ReadingEditor initialData={data} />
-        )}
-        {activeCategory === 'films' && (
-          <FilmsEditor initialData={data} />
-        )}
-        {activeCategory === 'music' && (
-          <MusicEditor initialData={data} />
-        )}
-        {activeCategory === 'events' && (
-          <EventsEditor initialData={data} />
-        )}
-        {activeCategory === 'contact' && (
-          <ContactEditor initialData={data} />
-        )}
-        {activeCategory === 'thoughts' && (
-          <ThoughtsEditor initialData={data} />
-        )}
-        {activeCategory === 'notifications' && (
-          <NotificationsEditor initialData={data} />
+        {currentSchema ? (
+          <SchemaEditorEngine
+            key={currentSchema.id}
+            initialData={data}
+            schema={currentSchema}
+          />
+        ) : (
+          <div className="text-sm text-gray-400">找不到对应版块的表单配置。</div>
         )}
       </div>
     </div>
