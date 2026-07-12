@@ -1,9 +1,4 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import type { ValueRow } from '@/types/database';
 
 // 计算年龄
 export function calculateAge(birthDate: string): number {
@@ -82,16 +77,6 @@ export function getCityCoordinates(city: string): { lat: number; lon: number } |
   return cityCoordinates[city] || null;
 }
 
-// 格式化日期
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
-
 // 获取当前时间字符串
 export function getCurrentTime(): string {
   const now = new Date();
@@ -108,4 +93,12 @@ export function scrollToElement(elementId: string) {
   if (element) {
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+}
+
+// 从作者名字中提取简称/昵称
+export function getAuthorNickname(name: string): string {
+  if (!name) return '作者';
+  // 提取 `｜`、`的`、空格前面的字符
+  const raw = name.split('｜')[0].split('的')[0].split(' ')[0].trim();
+  return raw || name;
 }
