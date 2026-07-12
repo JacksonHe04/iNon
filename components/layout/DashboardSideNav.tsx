@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { LayoutDashboard, Library, Palette, UserCog, BarChart3, MessageSquare, FolderOpen } from 'lucide-react';
 
 export const DASHBOARD_TABS = [
-  { id: 'home', label: '控制台', icon: LayoutDashboard, path: '' },
+  { id: 'home', label: '控制台', icon: LayoutDashboard, path: '/home' },
   { id: 'content', label: '内容管理', icon: FolderOpen, path: '/content' },
   { id: 'library', label: '我的库', icon: Library, path: '/library' },
   { id: 'canvas', label: '公开网站', icon: Palette, path: '/website' },
@@ -64,4 +64,3 @@ export default function DashboardSideNav({ activeTab, className = '', username, 
     </aside>
   );
 }
-

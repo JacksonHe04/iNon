@@ -99,7 +99,7 @@ export function NavRight({
         onClick={() => {
           if (userEmail) {
             const name = userEmail.split('@')[0];
-            const targetPath = activeIsConsolePage ? `/${name}` : `/i/${name}`;
+            const targetPath = activeIsConsolePage ? `/${name}` : `/i/${name}/home`;
             
             // Dispatch custom event to see if client layout wants to handle it instantly
             const eventDispatched = dispatchAppEvent(

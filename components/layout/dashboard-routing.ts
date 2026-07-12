@@ -1,6 +1,7 @@
 import { DASHBOARD_TABS, type DashboardTabId } from './DashboardSideNav';
 
 export function getDashboardTabFromPath(pathname: string): DashboardTabId {
+  if (pathname.endsWith('/home')) return 'home';
   if (pathname.endsWith('/content')) return 'content';
   if (pathname.endsWith('/library')) return 'library';
   if (pathname.endsWith('/website')) return 'canvas';
@@ -11,5 +12,8 @@ export function getDashboardTabFromPath(pathname: string): DashboardTabId {
 }
 
 export function getDashboardPathForTab(tabId: DashboardTabId): string {
+  if (tabId === 'home') {
+    return '/home';
+  }
   return DASHBOARD_TABS.find((tab) => tab.id === tabId)?.path ?? '';
 }

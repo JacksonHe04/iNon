@@ -43,5 +43,5 @@ export async function getUserDashboardPath(userId: string): Promise<string | nul
   }
 
   const username = getPrimaryUsername(profile);
-  return username ? `/i/${username}` : '/i';
+  return username ? `/i/${username}/home` : '/i';
 }
