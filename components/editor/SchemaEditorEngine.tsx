@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import type { ReadmeData } from '@/types';
 import EditorSectionCard from './EditorSectionCard';
 import { TextInput } from './TextInput';
@@ -81,28 +81,18 @@ export default function SchemaEditorEngine({ initialData, schema, onDataChange }
     return initialData[schema.id as keyof ReadmeData] || {};
   });
 
-  const { saveStatus, errorMessage } = useSectionSave(schema.id, formData);
+  const { saveStatus, errorMessage, triggerSave } = useSectionSave(schema.id);
 
   // Stateful tracking of active sub-tab group
   const [activeGroupId, setActiveGroupId] = useState(() => {
     return schema.groups && schema.groups.length > 0 ? schema.groups[0].id : null;
   });
 
-  const isFirstDataChange = useRef(true);
-  const onDataChangeRef = useRef(onDataChange);
-  onDataChangeRef.current = onDataChange;
-
-  // Sync edits safely after React commits rendering, preventing side-effects inside state updates
-  useEffect(() => {
-    if (isFirstDataChange.current) {
-      isFirstDataChange.current = false;
-      return;
-    }
-    onDataChangeRef.current(formData);
-  }, [formData]);
-
   const handleFieldChange = (path: string, value: any) => {
-    setFormData((prev: any) => setDeepValue(prev, path, value));
+    const nextData = setDeepValue(formData, path, value);
+    setFormData(nextData);
+    onDataChange(nextData);
+    triggerSave(nextData);
   };
 
   // Filter fields based on selected sub-tab group if groups are defined

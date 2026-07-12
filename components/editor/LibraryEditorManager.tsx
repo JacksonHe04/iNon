@@ -85,7 +85,7 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
   }, [activeKind, categories, selectedCategoryName]);
 
   // Hook handles auto-saving of changes to the "library" endpoint (background execution, no user-facing status pill)
-  useSectionSave('library', libraryData);
+  const { triggerSave } = useSectionSave('library');
 
   const kindConfig = {
     music: { label: '音乐', icon: MusicIcon },
@@ -95,24 +95,32 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
   } as const;
 
   const updateCategories = (newCategories: LibraryCategoryDTO[]) => {
-    setLibraryData((prev) => ({
-      ...prev,
-      [activeKind]: {
-        ...prev[activeKind],
-        categories: newCategories,
-      },
-    }));
+    setLibraryData((prev) => {
+      const next = {
+        ...prev,
+        [activeKind]: {
+          ...prev[activeKind],
+          categories: newCategories,
+        },
+      };
+      triggerSave(next);
+      return next;
+    });
   };
 
   const updateItems = (subtype: LibrarySubtype, newItems: LibraryItemDTO[]) => {
     const key = subtype === 'work' ? 'works' : subtype === 'creator' ? 'creators' : 'songs';
-    setLibraryData((prev) => ({
-      ...prev,
-      [activeKind]: {
-        ...prev[activeKind],
-        [key]: newItems,
-      },
-    }));
+    setLibraryData((prev) => {
+      const next = {
+        ...prev,
+        [activeKind]: {
+          ...prev[activeKind],
+          [key]: newItems,
+        },
+      };
+      triggerSave(next);
+      return next;
+    });
   };
 
   // Categories Operations (Music only)
@@ -141,7 +149,7 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
 
     setLibraryData((prev) => {
       const current = prev[activeKind];
-      return {
+      const next = {
         ...prev,
         [activeKind]: {
           ...current,
@@ -151,6 +159,8 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
           ...(activeKind === 'music' ? { songs: updateList((current as any).songs) } : {}),
         },
       };
+      triggerSave(next);
+      return next;
     });
   };
 
@@ -164,7 +174,7 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
 
     setLibraryData((prev) => {
       const current = prev[activeKind];
-      return {
+      const next = {
         ...prev,
         [activeKind]: {
           ...current,
@@ -174,6 +184,8 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
           ...(activeKind === 'music' ? { songs: updateList((current as any).songs) } : {}),
         },
       };
+      triggerSave(next);
+      return next;
     });
   };
 
