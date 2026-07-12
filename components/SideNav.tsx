@@ -38,6 +38,12 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
     navItems[0]?.id ?? 'bio'
   );
 
+  // 避免 framer-motion 在 SSR 阶段渲染初始 transform 导致 hydration mismatch
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isClickScrolling = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -99,7 +105,7 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
 
   return (
     <motion.nav
-      initial={{ x: -100 }}
+      initial={mounted ? { x: -100 } : false}
       animate={{ x: 0 }}
       className="fixed left-2 lg:left-4 -translate-y-1/2 z-40 hidden md:block"
       style={{ top: 'calc(50% + 40px)' }}
