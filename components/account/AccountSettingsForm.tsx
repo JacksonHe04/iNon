@@ -104,7 +104,7 @@ export default function AccountSettingsForm({
 
       // If username changed, redirect to new dashboard URL
       if (username && username !== currentUsername) {
-        router.push(`/i/${username}`);
+        router.push(`/i/${username}/home`);
       } else {
         router.refresh();
       }

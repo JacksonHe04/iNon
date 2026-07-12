@@ -100,7 +100,7 @@ export async function requireOwnerPage(identifier: string, next: string): Promis
   const context = await requireUserPage(next);
 
   if (!profileOwnsIdentifier(context.profile, identifier)) {
-    redirect(`/i/${getPrimaryUsername(context.profile)}`);
+    redirect(`/i/${getPrimaryUsername(context.profile)}/home`);
   }
 
   return context;

@@ -114,7 +114,7 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
   const handlePrefetch = useCallback(() => {
     if (userEmail) {
       const name = userEmail.split('@')[0];
-      const targetPath = isConsolePage ? `/${name}` : `/i/${name}`;
+      const targetPath = isConsolePage ? `/${name}` : `/i/${name}/home`;
       router.prefetch(targetPath);
     }
   }, [userEmail, isConsolePage, router]);
