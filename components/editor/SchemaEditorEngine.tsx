@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { ReadmeData } from '@/types';
 import EditorSectionCard from './EditorSectionCard';
 import { TextInput } from './TextInput';
@@ -88,12 +88,19 @@ export default function SchemaEditorEngine({ initialData, schema, onDataChange }
     return schema.groups && schema.groups.length > 0 ? schema.groups[0].id : null;
   });
 
+  const isFirstDataChange = useRef(true);
+
+  // Sync edits safely after React commits rendering, preventing side-effects inside state updates
+  useEffect(() => {
+    if (isFirstDataChange.current) {
+      isFirstDataChange.current = false;
+      return;
+    }
+    onDataChange(formData);
+  }, [formData, onDataChange]);
+
   const handleFieldChange = (path: string, value: any) => {
-    setFormData((prev: any) => {
-      const next = setDeepValue(prev, path, value);
-      onDataChange(next);
-      return next;
-    });
+    setFormData((prev: any) => setDeepValue(prev, path, value));
   };
 
   // Filter fields based on selected sub-tab group if groups are defined
