@@ -7,11 +7,22 @@ import type {
   NotificationRow,
   ValueRow,
 } from '@/types/database';
-import { sortByOrder, valuesByType } from './utils';
+import { sortByOrder, valuesByType, dedupeBy } from './utils';
+
+// Keys used to identify a media row by its business content (excluding
+// id/profile_id/sort_order/link/comment/image_url which are either metadata
+// or free-form). Keeping these in sync with what the mutation layer treats as
+// "the same row" ensures the read path agrees with the write path.
+const MEDIA_ROW_KEYS = ['domain', 'item_type', 'name', 'creator', 'album', 'country_or_region'] as const;
 
 export function mapMedia(mediaItems: MediaItemRow[]) {
   const mediaBy = (domain: MediaItemRow['domain'], itemType: string) =>
-    mediaItems.filter((item) => item.domain === domain && item.item_type === itemType);
+    sortByOrder(
+      dedupeBy(
+        mediaItems.filter((item) => item.domain === domain && item.item_type === itemType),
+        MEDIA_ROW_KEYS as unknown as (keyof MediaItemRow)[]
+      )
+    );
 
   return {
     reading: {

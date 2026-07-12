@@ -8,6 +8,20 @@ import {
   replaceProfileScopedRows,
   SupabaseAdminClient,
 } from './helpers';
+import { dedupeBy } from '../mappers/utils';
+
+/**
+ * Drop inbound rows whose business content is identical before persisting.
+ * `replaceMediaDomain` is "delete-all-then-insert", so duplicates in the input
+ * would otherwise be written straight back to the DB. We deduplicate using the
+ * same keys the reader uses, so the source of truth stays consistent.
+ */
+function dedupeMediaRows<T extends Record<string, unknown>>(
+  rows: T[],
+  keys: (keyof T)[]
+): T[] {
+  return dedupeBy(rows, keys);
+}
 
 async function replaceMediaDomain(
   adminClient: SupabaseAdminClient,
@@ -35,7 +49,7 @@ export async function updateReadingSection(
   const adminClient = createAdminClient();
   const profile = await getProfile(adminClient, scope);
 
-  await replaceMediaDomain(adminClient, profile.id, 'reading', [
+  await replaceMediaDomain(adminClient, profile.id, 'reading', dedupeMediaRows([
     ...data.books.map((item, index) => ({
       profile_id: profile.id,
       domain: 'reading',
@@ -62,7 +76,7 @@ export async function updateReadingSection(
       image_url: ensureString(item.image_url),
       sort_order: data.books.length + index,
     })),
-  ]);
+  ], ['domain', 'item_type', 'name', 'creator', 'country_or_region']));
 
   revalidatePath('/');
   revalidatePath('/admin/content');
@@ -72,7 +86,7 @@ export async function updateFilmsSection(data: ReadmeData['films'], scope: Mutat
   const adminClient = createAdminClient();
   const profile = await getProfile(adminClient, scope);
 
-  await replaceMediaDomain(adminClient, profile.id, 'films', [
+  await replaceMediaDomain(adminClient, profile.id, 'films', dedupeMediaRows([
     ...data.films.map((item, index) => ({
       profile_id: profile.id,
       domain: 'films',
@@ -99,7 +113,7 @@ export async function updateFilmsSection(data: ReadmeData['films'], scope: Mutat
       image_url: ensureString(item.image_url),
       sort_order: data.films.length + index,
     })),
-  ]);
+  ], ['domain', 'item_type', 'name', 'creator', 'country_or_region']));
 
   revalidatePath('/');
   revalidatePath('/admin/content');
@@ -113,7 +127,7 @@ export async function updateMusicSection(
   const adminClient = createAdminClient();
   const profile = await getProfile(adminClient, scope);
 
-  await replaceMediaDomain(adminClient, profile.id, section, [
+  await replaceMediaDomain(adminClient, profile.id, section, dedupeMediaRows([
     ...data.albums.map((item, index) => ({
       profile_id: profile.id,
       domain: section,
@@ -153,7 +167,7 @@ export async function updateMusicSection(
       image_url: ensureString(item.image_url),
       sort_order: data.albums.length + data.songs.length + index,
     })),
-  ]);
+  ], ['domain', 'item_type', 'name', 'creator', 'album', 'country_or_region']));
 
   revalidatePath('/');
   revalidatePath('/admin/content');
