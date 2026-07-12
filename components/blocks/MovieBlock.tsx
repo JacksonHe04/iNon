@@ -5,6 +5,7 @@ import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { Film, User, ExternalLink } from 'lucide-react';
 import BlockImage from './BlockImage';
+import { getBlockTitle } from '@/lib/blocks/registry';
 
 export interface MovieItem {
   name: string;
@@ -40,7 +41,7 @@ type SelectedDetail = {
 export default function MovieBlock({
   films = [],
   directors = [],
-  title = '影视海报墙',
+  title = getBlockTitle('movies'),
   colSpan = 2,
 }: MovieBlockProps) {
   const [activeTab, setActiveTab] = useState<'films' | 'directors'>('films');

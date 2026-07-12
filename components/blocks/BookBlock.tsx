@@ -5,6 +5,7 @@ import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { BookOpen, User, ExternalLink } from 'lucide-react';
 import BlockImage from './BlockImage';
+import { getBlockTitle } from '@/lib/blocks/registry';
 
 export interface BookItem {
   name: string;
@@ -40,7 +41,7 @@ type SelectedDetail = {
 export default function BookBlock({
   books = [],
   authors = [],
-  title = '电子书架',
+  title = getBlockTitle('books'),
   colSpan = 2,
 }: BookBlockProps) {
   const [activeTab, setActiveTab] = useState<'books' | 'authors'>('books');

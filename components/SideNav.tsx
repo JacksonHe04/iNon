@@ -3,12 +3,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { scrollToElement } from '@/lib/utils';
-import type { BlockConfig, NavSectionConfig } from '@/types/layout';
-import { getBlockTitle } from '@/lib/blocks/registry';
+import type { BlockConfig, NavSectionConfig, BlockType } from '@/types/layout';
+import { getBlockTitle, getBlockIcon } from '@/lib/blocks/registry';
 
 export interface NavItem {
   id: string;
   label: string;
+  blockType?: BlockType;
 }
 
 interface SideNavProps {
@@ -27,6 +28,7 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
         .map((block) => ({
           id: block.sectionId || block.id,
           label: getBlockTitle(block.blockType),
+          blockType: block.blockType,
         }))
     : [];
 
@@ -115,37 +117,51 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
     >
       <div className="rounded-2xl border border-white/30 bg-white/30 backdrop-blur-xl p-3 shadow-lg">
         <div className="flex flex-col gap-0.5 max-h-[70vh] overflow-y-auto scrollbar-none">
-          {navItems.map((section) => (
-            <button
-              key={section.id}
-              onClick={() => {
-                setActiveSection(section.id);
-                isClickScrolling.current = true;
-                scrollToElement(section.id);
+          {navItems.map((section) => {
+            const Icon = section.blockType ? getBlockIcon(section.blockType) : null;
+            return (
+              <button
+                key={section.id}
+                onClick={() => {
+                  setActiveSection(section.id);
+                  isClickScrolling.current = true;
+                  scrollToElement(section.id);
 
-                if (scrollTimeoutRef.current) {
-                  clearTimeout(scrollTimeoutRef.current);
-                }
-                scrollTimeoutRef.current = setTimeout(() => {
-                  isClickScrolling.current = false;
-                }, 800);
-              }}
-              className={`relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all text-left whitespace-nowrap cursor-pointer ${
-                activeSection === section.id
-                  ? 'bg-white/30 dark:bg-gray-800/40 text-gray-900 dark:text-white font-bold'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-white/10'
-              }`}
-            >
-              <span className="relative z-10">{section.label}</span>
-              {activeSection === section.id && (
-                <motion.div
-                  layoutId="activeSection"
-                  className="absolute inset-0 bg-white/30 dark:bg-teal-500/20 rounded-xl border border-teal-500/30"
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                />
-              )}
-            </button>
-          ))}
+                  if (scrollTimeoutRef.current) {
+                    clearTimeout(scrollTimeoutRef.current);
+                  }
+                  scrollTimeoutRef.current = setTimeout(() => {
+                    isClickScrolling.current = false;
+                  }, 800);
+                }}
+                className={`relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all text-left whitespace-nowrap cursor-pointer ${
+                  activeSection === section.id
+                    ? 'bg-white/30 dark:bg-gray-800/40 text-gray-900 dark:text-white font-bold'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-white/10'
+                }`}
+              >
+                <div className="relative z-10 flex items-center gap-2">
+                  {Icon && (
+                    <Icon
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        activeSection === section.id
+                          ? 'text-teal-600 dark:text-teal-400'
+                          : 'text-gray-500 dark:text-gray-400'
+                      }`}
+                    />
+                  )}
+                  <span>{section.label}</span>
+                </div>
+                {activeSection === section.id && (
+                  <motion.div
+                    layoutId="activeSection"
+                    className="absolute inset-0 bg-white/30 dark:bg-teal-500/20 rounded-xl border border-teal-500/30"
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     </motion.nav>
