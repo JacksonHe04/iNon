@@ -89,6 +89,8 @@ export default function SchemaEditorEngine({ initialData, schema, onDataChange }
   });
 
   const isFirstDataChange = useRef(true);
+  const onDataChangeRef = useRef(onDataChange);
+  onDataChangeRef.current = onDataChange;
 
   // Sync edits safely after React commits rendering, preventing side-effects inside state updates
   useEffect(() => {
@@ -96,8 +98,8 @@ export default function SchemaEditorEngine({ initialData, schema, onDataChange }
       isFirstDataChange.current = false;
       return;
     }
-    onDataChange(formData);
-  }, [formData, onDataChange]);
+    onDataChangeRef.current(formData);
+  }, [formData]);
 
   const handleFieldChange = (path: string, value: any) => {
     setFormData((prev: any) => setDeepValue(prev, path, value));
