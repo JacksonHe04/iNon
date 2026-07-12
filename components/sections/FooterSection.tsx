@@ -2,11 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import GlassCard from '../GlassCard';
+import type { ReadmeData } from '@/types';
+import { getAuthorNickname } from '@/lib/utils';
 
-export default function FooterSection() {
+interface FooterSectionProps {
+  data?: ReadmeData;
+}
+
+export default function FooterSection({ data }: FooterSectionProps) {
   const [visitCount, setVisitCount] = useState(0);
   const [uptime, setUptime] = useState('0 秒');
-  const visitStorageKey = 'yingying-visit-count';
+  
+  const nickname = data ? getAuthorNickname(data.basic.name) : 'default';
+  const visitStorageKey = `inon-visit-count-${nickname}`;
+
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
