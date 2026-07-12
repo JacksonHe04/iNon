@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, type ReactNode } from 'react';
 import type { ReadmeData } from '@/types';
 import type { BlockConfig, ThemeType } from '@/types/layout';
