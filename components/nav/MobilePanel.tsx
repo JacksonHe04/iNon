@@ -6,6 +6,7 @@ import type { ReadmeData } from '@/types';
 
 interface NavItem {
   id: string;
+  scrollId: string;
   label: string;
 }
 
@@ -148,7 +149,7 @@ export function MobilePanel({
                     <button
                       key={section.id}
                       onClick={() => {
-                        scrollToElement(section.id);
+                        scrollToElement(section.scrollId);
                         onClose();
                       }}
                       className="w-full rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-left text-sm text-gray-700"

@@ -8,6 +8,7 @@ import { getBlockTitle, getBlockIcon } from '@/lib/blocks/registry';
 
 export interface NavItem {
   id: string;
+  scrollId: string;
   label: string;
   blockType?: BlockType;
 }
@@ -26,7 +27,8 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
     ? blocks
         .filter((block) => block.visible)
         .map((block) => ({
-          id: block.sectionId || block.id,
+          id: block.id,
+          scrollId: block.sectionId || block.id,
           label: getBlockTitle(block.blockType),
           blockType: block.blockType,
         }))
@@ -59,7 +61,7 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
       const targetLine = 120; // 触发线：距离视口顶部 120px 处（避开顶栏高度）
 
       for (const item of navItems) {
-        const element = document.getElementById(item.id);
+        const element = document.getElementById(item.scrollId);
         if (element) {
           const rect = element.getBoundingClientRect();
           // 如果元素刚好跨越触发线，则当前激活项必定是它
@@ -112,7 +114,7 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
                 onClick={() => {
                   setActiveSection(section.id);
                   isClickScrolling.current = true;
-                  scrollToElement(section.id);
+                  scrollToElement(section.scrollId);
 
                   if (scrollTimeoutRef.current) {
                     clearTimeout(scrollTimeoutRef.current);

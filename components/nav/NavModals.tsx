@@ -22,7 +22,7 @@ interface NavModalsProps {
   isRefreshingLocation: boolean;
   updateUserLocation: () => Promise<void>;
   formatDistanceMeters: (meters: number) => string;
-  navItems: Array<{ id: string; label: string }>;
+  navItems: Array<{ id: string; scrollId: string; label: string }>;
 
   showAuthModal: boolean;
   setShowAuthModal: (open: boolean) => void;
