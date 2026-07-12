@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import DashboardSideNav, { type DashboardTabId, DASHBOARD_TABS } from '@/components/layout/DashboardSideNav';
+import DashboardSideNav, { type DashboardTabId } from '@/components/layout/DashboardSideNav';
 import type { ReadmeData } from '@/types';
 import type { OwnerMessage } from '@/lib/content/messages';
 import type { UserContext } from '@/lib/auth/user';
 import { fetchReadmeDataAction, fetchOwnerMessagesAction } from '@/lib/content/actions';
 import { fetchAnalyticsData } from '@/lib/analytics/actions';
 import { APP_EVENTS, dispatchAppEvent, addAppEventListener } from '@/lib/dom-events';
+import { getDashboardPathForTab, getDashboardTabFromPath } from '@/components/layout/dashboard-routing';
 
 // Loading Spinner for Code Splitting
 const LoadingSpinner = () => (
@@ -170,14 +171,7 @@ export default function DashboardLayoutClient({
   }, [ownerMessages]);
 
   // Compute standard active tab from current URL pathname
-  let pathTab: DashboardTabId = 'home';
-  if (pathname.endsWith('/content')) pathTab = 'content';
-  else if (pathname.endsWith('/library')) pathTab = 'library';
-  else if (pathname.endsWith('/website')) pathTab = 'canvas';
-  else if (pathname.endsWith('/messages')) pathTab = 'messages';
-  else if (pathname.endsWith('/analytics')) pathTab = 'analytics';
-  else if (pathname.endsWith('/account')) pathTab = 'account';
-
+  const pathTab = getDashboardTabFromPath(pathname);
   const activeTab = overrideTab !== null ? overrideTab : pathTab;
 
   // Background refetch function to keep tabs content updated without freezing the UI
@@ -197,8 +191,7 @@ export default function DashboardLayoutClient({
   const handleTabChange = (tabId: DashboardTabId) => {
     setOverrideTab(tabId);
     setIsPublicPreview(false);
-    const tabConfig = DASHBOARD_TABS.find((t) => t.id === tabId);
-    const targetUrl = `/i/${username}${tabConfig?.path ?? ''}`;
+    const targetUrl = `/i/${username}${getDashboardPathForTab(tabId)}`;
     
     // Change URL in address bar instantly without Next.js routing roundtrip
     window.history.pushState(null, '', targetUrl);
@@ -225,14 +218,7 @@ export default function DashboardLayoutClient({
       setIsPublicPreview(isPublic);
       
       if (!isPublic) {
-        let newTab: DashboardTabId = 'home';
-        if (targetPath.endsWith('/content')) newTab = 'content';
-        else if (targetPath.endsWith('/library')) newTab = 'library';
-        else if (targetPath.endsWith('/website')) newTab = 'canvas';
-        else if (targetPath.endsWith('/messages')) newTab = 'messages';
-        else if (targetPath.endsWith('/analytics')) newTab = 'analytics';
-        else if (targetPath.endsWith('/account')) newTab = 'account';
-        
+        const newTab = getDashboardTabFromPath(targetPath);
         setOverrideTab(newTab);
         refetchData(newTab);
       } else {
@@ -259,14 +245,7 @@ export default function DashboardLayoutClient({
         return;
       }
 
-      let newTab: DashboardTabId = 'home';
-      if (path.endsWith('/content')) newTab = 'content';
-      else if (path.endsWith('/library')) newTab = 'library';
-      else if (path.endsWith('/website')) newTab = 'canvas';
-      else if (path.endsWith('/messages')) newTab = 'messages';
-      else if (path.endsWith('/analytics')) newTab = 'analytics';
-      else if (path.endsWith('/account')) newTab = 'account';
-      
+      const newTab = getDashboardTabFromPath(path);
       setOverrideTab(newTab);
       refetchData(newTab);
     };

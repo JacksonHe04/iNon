@@ -166,7 +166,9 @@ export function scrollToElement(elementId: string) {
 // 从作者名字中提取简称/昵称
 export function getAuthorNickname(name: string): string {
   if (!name) return '作者';
-  // 提取 `｜`、`的`、空格前面的字符
-  const raw = name.split('｜')[0].split('的')[0].split(' ')[0].trim();
-  return raw || name;
+  const trimmed = name.trim();
+  const separated = trimmed.split(/[｜|•·—-]/)[0].trim();
+  const withPhraseBoundary = separated.split(/\s+的\s+/)[0].trim();
+  const withWhitespace = withPhraseBoundary.split(/\s+/)[0].trim();
+  return withWhitespace || trimmed || '作者';
 }
