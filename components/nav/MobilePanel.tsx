@@ -127,9 +127,9 @@ export function MobilePanel({
               <div>
                 <p className="text-xs uppercase text-gray-400 mb-1">社交平台</p>
                 <div className="space-y-2 text-sm">
-                  {data.contact.platform_accounts.map((platform) => (
+                  {data.contact.platform_accounts.map((platform, idx) => (
                     <a
-                      key={platform.platform_name}
+                      key={`${platform.platform_name}-${idx}`}
                       href={platform.homepage_link}
                       target="_blank"
                       rel="noopener noreferrer"

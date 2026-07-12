@@ -14,11 +14,11 @@ const platformIconMap = {
 export function SocialLinks({ platformAccounts }: SocialLinksProps) {
   return (
     <div className="hidden lg:flex items-center gap-2">
-      {platformAccounts.map((platform) => {
+      {platformAccounts.map((platform, idx) => {
         const Icon = platformIconMap[platform.platform_name as keyof typeof platformIconMap];
         return (
           <a
-            key={platform.platform_name}
+            key={`${platform.platform_name}-${idx}`}
             href={platform.homepage_link}
             target="_blank"
             rel="noopener noreferrer"
