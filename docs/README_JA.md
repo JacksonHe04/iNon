@@ -198,7 +198,6 @@ iNon/
 │   ├── admin/                   # アドミン側ヘルパー
 │   ├── analytics/               # アクセス統計 + IP ハッシュ
 │   └── utils.ts                 # ユーティリティ（距離、年齢、整形）
-├── data/readme.json             # シード データとバックアップ スナップショット
 ├── types/                       # TypeScript 型（database / layout / index）
 ├── scripts/                     # マイグレーション、インポート、検証、アップロード、アドミン初期化
 ├── supabase/                    # Supabase 設定 + マイグレーション
@@ -246,7 +245,6 @@ pnpm dev
 
 ```bash
 pnpm db:push             # Supabase マイグレーションをプッシュ
-pnpm db:import           # data/readme.json を Supabase に取り込み
 pnpm db:validate         # DB スキーマ / フィールドを検証
 pnpm db:seed-admin       # 初期アドミン アカウントを生成
 pnpm db:upload-assets    # ローカル アセットを Supabase Storage にアップロード

@@ -198,7 +198,6 @@ iNon/
 │   ├── admin/                   # 管理員側 helpers
 │   ├── analytics/               # 訪問統計與 IP 雜湊
 │   └── utils.ts                 # 工具（距離、年齡、格式化）
-├── data/readme.json             # 種子數據與備份快照
 ├── types/                       # TypeScript 類型（database / layout / index）
 ├── scripts/                     # 遷移、導庫、校驗、上傳資產、管理員初始化
 ├── supabase/                    # Supabase 設定與數據庫遷移
@@ -246,7 +245,6 @@ pnpm dev
 
 ```bash
 pnpm db:push             # 推送 Supabase 數據庫遷移
-pnpm db:import           # 將 data/readme.json 導入 Supabase
 pnpm db:validate         # 校驗數據庫結構與欄位完整性
 pnpm db:seed-admin       # 初始化管理員帳號
 pnpm db:upload-assets    # 上傳本地資產到 Supabase Storage

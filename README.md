@@ -198,7 +198,6 @@ iNon/
 │   ├── admin/                   # Admin helpers
 │   ├── analytics/               # Analytics + IP hashing
 │   └── utils.ts                 # utilities (distance, age, formatting)
-├── data/readme.json             # Seed data and backup snapshot
 ├── types/                       # TypeScript types (database / layout / index)
 ├── scripts/                     # migrations, import, validate, upload, admin seed
 ├── supabase/                    # Supabase config + migrations
@@ -246,7 +245,6 @@ Local server runs at `http://localhost:3000`.
 
 ```bash
 pnpm db:push             # Push Supabase migrations
-pnpm db:import           # Import data/readme.json into Supabase
 pnpm db:validate         # Validate DB schema and field integrity
 pnpm db:seed-admin       # Seed initial admin account
 pnpm db:upload-assets    # Upload local assets to Supabase Storage
