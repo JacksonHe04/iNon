@@ -1,7 +1,7 @@
 'use client';
 
-import GlassCard from '@/components/GlassCard';
-import { AppWindow, ExternalLink } from 'lucide-react';
+import { AppWindow } from 'lucide-react';
+import LinkGridBlock, { type LinkGridItem } from './LinkGridBlock';
 
 export interface AppItem {
   id: string;
@@ -17,38 +17,22 @@ interface AppLauncherBlockProps {
 }
 
 export default function AppLauncherBlock({ apps = [], title }: AppLauncherBlockProps) {
-  return (
-    <GlassCard className="p-5 space-y-4 hover:border-purple-400/40 transition">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
-            <AppWindow className="w-5 h-5" />
-          </div>
-          {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
-        </div>
-        <span className="text-xs text-gray-400 font-mono">{apps.length} 个应用</span>
-      </div>
+  const linkItems: LinkGridItem[] = apps.map((app) => ({
+    id: app.id,
+    name: app.name,
+    href: app.link,
+    icon: app.icon,
+    subtitle: app.category,
+  }));
 
-      <div className="grid grid-cols-2 gap-2.5">
-        {apps.map((app) => (
-          <a
-            key={app.id}
-            href={app.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-3 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-purple-400/50 transition"
-          >
-            <div className="flex items-center gap-2.5 truncate">
-              <span className="text-base">{app.icon || '🚀'}</span>
-              <div className="truncate">
-                <div className="text-xs font-bold text-gray-900 dark:text-white truncate">{app.name}</div>
-                <div className="text-[10px] text-gray-500 truncate">{app.category}</div>
-              </div>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
-          </a>
-        ))}
-      </div>
-    </GlassCard>
+  return (
+    <LinkGridBlock
+      items={linkItems}
+      title={title}
+      blockIcon={AppWindow}
+      themeColorClass="purple"
+      countLabel="个应用"
+      defaultIcon="🚀"
+    />
   );
 }
