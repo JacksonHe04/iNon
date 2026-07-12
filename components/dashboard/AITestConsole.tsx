@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Bot } from 'lucide-react';
 import GlassCard from '@/components/GlassCard';
