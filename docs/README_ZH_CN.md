@@ -279,6 +279,12 @@ pnpm build               # 生产构建
 
 ---
 
+## 它一路走来的样子
+
+从一份空白的脚手架，到一个可以自由拼装的个人 OS，iNon 是这样一步一步长成今天这样的。如果你好奇它的故事——那些悄悄的打磨、那些重写、那个它真正长大的日子——可以读读这份 [产品演进旅程](PROJECT_EVOLUTION.md)。
+
+---
+
 ## 致谢与作者
 
 由 [YingYingDontKill（何锦诚 / Jackson He）](https://github.com/JacksonHe04) 用心维护。

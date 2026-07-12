@@ -279,6 +279,12 @@ The full license text is available in the [LICENSE](LICENSE) file at the reposit
 
 ---
 
+## The journey so far
+
+From a blank scaffold to a fully composable personal OS, iNon has grown in waves. If you're curious about how it came to be — the quiet polish, the rewrites, the day it grew up — read [Project Evolution](docs/PROJECT_EVOLUTION.md).
+
+---
+
 ## Author
 
 Crafted and maintained by [YingYingDontKill (Jackson He)](https://github.com/JacksonHe04).
