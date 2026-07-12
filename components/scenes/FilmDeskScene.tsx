@@ -1,12 +1,18 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import type { ReadmeData } from '@/types';
 import { useState } from 'react';
 import { Film, Play, Disc } from 'lucide-react';
 
 interface FilmDeskSceneProps {
-  films: ReadmeData['films']['films'];
+  films: Array<{
+    name: string;
+    director: string;
+    country: string;
+    link: string;
+    comment: string;
+    image_url?: string;
+  }>;
   onSelect: (detail: {
     title: string;
     description: string;

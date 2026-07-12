@@ -3,36 +3,12 @@
 import { Disc, Play, Disc2, Music } from 'lucide-react';
 import CollectionGridBlock, { type CollectionTabConfig } from './CollectionGridBlock';
 import { getBlockTitle } from '@/lib/blocks/registry';
-
-export interface MusicAlbum {
-  name: string;
-  artist: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
-
-export interface MusicSong {
-  name: string;
-  artist: string;
-  album: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
-
-export interface MusicMusician {
-  name: string;
-  region: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
+import type { LibraryItemDTO } from '@/types';
 
 interface MusicBlockProps {
-  albums?: MusicAlbum[];
-  songs?: MusicSong[];
-  musicians?: MusicMusician[];
+  albums?: LibraryItemDTO[];
+  songs?: LibraryItemDTO[];
+  musicians?: LibraryItemDTO[];
   title?: string;
   colSpan?: number;
 }
@@ -52,7 +28,7 @@ export default function MusicBlock({
       icon: Disc,
       getCardMeta: (item) => ({
         title: item.name,
-        subTitle: item.artist,
+        subTitle: item.creator,
       }),
     },
     {
@@ -62,7 +38,7 @@ export default function MusicBlock({
       icon: Play,
       getCardMeta: (item) => ({
         title: item.name,
-        subTitle: `${item.artist} · ${item.album}`,
+        subTitle: item.creator,
       }),
     },
     {
@@ -72,7 +48,7 @@ export default function MusicBlock({
       icon: Disc2,
       getCardMeta: (item) => ({
         title: item.name,
-        subTitle: item.region,
+        subTitle: item.comment,
       }),
     },
   ];

@@ -1,11 +1,17 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import type { ReadmeData } from '@/types';
 import { BookOpen, ExternalLink } from 'lucide-react';
 
 interface ReadingDeskSceneProps {
-  books: ReadmeData['reading']['books'];
+  books: Array<{
+    name: string;
+    author: string;
+    country: string;
+    link: string;
+    comment: string;
+    image_url?: string;
+  }>;
   onSelect: (detail: {
     title: string;
     description: string;

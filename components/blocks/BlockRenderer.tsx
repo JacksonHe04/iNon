@@ -79,9 +79,9 @@ export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererP
     case 'music':
       return (
         <MusicBlock
-          albums={data.music.albums}
-          songs={data.music.songs}
-          musicians={data.music.musicians}
+          albums={data.library.music.works.filter((w) => w.categoryName !== '嘻哈')}
+          songs={data.library.music.songs.filter((s) => s.categoryName !== '嘻哈')}
+          musicians={data.library.music.creators.filter((m) => m.categoryName !== '嘻哈')}
           title={title}
           colSpan={block.colSpan}
         />
@@ -89,8 +89,8 @@ export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererP
     case 'movies':
       return (
         <MovieBlock
-          films={data.films.films}
-          directors={data.films.directors}
+          films={data.library.film.works}
+          directors={data.library.film.creators}
           title={title}
           colSpan={block.colSpan}
           mode={mode}
@@ -99,11 +99,20 @@ export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererP
     case 'books':
       return (
         <BookBlock
-          books={data.reading.books}
-          authors={data.reading.authors}
+          books={data.library.book.works}
+          authors={data.library.book.creators}
           title={title}
           colSpan={block.colSpan}
           mode={mode}
+        />
+      );
+    case 'games':
+      return (
+        <GameBlock
+          works={data.library.game.works}
+          creators={data.library.game.creators}
+          title={title}
+          colSpan={block.colSpan}
         />
       );
     case 'friend_links':
@@ -158,9 +167,9 @@ export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererP
     case 'hiphop':
       return (
         <HiphopBlock
-          albums={data.hiphop.albums}
-          songs={data.hiphop.songs}
-          musicians={data.hiphop.musicians}
+          albums={data.library.music.works.filter((w) => w.categoryName === '嘻哈')}
+          songs={data.library.music.songs.filter((s) => s.categoryName === '嘻哈')}
+          musicians={data.library.music.creators.filter((m) => m.categoryName === '嘻哈')}
           title={title}
           colSpan={block.colSpan}
         />

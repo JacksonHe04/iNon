@@ -6,35 +6,12 @@ import Modal from '@/components/Modal';
 import { Mic2, Play, ExternalLink, Disc, Disc2 } from 'lucide-react';
 import BlockImage from './BlockImage';
 
-export interface HiphopAlbum {
-  name: string;
-  artist: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
-
-export interface HiphopSong {
-  name: string;
-  artist: string;
-  album: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
-
-export interface HiphopMusician {
-  name: string;
-  region: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
+import type { LibraryItemDTO } from '@/types';
 
 interface HiphopBlockProps {
-  albums: HiphopAlbum[];
-  songs: HiphopSong[];
-  musicians: HiphopMusician[];
+  albums: LibraryItemDTO[];
+  songs: LibraryItemDTO[];
+  musicians: LibraryItemDTO[];
   title?: string;
   colSpan?: number;
 }
@@ -117,7 +94,7 @@ export default function HiphopBlock({
                 onClick={() =>
                   setSelectedDetail({
                     title: album.name,
-                    subTitle: `${album.artist} · 专辑`,
+                    subTitle: `${album.creator} · 专辑`,
                     comment: album.comment,
                     link: album.link,
                   })
@@ -132,7 +109,7 @@ export default function HiphopBlock({
                     <Disc className="w-3.5 h-3.5 text-orange-500" />
                   </div>
                   <BlockImage
-                    src={album.image_url}
+                    src={album.imageUrl || undefined}
                     alt={album.name}
                     fallback={
                       <div className={`aspect-square rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
@@ -141,7 +118,7 @@ export default function HiphopBlock({
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
                     {album.name}
                   </h4>
-                  <p className="text-[10px] text-gray-500 truncate mt-0.5">{album.artist}</p>
+                  <p className="text-[10px] text-gray-500 truncate mt-0.5">{album.creator}</p>
                 </div>
               </div>
             ))}
@@ -156,8 +133,8 @@ export default function HiphopBlock({
                 onClick={() =>
                   setSelectedDetail({
                     title: song.name,
-                    subTitle: `${song.artist} · 单曲`,
-                    comment: song.comment || `收录于专辑《${song.album}》`,
+                    subTitle: `${song.creator} · 单曲`,
+                    comment: song.comment,
                     link: song.link,
                   })
                 }
@@ -171,7 +148,7 @@ export default function HiphopBlock({
                     <Play className="w-3 h-3 text-orange-500" />
                   </div>
                   <BlockImage
-                    src={song.image_url}
+                    src={song.imageUrl || undefined}
                     alt={song.name}
                     fallback={
                       <div className={`aspect-square rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 2)} opacity-80`} />
@@ -181,7 +158,7 @@ export default function HiphopBlock({
                     {song.name}
                   </h4>
                   <p className="text-[10px] text-gray-500 truncate mt-0.5">
-                    {song.artist} · {song.album}
+                    {song.creator}
                   </p>
                 </div>
               </div>
@@ -197,7 +174,7 @@ export default function HiphopBlock({
                 onClick={() =>
                   setSelectedDetail({
                     title: mus.name,
-                    subTitle: `${mus.region} · 音乐人`,
+                    subTitle: '音乐人',
                     comment: mus.comment,
                     link: mus.link,
                   })
@@ -212,7 +189,7 @@ export default function HiphopBlock({
                     <Disc2 className="w-3.5 h-3.5 text-orange-500" />
                   </div>
                   <BlockImage
-                    src={mus.image_url}
+                    src={mus.imageUrl || undefined}
                     alt={mus.name}
                     fallback={
                       <div className={`aspect-square rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx + 4)} opacity-80`} />
@@ -221,7 +198,7 @@ export default function HiphopBlock({
                   <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate">
                     {mus.name}
                   </h4>
-                  <p className="text-[10px] text-gray-500 truncate mt-0.5">{mus.region}</p>
+                  <p className="text-[10px] text-gray-500 truncate mt-0.5">{mus.comment}</p>
                 </div>
               </div>
             ))}

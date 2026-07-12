@@ -8,7 +8,7 @@ import ReadingDeskScene from '../scenes/ReadingDeskScene';
 import Modal from '../Modal';
 
 interface ReadingSectionProps {
-  data: ReadmeData['reading'];
+  data: any;
 }
 
 type BookDetail = {
@@ -20,6 +20,8 @@ type BookDetail = {
 };
 
 export default function ReadingSection({ data }: ReadingSectionProps) {
+  const books = data?.books || [];
+  const authors = data?.authors || [];
   const [selectedBook, setSelectedBook] = useState<BookDetail | null>(null);
 
   return (
@@ -35,7 +37,7 @@ export default function ReadingSection({ data }: ReadingSectionProps) {
         </motion.h2>
 
         <ReadingDeskScene
-          books={data.books}
+          books={books}
           activeTitle={selectedBook?.title ?? null}
           onSelect={(detail) =>
             setSelectedBook({
@@ -52,7 +54,7 @@ export default function ReadingSection({ data }: ReadingSectionProps) {
         <div className="mt-16 mb-12">
           <h3 className="text-2xl font-semibold mb-6">书籍</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.books.map((book, idx) => (
+            {books.map((book: any, idx: number) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 20 }}
@@ -101,7 +103,7 @@ export default function ReadingSection({ data }: ReadingSectionProps) {
         <div className="mt-16">
           <h3 className="text-2xl font-semibold mb-6">作家</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.authors.map((author, idx) => (
+            {authors.map((author: any, idx: number) => (
               <GlassCard key={idx} hover>
                 <h4 className="font-semibold mb-1">{author.name}</h4>
                 <p className="text-sm text-gray-500 mb-2">{author.country}</p>

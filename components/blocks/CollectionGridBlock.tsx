@@ -175,7 +175,7 @@ export default function CollectionGridBlock({
                     {TabIcon && <TabIcon className={`w-3.5 h-3.5 ${iconColors[themeColorClass] || iconColors.indigo}`} />}
                   </div>
                   <BlockImage
-                    src={item.image_url}
+                    src={item.image_url || item.imageUrl}
                     alt={meta.title}
                     fallback={
                       <div className={`aspect-square rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />

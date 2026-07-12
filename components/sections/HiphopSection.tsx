@@ -8,7 +8,7 @@ import Modal from '../Modal';
 import OverflowTooltip from '../OverflowTooltip';
 
 interface HiphopSectionProps {
-  data: ReadmeData['hiphop'];
+  data: any;
 }
 
 type Detail = {
@@ -19,6 +19,9 @@ type Detail = {
 };
 
 export default function HiphopSection({ data }: HiphopSectionProps) {
+  const albums = data?.albums || [];
+  const songs = data?.songs || [];
+  const musicians = data?.musicians || [];
   const [selectedDetail, setSelectedDetail] = useState<Detail | null>(null);
 
   return (
@@ -35,7 +38,7 @@ export default function HiphopSection({ data }: HiphopSectionProps) {
 
         <HiphopGrid
           title="专辑"
-          data={data.albums.map((album, idx) => ({
+          data={albums.map((album: any, idx: number) => ({
             id: `hiphop-album-${idx}`,
             order: idx + 1,
             label: 'Album',
@@ -55,7 +58,7 @@ export default function HiphopSection({ data }: HiphopSectionProps) {
 
         <HiphopGrid
           title="单曲"
-          data={data.songs.map((song, idx) => ({
+          data={songs.map((song: any, idx: number) => ({
             id: `hiphop-song-${idx}`,
             order: idx + 1,
             label: 'Song',
@@ -75,7 +78,7 @@ export default function HiphopSection({ data }: HiphopSectionProps) {
 
         <HiphopGrid
           title="音乐人"
-          data={data.musicians.map((musician, idx) => ({
+          data={musicians.map((musician: any, idx: number) => ({
             id: `hiphop-musician-${idx}`,
             order: idx + 1,
             label: 'Artist',

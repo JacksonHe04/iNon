@@ -5,27 +5,11 @@ import { BookOpen, User } from 'lucide-react';
 import ReadingDeskScene from '@/components/scenes/ReadingDeskScene';
 import CollectionGridBlock, { type CollectionTabConfig } from './CollectionGridBlock';
 import { getBlockTitle } from '@/lib/blocks/registry';
-
-export interface BookItem {
-  name: string;
-  author: string;
-  country: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
-
-export interface AuthorItem {
-  name: string;
-  country: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
+import type { LibraryItemDTO } from '@/types';
 
 interface BookBlockProps {
-  books?: BookItem[];
-  authors?: AuthorItem[];
+  books?: LibraryItemDTO[];
+  authors?: LibraryItemDTO[];
   title?: string;
   colSpan?: number;
   mode?: 'readonly' | 'edit';
@@ -49,7 +33,7 @@ export default function BookBlock({
       icon: BookOpen,
       getCardMeta: (item) => ({
         title: item.name,
-        subTitle: `${item.author} · ${item.country}`,
+        subTitle: item.creator,
       }),
     },
     {
@@ -59,7 +43,7 @@ export default function BookBlock({
       icon: User,
       getCardMeta: (item) => ({
         title: item.name,
-        subTitle: item.country,
+        subTitle: item.comment,
       }),
     },
   ];
@@ -73,7 +57,14 @@ export default function BookBlock({
       colSpan={colSpan}
       interactiveScene={
         <ReadingDeskScene
-          books={books}
+          books={books.map((b) => ({
+            name: b.name,
+            author: b.creator,
+            country: '',
+            link: b.link,
+            comment: b.comment,
+            image_url: b.imageUrl || undefined,
+          }))}
           activeTitle={activeTitle}
           onSelect={(b) => setActiveTitle(b.title)}
           mode={mode}

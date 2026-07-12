@@ -8,7 +8,7 @@ import Modal from '../Modal';
 import OverflowTooltip from '../OverflowTooltip';
 
 interface MusicSectionProps {
-  data: ReadmeData['music'];
+  data: any;
 }
 
 type MusicDetail = {
@@ -19,6 +19,9 @@ type MusicDetail = {
 };
 
 export default function MusicSection({ data }: MusicSectionProps) {
+  const albums = data?.albums || [];
+  const songs = data?.songs || [];
+  const musicians = data?.musicians || [];
   const [selectedDetail, setSelectedDetail] = useState<MusicDetail | null>(null);
 
   return (
@@ -35,7 +38,7 @@ export default function MusicSection({ data }: MusicSectionProps) {
 
         <MusicGrid
           title="专辑"
-          data={data.albums.map((album, idx) => ({
+          data={albums.map((album: any, idx: number) => ({
             id: `album-${idx}`,
             order: idx + 1,
             label: 'Album',
@@ -55,7 +58,7 @@ export default function MusicSection({ data }: MusicSectionProps) {
 
         <MusicGrid
           title="单曲"
-          data={data.songs.map((song, idx) => ({
+          data={songs.map((song: any, idx: number) => ({
             id: `song-${idx}`,
             order: idx + 1,
             label: 'Song',
@@ -75,7 +78,7 @@ export default function MusicSection({ data }: MusicSectionProps) {
 
         <MusicGrid
           title="音乐人"
-          data={data.musicians.map((musician, idx) => ({
+          data={musicians.map((musician: any, idx: number) => ({
             id: `musician-${idx}`,
             order: idx + 1,
             label: 'Artist',

@@ -5,27 +5,11 @@ import { Film, User } from 'lucide-react';
 import FilmDeskScene from '@/components/scenes/FilmDeskScene';
 import CollectionGridBlock, { type CollectionTabConfig } from './CollectionGridBlock';
 import { getBlockTitle } from '@/lib/blocks/registry';
-
-export interface MovieItem {
-  name: string;
-  director: string;
-  country: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
-
-export interface DirectorItem {
-  name: string;
-  country: string;
-  link: string;
-  comment: string;
-  image_url?: string;
-}
+import type { LibraryItemDTO } from '@/types';
 
 interface MovieBlockProps {
-  films?: MovieItem[];
-  directors?: DirectorItem[];
+  films?: LibraryItemDTO[];
+  directors?: LibraryItemDTO[];
   title?: string;
   colSpan?: number;
   mode?: 'readonly' | 'edit';
@@ -49,7 +33,7 @@ export default function MovieBlock({
       icon: Film,
       getCardMeta: (item) => ({
         title: item.name,
-        subTitle: `${item.director} · ${item.country}`,
+        subTitle: item.creator,
       }),
     },
     {
@@ -59,7 +43,7 @@ export default function MovieBlock({
       icon: User,
       getCardMeta: (item) => ({
         title: item.name,
-        subTitle: item.country,
+        subTitle: item.comment,
       }),
     },
   ];
@@ -73,7 +57,14 @@ export default function MovieBlock({
       colSpan={colSpan}
       interactiveScene={
         <FilmDeskScene
-          films={films}
+          films={films.map((f) => ({
+            name: f.name,
+            director: f.creator,
+            country: '',
+            link: f.link,
+            comment: f.comment,
+            image_url: f.imageUrl || undefined,
+          }))}
           activeTitle={activeTitle}
           onSelect={(f) => setActiveTitle(f.title)}
           mode={mode}

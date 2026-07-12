@@ -8,7 +8,7 @@ import FilmDeskScene from '../scenes/FilmDeskScene';
 import Modal from '../Modal';
 
 interface FilmsSectionProps {
-  data: ReadmeData['films'];
+  data: any;
 }
 
 type FilmDetail = {
@@ -20,6 +20,8 @@ type FilmDetail = {
 };
 
 export default function FilmsSection({ data }: FilmsSectionProps) {
+  const films = data?.films || [];
+  const directors = data?.directors || [];
   const [selectedFilm, setSelectedFilm] = useState<FilmDetail | null>(null);
 
   return (
@@ -35,7 +37,7 @@ export default function FilmsSection({ data }: FilmsSectionProps) {
         </motion.h2>
 
         <FilmDeskScene
-          films={data.films}
+          films={films}
           activeTitle={selectedFilm?.title ?? null}
           onSelect={(detail) =>
             setSelectedFilm({
@@ -52,7 +54,7 @@ export default function FilmsSection({ data }: FilmsSectionProps) {
         <div className="mt-16 mb-12">
           <h3 className="text-2xl font-semibold mb-6">影片</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.films.map((film, idx) => (
+            {films.map((film: any, idx: number) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 20 }}
@@ -101,7 +103,7 @@ export default function FilmsSection({ data }: FilmsSectionProps) {
         <div className="mt-16">
           <h3 className="text-2xl font-semibold mb-6">导演</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.directors.map((director, idx) => (
+            {directors.map((director: any, idx: number) => (
               <GlassCard key={idx} hover>
                 <h4 className="font-semibold mb-1">{director.name}</h4>
                 <p className="text-sm text-gray-500 mb-2">{director.country}</p>
