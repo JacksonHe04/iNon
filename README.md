@@ -1,194 +1,287 @@
-# iNon — Block-Based Personal OS & Digital Garden
+# iNon — Block by Block, Build a Personal Site You Truly Own
 
-> **iNon** — A local-first, customizable, block-based personal workspace and digital garden.
-> Powered by Next.js 16, Supabase, React Three Fiber, and a unified atomic component system ("Non").
+> **iNon** — A block-based personal OS that lets your personal site truly belong to you.
+> *Open source. Infinitely customizable. Effortless to use.*
 >
-> One personal OS: Console (`/i/:slug`) & Digital Garden (`/:slug`).
+> One personal OS: the Console (`/i/:slug`) and the Digital Garden (`/:slug`).
 
-🌐 **Read this README in another language:** [English](README.md) · [简体中文](docs/README_ZH_CN.md) · [繁體中文](docs/README_ZH_TW.md) · [日本語](docs/README_JA.md)
+[English](README.md) · [简体中文](docs/README_ZH_CN.md) · [繁體中文](docs/README_ZH_TW.md) · [日本語](docs/README_JA.md)
 
-## Interface Preview
+---
 
-| Home Narrative |
+## What it is
+
+iNon is an **open-source, infinitely customizable** personal site system.
+You **drag blocks into place like Lego** to assemble your homepage — bookmarks, projects, music walls, bookshelves, AI avatar, and whatever else you want to share.
+
+You define the content. You decide the layout. You own the data.
+**No code required** to build something beautiful and deeply personal.
+
+But if you *do* want to dig into the code — even better. The whole system ships under AGPL-3.0. Fork it, modify it, wire it to your own backend — all welcome.
+
+---
+
+## Why iNon
+
+Most "personal sites" out there are templates — pick one, fill in the blanks, apply a skin. They look like yours on the surface, but they aren't really *yours* underneath.
+
+iNon is different. At its core are **22 independent blocks**, each handling one kind of content. **You choose which blocks appear, in what order, side-by-side or stacked.** Blocks aren't locked together; add, reorder, hide — whatever.
+
+And there's the catch that matters most: **whatever you lay out in the Console is what visitors see on the public page.** WYSIWYG. WYSISYG.
+
+---
+
+## At a glance
+
+| Home narrative |
 | --- |
-| ![Home Narrative](docs/images/desktop-home.png) |
+| ![Home narrative](docs/images/desktop-home.png) |
 
-| AI Q&A Ask | AI Q&A Answer |
+| AI Q&A — Ask | AI Q&A — Answer |
 | --- | --- |
 | ![Hobby Ask](docs/images/desktop-hobby-ask.png) | ![Hobby Answer](docs/images/desktop-hobby-anwser.png) |
 | ![MBTI Ask](docs/images/desktop-mbti-ask.png) | ![MBTI Answer](docs/images/desktop-mbti-anwser.png) |
 
-| Mobile Home | Mobile Menu | Mobile Ask | Mobile Galaxy |
+| Mobile home | Mobile menu | Mobile ask | Mobile galaxy |
 | --- | --- | --- | --- |
 | ![Mobile Home](docs/images/mobile-home.png) | ![Mobile Menu](docs/images/mobile-menu.png) | ![Mobile Ask](docs/images/mobile-ask.png) | ![Mobile Galaxy](docs/images/mobile-galaxy.png) |
 
-| Music Cards | Film & Book Desk |
+| Music cards | Films & books desk |
 | --- | --- |
 | ![Music Card](docs/images/desktop-music.png) | ![Film Desk](docs/images/desktop-desk.png) |
 
-| Tag Wall | Deep Space Area |
+| Tag wall | Deep space |
 | --- | --- |
 | ![Tag Wall](docs/images/desktop-label.png) | ![Deep Space](docs/images/desktop-into-deepwater.png) |
 
-## System Architecture
+---
+
+## Who it's for
+
+- **Everyday creators** who just want a good-looking personal site. Sign up online, drag in a few blocks, fill them in, and immediately have a shareable URL that looks like *you*.
+- **Independent developers** who want an open-source base they can fork, change, and self-host. The full repo, the license, the components — all yours to play with.
+
+---
+
+## How it works
 
 ```
                         ┌──────────────────────────────┐
-                        │        Supabase DB           │
-                        │ (Postgres + Auth + Storage)  │
+                        │         Supabase (DB)        │
+                        │  (Postgres + Auth + Storage) │
                         └──────────────┬───────────────┘
                                        │
                 ┌──────────────────────┴──────────────────────┐
-                │             iNon Core System                │
+                │            iNon Core Engine                │
                 │     (Next.js 16 + React 19 + R3F)           │
+                │     — Block Registry (single source of truth)│
+                │     — Visual canvas layout engine           │
+                │     — Multi-theme + dark mode               │
+                │     — Streaming AI avatar                   │
                 └──────┬──────────────────────────────┬───────┘
                        │                              │
           ┌────────────▼────────────┐    ┌────────────▼────────────┐
-          │     Console /i/:slug    │    │    Public Site /:slug   │
+          │    Console /i/:slug     │    │   Public Site /:slug   │
           │                         │    │                         │
-          │ • Home (Bookmarks & AI) │    │ • Glassmorphism Design  │
-          │ • Content CRUD Manager  │    │ • 3D Desk & R3F Galaxy  │
-          │ • Block Canvas Builder  │    │ • Dynamic Non Blocks    │
-          │ • Account Settings      │    │ • AI Avatar Assistant   │
+          │  • Visual canvas layout │    │  • Glassmorphism +      │
+          │  • Block drag & reorder │    │    dark mode            │
+          │  • Full content CRUD    │    │  • React Three Fiber    │
+          │  • Live theme switching │    │    3D scenes            │
+          │  • Account & security   │    │  • Floating AI avatar   │
+          │  • Auto-save             │    │  • Responsive (mobile)  │
           └─────────────────────────┘    └─────────────────────────┘
 ```
 
-## What it is
+Admin (`/admin`) is restricted to **superadmins** and handles asset / object-storage maintenance only.
 
-iNon elevates personal website creation into a **block-based operating system**. It seamlessly drives both the private workspace console (`/i/:slug`) and the public digital showcase (`/:slug`) using a unified component architecture. Users can effortlessly customize their content, layout structure, media collections, bookmarks, and AI avatar assistant.
+---
 
-## Key Features
+## 22 blocks: assemble whatever you want to show
 
-- **Block-Based OS ("Non" System)**: Modular component architecture driving both personal dashboard and public site.
-- **Visual Canvas Builder**: Real-time canvas engine (`BlockCanvasEngine`) supporting drag-and-drop reordering, visibility toggle, and responsive column sizing (50% / 100% width).
-- **Multi-Slug & Permission Design**:
-  - `/:slug`: Public read-only digital garden accessible to guests.
-  - `/i/:slug`: Private dashboard for account owner to edit content, layout, and settings.
-  - `/admin`: Superadmin asset library & object storage manager.
-- **AI Avatar Assistant**: Built-in `/api/assistant` streaming GLM / LLM model responses populated by user markdown knowledge base.
-- **Immersive 3D & Micro-Animations**: React Three Fiber 3D interactive desks, creation galaxies, dynamic Canvas background, dark mode, and Framer Motion transitions.
+Each block is the smallest unit of one kind of content. They all share a single **registry** as the source of truth — every title, every icon, everywhere, comes from this one place.
 
-## Atomic Definition: Non Components
-
-iNon defines system capabilities through granular, reusable "Non" atomic blocks:
-
-| Block Component | Description |
+| Block | What it shows |
 | --- | --- |
-| **Bio Header** (`BioHeaderBlock`) | Profile avatar, name, bio, city distance calculator, age progress bar, and social links. |
-| **Website Bookmarks** (`BookmarkBlock`) | Quick launch web shortcuts and dev tool grid. |
-| **Project Showcase** (`ProjectBlock`) | Rich project cards with covers, tech stack badges, status, and quick links. |
-| **Music Card** (`MusicBlock`) | Artist & album collection grid with horizontal scroll. |
-| **Movie Posters** (`MovieBlock`) | Film wall and 3D desk scene integrations. |
-| **Bookshelf** (`BookBlock`) | Reading desk and book summary cards. |
-| **Game Collection** (`GameBlock`) | Gaming library and interactive shelf. |
-| **AI Avatar Entrance** (`AiCloneBlock`) | Floating AI dialog & streaming assistant interface. |
-| **Activity Timeline** (`TimelineBlock`) | Public personal milestones and career waterfall. |
-| **Friend Links** (`FriendLinkBlock`) | Interactive friend link matrix. |
-| **Contact Card** (`ContactBlock`) | Direct message form and social touchpoints. |
-| **App Launcher** (`AppLauncherBlock`) | Application launcher and utility tool matrix. |
+| **Bio Header** (`bio`) | Avatar, name, bio, current city, age progress, social links. |
+| **Bookmarks** (`bookmarks`) | Grid of favorite URLs and dev tools. |
+| **Projects** (`projects`) | Cover, status, summary, tech stack, quick jump for each project. |
+| **App Launcher** (`app_launcher`) | Quick-launch grid of apps and tools. |
+| **Dev Tools** (`dev_tools`) | Day-to-day developer tools. |
+| **Music** (`music`) | Artists and albums grid, horizontal scroll supported. |
+| **Hip-hop** (`hiphop`) | Hip-hop collection, distinct from general music. |
+| **Movies** (`movies`) | Film wall, paired with 3D desk scenes. |
+| **Books** (`books`) | Reading desk and book summary cards. |
+| **Games** (`games`) | Game grid and interactive shelf. |
+| **Products** (`products`) | Favorite products, recommendations, hardware you use. |
+| **Creations** (`creation`) | Videos, articles, talks, mottos, and quotes together. |
+| **Timeline** (`timeline`) | Personal milestones and career waterfall. |
+| **Education** (`education`) | Schools, majors, advisors, learning journey. |
+| **Work** (`work`) | Current job, past roles, work preferences. |
+| **Skills** (`skills`) | Tech stack and capability tags. |
+| **Live Events** (`events`) | Performances, talks, in-person meetups. |
+| **Tag Wall** (`tags`) | Keywords, values, habits, tags as a visual wall. |
+| **Friend Links** (`friend_links`) | Friend link matrix. |
+| **Contact** (`contact`) | Message form and social touchpoints. |
+| **Thoughts** (`thoughts`) | Quick sparks and short reflections. |
+| **AI Avatar** (`ai_clone`) | Floating AI chat fed by your own profile. |
 
-## Tech Stack
+Adding a new block is a one-place change: register it. Drop the component into `components/blocks/`, add one line to the registry, and every UI corner — sidebar menu, console canvas, public page — picks it up.
 
-- **Framework**: Next.js 16 (App Router, Turbopack)
+---
+
+## Key capabilities
+
+- **Canvas-style layout** — drag, reorder, hide, and adjust column width (single / half-and-half) right in `/i/:slug`. WYSIWYG.
+- **22+ Non Blocks** — a single component system drives both the Console and the public site, zero duplication.
+- **Multi-slug + Permissions**
+  - `/:slug` — public, read-only homepage, accessible to anyone.
+  - `/i/:slug` — owner's Console: read, write, edit.
+  - `/admin` — asset library, admin-only.
+- **AI Avatar** — `/api/assistant` is a streaming endpoint that turns your content profile into a system prompt, pluggable into any OpenAI-compatible model.
+- **Immersive 3D** — React Three Fiber desk, galaxy, and deep-space scenes with a dynamic canvas background.
+- **Multi-theme** — switch themes and dark mode live in the Console; the public page follows instantly.
+- **Responsive** — 1 / 2-column adaptive on desktop; collapses to single column and a floating sidebar on mobile.
+- **Asset Library** — shared image bed; upload images directly inside blocks, no external host needed.
+- **Auto-save** — edits persist as you go; goodbye "I forgot to save".
+- **Version bumps on commit** — the current version is always visible on the top nav.
+
+---
+
+## Tech stack
+
+- **Framework**: Next.js 16 (App Router, Turbopack, React Server Components, Proxy)
 - **Language**: TypeScript 6 + React 19
-- **Database & Auth**: Supabase Postgres + Supabase Auth (`@supabase/ssr`, `@supabase/supabase-js`)
-- **Styling & UI**: Tailwind CSS 4 + Glassmorphism design system + Framer Motion
-- **3D Graphics**: Three.js + React Three Fiber + @react-three/drei
-- **State & Utilities**: Zustand, TanStack React Query, Nuqs, Zod, Lucide React
+- **Database & Auth**: Supabase (Postgres + Auth + Storage, `@supabase/ssr` + `@supabase/supabase-js`)
+- **Styling & UI**: Tailwind CSS 4 + multi-theme system + Framer Motion + Lucide React
+- **3D**: Three.js + React Three Fiber + @react-three/drei
+- **State & Data**: Zustand, @tanstack/react-query, nuqs
+- **Forms & Validation**: react-hook-form + Zod
+- **Theming**: next-themes
+- **Analytics**: `@vercel/analytics` + salted IP hashing
 
-## Project Structure
+---
+
+## Repository layout
 
 ```
 iNon/
 ├── app/
+│   ├── (home)/                  # Platform landing page (guests)
 │   ├── [slug]/                  # Public user page (/:slug)
-│   ├── i/                       # Private user dashboard (/i/:slug)
-│   ├── admin/                   # Asset library manager (/admin)
-│   ├── api/assistant/route.ts   # AI assistant streaming route
-│   └── globals.css              # Tailwind 4 & global styles
+│   ├── i/[slug]/                # Console (/i/:slug)
+│   ├── admin/                   # Asset library (/admin)
+│   ├── login/                   # Sign-in
+│   ├── api/
+│   │   ├── assistant/           # AI avatar streaming endpoint
+│   │   ├── messages/            # Visitor messages
+│   │   ├── account/             # Settings / content / layout for current user
+│   │   └── admin/               # Asset / content / upload / delete for admins
+│   ├── layout.tsx
+│   └── globals.css              # Tailwind 4 + global styles
 ├── components/
-│   ├── blocks/                  # "Non" atomic block components & canvas engine
-│   ├── scenes/                  # React Three Fiber 3D scenes (ProductDesk, Galaxy, etc.)
-│   ├── dashboard/               # Console UI components (/i/:slug)
-│   ├── editor/                  # Visual content block editors
-│   ├── layout/                  # Shell layouts, top nav, side nav
-│   ├── BackGround.tsx           # Dynamic Canvas background
-│   └── GlassCard.tsx            # Glassmorphism UI primitive
-├── data/readme.json             # Seed data & backup snapshot
+│   ├── blocks/                  # 22 Non Blocks + canvas engine + renderer
+│   ├── scenes/                  # React Three Fiber 3D scenes
+│   ├── dashboard/               # Console UI (sidebar, lists, cards)
+│   ├── editor/                  # Schema-driven content editors
+│   ├── layout/                  # Shell layout, top nav, floating sidebar
+│   ├── ai/                      # AI avatar UI (streaming response)
+│   ├── ui/                      # Generic UI atoms (glass, buttons, inputs)
+│   ├── BackGround.tsx           # Dynamic flowing canvas background
+│   └── GlassCard.tsx            # Glassmorphism primitive
+├── hooks/                       # Client hooks (AI / assets / layout / clock / distance)
 ├── lib/
-│   ├── auth/                    # Supabase session & permission helpers
-│   ├── content.ts               # Data fetching & schema mapping
-│   ├── markdown.ts              # Knowledge base to Markdown generator for AI
-│   └── utils.ts                 # Location/distance/age helpers
-├── supabase/                    # Schema migrations & Supabase config
-├── scripts/                     # Seed admin, asset upload, data validation scripts
-├── types/                       # TypeScript interfaces & layout definitions
-└── docs/                        # Multi-language README documentation & images
+│   ├── blocks/registry.ts       # Block single source of truth (titles, icons)
+│   ├── content.ts               # Data fetch and field mapping
+│   ├── markdown.ts              # Profile → Markdown (AI system prompt)
+│   ├── auth/                    # Supabase session, permissions, username lookup
+│   ├── supabase/                # Supabase clients and middleware
+│   ├── admin/                   # Admin helpers
+│   ├── analytics/               # Analytics + IP hashing
+│   └── utils.ts                 # utilities (distance, age, formatting)
+├── data/readme.json             # Seed data and backup snapshot
+├── types/                       # TypeScript types (database / layout / index)
+├── scripts/                     # migrations, import, validate, upload, admin seed
+├── supabase/                    # Supabase config + migrations
+├── proxy.ts                     # Next.js Proxy (session refresh + route protection)
+├── components.json              # shadcn-style component config
+└── docs/                        # Multi-language READMEs + UI preview images
 ```
 
-## Getting Started
+---
+
+## Local development
 
 ### Prerequisites
 
 - Node.js ≥ 20
-- pnpm (recommended)
+- pnpm
 
-### Environment Setup
+### Environment
 
-Create `.env.local` based on `.env.example`:
+Copy `.env.example` to `.env.local`:
 
 ```env
-OPENAI_API_KEY=your_openai_or_zhipu_api_key
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
-SUPABASE_SECRET_KEY=your_secret_key
+OPENAI_API_KEY=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
+ADMIN_EMAIL=
+ADMIN_DISPLAY_NAME=
+ANALYTICS_IP_SALT=
 ```
 
-### Installation & Development
+### Install & run
 
 ```bash
 # Install dependencies
 pnpm install
 
-# Start local development server with Turbopack
+# Start dev server (Turbopack)
 pnpm dev
-
-# Lint & build
-pnpm lint
-pnpm build
 ```
 
-The application will run locally at `http://localhost:3000`.
+Local server runs at `http://localhost:3000`.
 
-### Database Scripts
+### Useful scripts
 
 ```bash
-# Push database migrations to Supabase
-pnpm db:push
-
-# Import seed json data into Supabase
-pnpm db:import
-
-# Validate database contents against schema
-pnpm db:validate
-
-# Seed initial admin user
-pnpm db:seed-admin
+pnpm db:push             # Push Supabase migrations
+pnpm db:import           # Import data/readme.json into Supabase
+pnpm db:validate         # Validate DB schema and field integrity
+pnpm db:seed-admin       # Seed initial admin account
+pnpm db:upload-assets    # Upload local assets to Supabase Storage
+pnpm lint                # ESLint
+pnpm build               # Production build
 ```
+
+---
 
 ## Roadmap
 
-- [x] Runtime migration to Supabase Postgres & Storage with CMS console.
-- [x] Visual block canvas layout builder (`BlockCanvasEngine`) with drag-and-drop support.
-- [x] Full Non component system rollout (14+ atomic blocks).
-- [ ] 3D scene refinements for Education & Experience waterfall.
-- [ ] Multi-agent memory support and context upload for AI Avatar.
-- [ ] Granular asset publishing pipeline and moderation.
+- [x] Full migration to Supabase (Postgres + Auth + Storage) with Console CMS
+- [x] Visual canvas drag layout engine (`BlockCanvasEngine`)
+- [x] 22 Non Blocks driven by a unified registry
+- [x] Multi-theme + dark mode + dynamic canvas background
+- [x] Asset library + direct image upload in blocks
+- [x] Auto-save + version bumps on commit
+- [ ] AI avatar with multi-model routing and visitor context memory
+- [ ] Iteration on Work / Education / Products 3D scene detail
+- [ ] Granular asset publishing pipeline and visitor message moderation
+
+---
 
 ## License
 
-[MIT](LICENSE)
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+In short: **any fork or derivative work that is made available to the public over a network must release its complete corresponding source code under a compatible license.**
+
+This is so that iNon stays a community thing forever, not a private asset of any one company.
+
+The full license text is available in the [LICENSE](LICENSE) file at the repository root.
+
+---
 
 ## Author
 
-[YingYingDontKill (Jackson He)](https://github.com/JacksonHe04)
+Crafted and maintained by [YingYingDontKill (Jackson He)](https://github.com/JacksonHe04).
+If it helps you, a Star, feedback, or Fork is the kindest thing you can do — anything that keeps it moving forward.

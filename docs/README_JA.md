@@ -1,194 +1,287 @@
-# iNon — Block ベースのパーソナル OS & デジタルガーデン
+# iNon — ブロックをひとつずつ組み合わせて、完全にあなたのものになる個人サイトを作る
 
-> **iNon** — ローカルファーストで高度にカスタマイズ可能な Block ベースのパーソナルワークスペース & デジタルガーデン。
-> Next.js 16、Supabase、React Three Fiber、そして統一されたアトミックコンポーネントシステム（"Non"）によって構築されています。
+> **iNon** — ブロックベースの個人 OS が、あなたの個人サイトを本当に「あなたのもの」にします。
+> *オープンソース。高度にカスタマイズ可能。シンプルで使い心地は至極。*
 >
-> 1つのパーソナル OS: コンソール (`/i/:slug`) & デジタルガーデン (`/:slug`)。
+> ひとつのパーソナル OS：コンソール（`/i/:slug`）とデジタルガーデン（/:slug）。
 
-🌐 **他の言語で読む:** [English](../README.md) · [简体中文](README_ZH_CN.md) · [繁體中文](README_ZH_TW.md) · [日本語](README_JA.md)
+[🌐 English](../README.md) · [简体中文](README_ZH_CN.md) · [繁體中文](README_ZH_TW.md) · 日本語
 
-## インターフェースプレビュー
-
-| ホームストーリー領域 |
-| --- |
-| ![ホームストーリー領域](images/desktop-home.png) |
-
-| AI 質問 | AI 回答 |
-| --- | --- |
-| ![趣味の質問](images/desktop-hobby-ask.png) | ![趣味の回答](images/desktop-hobby-anwser.png) |
-| ![MBTIの質問](images/desktop-mbti-ask.png) | ![MBTIの回答](images/desktop-mbti-anwser.png) |
-
-| モバイルホーム | モバイルメニュー | モバイル Q&A | モバイル銀河 |
-| --- | --- | --- | --- |
-| ![モバイルホーム](images/mobile-home.png) | ![モバイルメニュー](images/mobile-menu.png) | ![モバイル Q&A](images/mobile-ask.png) | ![モバイル銀河](images/mobile-galaxy.png) |
-
-| 音楽カード | 映画・書籍デスク |
-| --- | --- |
-| ![音楽カード](images/desktop-music.png) | ![映画デスク](images/desktop-desk.png) |
-
-| タグウォール | ディープスペースエリア |
-| --- | --- |
-| ![タグウォール](images/desktop-label.png) | ![ディープスペース](images/desktop-into-deepwater.png) |
-
-## システムアーキテクチャ
-
-```
-                        ┌──────────────────────────────┐
-                        │        Supabase DB           │
-                        │ (Postgres + Auth + Storage)  │
-                        └──────────────┬───────────────┘
-                                       │
-                ┌──────────────────────┴──────────────────────┐
-                │             iNon コアシステム               │
-                │     (Next.js 16 + React 19 + R3F)           │
-                └──────┬──────────────────────────────┬───────┘
-                       │                              │
-          ┌────────────▼────────────┐    ┌────────────▼────────────┐
-          │    コンソール /i/:slug   │    │   公開ページ /:slug     │
-          │                         │    │                         │
-          │ • ホーム (ブックマーク&AI)│    │ • グラスモーフィズムデザイン │
-          │ • 全コンテンツ CRUD 管理 │    │ • 3D デスク & R3F 銀河   │
-          │ • ドラッグ＆ドロップキャンバス│    │ • 動的 Non ブロック     │
-          │ • アカウント & セキュリティ │    │ • AI アバターアシスタント│
-          └─────────────────────────┘    └─────────────────────────┘
-```
+---
 
 ## iNon とは
 
-iNon は、従来の個人ウェブサイト構築を **Block ベースのパーソナルオペレーティングシステム** へと進化させます。統一されたコンポーネントアーキテクチャにより、プライベートワークスペースコンソール (`/i/:slug`) と公開デジタルガーデン (`/:slug`) の両方をシームレスに駆動します。ユーザーは個人プロフィール、プロジェクト、ブックマーク、メディアコレクション、AI アバターをコンソールで容易に管理・配置できます。
+iNon は、**オープンソースで高度にカスタマイズ可能な**個人サイトシステムです。
+ブロックを Lego のようにドラッグして、ホームページを組み立てることができます——ブックマーク、プロジェクト、ミュージックウォール、書棚、AI アバターなど、あなたの見せたいものを。
 
-## 主な特徴
+コンテンツも、レイアウトも、データも、すべてあなたが決めます。
+**コードが書けなくても**、美しく本格的な個人サイトを作れます。
 
-- **Block ベース OS ("Non" システム)**: プライベートコンソールと公開展示ページの両方を駆動するモジュール式コンポーネントアーキテクチャ。
-- **視覚的キャンバスビルダー**: ドラッグ＆ドロップによる並べ替え、表示/非表示の切り替え、レスポンシブな 1/2 カラム幅（50% / 100%）調整をサポートするリアルタイムキャンバスエンジン (`BlockCanvasEngine`)。
-- **マルチ Slug & 権限設計**:
-  - `/:slug`: 誰でもアクセス可能な閲覧専用のデジタルガーデン。
-  - `/i/:slug`: アカウント所有者専用の編集コンソール。
-  - `/admin`: スーパー管理者専用のアセットライブラリ & ストレージ管理。
-- **AI アバターアシスタント**: ユーザーのナレッジベース（Markdown）を読み込み、リアルタイムで応答をストリーミング出力する `/api/assistant` ルートを内蔵。
-- **没入型 3D & ミクロアニメーション**: React Three Fiber 3D インタラクティブデスク、クリエイションギャラクシー、Canvas 動的背景、ダークモード、Framer Motion トランジション。
+もしあなたがコードに触れたいなら——もちろん大歓迎です。システム全体は AGPL-3.0 で公開されています。フォークし、改造し、自分のバックエンドに接続しても、すべてウェルカムです。
 
-## 原子定義: Non コンポーネント
+---
 
-iNon は、粒度の揃った再利用可能な "Non" アトミックブロックによってシステムの機能を定義します：
+## なぜ iNon か
 
-| ブロックコンポーネント | 説明 |
+世にある「個人サイト」の多くはテンプレートです——テンプレートを選び、フォームを埋め、スキンを適用する。表面上はあなたのものですが、骨の部分はあなたの決めたものではありません。
+
+iNon は違います。中心にあるのは **22 個の独立したブロック**で、それぞれが 1 種類のコンテンツを担当します。**どのブロックをどんな順序で見せるか、横並びか縦並びか、見せるか見せないか、すべてあなたが決めます。** ブロック同士は縛られず、追加も、移動も、非表示も、自由自在。
+
+そして最も大事なこと——**コンソールで組んだとおりに、公開ページに反映されます。** WYSIWYG、WYSISYG。
+
+---
+
+## 一覧
+
+| ホーム ナラティブ |
+| --- |
+| ![ホーム ナラティブ](images/desktop-home.png) |
+
+| AI Q&A — Ask | AI Q&A — Answer |
 | --- | --- |
-| **プロフィール** (`BioHeaderBlock`) | アバター、名前、Bio、都市間距離計算、年齢プログレスバー、SNS リンク。 |
-| **ブックマーク** (`BookmarkBlock`) | Web ショートカット & 開発ツールグリッド。 |
-| **プロジェクト** (`ProjectBlock`) | カバー画像、技術スタックバッジ、ステータス、リンク付きプロジェクトカード。 |
-| **音楽** (`MusicBlock`) | アーティスト & アルバムコレクション（横スクロール対応）。 |
-| **映画** (`MovieBlock`) | 映画ポスターウォール & 3D デスク連携。 |
-| **本棚** (`BookBlock`) | 読書デスク & 書籍サマリーカード。 |
-| **ゲーム** (`GameBlock`) | ゲームライブラリ & インタラクティブ棚。 |
-| **AI アバター** (`AiCloneBlock`) | フローティング AI ダイアログ & ストリーミングアシスタント。 |
-| **タイムライン** (`TimelineBlock`) | マイルストーン & 経歴ウォーターフォール。 |
-| **友情リンク** (`FriendLinkBlock`) | インタラクティブな相互リンクマトリクス。 |
-| **コンタクト** (`ContactBlock`) | メッセージフォーム & ソーシャルタッチポイント。 |
-| **アプリランチャー** (`AppLauncherBlock`) | アプリケーションランチャー & ツールマトリクス。 |
+| ![Hobby Ask](images/desktop-hobby-ask.png) | ![Hobby Answer](images/desktop-hobby-anwser.png) |
+| ![MBTI Ask](images/desktop-mbti-ask.png) | ![MBTI Answer](images/desktop-mbti-anwser.png) |
+
+| モバイル ホーム | モバイル メニュー | モバイル Ask | モバイル ギャラクシー |
+| --- | --- | --- | --- |
+| ![モバイル ホーム](images/mobile-home.png) | ![モバイル メニュー](images/mobile-menu.png) | ![モバイル Ask](images/mobile-ask.png) | ![モバイル ギャラクシー](images/mobile-galaxy.png) |
+
+| ミュージック カード | フィルム & ブック デスク |
+| --- | --- |
+| ![ミュージック カード](images/desktop-music.png) | ![フィルム デスク](images/desktop-desk.png) |
+
+| タグ ウォール | ディープ スペース |
+| --- | --- |
+| ![タグ ウォール](images/desktop-label.png) | ![ディープ スペース](images/desktop-into-deepwater.png) |
+
+---
+
+## どんな人が使うか
+
+- **ふだんのつくり手**：とにかく見た目の良い個人サイトが欲しい人。オンラインでサインアップし、ブロックをいくつかドラッグして、中身を埋めたら、すぐに共有できる URL が手に入ります。
+- **独立系の開発者**：フォークして、改造して、自分でホストできる OSS の土台がほしい人。レポジトリも、ライセンスも、コンポーネントも、あなたのものです。自由に遊んでください。
+
+---
+
+## 動作の仕組み
+
+```
+                        ┌──────────────────────────────┐
+                        │         Supabase (DB)        │
+                        │  (Postgres + Auth + Storage) │
+                        └──────────────┬───────────────┘
+                                       │
+                ┌──────────────────────┴──────────────────────┐
+                │            iNon コアエンジン                 │
+                │     (Next.js 16 + React 19 + R3F)           │
+                │     ─ ブロック登録表（単一の真実の源）        │
+                │     ─ キャンバス レイアウトエンジン           │
+                │     ─ マルチテーマ + ダークモード            │
+                │     ─ ストリーミング AI アバター             │
+                └──────┬──────────────────────────────┬───────┘
+                       │                              │
+          ┌────────────▼────────────┐    ┌────────────▼────────────┐
+          │   コンソール /i/:slug  │    │   公開サイト /:slug    │
+          │                         │    │                         │
+          │  • キャンバス レイアウト │    │  • グラスモーフィズム   │
+          │  • ブロック ドラッグ    │    │    + ダークモード       │
+          │  • コンテンツ CRUD      │    │  • React Three Fiber    │
+          │  • テーマ即時切替       │    │    3D シーン            │
+          │  • アカウント / 設定    │    │  • フローティング AI    │
+          │  • 自動保存              │    │  • レスポンシブ対応      │
+          └─────────────────────────┘    └─────────────────────────┘
+```
+
+管理画面（`/admin`）は**スーパーアドミンのみ**アクセス可能で、アセットとオブジェクトストレージの保守に使われます。
+
+---
+
+## 22 個のブロック：見せたいものを組み合わせて
+
+各ブロックは 1 種類のコンテンツの最小単位です。すべて単一の**登録表**で管理され、タイトル・アイコンなどあらゆる表示がここから出てきます。
+
+| ブロック | 表示内容 |
+| --- | --- |
+| **プロフィール** (`bio`) | アバター、名前、bio、現在地、年齢バー、ソーシャルリンク。 |
+| **ブックマーク** (`bookmarks`) | お気に入りの URL と開発ツールのグリッド。 |
+| **プロジェクト** (`projects`) | 各プロジェクトのカバー、状態、概要、技術スタック、リンク。 |
+| **App ランチャー** (`app_launcher`) | アプリ / ツールのショートカット起動配列。 |
+| **開発ツール** (`dev_tools`) | 開発者の日常ツール一覧。 |
+| **ミュージック** (`music`) | アーティスト / アルバムのグリッド。横スクロール対応。 |
+| **ヒップホップ** (`hiphop`) | ミュージックとは独立したヒップホップ作品コレクション。 |
+| **映画** (`movies`) | 映画ポスターのグリッド、3D デスクと連携。 |
+| **ブック** (`books`) | 読書デスクと本のサマリーカード。 |
+| **ゲーム** (`games`) | ゲームグリッドとインタラクティブシェルフ。 |
+| **プロダクト** (`products`) | 好きなプロダクト、推薦プロダクト、自前のハードウェア。 |
+| **創作** (`creation`) | 動画、文章、スピーチ、座右の銘、引用をまとめて。 |
+| **タイムライン** (`timeline`) | 個人のマイルストーンとキャリアの滝。 |
+| **学歴** (`education`) | 学校、専攻、指導教官、学習の軌跡。 |
+| **職歴** (`work`) | 現在職、過去の職歴、仕事観。 |
+| **スキル** (`skills`) | 技術スタックと能力タグ。 |
+| **ライブ** (`events`) | 公演、トーク、対面の集まり。 |
+| **タグ ウォール** (`tags`) | キーワード、価値観、習慣、タグのビジュアル壁。 |
+| **フレンド リンク** (`friend_links`) | 相互リンク マトリクス。 |
+| **コンタクト** (`contact`) | メッセージ フォームとソーシャル接点。 |
+| **思考** (`thoughts`) | ひとときの閃きと短い思索。 |
+| **AI アバター** (`ai_clone`) | あなたのプロフィールを源泉とするフローティング AI チャット。 |
+
+新しいブロックを追加する変更は 1 か所：登録表。`components/blocks/` に新しいコンポーネントを足し、登録表に 1 行加えれば、UI のあらゆる場所（サイドメニュー、コンソール キャンバス、公開ページ）が自動で認識します。
+
+---
+
+## 主な機能
+
+- **キャンバス レイアウト** — `/i/:slug` でドラッグ、並べ替え、非表示、幅調整（1 カラム / 1:1）。WYSIWYG。
+- **22+ Non ブロック** — 同じコンポーネント システムがコンソールと公開ページ双方を駆動。重複ゼロ。
+- **マルチスラッグ + 権限設計**
+  - `/:slug`：公開、読み取り専用、だれでもアクセス可。
+  - `/i/:slug`：オーナーのコンソール、読み書き可能。
+  - `/admin`：アセット ライブラリ、アドミンのみ。
+- **AI アバター** — `/api/assistant` はストリーミング エンドポイント。あなたのプロフィールをシステム Prompt に変換し、任意の OpenAI 互換モデルへ接続。
+- **没入型 3D** — React Three Fiber のデスク / ギャラクシー / ディープ スペース シーンと、動的な Canvas 背景。
+- **マルチテーマ** — コンソール内でテーマとダークモードをライブ切替、公開ページも即座に追従。
+- **レスポンシブ** — デスクトップは 1 / 2 カラムで自在、モバイルは 1 カラム + フローティング サイドバーへ折りたたみ。
+- **アセット ライブラリ** — 共有の画像ベッド。ブロック内で直接アップロードでき、外部ホストは不要。
+- **自動保存** — 編集はそのまま反映。もう「保存を押し忘れた」は言わせない。
+- **コミットで自動バージョン bump** — トップ ナビの通知エリアに現在のバージョンが常に表示されます。
+
+---
 
 ## 技術スタック
 
-- **フレームワーク**: Next.js 16 (App Router, Turbopack)
-- **言語**: TypeScript 6 + React 19
-- **データベース & 認証**: Supabase Postgres + Supabase Auth (`@supabase/ssr`, `@supabase/supabase-js`)
-- **スタイリング & UI**: Tailwind CSS 4 + グラスモーフィズムデザインシステム + Framer Motion
-- **3D グラフィックス**: Three.js + React Three Fiber + @react-three/drei
-- **状態管理 & ユーティリティ**: Zustand, TanStack React Query, Nuqs, Zod, Lucide React
+- **フレームワーク**：Next.js 16（App Router、Turbopack、React Server Components、Proxy）
+- **言語**：TypeScript 6 + React 19
+- **データベース / 認証**：Supabase（Postgres + Auth + Storage、`@supabase/ssr` + `@supabase/supabase-js`）
+- **スタイル / UI**：Tailwind CSS 4 + マルチテーマ システム + Framer Motion + Lucide React
+- **3D**：Three.js + React Three Fiber + @react-three/drei
+- **状態 / データ**：Zustand、@tanstack/react-query、nuqs
+- **フォーム / バリデーション**：react-hook-form + Zod
+- **テーマ切替**：next-themes
+- **アクセス解析**：`@vercel/analytics` + IP 塩付きハッシュ
 
-## ディレクトリ構造
+---
+
+## リポジトリ構成
 
 ```
 iNon/
 ├── app/
-│   ├── [slug]/                  # 公開ユーザーページ (/:slug)
-│   ├── i/                       # ユーザーコンソール (/i/:slug)
-│   ├── admin/                   # アセット管理ページ (/admin)
-│   ├── api/assistant/route.ts   # AI アシスタントストリーミングルート
-│   └── globals.css              # Tailwind 4 & グローバルスタイル
+│   ├── (home)/                  # プラットフォーム ホーム（未ログイン訪問者）
+│   ├── [slug]/                  # 公開ページ (/:slug)
+│   ├── i/[slug]/                # ユーザー コンソール (/i/:slug)
+│   ├── admin/                   # アセット管理 (/admin)
+│   ├── login/                   # サインイン
+│   ├── api/
+│   │   ├── assistant/           # AI アバター ストリーミング
+│   │   ├── messages/            # 訪問者のメッセージ
+│   │   ├── account/             # 現在ユーザーの設定 / コンテンツ / レイアウト
+│   │   └── admin/               # アドミン側のアセット / コンテンツ / アップロード / 削除
+│   ├── layout.tsx
+│   └── globals.css              # Tailwind 4 + グローバル スタイル
 ├── components/
-│   ├── blocks/                  # "Non" アトミックブロック & キャンバスエンジン
-│   ├── scenes/                  # React Three Fiber 3D シーン (ProductDesk, Galaxyなど)
-│   ├── dashboard/               # コンソール UI コンポーネント (/i/:slug)
-│   ├── editor/                  # コンテンツ編集コンポーネント
-│   ├── layout/                  # シェルレイアウト、トップナビ、サイドナビ
-│   ├── BackGround.tsx           # Canvas 動的背景
-│   └── GlassCard.tsx            # グラスモーフィズム UI 原型
-├── data/readme.json             # シードデータ & バックアップスナップショット
+│   ├── blocks/                  # 22 Non ブロック + キャンバス エンジン + レンダラー
+│   ├── scenes/                  # React Three Fiber 3D シーン
+│   ├── dashboard/               # コンソール UI（サイドバー、リスト、Card 等）
+│   ├── editor/                  # スキーマ駆動のコンテンツ エディタ
+│   ├── layout/                  # シェル レイアウト、トップ ナビ、フローティング サイドバー
+│   ├── ai/                      # AI アバター UI（ストリーミング応答）
+│   ├── ui/                      # 汎用 UI 原子（グラス、ボタン、フォーム）
+│   ├── BackGround.tsx           # 動的に流れる Canvas 背景
+│   └── GlassCard.tsx            # グラスモーフィズム素子
+├── hooks/                       # クライアント hooks（AI / アセット / レイアウト / 時計 / 距離）
 ├── lib/
-│   ├── auth/                    # Supabase セッション & 権限ヘルパー
-│   ├── content.ts               # データ取得 & Schema マッピング
-│   ├── markdown.ts              # ナレッジベース Markdown 変換
-│   └── utils.ts                 # 距離・年齢計算ヘルパー
-├── supabase/                    # Schema マイグレーション & Supabase 設定
-├── scripts/                     # シードインポート、データ検証、アセットアップロード
-├── types/                       # TypeScript 型定義 & Layout 設定
-└── docs/                        # 多言語 README ドキュメント & 画像
+│   ├── blocks/registry.ts       # ブロック単一の真実の源（タイトル、アイコン）
+│   ├── content.ts               # データ取得とフィールド マッピング
+│   ├── markdown.ts              # プロフィール → Markdown（AI システム Prompt）
+│   ├── auth/                    # Supabase セッション、権限、ユーザー名解決
+│   ├── supabase/                # Supabase クライアントとミドルウェア
+│   ├── admin/                   # アドミン側ヘルパー
+│   ├── analytics/               # アクセス統計 + IP ハッシュ
+│   └── utils.ts                 # ユーティリティ（距離、年齢、整形）
+├── data/readme.json             # シード データとバックアップ スナップショット
+├── types/                       # TypeScript 型（database / layout / index）
+├── scripts/                     # マイグレーション、インポート、検証、アップロード、アドミン初期化
+├── supabase/                    # Supabase 設定 + マイグレーション
+├── proxy.ts                     # Next.js Proxy（セッション更新 + ルート保護）
+├── components.json              # shadcn 風コンポーネント設定
+└── docs/                        # 多言語 README と UI プレビュー画像
 ```
 
-## ローカル開発手順
+---
 
-### 開発要件
+## ローカル開発
+
+### 前提条件
 
 - Node.js ≥ 20
-- pnpm（推奨）
+- pnpm
 
-### 環境変数の設定
+### 環境変数
 
-`.env.example` を参考に `.env.local` を作成します：
+`.env.example` を参考に `.env.local` を作成してください：
 
 ```env
-OPENAI_API_KEY=your_openai_or_zhipu_api_key
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
-SUPABASE_SECRET_KEY=your_secret_key
+OPENAI_API_KEY=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
+ADMIN_EMAIL=
+ADMIN_DISPLAY_NAME=
+ANALYTICS_IP_SALT=
 ```
 
-### インストールと起動
+### インストールと実行
 
 ```bash
-# 依存関係のインストール
+# 依存をインストール
 pnpm install
 
-# Turbopack によるローカル開発サーバーの起動
+# Turbopack で開発サーバーを起動
 pnpm dev
-
-# コードチェック & プロダクションビルド
-pnpm lint
-pnpm build
 ```
 
-ローカルサーバーは `http://localhost:3000` で実行されます。
+ローカル サーバーは `http://localhost:3000` で起動します。
 
-### データベーススクリプト
+### よく使うスクリプト
 
 ```bash
-# Supabase へ DB マイグレーションを適用
-pnpm db:push
-
-# JSON データを Supabase にインポート
-pnpm db:import
-
-# データベース内容のバリデーション
-pnpm db:validate
-
-# 管理者ユーザーの初期化
-pnpm db:seed-admin
+pnpm db:push             # Supabase マイグレーションをプッシュ
+pnpm db:import           # data/readme.json を Supabase に取り込み
+pnpm db:validate         # DB スキーマ / フィールドを検証
+pnpm db:seed-admin       # 初期アドミン アカウントを生成
+pnpm db:upload-assets    # ローカル アセットを Supabase Storage にアップロード
+pnpm lint                # ESLint
+pnpm build               # プロダクション ビルド
 ```
+
+---
 
 ## ロードマップ
 
-- [x] Supabase Postgres & Storage への移行と CMS コンソールの構築。
-- [x] ドラッグ＆ドロップ対応の視覚的 Block キャンバスビルダー (`BlockCanvasEngine`)。
-- [x] Non コンポーネントシステムの拡張 (14+ アトミック Block)。
-- [ ] 経歴・教育銀河の 3D シーン詳細アップデート。
-- [ ] AI アバターにおけるマルチモデル対応およびコンテキスト記憶。
-- [ ] アセットパブリッシングパイプラインとモデレーション機能。
+- [x] Supabase（Postgres + Auth + Storage）への完全移行とコンソール CMS
+- [x] ビジュアル キャンバス ドラッグ レイアウト エンジン（BlockCanvasEngine）
+- [x] 22 Non ブロックを統一登録表で駆動
+- [x] マルチテーマ + ダークモード + 動的 Canvas 背景
+- [x] アセット ライブラリ + ブロック内画像直アップロード
+- [x] 自動保存 + コミットによる自動バージョン bump
+- [ ] AI アバター — マルチモデル ルーティングと訪問者コンテキスト記憶
+- [ ] 職歴 / 学歴 / プロダクト の 3D シーン ディテール反復
+- [ ] CMS アセットのきめ細かい公開フローと訪問者メッセージのモデレーション
+
+---
 
 ## ライセンス
 
-[MIT](LICENSE)
+本プロジェクトは **GNU Affero General Public License v3.0 (AGPL-3.0)** で公開されています。
+つまり：**ネットワークを通じて一般に公開される fork または派生物は、互換ライセンスのもとで対応する完全なソースコードを公開しなければなりません。**
+
+これは iNon がいつまでもコミュニティのものであり続け、特定の企業の私有資産にならないためのものです。
+
+ライセンスの全文はリポジトリルートの [LICENSE](../LICENSE) ファイルにあります。
+
+---
 
 ## 作者
 
-[YingYingDontKill (何錦誠 / Jackson He)](https://github.com/JacksonHe04)
+[YingYingDontKill（何錦誠 / Jackson He）](https://github.com/JacksonHe04) が心を込めて保守しています。
+お役に立ちましたら Star、フィードバック、Fork —— このプロジェクトを前に進めるあらゆる行為を歓迎します。
