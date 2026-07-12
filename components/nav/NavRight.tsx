@@ -38,6 +38,24 @@ export function NavRight({
   startTransition,
   router,
 }: NavRightProps) {
+  const [currentPath, setCurrentPath] = React.useState(
+    typeof window !== 'undefined' ? window.location.pathname : ''
+  );
+
+  React.useEffect(() => {
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('locationchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('locationchange', handleLocationChange);
+    };
+  }, []);
+
+  const activeIsConsolePage = isMounted ? (currentPath.startsWith('/i/') || currentPath === '') : isConsolePage;
+
   return (
     <div className="flex items-center gap-2 lg:gap-4">
       <SocialLinks platformAccounts={data.contact.platform_accounts} />
@@ -57,7 +75,7 @@ export function NavRight({
       >
         <Bell className="h-4 w-4" />
         {shouldShowBadge && (
-          <span className="absolute -top-1 -right-1 min-w-[1.2rem]. h-4 px-1 bg-gray-100 text-gray-700 rounded-full text-[10px] flex items-center justify-center font-semibold">
+          <span className="absolute -top-1 -right-1 min-w-[1.2rem] h-4 px-1 bg-gray-100 text-gray-700 rounded-full text-[10px] flex items-center justify-center font-semibold">
             {data.notifications.length}
           </span>
         )}
@@ -80,7 +98,21 @@ export function NavRight({
         onClick={() => {
           if (userEmail) {
             const name = userEmail.split('@')[0];
-            const targetPath = isConsolePage ? `/${name}` : `/i/${name}`;
+            const targetPath = activeIsConsolePage ? `/${name}` : `/i/${name}`;
+            
+            // Dispatch custom event to see if client layout wants to handle it instantly
+            const eventDispatched = window.dispatchEvent(
+              new CustomEvent('toggle-console-preview', {
+                detail: { targetPath },
+                cancelable: true,
+              })
+            );
+
+            // If the event was intercepted and prevented (returned false), do not perform Next.js transition
+            if (!eventDispatched) {
+              return;
+            }
+
             startTransition(() => {
               router.push(targetPath);
             });
@@ -90,12 +122,12 @@ export function NavRight({
         }}
         onMouseEnter={handlePrefetch}
         className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
-        title={userEmail ? (isConsolePage ? "预览公开主页" : "进入我的个人 OS 控制台") : "登录"}
-        aria-label={userEmail ? (isConsolePage ? "预览公开主页" : "进入控制台") : "登录"}
+        title={userEmail ? (activeIsConsolePage ? "预览公开主页" : "进入我的个人 OS 控制台") : "登录"}
+        aria-label={userEmail ? (activeIsConsolePage ? "预览公开主页" : "进入控制台") : "登录"}
       >
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin text-teal-500" />
-        ) : isConsolePage ? (
+        ) : activeIsConsolePage ? (
           <Eye className="h-4 w-4" />
         ) : (
           <User className="h-4 w-4" />
@@ -105,3 +137,4 @@ export function NavRight({
   );
 }
 export default NavRight;
+

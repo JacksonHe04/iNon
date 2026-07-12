@@ -86,3 +86,34 @@ export async function recordPageView(
     };
   }
 }
+
+export async function fetchAnalyticsData(profileId: string) {
+  const { getUserContext } = await import('@/lib/auth/user');
+  const { getPageViewSummary, getPageViewTotals, getPageViewTop } = await import('./queries');
+
+  const context = await getUserContext();
+  if (!context || context.profile.id !== profileId) {
+    throw new Error('Unauthorized');
+  }
+
+  const [summary, totals, sources, paths, devices, browsers, countries] =
+    await Promise.all([
+      getPageViewSummary(profileId, 30),
+      getPageViewTotals(profileId, 30),
+      getPageViewTop(profileId, 'sources', 30, 10),
+      getPageViewTop(profileId, 'paths', 30, 10),
+      getPageViewTop(profileId, 'devices', 30, 10),
+      getPageViewTop(profileId, 'browsers', 30, 10),
+      getPageViewTop(profileId, 'countries', 30, 10),
+    ]);
+
+  return {
+    summary,
+    totals,
+    sources,
+    paths,
+    devices,
+    browsers,
+    countries,
+  };
+}

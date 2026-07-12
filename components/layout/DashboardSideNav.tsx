@@ -18,9 +18,10 @@ interface DashboardSideNavProps {
   activeTab: DashboardTabId;
   className?: string;
   username: string;
+  onTabChange?: (tabId: DashboardTabId) => void;
 }
 
-export default function DashboardSideNav({ activeTab, className = '', username }: DashboardSideNavProps) {
+export default function DashboardSideNav({ activeTab, className = '', username, onTabChange }: DashboardSideNavProps) {
   return (
     <aside className={`w-full md:w-52 lg:w-60 shrink-0 md:sticky md:top-24 z-30 ${className}`}>
       <div className="rounded-3xl border border-white/30 bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-3 shadow-xl">
@@ -33,12 +34,19 @@ export default function DashboardSideNav({ activeTab, className = '', username }
               <Link
                 key={tab.id}
                 href={targetUrl}
+                onClick={(e) => {
+                  if (onTabChange) {
+                    e.preventDefault();
+                    onTabChange(tab.id);
+                  }
+                }}
                 className={`relative flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs lg:text-sm font-medium transition-all whitespace-nowrap text-left w-full cursor-pointer ${
                   isActive
                     ? 'bg-white/50 dark:bg-gray-800/60 text-gray-900 dark:text-white shadow-md font-bold'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-white/20 dark:hover:bg-gray-800/30'
                 }`}
               >
+
                 <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-teal-600 dark:text-teal-400' : 'text-gray-500'}`} />
                 <span className="relative z-10">{tab.label}</span>
                 {isActive && (
