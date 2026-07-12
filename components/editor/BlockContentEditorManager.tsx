@@ -17,46 +17,29 @@ import EventsEditor from './sections/EventsEditor';
 import ContactEditor from './sections/ContactEditor';
 import ThoughtsEditor from './sections/ThoughtsEditor';
 import NotificationsEditor from './sections/NotificationsEditor';
-import {
-  User,
-  Heart,
-  MapPin,
-  GraduationCap,
-  Briefcase,
-  Code2,
-  Laptop,
-  PenTool,
-  BookOpen,
-  Film,
-  Music,
-  Calendar,
-  Send,
-  Compass,
-  Bell,
-} from 'lucide-react';
+import { Heart, Code2, Bell } from 'lucide-react';
+import { BLOCK_REGISTRY } from '@/lib/blocks/registry';
 
 /**
  * 内容管理 tab 的数据编辑分组。注意：这是「数据编辑主题」分类，
- * 不是 blockType 维度——一组 block 的数据可能由一个 category 编辑
- * （例如 development 同时编辑 skills + projects + dev_tools）。
- * label 直接在此声明，不再从 registry 取（registry 是 blockType 级，
- * 与这种聚合维度不是 1:1 关系）。label 保持纯中文、无中英混排。
+ * 部分分类直接引用 BLOCK_REGISTRY 关联 Block 的 title 与 icon，
+ * 确保文案与图标全局统一。
  */
 const BLOCK_CATEGORIES = [
-  { id: 'basic', label: '基本信息', icon: User },
+  { id: 'basic', label: BLOCK_REGISTRY.bio.title, icon: BLOCK_REGISTRY.bio.icon },
   { id: 'life', label: '生活状态', icon: Heart },
-  { id: 'experience', label: '个人经历', icon: MapPin },
-  { id: 'education', label: '教育背景', icon: GraduationCap },
-  { id: 'work', label: '工作履历', icon: Briefcase },
+  { id: 'experience', label: BLOCK_REGISTRY.timeline.title, icon: BLOCK_REGISTRY.timeline.icon },
+  { id: 'education', label: BLOCK_REGISTRY.education.title, icon: BLOCK_REGISTRY.education.icon },
+  { id: 'work', label: BLOCK_REGISTRY.work.title, icon: BLOCK_REGISTRY.work.icon },
   { id: 'development', label: '技术与项目', icon: Code2 },
-  { id: 'products', label: '硬件与产品', icon: Laptop },
-  { id: 'creation', label: '内容创作', icon: PenTool },
-  { id: 'reading', label: '在读书单', icon: BookOpen },
-  { id: 'films', label: '影视墙', icon: Film },
-  { id: 'music', label: '音乐库', icon: Music },
-  { id: 'events', label: '里程碑事件', icon: Calendar },
-  { id: 'contact', label: '联系方式', icon: Send },
-  { id: 'thoughts', label: '思考与 Q&A', icon: Compass },
+  { id: 'products', label: BLOCK_REGISTRY.products.title, icon: BLOCK_REGISTRY.products.icon },
+  { id: 'creation', label: BLOCK_REGISTRY.creation.title, icon: BLOCK_REGISTRY.creation.icon },
+  { id: 'reading', label: BLOCK_REGISTRY.books.title, icon: BLOCK_REGISTRY.books.icon },
+  { id: 'films', label: BLOCK_REGISTRY.movies.title, icon: BLOCK_REGISTRY.movies.icon },
+  { id: 'music', label: BLOCK_REGISTRY.music.title, icon: BLOCK_REGISTRY.music.icon },
+  { id: 'events', label: BLOCK_REGISTRY.events.title, icon: BLOCK_REGISTRY.events.icon },
+  { id: 'contact', label: BLOCK_REGISTRY.contact.title, icon: BLOCK_REGISTRY.contact.icon },
+  { id: 'thoughts', label: BLOCK_REGISTRY.thoughts.title, icon: BLOCK_REGISTRY.thoughts.icon },
   { id: 'notifications', label: '动态公告', icon: Bell },
 ] as const;
 
