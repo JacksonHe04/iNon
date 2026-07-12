@@ -3,13 +3,19 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import GlassCard from '../GlassCard';
+import type { PublicMessage } from '@/lib/content/messages';
 
-export default function MessageSection() {
+interface MessageSectionProps {
+  initialMessages?: PublicMessage[];
+}
+
+export default function MessageSection({ initialMessages = [] }: MessageSectionProps) {
   const [nickname, setNickname] = useState('');
   const [message, setMessage] = useState('');
   const [contact, setContact] = useState('');
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'submitting'>('idle');
   const [feedback, setFeedback] = useState('');
+  const [messages, setMessages] = useState<PublicMessage[]>(initialMessages);
 
   const quickGreetings = ['你好！', '很高兴认识你！', '期待交流！', '祝好！'];
 
@@ -34,7 +40,11 @@ export default function MessageSection() {
         }),
       });
 
-      const result = (await response.json()) as { error?: string };
+      const result = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        message?: PublicMessage;
+      };
 
       if (!response.ok) {
         setStatus('error');
@@ -42,8 +52,13 @@ export default function MessageSection() {
         return;
       }
 
+      if (result.message) {
+        const msg = result.message;
+        setMessages((prev) => [msg, ...prev]);
+      }
+
       setStatus('success');
-      setFeedback('已收到，留言会在审核后展示。');
+      setFeedback('已收到，留言已展示。');
       setMessage('');
       setContact('');
       setNickname('');
