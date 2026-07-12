@@ -11,14 +11,15 @@ export function useBlockLayout({ initialLayoutConfig, onSave }: UseBlockLayoutPr
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(initialLayoutConfig);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const saveRequestedRef = useRef(false);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const savedSuccessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const currentTheme = layoutConfig.theme || 'green';
     document.documentElement.setAttribute('data-color-theme', currentTheme);
     window.dispatchEvent(new CustomEvent('color-theme-changed', { detail: { theme: currentTheme } }));
   }, [layoutConfig.theme]);
-
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const autoSave = (newConfig: LayoutConfig) => {
     if (!onSave) return;
@@ -30,7 +31,10 @@ export function useBlockLayout({ initialLayoutConfig, onSave }: UseBlockLayoutPr
         setSaving(true);
         await onSave(newConfig);
         setSavedSuccess(true);
-        setTimeout(() => setSavedSuccess(false), 2000);
+        if (savedSuccessTimeoutRef.current) {
+          clearTimeout(savedSuccessTimeoutRef.current);
+        }
+        savedSuccessTimeoutRef.current = setTimeout(() => setSavedSuccess(false), 2000);
       } catch (e) {
         console.error('Failed to auto save layout:', e);
       } finally {
@@ -40,40 +44,44 @@ export function useBlockLayout({ initialLayoutConfig, onSave }: UseBlockLayoutPr
   };
 
   useEffect(() => {
+    if (!saveRequestedRef.current) return;
+    saveRequestedRef.current = false;
+    autoSave(layoutConfig);
+  }, [layoutConfig]);
+
+  useEffect(() => {
     return () => {
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
       }
+      if (savedSuccessTimeoutRef.current) {
+        clearTimeout(savedSuccessTimeoutRef.current);
+      }
     };
   }, []);
 
+  const updateLayoutConfig = (updater: (prev: LayoutConfig) => LayoutConfig) => {
+    saveRequestedRef.current = true;
+    setLayoutConfig(updater);
+  };
+
   const handleThemeChange = (newTheme: 'green' | 'red' | 'orange' | 'blue' | 'gray') => {
-    setLayoutConfig((prev) => {
-      const nextConfig: LayoutConfig = { ...prev, theme: newTheme };
-      document.documentElement.setAttribute('data-color-theme', newTheme);
-      window.dispatchEvent(new CustomEvent('color-theme-changed', { detail: { theme: newTheme } }));
-      autoSave(nextConfig);
-      return nextConfig;
-    });
+    updateLayoutConfig((prev) => ({ ...prev, theme: newTheme }));
   };
 
   const handleToggleVisibility = (blockId: string) => {
-    setLayoutConfig((prev) => {
+    updateLayoutConfig((prev) => {
       const nextBlocks: BlockConfig[] = prev.blocks.map((b) => (b.id === blockId ? { ...b, visible: !b.visible } : b));
-      const nextConfig: LayoutConfig = { ...prev, blocks: nextBlocks };
-      autoSave(nextConfig);
-      return nextConfig;
+      return { ...prev, blocks: nextBlocks };
     });
   };
 
   const handleToggleColSpan = (blockId: string) => {
-    setLayoutConfig((prev) => {
+    updateLayoutConfig((prev) => {
       const nextBlocks: BlockConfig[] = prev.blocks.map((b) =>
         b.id === blockId ? { ...b, colSpan: (b.colSpan === 2 ? 1 : 2) as (1 | 2) } : b
       );
-      const nextConfig: LayoutConfig = { ...prev, blocks: nextBlocks };
-      autoSave(nextConfig);
-      return nextConfig;
+      return { ...prev, blocks: nextBlocks };
     });
   };
 
@@ -86,24 +94,15 @@ export function useBlockLayout({ initialLayoutConfig, onSave }: UseBlockLayoutPr
     nextBlocks[index] = nextBlocks[targetIndex];
     nextBlocks[targetIndex] = temp;
 
-    setLayoutConfig((prev) => {
-      const nextConfig: LayoutConfig = { ...prev, blocks: nextBlocks };
-      autoSave(nextConfig);
-      return nextConfig;
-    });
+    updateLayoutConfig((prev) => ({ ...prev, blocks: nextBlocks }));
   };
 
   const handleReorderBlocks = (newBlocks: BlockConfig[]) => {
-    setLayoutConfig((prev) => {
-      const nextConfig: LayoutConfig = { ...prev, blocks: newBlocks };
-      autoSave(nextConfig);
-      return nextConfig;
-    });
+    updateLayoutConfig((prev) => ({ ...prev, blocks: newBlocks }));
   };
 
   const handleResetLayout = () => {
-    setLayoutConfig(DEFAULT_LAYOUT_CONFIG);
-    autoSave(DEFAULT_LAYOUT_CONFIG);
+    updateLayoutConfig(() => DEFAULT_LAYOUT_CONFIG);
   };
 
   return {
