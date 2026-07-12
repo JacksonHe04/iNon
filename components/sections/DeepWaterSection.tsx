@@ -121,20 +121,17 @@ export default function DeepWaterSection({ data }: DeepWaterSectionProps) {
 
   if (!isVisible) return null;
 
-  const sectionSpacing = isUnlocked
-    ? 'px-0 lg:ml-[-8rem] xl:ml-[-10rem] 2xl:ml-[-12rem]'
-    : 'px-4';
-  const innerSpacing = isUnlocked ? 'px-4 sm:px-8 lg:px-16' : '';
+  const sectionSpacing = 'px-4 sm:px-8 lg:px-16';
 
   return (
     <section
       id="deepwater"
       ref={sectionRef}
-      className={`min-h-screen w-full py-20 relative overflow-hidden transition-all duration-500 ${sectionSpacing}`}
+      className={`min-h-screen w-full py-20 relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl transition-all duration-500 ${sectionSpacing}`}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-purple-950 to-black" />
 
-      <div className={`relative z-10 space-y-10 ${innerSpacing}`}>
+      <div className="relative z-10 space-y-10">
         <motion.h2
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}

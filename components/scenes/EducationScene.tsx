@@ -7,9 +7,10 @@ import { GraduationCap, MapPin, Calendar, BookOpen } from 'lucide-react';
 
 interface EducationSceneProps {
   schools: ReadmeData['education']['schools'];
+  mode?: 'readonly' | 'edit';
 }
 
-export default function EducationScene({ schools }: EducationSceneProps) {
+export default function EducationScene({ schools, mode = 'readonly' }: EducationSceneProps) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -22,6 +23,18 @@ export default function EducationScene({ schools }: EducationSceneProps) {
   }, []);
 
   const activeSchool = schools[activeIdx] ?? schools[0];
+
+  if (mode === 'edit') {
+    return (
+      <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 dark:bg-black/10 p-6 backdrop-blur-md shadow-2xl flex flex-col items-center justify-center min-h-[220px] text-gray-400">
+        <div className="flex flex-col items-center gap-3">
+          <GraduationCap className="w-12 h-12 text-blue-500/60 opacity-80" />
+          <h4 className="font-bold text-sm text-gray-900 dark:text-white">教育经历互动场景 (排版预览)</h4>
+          <p className="text-xs text-gray-500">在画板编辑模式下，学校互动场景已降级以优化性能。</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 dark:bg-black/10 p-6 backdrop-blur-md shadow-2xl">

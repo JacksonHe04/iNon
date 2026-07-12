@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ReadmeData } from '@/types';
-import { Film, Play, Disc } from 'lucide-react';
 import { useState } from 'react';
+import { Film, Play, Disc } from 'lucide-react';
 
 interface FilmDeskSceneProps {
   films: ReadmeData['films']['films'];
@@ -15,11 +15,24 @@ interface FilmDeskSceneProps {
     country: string;
   }) => void;
   activeTitle?: string | null;
+  mode?: 'readonly' | 'edit';
 }
 
-export default function FilmDeskScene({ films, onSelect, activeTitle }: FilmDeskSceneProps) {
+export default function FilmDeskScene({ films, onSelect, activeTitle, mode = 'readonly' }: FilmDeskSceneProps) {
   const featured = films.slice(0, 4);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
+  if (mode === 'edit') {
+    return (
+      <div className="relative mt-8 w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 dark:bg-black/10 p-6 backdrop-blur-md shadow-2xl flex flex-col items-center justify-center min-h-[300px] text-gray-400">
+        <div className="flex flex-col items-center gap-3">
+          <Film className="w-12 h-12 text-rose-500/60 opacity-80" />
+          <h4 className="font-bold text-sm text-gray-900 dark:text-white">复古黑胶电影墙 (排版预览)</h4>
+          <p className="text-xs text-gray-500">在画板编辑模式下，3D 互动已降级以优化性能。</p>
+        </div>
+      </div>
+    );
+  }
 
   // Vivid gradient combinations for vinyl labels
   const labelGradients = [

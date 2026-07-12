@@ -9,9 +9,10 @@ interface WorkSceneProps {
   jobs: ReadmeData['work']['jobs'];
   onSelectJob: (job: ReadmeData['work']['jobs'][number]) => void;
   activeJobId?: string;
+  mode?: 'readonly' | 'edit';
 }
 
-export default function WorkScene({ jobs, onSelectJob, activeJobId }: WorkSceneProps) {
+export default function WorkScene({ jobs, onSelectJob, activeJobId, mode = 'readonly' }: WorkSceneProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   // Find index of active job based on company name
@@ -21,6 +22,18 @@ export default function WorkScene({ jobs, onSelectJob, activeJobId }: WorkSceneP
   const handleJobSelect = (job: typeof jobs[number]) => {
     onSelectJob(job);
   };
+
+  if (mode === 'edit') {
+    return (
+      <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 dark:bg-black/10 p-6 backdrop-blur-md shadow-2xl flex flex-col items-center justify-center min-h-[220px] text-gray-400">
+        <div className="flex flex-col items-center gap-3">
+          <Briefcase className="w-12 h-12 text-teal-500/60 opacity-80" />
+          <h4 className="font-bold text-sm text-gray-900 dark:text-white">履历关卡互动场景 (排版预览)</h4>
+          <p className="text-xs text-gray-500">在画板编辑模式下，3D/2D 关卡互动已降级以优化性能。</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 dark:bg-black/10 p-6 backdrop-blur-md shadow-2xl">
