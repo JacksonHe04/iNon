@@ -15,6 +15,7 @@ export default function DashboardLayoutClient({
   let activeTab: DashboardTabId = 'home';
   if (pathname.endsWith('/content')) activeTab = 'content';
   else if (pathname.endsWith('/website')) activeTab = 'canvas';
+  else if (pathname.endsWith('/analytics')) activeTab = 'analytics';
   else if (pathname.endsWith('/account')) activeTab = 'account';
 
   return (

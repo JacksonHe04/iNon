@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Library, Palette, UserCog } from 'lucide-react';
+import { LayoutDashboard, Library, Palette, UserCog, BarChart3 } from 'lucide-react';
 
 export const DASHBOARD_TABS = [
   { id: 'home', label: '控制台', icon: LayoutDashboard, path: '' },
   { id: 'content', label: '内容管理', icon: Library, path: '/content' },
   { id: 'canvas', label: '公开网站', icon: Palette, path: '/website' },
+  { id: 'analytics', label: '数据统计', icon: BarChart3, path: '/analytics' },
   { id: 'account', label: '账号管理', icon: UserCog, path: '/account' },
 ] as const;
 
