@@ -136,88 +136,7 @@ export interface ReadmeData {
     mottos: string[];
     quotes: string[];
   };
-  reading: {
-    books: Array<{
-      name: string;
-      author: string;
-      country: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-    authors: Array<{
-      name: string;
-      country: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-  };
-  films: {
-    films: Array<{
-      name: string;
-      director: string;
-      country: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-    directors: Array<{
-      name: string;
-      country: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-  };
-  music: {
-    albums: Array<{
-      name: string;
-      artist: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-    songs: Array<{
-      name: string;
-      artist: string;
-      album: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-    musicians: Array<{
-      name: string;
-      region: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-  };
-  hiphop: {
-    albums: Array<{
-      name: string;
-      artist: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-    songs: Array<{
-      name: string;
-      artist: string;
-      album: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-    musicians: Array<{
-      name: string;
-      region: string;
-      link: string;
-      comment: string;
-      image_url?: string;
-    }>;
-  };
+  library: LibraryByKind;
   events: {
     performances: Array<{
       type: string;
@@ -263,5 +182,53 @@ export interface ReadmeData {
     content: string;
     created_at: string;
   }>;
+}
+
+export type LibraryKind = 'music' | 'film' | 'game' | 'book';
+export type LibrarySubtype = 'work' | 'creator' | 'song';
+
+export interface LibraryItemDTO {
+  id: string;
+  kind: LibraryKind;
+  subtype: LibrarySubtype;
+  categoryId: string | null;
+  categoryName: string;
+  name: string;
+  creator: string;
+  link: string;
+  comment: string;
+  imageUrl: string | null;
+  sortOrder: number;
+}
+
+export interface LibraryCategoryDTO {
+  id: string;
+  kind: LibraryKind;
+  name: string;
+  sortOrder: number;
+}
+
+export interface LibraryByKind {
+  music: {
+    categories: LibraryCategoryDTO[];
+    works: LibraryItemDTO[];
+    songs: LibraryItemDTO[];
+    creators: LibraryItemDTO[];
+  };
+  film: {
+    categories: LibraryCategoryDTO[];
+    works: LibraryItemDTO[];
+    creators: LibraryItemDTO[];
+  };
+  game: {
+    categories: LibraryCategoryDTO[];
+    works: LibraryItemDTO[];
+    creators: LibraryItemDTO[];
+  };
+  book: {
+    categories: LibraryCategoryDTO[];
+    works: LibraryItemDTO[];
+    creators: LibraryItemDTO[];
+  };
 }
 

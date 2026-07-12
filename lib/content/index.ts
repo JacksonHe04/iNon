@@ -16,7 +16,7 @@ import {
   mapDevelopment,
   mapProducts,
   mapCreation,
-  mapMedia,
+  mapLibrary,
   mapEvents,
   mapContact,
   mapThoughts,
@@ -38,7 +38,8 @@ import type {
   ProductItemRow,
   HardwareItemRow,
   CreationItemRow,
-  MediaItemRow,
+  LibraryItemRow,
+  LibraryCategoryRow,
   PerformanceRow,
   ContactMethodRow,
   PlatformAccountRow,
@@ -79,7 +80,8 @@ export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<Readme
       productItemsResult,
       hardwareItemsResult,
       creationItemsResult,
-      mediaItemsResult,
+      libraryItemsResult,
+      libraryCategoriesResult,
       performancesResult,
       contactMethodsResult,
       platformAccountsResult,
@@ -100,7 +102,8 @@ export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<Readme
       listTable<ProductItemRow>('product_items', profile.id),
       listTable<HardwareItemRow>('hardware_items', profile.id),
       listTable<CreationItemRow>('creation_items', profile.id),
-      listTable<MediaItemRow>('media_items', profile.id),
+      listTable<LibraryItemRow>('library_items', profile.id),
+      listTable<LibraryCategoryRow>('library_categories', profile.id),
       listTable<PerformanceRow>('performances', profile.id),
       listTable<ContactMethodRow>('contact_methods', profile.id),
       listTable<PlatformAccountRow>('platform_accounts', profile.id),
@@ -123,7 +126,8 @@ export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<Readme
       productItemsResult.error,
       hardwareItemsResult.error,
       creationItemsResult.error,
-      mediaItemsResult.error,
+      libraryItemsResult.error,
+      libraryCategoriesResult.error,
       performancesResult.error,
       contactMethodsResult.error,
       platformAccountsResult.error,
@@ -139,7 +143,8 @@ export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<Readme
     const listItems = listItemsResult.data ?? [];
     const projects = sortByOrder(projectsResult.data ?? []);
     const productItems = sortByOrder(productItemsResult.data ?? []);
-    const mediaItems = sortByOrder(mediaItemsResult.data ?? []);
+    const libraryItems = libraryItemsResult.data ?? [];
+    const libraryCategories = libraryCategoriesResult.data ?? [];
     const creationItems = sortByOrder(creationItemsResult.data ?? []);
     const hardwareItems = sortByOrder(hardwareItemsResult.data ?? []);
     const projectIds = projects.map((project) => project.id);
@@ -188,7 +193,7 @@ export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<Readme
     );
     const products = mapProducts(productItems, productItemTags, hardwareItems);
     const creation = mapCreation(creationItems, listItems);
-    const media = mapMedia(mediaItems);
+    const library = mapLibrary(libraryItems, libraryCategories);
     const events = mapEvents(performancesResult.data ?? []);
     const contact = mapContact(contactMethodsResult.data ?? [], platformAccountsResult.data ?? []);
     const thoughts = mapThoughts(listItems, thoughtQaResult.data ?? []);
@@ -204,10 +209,7 @@ export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<Readme
       development,
       products,
       creation,
-      reading: media.reading,
-      films: media.films,
-      music: media.music,
-      hiphop: media.hiphop,
+      library,
       events,
       contact,
       thoughts,

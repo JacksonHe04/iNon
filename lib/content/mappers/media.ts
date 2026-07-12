@@ -1,5 +1,6 @@
 import type {
-  MediaItemRow,
+  LibraryCategoryRow,
+  LibraryItemRow,
   PerformanceRow,
   ContactMethodRow,
   PlatformAccountRow,
@@ -7,96 +8,84 @@ import type {
   NotificationRow,
   ValueRow,
 } from '@/types/database';
-import { sortByOrder, valuesByType, dedupeBy } from './utils';
+import type {
+  LibraryItemDTO,
+  LibraryCategoryDTO,
+  LibraryByKind,
+  LibraryKind,
+} from '@/types';
+import { sortByOrder, valuesByType } from './utils';
 
-// Keys used to identify a media row by its business content (excluding
-// id/profile_id/sort_order/link/comment/image_url which are either metadata
-// or free-form). Keeping these in sync with what the mutation layer treats as
-// "the same row" ensures the read path agrees with the write path.
-const MEDIA_ROW_KEYS = ['domain', 'item_type', 'name', 'creator', 'album', 'country_or_region'] as const;
+function sortByLibraryOrder<T extends { sort_order: number; created_at?: string }>(arr: T[]): T[] {
+  return [...arr].sort((a, b) => {
+    if (a.sort_order !== b.sort_order) {
+      return a.sort_order - b.sort_order;
+    }
+    const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return dateA - dateB;
+  });
+}
 
-export function mapMedia(mediaItems: MediaItemRow[]) {
-  const mediaBy = (domain: MediaItemRow['domain'], itemType: string) =>
-    sortByOrder(
-      dedupeBy(
-        mediaItems.filter((item) => item.domain === domain && item.item_type === itemType),
-        MEDIA_ROW_KEYS as unknown as (keyof MediaItemRow)[]
-      )
-    );
+export function mapLibrary(items: LibraryItemRow[], categories: LibraryCategoryRow[]): LibraryByKind {
+  const categoryMap = new Map<string, string>();
+  for (const cat of categories) {
+    categoryMap.set(cat.id, cat.name);
+  }
+
+  const itemToDTO = (item: LibraryItemRow): LibraryItemDTO => ({
+    id: item.id,
+    kind: item.kind,
+    subtype: item.subtype,
+    categoryId: item.category_id,
+    categoryName: item.category_id ? (categoryMap.get(item.category_id) || '') : '',
+    name: item.name,
+    creator: item.creator,
+    link: item.link,
+    comment: item.comment,
+    imageUrl: item.image_url,
+    sortOrder: item.sort_order,
+  });
+
+  const categoryToDTO = (cat: LibraryCategoryRow): LibraryCategoryDTO => ({
+    id: cat.id,
+    kind: cat.kind,
+    name: cat.name,
+    sortOrder: cat.sort_order,
+  });
+
+  const sortedCategories = sortByLibraryOrder(categories);
+  const sortedItems = sortByLibraryOrder(items);
+
+  const getByKind = (kind: LibraryKind) => {
+    const kindCategories = sortedCategories.filter((c) => c.kind === kind).map(categoryToDTO);
+    const kindItems = sortedItems.filter((i) => i.kind === kind);
+
+    const works = kindItems.filter((i) => i.subtype === 'work').map(itemToDTO);
+    const creators = kindItems.filter((i) => i.subtype === 'creator').map(itemToDTO);
+
+    if (kind === 'music') {
+      const songs = kindItems.filter((i) => i.subtype === 'song').map(itemToDTO);
+      return {
+        categories: kindCategories,
+        works,
+        songs,
+        creators,
+      };
+    }
+
+    return {
+      categories: kindCategories,
+      works,
+      creators,
+    };
+  };
 
   return {
-    reading: {
-      books: mediaBy('reading', 'book').map((item) => ({
-        name: item.name,
-        author: item.creator,
-        country: item.country_or_region,
-        link: item.link,
-        comment: item.comment,
-      })),
-      authors: mediaBy('reading', 'author').map((item) => ({
-        name: item.name,
-        country: item.country_or_region,
-        link: item.link,
-        comment: item.comment,
-      })),
-    },
-    films: {
-      films: mediaBy('films', 'film').map((item) => ({
-        name: item.name,
-        director: item.creator,
-        country: item.country_or_region,
-        link: item.link,
-        comment: item.comment,
-      })),
-      directors: mediaBy('films', 'director').map((item) => ({
-        name: item.name,
-        country: item.country_or_region,
-        link: item.link,
-        comment: item.comment,
-      })),
-    },
-    music: {
-      albums: mediaBy('music', 'album').map((item) => ({
-        name: item.name,
-        artist: item.creator,
-        link: item.link,
-        comment: item.comment,
-      })),
-      songs: mediaBy('music', 'song').map((item) => ({
-        name: item.name,
-        artist: item.creator,
-        album: item.album,
-        link: item.link,
-        comment: item.comment,
-      })),
-      musicians: mediaBy('music', 'musician').map((item) => ({
-        name: item.name,
-        region: item.country_or_region,
-        link: item.link,
-        comment: item.comment,
-      })),
-    },
-    hiphop: {
-      albums: mediaBy('hiphop', 'album').map((item) => ({
-        name: item.name,
-        artist: item.creator,
-        link: item.link,
-        comment: item.comment,
-      })),
-      songs: mediaBy('hiphop', 'song').map((item) => ({
-        name: item.name,
-        artist: item.creator,
-        album: item.album,
-        link: item.link,
-        comment: item.comment,
-      })),
-      musicians: mediaBy('hiphop', 'musician').map((item) => ({
-        name: item.name,
-        region: item.country_or_region,
-        link: item.link,
-        comment: item.comment,
-      })),
-    },
+    music: getByKind('music') as LibraryByKind['music'],
+    film: getByKind('film') as LibraryByKind['film'],
+    game: getByKind('game') as LibraryByKind['game'],
+    book: getByKind('book') as LibraryByKind['book'],
   };
 }
 

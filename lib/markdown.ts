@@ -67,21 +67,47 @@ export function readmeDataToMarkdown(data: ReadmeData): string {
   lines.push(`- 座右铭：${data.creation.mottos.join(' / ')}`);
   lines.push(`- 语录：${data.creation.quotes.join(' / ')}`, ``);
 
-  lines.push(`## 阅读`);
-  lines.push(`- 书籍：${data.reading.books.map((b) => `${b.name} - ${b.author}`).join('; ')}`);
-  lines.push(`- 作家：${data.reading.authors.map((a) => `${a.name}`).join(', ')}`, ``);
-
-  lines.push(`## 影视与音乐`);
-  lines.push(`- 影片：${data.films.films.map((f) => `${f.name} by ${f.director}`).join('; ')}`);
-  lines.push(`- 导演：${data.films.directors.map((d) => d.name).join(', ')}`);
-  lines.push(`- 音乐专辑：${data.music.albums.map((a) => a.name).join(', ')}`);
-  lines.push(`- 喜欢的歌曲：${data.music.songs.map((s) => s.name).join(', ')}`);
-  lines.push(`- 喜爱音乐人：${data.music.musicians.map((m) => m.name).join(', ')}`, ``);
-
-  lines.push(`## 嘻哈`);
-  lines.push(`- 专辑：${data.hiphop.albums.map((a) => a.name).join(', ')}`);
-  lines.push(`- 歌曲：${data.hiphop.songs.map((s) => s.name).join(', ')}`);
-  lines.push(`- 音乐人：${data.hiphop.musicians.map((m) => m.name).join(', ')}`, ``);
+  lines.push(`## 库 (Library)`);
+  if (data.library.book.works.length > 0 || data.library.book.creators.length > 0) {
+    lines.push(`### 读书`);
+    if (data.library.book.works.length > 0) {
+      lines.push(`- 书籍：${data.library.book.works.map((b) => `${b.name} - ${b.creator}`).join('; ')}`);
+    }
+    if (data.library.book.creators.length > 0) {
+      lines.push(`- 作家/学者：${data.library.book.creators.map((a) => `${a.name}`).join(', ')}`);
+    }
+  }
+  if (data.library.film.works.length > 0 || data.library.film.creators.length > 0) {
+    lines.push(`### 影视`);
+    if (data.library.film.works.length > 0) {
+      lines.push(`- 影片：${data.library.film.works.map((f) => `${f.name} - ${f.creator}`).join('; ')}`);
+    }
+    if (data.library.film.creators.length > 0) {
+      lines.push(`- 导演/影人：${data.library.film.creators.map((d) => d.name).join(', ')}`);
+    }
+  }
+  if (data.library.music.works.length > 0 || data.library.music.songs.length > 0 || data.library.music.creators.length > 0) {
+    lines.push(`### 音乐`);
+    if (data.library.music.works.length > 0) {
+      lines.push(`- 专辑：${data.library.music.works.map((a) => `${a.name} - ${a.creator}`).join('; ')}`);
+    }
+    if (data.library.music.songs.length > 0) {
+      lines.push(`- 单曲：${data.library.music.songs.map((s) => `${s.name} - ${s.creator}`).join('; ')}`);
+    }
+    if (data.library.music.creators.length > 0) {
+      lines.push(`- 音乐人：${data.library.music.creators.map((m) => m.name).join(', ')}`);
+    }
+  }
+  if (data.library.game.works.length > 0 || data.library.game.creators.length > 0) {
+    lines.push(`### 游戏`);
+    if (data.library.game.works.length > 0) {
+      lines.push(`- 游戏：${data.library.game.works.map((g) => `${g.name} - ${g.creator}`).join('; ')}`);
+    }
+    if (data.library.game.creators.length > 0) {
+      lines.push(`- 开发商/制作人：${data.library.game.creators.map((d) => d.name).join(', ')}`);
+    }
+  }
+  lines.push(``);
 
   lines.push(`## 活动`);
   data.events.performances.forEach((event) => {

@@ -152,6 +152,48 @@ export type MediaItemRow = {
   sort_order: number;
 };
 
+/**
+ * Library 重构后新增的类型(2026-07-12)。
+ * 取代 MediaItemRow, 详见 .agents/docs/260712/library-design.md。
+ *
+ * 后端工程师对接步骤:
+ * 1. 用 LibraryItemRow / LibraryCategoryRow 替换 MediaItemRow 的所有引用
+ * 2. lib/content/index.ts 把 listTable<MediaItemRow>('media_items', ...) 改为
+ *    listTable<LibraryItemRow>('library_items', ...)
+ * 3. lib/content/mappers/media.ts 的 mapMedia 改写为 mapLibrary, 数据形态从
+ *    { reading, films, music, hiphop } 切为 { music: {categories:[...], works, songs, creators}, film, game, book }
+ * 4. lib/content/mutations/media-events.ts 的 updateReadingSection/updateFilmsSection/
+ *    updateMusicSection 全部替换为 updateLibrarySection
+ * 5. app/api/{admin,account}/content/[section]/route.ts 把 case 'reading'/'films'/'music'/'hiphop'
+ *    合并为 case 'library'
+ */
+export type LibraryKind = 'music' | 'film' | 'game' | 'book';
+export type LibrarySubtype = 'work' | 'creator' | 'song';
+
+export type LibraryCategoryRow = {
+  id: string;
+  profile_id: string;
+  kind: LibraryKind;
+  name: string;
+  sort_order: number;
+  created_at?: string;
+};
+
+export type LibraryItemRow = {
+  id: string;
+  profile_id: string;
+  kind: LibraryKind;
+  subtype: LibrarySubtype;
+  category_id: string | null;
+  name: string;
+  creator: string;
+  link: string;
+  comment: string;
+  image_url: string | null;
+  sort_order: number;
+  created_at?: string;
+};
+
 export type PerformanceRow = {
   event_type: string;
   name: string;
