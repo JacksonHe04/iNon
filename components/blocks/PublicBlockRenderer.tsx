@@ -22,7 +22,7 @@ export default function PublicBlockRenderer({ data, layoutConfig }: PublicBlockR
       />
 
       {/* Interactive Footer & DeepWater Sections */}
-      <FooterSection />
+      <FooterSection data={data} />
       <DeepWaterSection data={data.thoughts} />
     </div>
   );
