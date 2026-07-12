@@ -107,7 +107,7 @@ export function EditableBlockWrapper({
       </div>
 
       {/* Block Content Container */}
-      <div className="p-3">
+      <div className="p-3 pointer-events-none select-none">
         {children}
       </div>
     </Reorder.Item>

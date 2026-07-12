@@ -19,6 +19,7 @@ interface EducationBlockProps {
   undergraduateAdvisor?: string;
   title?: string;
   colSpan?: number;
+  mode?: 'readonly' | 'edit';
 }
 
 export default function EducationBlock({
@@ -27,6 +28,7 @@ export default function EducationBlock({
   undergraduateAdvisor,
   title,
   colSpan = 2,
+  mode = 'readonly',
 }: EducationBlockProps) {
   const [showScene, setShowScene] = useState(true);
 
@@ -64,7 +66,7 @@ export default function EducationBlock({
 
       {colSpan === 2 && showScene && (
         <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10 p-2">
-          <EducationScene schools={schools} />
+          <EducationScene schools={schools} mode={mode} />
         </div>
       )}
 

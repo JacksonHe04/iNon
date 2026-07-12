@@ -27,6 +27,7 @@ import { getBlockTitle } from '@/lib/blocks/registry';
 interface BlockRendererProps {
   block: BlockConfig;
   data: ReadmeData;
+  mode?: 'readonly' | 'edit';
 }
 
 const defaultBookmarks = [
@@ -36,7 +37,7 @@ const defaultBookmarks = [
   { id: '4', title: 'Antigravity CLI', url: 'https://deepmind.google', icon: '🤖' },
 ];
 
-export function BlockRenderer({ block, data }: BlockRendererProps) {
+export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererProps) {
   const title = getBlockTitle(block.blockType);
 
   const timelineItems = data.experience.experience.map((e, i) => ({
@@ -91,6 +92,7 @@ export function BlockRenderer({ block, data }: BlockRendererProps) {
           directors={data.films.directors}
           title={title}
           colSpan={block.colSpan}
+          mode={mode}
         />
       );
     case 'books':
@@ -100,6 +102,7 @@ export function BlockRenderer({ block, data }: BlockRendererProps) {
           authors={data.reading.authors}
           title={title}
           colSpan={block.colSpan}
+          mode={mode}
         />
       );
     case 'friend_links':
@@ -114,6 +117,7 @@ export function BlockRenderer({ block, data }: BlockRendererProps) {
           undergraduateAdvisor={data.education.undergraduate_advisor}
           title={title}
           colSpan={block.colSpan}
+          mode={mode}
         />
       );
     case 'work':
@@ -124,6 +128,7 @@ export function BlockRenderer({ block, data }: BlockRendererProps) {
           workPreferences={data.work.work_preferences}
           title={title}
           colSpan={block.colSpan}
+          mode={mode}
         />
       );
     case 'products':
@@ -202,4 +207,5 @@ export function BlockRenderer({ block, data }: BlockRendererProps) {
       return null;
   }
 }
+
 export default BlockRenderer;

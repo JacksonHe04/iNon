@@ -23,6 +23,7 @@ interface WorkBlockProps {
   workPreferences: string[];
   title?: string;
   colSpan?: number;
+  mode?: 'readonly' | 'edit';
 }
 
 export default function WorkBlock({
@@ -31,6 +32,7 @@ export default function WorkBlock({
   workPreferences,
   title,
   colSpan = 2,
+  mode = 'readonly',
 }: WorkBlockProps) {
   const [selectedJob, setSelectedJob] = useState<JobItem | null>(null);
   const [showScene, setShowScene] = useState(true);
@@ -76,6 +78,7 @@ export default function WorkBlock({
             jobs={jobs}
             onSelectJob={setSelectedJob}
             activeJobId={selectedJob?.company_name}
+            mode={mode}
           />
           <p className="text-[10px] text-gray-400 text-center mt-2">
             💡 点击上方 2D 关卡中的公司图标，可查看详细履历。

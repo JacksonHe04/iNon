@@ -93,7 +93,7 @@ export default function BlockCanvasEngine({
               onToggleVisibility={handleToggleVisibility}
             >
               <div id={block.sectionId || block.id}>
-                <BlockRenderer block={block} data={data} />
+                <BlockRenderer block={block} data={data} mode="edit" />
               </div>
             </EditableBlockWrapper>
           ))}
