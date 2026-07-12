@@ -2,6 +2,7 @@ import React from 'react';
 import { Bell, Sun, Moon, Eye, Loader2, User } from 'lucide-react';
 import SocialLinks from './SocialLinks';
 import type { ReadmeData } from '@/types';
+import { APP_EVENTS, addAppEventListener, dispatchAppEvent } from '@/lib/dom-events';
 
 interface NavRightProps {
   data: ReadmeData;
@@ -47,10 +48,10 @@ export function NavRight({
       setCurrentPath(window.location.pathname);
     };
     window.addEventListener('popstate', handleLocationChange);
-    window.addEventListener('locationchange', handleLocationChange);
+    const removeLocationChange = addAppEventListener(APP_EVENTS.locationChange, handleLocationChange);
     return () => {
       window.removeEventListener('popstate', handleLocationChange);
-      window.removeEventListener('locationchange', handleLocationChange);
+      removeLocationChange();
     };
   }, []);
 
@@ -101,11 +102,10 @@ export function NavRight({
             const targetPath = activeIsConsolePage ? `/${name}` : `/i/${name}`;
             
             // Dispatch custom event to see if client layout wants to handle it instantly
-            const eventDispatched = window.dispatchEvent(
-              new CustomEvent('toggle-console-preview', {
-                detail: { targetPath },
-                cancelable: true,
-              })
+            const eventDispatched = dispatchAppEvent(
+              APP_EVENTS.toggleConsolePreview,
+              { targetPath },
+              { cancelable: true }
             );
 
             // If the event was intercepted and prevented (returned false), do not perform Next.js transition
@@ -137,4 +137,3 @@ export function NavRight({
   );
 }
 export default NavRight;
-

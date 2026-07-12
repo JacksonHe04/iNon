@@ -2,6 +2,7 @@
 
 import GlassCard from '@/components/GlassCard';
 import { Bot, Sparkles, MessageSquare } from 'lucide-react';
+import { APP_EVENTS, dispatchAppEvent } from '@/lib/dom-events';
 
 interface AiCloneBlockProps {
   name: string;
@@ -15,7 +16,7 @@ export default function AiCloneBlock({ name, title, onOpenChat }: AiCloneBlockPr
       onOpenChat();
       return;
     }
-    window.dispatchEvent(new CustomEvent('inon-open-ai-panel'));
+    dispatchAppEvent(APP_EVENTS.openAiPanel, undefined);
   };
 
   return (

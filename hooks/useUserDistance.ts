@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   getCityCoordinates,
   getUserLocation,
   calculateDistance,
+  resolveCityCoordinates,
 } from '@/lib/utils';
 
 export function useUserDistance(currentCity: string) {
@@ -10,7 +11,25 @@ export function useUserDistance(currentCity: string) {
   const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [isRefreshingLocation, setIsRefreshingLocation] = useState(false);
 
-  const cityCoords = getCityCoordinates(currentCity);
+  const [cityCoords, setCityCoords] = useState(() => getCityCoordinates(currentCity));
+
+  useEffect(() => {
+    let cancelled = false;
+    const localCoords = getCityCoordinates(currentCity);
+    setCityCoords(localCoords);
+
+    if (localCoords) return;
+
+    void resolveCityCoordinates(currentCity).then((coords) => {
+      if (!cancelled) {
+        setCityCoords(coords);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentCity]);
 
   const updateUserLocation = useCallback(async () => {
     if (!cityCoords) return;

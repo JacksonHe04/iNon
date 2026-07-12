@@ -9,6 +9,7 @@ import type { OwnerMessage } from '@/lib/content/messages';
 import type { UserContext } from '@/lib/auth/user';
 import { fetchReadmeDataAction, fetchOwnerMessagesAction } from '@/lib/content/actions';
 import { fetchAnalyticsData } from '@/lib/analytics/actions';
+import { APP_EVENTS, dispatchAppEvent, addAppEventListener } from '@/lib/dom-events';
 
 // Loading Spinner for Code Splitting
 const LoadingSpinner = () => (
@@ -143,14 +144,14 @@ export default function DashboardLayoutClient({
 
     window.history.pushState = function (...args) {
       originalPushState.apply(this, args);
-      window.dispatchEvent(new Event('pushstate'));
-      window.dispatchEvent(new Event('locationchange'));
+      dispatchAppEvent(APP_EVENTS.pushState, undefined);
+      dispatchAppEvent(APP_EVENTS.locationChange, undefined);
     };
 
     window.history.replaceState = function (...args) {
       originalReplaceState.apply(this, args);
-      window.dispatchEvent(new Event('replacestate'));
-      window.dispatchEvent(new Event('locationchange'));
+      dispatchAppEvent(APP_EVENTS.replaceState, undefined);
+      dispatchAppEvent(APP_EVENTS.locationChange, undefined);
     };
 
     return () => {
@@ -201,7 +202,7 @@ export default function DashboardLayoutClient({
     
     // Change URL in address bar instantly without Next.js routing roundtrip
     window.history.pushState(null, '', targetUrl);
-    window.dispatchEvent(new Event('locationchange'));
+    dispatchAppEvent(APP_EVENTS.locationChange, undefined);
     
     // Trigger background data sync
     refetchData(tabId);
@@ -218,7 +219,7 @@ export default function DashboardLayoutClient({
       
       // Update browser URL address bar
       window.history.pushState(null, '', targetPath);
-      window.dispatchEvent(new Event('locationchange'));
+      dispatchAppEvent(APP_EVENTS.locationChange, undefined);
       
       const isPublic = !targetPath.includes('/i/');
       setIsPublicPreview(isPublic);
@@ -242,8 +243,8 @@ export default function DashboardLayoutClient({
       }
     };
 
-    window.addEventListener('toggle-console-preview', handleToggle);
-    return () => window.removeEventListener('toggle-console-preview', handleToggle);
+    const removeToggle = addAppEventListener(APP_EVENTS.toggleConsolePreview, handleToggle);
+    return () => removeToggle();
   }, [username, userContext.profile.id]);
 
   // Handle browser back and forward button clicks
@@ -252,7 +253,7 @@ export default function DashboardLayoutClient({
       const path = window.location.pathname;
       const isPublic = !path.startsWith('/i/');
       setIsPublicPreview(isPublic);
-      window.dispatchEvent(new Event('locationchange'));
+      dispatchAppEvent(APP_EVENTS.locationChange, undefined);
 
       if (isPublic) {
         return;

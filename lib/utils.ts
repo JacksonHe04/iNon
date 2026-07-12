@@ -1,5 +1,12 @@
 import type { ValueRow } from '@/types/database';
 
+type CityCoordinates = { lat: number; lon: number };
+const cityCoordinatesCache = new Map<string, CityCoordinates | null>();
+
+function normalizeCityKey(city: string): string {
+  return city.trim().replace(/\s+/g, '').replace(/[市區区县縣]$/, '');
+}
+
 // 计算年龄
 export function calculateAge(birthDate: string): number {
   const today = new Date();
@@ -62,7 +69,7 @@ export async function getUserLocation(): Promise<{ lat: number; lon: number } | 
 }
 
 // 城市坐标映射（简化版，实际应该使用地理编码API）
-const cityCoordinates: Record<string, { lat: number; lon: number }> = {
+const cityCoordinates: Record<string, CityCoordinates> = {
   上海: { lat: 31.2304, lon: 121.4737 },
   北京: { lat: 39.9042, lon: 116.4074 },
   广州: { lat: 23.1291, lon: 113.2644 },
@@ -73,8 +80,69 @@ const cityCoordinates: Record<string, { lat: number; lon: number }> = {
 };
 
 // 获取城市坐标
-export function getCityCoordinates(city: string): { lat: number; lon: number } | null {
-  return cityCoordinates[city] || null;
+export function getCityCoordinates(city: string): CityCoordinates | null {
+  const normalized = normalizeCityKey(city);
+  return cityCoordinates[normalized] || cityCoordinates[city] || null;
+}
+
+export async function resolveCityCoordinates(city: string): Promise<CityCoordinates | null> {
+  const normalized = normalizeCityKey(city);
+  if (!normalized) return null;
+
+  const localMatch = getCityCoordinates(normalized);
+  if (localMatch) return localMatch;
+
+  if (cityCoordinatesCache.has(normalized)) {
+    return cityCoordinatesCache.get(normalized) || null;
+  }
+
+  const storageKey = `inon-city-coordinates:${normalized}`;
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = window.localStorage.getItem(storageKey);
+      if (cached) {
+        const parsed = JSON.parse(cached) as CityCoordinates;
+        if (typeof parsed.lat === 'number' && typeof parsed.lon === 'number') {
+          cityCoordinatesCache.set(normalized, parsed);
+          return parsed;
+        }
+      }
+    } catch {
+      // ignore stale cache
+    }
+  }
+
+  try {
+    const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
+    url.searchParams.set('name', city);
+    url.searchParams.set('count', '1');
+    url.searchParams.set('language', 'zh');
+    url.searchParams.set('format', 'json');
+
+    const response = await fetch(url.toString());
+    if (!response.ok) return null;
+
+    const payload = (await response.json()) as {
+      results?: Array<{ latitude?: number; longitude?: number }>;
+    };
+    const result = payload.results?.[0];
+    if (typeof result?.latitude !== 'number' || typeof result?.longitude !== 'number') {
+      return null;
+    }
+
+    const coords = { lat: result.latitude, lon: result.longitude };
+    cityCoordinatesCache.set(normalized, coords);
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(coords));
+      } catch {
+        // ignore cache write failures
+      }
+    }
+    return coords;
+  } catch {
+    return null;
+  }
 }
 
 // 获取当前时间字符串

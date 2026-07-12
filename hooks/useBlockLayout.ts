@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { LayoutConfig, BlockConfig } from '@/types/layout';
 import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
+import { APP_EVENTS, dispatchAppEvent } from '@/lib/dom-events';
 
 interface UseBlockLayoutProps {
   initialLayoutConfig: LayoutConfig;
@@ -18,7 +19,7 @@ export function useBlockLayout({ initialLayoutConfig, onSave }: UseBlockLayoutPr
   useEffect(() => {
     const currentTheme = layoutConfig.theme || 'green';
     document.documentElement.setAttribute('data-color-theme', currentTheme);
-    window.dispatchEvent(new CustomEvent('color-theme-changed', { detail: { theme: currentTheme } }));
+    dispatchAppEvent(APP_EVENTS.colorThemeChanged, { theme: currentTheme });
   }, [layoutConfig.theme]);
 
   const autoSave = (newConfig: LayoutConfig) => {

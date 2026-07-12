@@ -9,6 +9,7 @@ import { calculateAge, getAuthorNickname } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import type { BlockConfig } from '@/types/layout';
 import { getBlockTitle } from '@/lib/blocks/registry';
+import { APP_EVENTS, addAppEventListener } from '@/lib/dom-events';
 
 import useClockAndYearProgress from '@/hooks/useClockAndYearProgress';
 import useUserDistance from '@/hooks/useUserDistance';
@@ -81,8 +82,7 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
 
   useEffect(() => {
     const handleOpenAIPanel = () => setAIState('floating');
-    window.addEventListener('inon-open-ai-panel', handleOpenAIPanel);
-    return () => window.removeEventListener('inon-open-ai-panel', handleOpenAIPanel);
+    return addAppEventListener(APP_EVENTS.openAiPanel, handleOpenAIPanel);
   }, [setAIState]);
 
   useEffect(() => {

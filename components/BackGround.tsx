@@ -6,6 +6,7 @@ import type { ThemeType } from '@/types/layout'
 import { CANVAS_THEMES } from './background/constants'
 import type { MouseRipple, AmbientRipple } from './background/constants'
 import { BlobParticle } from './background/particles'
+import { APP_EVENTS, addAppEventListener } from '@/lib/dom-events'
 
 export function AnimatedGradientBackground({ theme: initialTheme = 'green' }: { theme?: string }) {
   const [theme, setTheme] = useState(initialTheme)
@@ -26,10 +27,7 @@ export function AnimatedGradientBackground({ theme: initialTheme = 'green' }: { 
         setTheme(detail.theme)
       }
     }
-    window.addEventListener('color-theme-changed', handleThemeChange)
-    return () => {
-      window.removeEventListener('color-theme-changed', handleThemeChange)
-    }
+    return addAppEventListener(APP_EVENTS.colorThemeChanged, handleThemeChange)
   }, [])
 
   useEffect(() => {
