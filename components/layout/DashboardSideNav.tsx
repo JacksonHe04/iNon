@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Library, Palette, UserCog, BarChart3, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Library, Palette, UserCog, BarChart3, MessageSquare, FolderOpen } from 'lucide-react';
 
 export const DASHBOARD_TABS = [
   { id: 'home', label: '控制台', icon: LayoutDashboard, path: '' },
-  { id: 'content', label: '内容管理', icon: Library, path: '/content' },
+  { id: 'content', label: '内容管理', icon: FolderOpen, path: '/content' },
+  { id: 'library', label: '我的库', icon: Library, path: '/library' },
   { id: 'canvas', label: '公开网站', icon: Palette, path: '/website' },
   { id: 'messages', label: '留言管理', icon: MessageSquare, path: '/messages' },
   { id: 'analytics', label: '数据统计', icon: BarChart3, path: '/analytics' },
