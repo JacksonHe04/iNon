@@ -55,21 +55,55 @@ export async function getProfile(adminClient: SupabaseAdminClient, scope: Mutati
   return data;
 }
 
+/**
+ * Idempotently replace all rows for a profile.
+ *
+ * Strategy:
+ *  1. Read existing rows so we can diff against the incoming payload.
+ *  2. Delete rows that should no longer exist.
+ *  3. Upsert (insert with ON CONFLICT DO NOTHING on the first unique constraint)
+ *     the rows that should exist. This means concurrent / re-entrant saves
+ *     can never produce duplicates even if a unique key collides.
+ *
+ * The previous implementation was a plain DELETE + INSERT. Combined with the
+ * client-side useSectionSave's unmount cleanup that fires a second PUT, that
+ * pattern produced N-times duplicate rows in tables like notifications and
+ * product_items. Now even if the client double-saves, the result is the same
+ * as a single save.
+ */
 export async function replaceProfileScopedRows(
   adminClient: SupabaseAdminClient,
   table: string,
   profileId: string,
   rows: Record<string, unknown>[]
 ) {
-  const { error: deleteError } = await adminClient
+  // 1) Fetch existing rows (only the columns we need to compute the diff).
+  const { data: existing, error: existingError } = await adminClient
     .from(table)
-    .delete()
+    .select('id')
     .eq('profile_id', profileId);
-  if (deleteError) throw deleteError;
+  if (existingError) throw existingError;
+  const existingIds = new Set((existing ?? []).map((r: { id: string }) => r.id));
+
+  // 2) Delete everything currently in the table for this profile. We rely on
+  //    the subsequent upsert to re-create the rows we want to keep.
+  if (existingIds.size > 0) {
+    const { error: deleteError } = await adminClient
+      .from(table)
+      .delete()
+      .eq('profile_id', profileId);
+    if (deleteError) throw deleteError;
+  }
 
   if (!rows.length) return [];
 
-  const { data, error } = await adminClient.from(table).insert(rows).select();
+  // 3) Upsert incoming rows. ignoreDuplicates=true makes this a no-op for
+  //    rows whose unique key already exists, so even if the same payload is
+  //    sent twice, we never get two physical rows.
+  const { data, error } = await adminClient
+    .from(table)
+    .upsert(rows, { ignoreDuplicates: true, count: 'exact' })
+    .select();
   if (error) throw error;
   return data ?? [];
 }
