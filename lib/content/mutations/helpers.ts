@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
+import { revalidatePath } from 'next/cache';
 
 export type SupabaseAdminClient = ReturnType<typeof createAdminClient>;
 
@@ -108,4 +109,22 @@ export function tagRows(profileId: string, tagType: string, values: string[]) {
     value,
     sort_order: index,
   }));
+}
+
+export function withMutation<T>(
+  handler: (adminClient: SupabaseAdminClient, profileId: string, data: T) => Promise<void>
+) {
+  return async (data: T, scope: MutationScope = { kind: 'admin' }) => {
+    const adminClient = createAdminClient();
+    const profile = await getProfile(adminClient, scope);
+    
+    await handler(adminClient, profile.id, data);
+    
+    if (profile.slug) {
+      revalidatePath(`/${profile.slug}`);
+      revalidatePath(`/i/${profile.slug}`);
+    }
+    revalidatePath('/');
+    revalidatePath('/admin/content');
+  };
 }
