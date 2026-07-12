@@ -1,15 +1,19 @@
 import { getReadmeData } from '@/lib/content';
 import { getLayoutConfig } from '@/lib/content/layout';
 import { requireOwnerPage } from '@/lib/auth/user';
-import DashboardClient from '@/components/dashboard/DashboardClient';
+import ShellLayout from '@/components/layout/ShellLayout';
 
-export const dynamic = 'force-dynamic';
-
-interface UserDashboardPageProps {
+interface DashboardLayoutProps {
+  children: React.ReactNode;
   params: Promise<{ slug: string }>;
 }
 
-export default async function UserDashboardPage({ params }: UserDashboardPageProps) {
+export const dynamic = 'force-dynamic';
+
+export default async function DashboardLayout({
+  children,
+  params,
+}: DashboardLayoutProps) {
   const { slug } = await params;
   await requireOwnerPage(slug, `/i/${slug}`);
   const [data, layoutConfig] = await Promise.all([
@@ -18,11 +22,13 @@ export default async function UserDashboardPage({ params }: UserDashboardPagePro
   ]);
 
   return (
-    <DashboardClient
-      username={slug}
+    <ShellLayout
       data={data}
-      initialLayoutConfig={layoutConfig}
-      activeTab="home"
-    />
+      username={slug}
+      showSideNav={false}
+      theme={layoutConfig.theme}
+    >
+      {children}
+    </ShellLayout>
   );
 }

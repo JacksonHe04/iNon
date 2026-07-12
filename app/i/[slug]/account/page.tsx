@@ -1,7 +1,6 @@
 import { getReadmeData } from '@/lib/content';
 import { getLayoutConfig } from '@/lib/content/layout';
 import { requireOwnerPage } from '@/lib/auth/user';
-import ShellLayout from '@/components/layout/ShellLayout';
 import DashboardClient from '@/components/dashboard/DashboardClient';
 
 export const dynamic = 'force-dynamic';
@@ -22,15 +21,13 @@ export default async function UserAccountPage({ params }: UserDashboardPageProps
   const initialSlugs = userContext.profile.slugs;
 
   return (
-    <ShellLayout data={data} username={slug} showSideNav={false} theme={layoutConfig.theme}>
-      <DashboardClient
-        username={slug}
-        data={data}
-        initialLayoutConfig={layoutConfig}
-        activeTab="account"
-        initialEmail={initialEmail}
-        initialSlugs={initialSlugs}
-      />
-    </ShellLayout>
+    <DashboardClient
+      username={slug}
+      data={data}
+      initialLayoutConfig={layoutConfig}
+      activeTab="account"
+      initialEmail={initialEmail}
+      initialSlugs={initialSlugs}
+    />
   );
 }
