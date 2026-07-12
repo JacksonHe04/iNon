@@ -8,6 +8,8 @@ export interface LinkGridItem {
   name: string;
   href: string;
   icon?: string;
+  imageUrl?: string;
+  imageAlt?: string;
   subtitle?: string;
 }
 
@@ -84,7 +86,15 @@ export default function LinkGridBlock({
               rel="noopener noreferrer"
               className="flex items-center gap-2 truncate pr-2 text-gray-800 dark:text-gray-200 hover:text-teal-600 dark:hover:text-teal-400"
             >
-              <span className="text-sm">{item.icon || defaultIcon}</span>
+              {item.imageUrl ? (
+                <img
+                  src={item.imageUrl}
+                  alt={item.imageAlt || item.name}
+                  className="h-5 w-5 rounded-full object-cover shrink-0"
+                />
+              ) : (
+                <span className="text-sm">{item.icon || defaultIcon}</span>
+              )}
               <span className="truncate">
                 <span className="block font-semibold">{item.name}</span>
                 {item.subtitle && (
