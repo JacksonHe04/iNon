@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getReadmeData } from '@/lib/content';
 import { readmeDataToMarkdown } from '@/lib/markdown';
 import { ReadmeData } from '@/types';
+import { getAuthorNickname } from '@/lib/utils';
 
 const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
@@ -22,7 +23,8 @@ export async function POST(req: Request) {
 
     const readmeData = (await getReadmeData()) as ReadmeData;
     const profileMarkdown = readmeDataToMarkdown(readmeData);
-    const systemPrompt = `你是小缨缨，是缨缨的数字花园的主人。请根据以下关于你的 Markdown 资料回答访客的问题，保持温柔、简洁且富有创意。\n\n${profileMarkdown}`;
+    const nickname = getAuthorNickname(readmeData.basic.name);
+    const systemPrompt = `你是小${nickname}，是${nickname}的数字花园的主人。请根据以下关于你的 Markdown 资料回答访客的问题，保持温柔、简洁且富有创意。\n\n${profileMarkdown}`;
 
     const payload = {
       model: 'openrouter/free',

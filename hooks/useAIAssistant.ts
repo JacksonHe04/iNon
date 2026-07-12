@@ -1,5 +1,6 @@
 import { useState, type KeyboardEvent } from 'react';
 import type { ReadmeData } from '@/types';
+import { getAuthorNickname } from '@/lib/utils';
 
 export type ChatMessage = {
   role: 'user' | 'assistant';
@@ -11,6 +12,7 @@ interface UseAIAssistantProps {
 }
 
 export function useAIAssistant({ data }: UseAIAssistantProps) {
+  const nickname = getAuthorNickname(data.basic.name);
   const [aiState, setAIState] = useState<'closed' | 'docked' | 'floating'>('closed');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [aiInput, setAIInput] = useState('');
@@ -28,10 +30,10 @@ export function useAIAssistant({ data }: UseAIAssistantProps) {
       if (pendingPrompt === 'mbti') {
         const lifeMBTI = data.life.mbti?.life_mbti ?? '未知';
         const workMBTI = data.life.mbti?.work_mbti ?? '未知';
-        finalPrompt = `访客的 MBTI 是「${text}」。请结合 Yingying 的 MBTI（生活：${lifeMBTI}，工作：${workMBTI}）分析与访客的匹配度，输出性格契合点与建议。`;
+        finalPrompt = `访客的 MBTI 是「${text}」。请结合 ${nickname} 的 MBTI（生活：${lifeMBTI}，工作：${workMBTI}）分析与访客的匹配度，输出性格契合点与建议。`;
       } else if (pendingPrompt === 'zodiac') {
         const zodiac = data.life.zodiac_sign || '未知';
-        finalPrompt = `访客的星座是「${text}」。请结合 Yingying 的星座（${zodiac}）进行星座匹配度解析，写出共鸣点与提醒。`;
+        finalPrompt = `访客的星座是「${text}」。请结合 ${nickname} 的星座（${zodiac}）进行星座匹配度解析，写出共鸣点与提醒。`;
       }
       setPendingPrompt(null);
     } else if (prompt) {
@@ -75,7 +77,7 @@ export function useAIAssistant({ data }: UseAIAssistantProps) {
       }
     } catch (error) {
       console.error('AI assistant error:', error);
-      setErrorMessage('小缨缨暂时离线，请稍后重试。');
+      setErrorMessage(`小${nickname}暂时离线，请稍后重试。`);
       setMessages((prev) => {
         if (!prev.length) return prev;
         const updated = [...prev];

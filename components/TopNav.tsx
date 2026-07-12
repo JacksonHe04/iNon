@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import type { ReadmeData } from '@/types';
-import { calculateAge } from '@/lib/utils';
+import { calculateAge, getAuthorNickname } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import type { BlockConfig } from '@/types/layout';
 import { getBlockTitle } from '@/lib/blocks/registry';
@@ -49,7 +49,8 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
   const [showMobilePanel, setShowMobilePanel] = useState(false);
   const [notificationsViewed, setNotificationsViewed] = useState(0);
 
-  const notificationsStorageKey = 'yingying-notifications-viewed';
+  const nickname = getAuthorNickname(data.basic.name);
+  const notificationsStorageKey = `inon-notifications-viewed-${nickname}`;
 
   const age = calculateAge(data.life.birth_date);
   const shouldShowBadge = data.notifications.length > notificationsViewed;
@@ -155,6 +156,7 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
               handleSuggestionClick={handleSuggestionClick}
               handleInputKeyDown={handleInputKeyDown}
               getInputPlaceholder={getInputPlaceholder}
+              nickname={nickname}
             />
 
             <NavRight
@@ -215,6 +217,7 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
         handleSend={handleSend}
         handleInputKeyDown={handleInputKeyDown}
         getInputPlaceholder={getInputPlaceholder}
+        nickname={nickname}
       />
     </>
   );

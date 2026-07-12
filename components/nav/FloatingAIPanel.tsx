@@ -13,6 +13,7 @@ interface FloatingAIPanelProps {
   handleSend: (prompt?: string) => Promise<void>;
   handleInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   getInputPlaceholder: (mode: 'docked' | 'floating') => string;
+  nickname: string;
 }
 
 export function FloatingAIPanel({
@@ -26,6 +27,7 @@ export function FloatingAIPanel({
   handleSend,
   handleInputKeyDown,
   getInputPlaceholder,
+  nickname,
 }: FloatingAIPanelProps) {
   return (
     <AnimatePresence>
@@ -39,8 +41,8 @@ export function FloatingAIPanel({
         >
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/50">
             <div>
-              <p className="text-sm font-semibold">小缨缨 AI</p>
-              <p className="text-xs text-gray-500">基于 Yingying 的数字花园</p>
+              <p className="text-sm font-semibold">小{nickname} AI</p>
+              <p className="text-xs text-gray-500">基于 {nickname} 的数字花园</p>
             </div>
             <div className="flex items-center gap-2">
               {isStreaming && <span className="text-[10px] text-green-500">回答中...</span>}
@@ -55,7 +57,7 @@ export function FloatingAIPanel({
           <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
             {messages.length === 0 && (
               <div className="rounded-2xl bg-white/50 p-4 text-sm text-gray-600 shadow-inner">
-                你可以问"小缨缨"关于作品、经历、音乐、阅读或任何和 Yingying 相关的故事。
+                你可以问"小{nickname}"关于作品、经历、音乐、阅读或任何和 {nickname} 相关的故事。
               </div>
             )}
             {messages.map((message, idx) => (

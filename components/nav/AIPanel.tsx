@@ -14,6 +14,7 @@ interface AIPanelProps {
   handleSuggestionClick: (suggest: string) => void;
   handleInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   getInputPlaceholder: (mode: 'docked' | 'floating') => string;
+  nickname: string;
 }
 
 const aiSuggestions = ['MBTI匹配度测试', '星座匹配度测试', '推荐一本书', '最近的创作灵感'];
@@ -30,6 +31,7 @@ export function AIPanel({
   handleSuggestionClick,
   handleInputKeyDown,
   getInputPlaceholder,
+  nickname,
 }: AIPanelProps) {
   return (
     <AnimatePresence>
@@ -43,7 +45,7 @@ export function AIPanel({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="mb-3 text-gray-600">
-            你好，我是小缨缨。想了解 Yingying 的哪些故事？
+            你好，我是小{nickname}。想了解 {nickname} 的哪些故事？
           </div>
           <div className="flex flex-wrap gap-2 mb-3">
             {aiSuggestions.map((suggest) => (

@@ -15,6 +15,7 @@ interface NavMiddleProps {
   handleSuggestionClick: (suggest: string) => void;
   handleInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   getInputPlaceholder: (mode: 'docked' | 'floating') => string;
+  nickname: string;
 }
 
 export function NavMiddle({
@@ -29,6 +30,7 @@ export function NavMiddle({
   handleSuggestionClick,
   handleInputKeyDown,
   getInputPlaceholder,
+  nickname,
 }: NavMiddleProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -62,7 +64,7 @@ export function NavMiddle({
               transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
             />
           </div>
-          <span className="text-xs tracking-wide uppercase">小缨缨 AI</span>
+          <span className="text-xs tracking-wide uppercase">小{nickname} AI</span>
         </div>
       </motion.div>
 
@@ -78,6 +80,7 @@ export function NavMiddle({
         handleSuggestionClick={handleSuggestionClick}
         handleInputKeyDown={handleInputKeyDown}
         getInputPlaceholder={getInputPlaceholder}
+        nickname={nickname}
       />
     </motion.div>
   );
