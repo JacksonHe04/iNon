@@ -5,7 +5,8 @@ import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { Monitor, Heart, Star, Laptop, Compass, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import ProductDeskScene from '@/components/scenes/ProductDeskScene';
-import BlockImage from './BlockImage';
+import ProductCard from './products/ProductCard';
+import HardwareGrid from './products/HardwareGrid';
 
 export interface ProductItem {
   name: string;
@@ -150,8 +151,12 @@ export default function ProductsBlock({
         {activeTab === 'favorite' && (
           <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {favoriteProducts.map((prod, idx) => (
-              <div
+              <ProductCard
                 key={idx}
+                name={prod.name}
+                intro={prod.intro}
+                tags={prod.tags}
+                image_url={prod.image_url}
                 onClick={() =>
                   setSelectedProduct({
                     title: prod.name,
@@ -160,31 +165,7 @@ export default function ProductsBlock({
                     link: prod.link,
                   })
                 }
-                className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-amber-400/40 transition cursor-pointer flex flex-col justify-between"
-              >
-                <div>
-                  {prod.image_url && (
-                    <BlockImage
-                      src={prod.image_url}
-                      alt={prod.name}
-                      className="w-full aspect-square rounded-lg mb-2 object-cover"
-                      fallback={null}
-                    />
-                  )}
-                  <h4 className="font-bold text-sm text-gray-900 dark:text-white">{prod.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{prod.intro}</p>
-                </div>
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {prod.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-1.5 py-0.5 rounded bg-amber-500/5 border border-amber-500/10 text-[9px] text-amber-600 dark:text-amber-400 font-mono"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              />
             ))}
           </div>
         )}
@@ -192,8 +173,12 @@ export default function ProductsBlock({
         {activeTab === 'recommended' && (
           <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {recommendedProducts.map((prod, idx) => (
-              <div
+              <ProductCard
                 key={idx}
+                name={prod.name}
+                intro={prod.intro}
+                tags={prod.tags}
+                image_url={prod.image_url}
                 onClick={() =>
                   setSelectedProduct({
                     title: prod.name,
@@ -202,71 +187,24 @@ export default function ProductsBlock({
                     link: prod.link,
                   })
                 }
-                className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-amber-400/40 transition cursor-pointer flex flex-col justify-between"
-              >
-                <div>
-                  {prod.image_url && (
-                    <BlockImage
-                      src={prod.image_url}
-                      alt={prod.name}
-                      className="w-full aspect-square rounded-lg mb-2 object-cover"
-                      fallback={null}
-                    />
-                  )}
-                  <h4 className="font-bold text-sm text-gray-900 dark:text-white">{prod.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{prod.intro}</p>
-                </div>
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {prod.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-1.5 py-0.5 rounded bg-amber-500/5 border border-amber-500/10 text-[9px] text-amber-600 dark:text-amber-400 font-mono"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              />
             ))}
           </div>
         )}
 
         {activeTab === 'hardware' && (
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="p-3 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20">
-              <span className="text-[10px] text-gray-400 font-mono">📱 PHONE</span>
-              <p className="font-bold text-gray-800 dark:text-white mt-0.5">{myHardware.phone}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20">
-              <span className="text-[10px] text-gray-400 font-mono">💻 COMPUTER</span>
-              <p className="font-bold text-gray-800 dark:text-white mt-0.5">
-                {myHardware.computer}
-              </p>
-            </div>
-            <div className="p-3 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20">
-              <span className="text-[10px] text-gray-400 font-mono">📟 TABLET</span>
-              <p className="font-bold text-gray-800 dark:text-white mt-0.5">{myHardware.tablet}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20">
-              <span className="text-[10px] text-gray-400 font-mono">⌚ WATCH</span>
-              <p className="font-bold text-gray-800 dark:text-white mt-0.5">
-                {myHardware.smartwatch}
-              </p>
-            </div>
-            <div className="col-span-2 p-3 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20">
-              <span className="text-[10px] text-gray-400 font-mono">🎧 HEADPHONES</span>
-              <p className="font-bold text-gray-800 dark:text-white mt-0.5">
-                {myHardware.headphones.join(' 、 ')}
-              </p>
-            </div>
-          </div>
+          <HardwareGrid myHardware={myHardware} />
         )}
 
         {activeTab === 'brands' && (
           <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {favoriteBrands.map((brand, idx) => (
-              <div
+              <ProductCard
                 key={idx}
+                name={brand.name}
+                intro={brand.intro}
+                tags={brand.tags}
+                image_url={brand.image_url}
                 onClick={() =>
                   setSelectedProduct({
                     title: brand.name,
@@ -275,31 +213,7 @@ export default function ProductsBlock({
                     link: brand.link,
                   })
                 }
-                className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-amber-400/40 transition cursor-pointer flex flex-col justify-between"
-              >
-                <div>
-                  {brand.image_url && (
-                    <BlockImage
-                      src={brand.image_url}
-                      alt={brand.name}
-                      className="w-full aspect-square rounded-lg mb-2 object-cover"
-                      fallback={null}
-                    />
-                  )}
-                  <h4 className="font-bold text-sm text-gray-900 dark:text-white">{brand.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{brand.intro}</p>
-                </div>
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {brand.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-1.5 py-0.5 rounded bg-amber-500/5 border border-amber-500/10 text-[9px] text-amber-600 dark:text-amber-400 font-mono"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              />
             ))}
           </div>
         )}

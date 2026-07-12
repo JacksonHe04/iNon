@@ -2,32 +2,15 @@
 
 import { useState } from 'react';
 import GlassCard from '@/components/GlassCard';
-import { PenTool, Video, FileText, Mic, BookOpen, Quote, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { PenTool, Video, FileText, Mic, BookOpen, Quote, Eye, EyeOff } from 'lucide-react';
 import CreationGalaxy from '@/components/scenes/CreationGalaxy';
-import BlockImage from './BlockImage';
-
-export interface VideoItem {
-  series: string;
-  title: string;
-  video_link: string;
-  podcast_link: string;
-  image_url?: string;
-}
-
-export interface ArticleItem {
-  title: string;
-  link: string;
-  excerpt: string;
-  image_url?: string;
-}
-
-export interface SpeechItem {
-  speech_name: string;
-  link: string;
-  outline_doc: string;
-  presentation_link: string;
-  image_url?: string;
-}
+import VideoGrid from './creation/VideoGrid';
+import type { VideoItem } from './creation/VideoGrid';
+import ArticleGrid from './creation/ArticleGrid';
+import type { ArticleItem } from './creation/ArticleGrid';
+import SpeechGrid from './creation/SpeechGrid';
+import type { SpeechItem } from './creation/SpeechGrid';
+import MottoAndQuoteGrid from './creation/MottoAndQuoteGrid';
 
 interface CreationBlockProps {
   videos: VideoItem[];
@@ -148,179 +131,26 @@ export default function CreationBlock({
       {/* Category Content */}
       <div className="space-y-3 min-h-[160px]">
         {activeCategory === 'videos' && (
-          <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            {videos.map((vid, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-purple-400/30 transition flex flex-col justify-between"
-              >
-                <div>
-                  {vid.image_url && (
-                    <BlockImage
-                      src={vid.image_url}
-                      alt={vid.title}
-                      className="w-full aspect-square rounded-lg mb-2 object-cover"
-                      fallback={null}
-                    />
-                  )}
-                  <span className="text-[10px] text-gray-400 font-mono">{vid.series}</span>
-                  <h4 className="font-bold text-xs text-gray-800 dark:text-white mt-0.5">
-                    {vid.title}
-                  </h4>
-                </div>
-                <div className="flex gap-3 mt-3 pt-2 border-t border-white/5">
-                  {vid.video_link && vid.video_link.trim() !== '' && (
-                    <a
-                      href={vid.video_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5 font-medium"
-                    >
-                      <span>视频链接</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                  {vid.podcast_link && vid.podcast_link.trim() !== '' && (
-                    <a
-                      href={vid.podcast_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-0.5 font-medium"
-                    >
-                      <span>播客链接</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <VideoGrid videos={videos} colSpan={colSpan} />
         )}
 
         {activeCategory === 'articles' && (
-          <div className="space-y-3">
-            {articles.map((art, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-purple-400/30 transition space-y-1.5"
-              >
-                {art.image_url && (
-                  <BlockImage
-                    src={art.image_url}
-                    alt={art.title}
-                    className="w-full aspect-square rounded-lg mb-2 object-cover"
-                    fallback={null}
-                  />
-                )}
-                <div className="flex items-start justify-between gap-3">
-                  <h4 className="font-bold text-xs text-gray-800 dark:text-white leading-tight">
-                    {art.title}
-                  </h4>
-                  {art.link && art.link.trim() !== '' && (
-                    <a
-                      href={art.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5 flex-shrink-0 font-medium"
-                    >
-                      <span>阅读</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{art.excerpt}</p>
-              </div>
-            ))}
-          </div>
+          <ArticleGrid articles={articles} />
         )}
 
         {activeCategory === 'speeches' && (
-          <div className="space-y-3">
-            {speeches.map((sp, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-purple-400/30 transition flex flex-col gap-3"
-              >
-                {sp.image_url && (
-                  <BlockImage
-                    src={sp.image_url}
-                    alt={sp.speech_name}
-                    className="w-full aspect-square rounded-lg object-cover"
-                    fallback={null}
-                  />
-                )}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <h4 className="font-bold text-xs text-gray-800 dark:text-white leading-tight">
-                    🎤 {sp.speech_name}
-                  </h4>
-                <div className="flex flex-wrap gap-2.5">
-                  {sp.link && sp.link.trim() !== '' && (
-                    <a
-                      href={sp.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] bg-purple-500/10 px-2 py-0.5 rounded text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5 font-medium"
-                    >
-                      <span>演示文稿</span>
-                    </a>
-                  )}
-                  {sp.outline_doc && sp.outline_doc.trim() !== '' && (
-                    <a
-                      href={sp.outline_doc}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] bg-pink-500/10 px-2 py-0.5 rounded text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-0.5 font-medium"
-                    >
-                      <span>大纲文档</span>
-                    </a>
-                  )}
-                  {sp.presentation_link && sp.presentation_link.trim() !== '' && (
-                    <a
-                      href={sp.presentation_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] bg-blue-500/10 px-2 py-0.5 rounded text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5 font-medium"
-                    >
-                      <span>讲稿</span>
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-          </div>
+          <SpeechGrid speeches={speeches} />
         )}
 
         {activeCategory === 'mottos' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {mottos.map((motto, idx) => (
-              <div
-                key={idx}
-                className="p-4 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 flex items-center justify-center text-center"
-              >
-                <p className="text-xs italic font-medium text-gray-800 dark:text-gray-200">
-                  “ {motto} ”
-                </p>
-              </div>
-            ))}
-          </div>
+          <MottoAndQuoteGrid items={mottos} />
         )}
 
         {activeCategory === 'quotes' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {quotes.map((quote, idx) => (
-              <div
-                key={idx}
-                className="p-4 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 flex items-center justify-center text-center"
-              >
-                <p className="text-xs italic font-medium text-gray-800 dark:text-gray-200">
-                  “ {quote} ”
-                </p>
-              </div>
-            ))}
-          </div>
+          <MottoAndQuoteGrid items={quotes} />
         )}
       </div>
     </GlassCard>
   );
 }
+export type { VideoItem, ArticleItem, SpeechItem };
