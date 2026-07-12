@@ -6,9 +6,10 @@ interface ImageInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  disableUpload?: boolean;
 }
 
-export function ImageInput({ label, value, onChange, placeholder }: ImageInputProps) {
+export function ImageInput({ label, value, onChange, placeholder, disableUpload = false }: ImageInputProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -101,8 +102,7 @@ export function ImageInput({ label, value, onChange, placeholder }: ImageInputPr
               placeholder={placeholder || '粘贴图片链接...'}
               className="w-full pl-3.5 pr-20 py-2 rounded-xl border border-gray-200 dark:border-gray-700/60 bg-white/60 dark:bg-gray-800/60 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition"
             />
-            
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {value && (
                 <button
                   type="button"
@@ -114,31 +114,41 @@ export function ImageInput({ label, value, onChange, placeholder }: ImageInputPr
                 </button>
               )}
               
-              <button
-                type="button"
-                onClick={handleUploadClick}
-                disabled={isUploading}
-                className="p-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                title="选择并上传图片"
-              >
-                {isUploading ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : (
-                  <Upload className="w-3 h-3" />
-                )}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
+              {!disableUpload && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleUploadClick}
+                    disabled={isUploading}
+                    className="p-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                    title="选择并上传图片"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Upload className="w-3 h-3" />
+                    )}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </>
+              )}
             </div>
           </div>
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-normal">
-            可粘贴外部链接，或点击右侧 <Upload className="inline w-3 h-3 text-teal-500" /> 上传本地图片并自动填充。
-          </p>
+          {disableUpload ? (
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-normal">
+              粘贴外部图片链接以自动加载预览。
+            </p>
+          ) : (
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-normal">
+              可粘贴外部链接，或点击右侧 <Upload className="inline w-3 h-3 text-teal-500" /> 上传本地图片并自动填充。
+            </p>
+          )}
         </div>
       </div>
     </div>
