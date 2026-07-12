@@ -18,7 +18,7 @@ export default async function DefaultUserDashboardPage() {
 
   return (
     <ShellLayout data={data} username={targetSlug} showSideNav={false}>
-      <DashboardClient username={targetSlug} data={data} />
+      <DashboardClient username={targetSlug} data={data} activeTab="home" />
     </ShellLayout>
   );
 }

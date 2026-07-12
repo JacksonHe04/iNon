@@ -30,21 +30,9 @@ export default function EditorSectionCard({
     <div
       className={`rounded-3xl border border-white/20 bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 shadow-xl transition-all ${className}`}
     >
-      {(saveStatus !== 'idle' || onSave) && (
+      {(saveStatus === 'error' || onSave) && (
         <div className="flex items-center justify-end mb-4">
           <div className="flex items-center gap-3">
-            {saveStatus === 'saving' && (
-              <span className="flex items-center gap-1 text-xs font-medium text-teal-600 dark:text-teal-400 animate-pulse">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                正在保存...
-              </span>
-            )}
-            {saveStatus === 'saved' && (
-              <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 animate-fadeIn">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                已保存
-              </span>
-            )}
             {saveStatus === 'error' && (
               <span className="flex items-center gap-1 text-xs font-medium text-rose-500 animate-fadeIn" title={errorMessage}>
                 <AlertCircle className="w-3.5 h-3.5" />
