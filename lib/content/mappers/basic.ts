@@ -7,7 +7,7 @@ import type {
   WorkMetaRow,
   JobRow,
 } from '@/types/database';
-import { sortByOrder, valuesByType, withFallback } from './utils';
+import { sortByOrder, tagValuesByType, listValuesByType, withFallback } from './utils';
 
 export function mapProfileAndBasic(profile: ProfileRow, tags: (ValueRow & { tag_type: string })[]) {
   return {
@@ -20,9 +20,9 @@ export function mapProfileAndBasic(profile: ProfileRow, tags: (ValueRow & { tag_
       name: profile.name,
       intro: profile.intro,
       current_status: profile.current_status,
-      keywords: valuesByType(tags, 'keyword'),
-      values: valuesByType(tags, 'value'),
-      tags: valuesByType(tags, 'tag'),
+      keywords: tagValuesByType(tags, 'keyword'),
+      values: tagValuesByType(tags, 'value'),
+      tags: tagValuesByType(tags, 'tag'),
     },
   };
 }
@@ -36,10 +36,10 @@ export function mapLife(lifeData: any, listItems: (ValueRow & { list_type: strin
     },
     birth_date: withFallback(lifeData?.birth_date),
     zodiac_sign: withFallback(lifeData?.zodiac_sign),
-    habits: valuesByType(listItems, 'habit'),
+    habits: listValuesByType(listItems, 'habit'),
     diet: {
-      favorite_food: valuesByType(listItems, 'favorite_food'),
-      favorite_drinks: valuesByType(listItems, 'favorite_drink'),
+      favorite_food: listValuesByType(listItems, 'favorite_food'),
+      favorite_drinks: listValuesByType(listItems, 'favorite_drink'),
     },
   };
 }
@@ -81,6 +81,6 @@ export function mapWork(jobs: JobRow[], meta: WorkMetaRow | null, listItems: (Va
       job_summary: item.job_summary,
       work_output: item.work_output,
     })),
-    work_preferences: valuesByType(listItems, 'work_preference'),
+    work_preferences: listValuesByType(listItems, 'work_preference'),
   };
 }

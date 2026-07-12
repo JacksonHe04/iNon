@@ -10,7 +10,7 @@ import type {
   CreationItemRow,
   ValueRow,
 } from '@/types/database';
-import { sortByOrder, valuesByType } from './utils';
+import { sortByOrder, listValuesByType } from './utils';
 
 export function mapDevelopment(
   skills: DevelopmentSkillRow[],
@@ -109,7 +109,7 @@ export function mapCreation(creationItems: CreationItemRow[], listItems: (ValueR
         outline_doc: item.outline_doc,
         presentation_link: item.link_secondary,
       })),
-    mottos: valuesByType(listItems, 'motto'),
-    quotes: valuesByType(listItems, 'quote'),
+    mottos: listValuesByType(listItems, 'motto'),
+    quotes: listValuesByType(listItems, 'quote'),
   };
 }

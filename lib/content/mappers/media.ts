@@ -14,7 +14,7 @@ import type {
   LibraryByKind,
   LibraryKind,
 } from '@/types';
-import { sortByOrder, valuesByType } from './utils';
+import { sortByOrder, listValuesByType } from './utils';
 
 function sortByLibraryOrder<T extends { sort_order: number; created_at?: string }>(arr: T[]): T[] {
   return [...arr].sort((a, b) => {
@@ -117,12 +117,12 @@ export function mapContact(contactMethods: ContactMethodRow[], platformAccounts:
 
 export function mapThoughts(listItems: (ValueRow & { list_type: string })[], thoughtQa: ThoughtQaRow[]) {
   return {
-    personal_philosophy: valuesByType(listItems, 'personal_philosophy'),
-    industry_views: valuesByType(listItems, 'industry_view'),
-    ideology: valuesByType(listItems, 'ideology'),
-    life_elements: valuesByType(listItems, 'life_element'),
-    macro_vision: valuesByType(listItems, 'macro_vision'),
-    personal_vision: valuesByType(listItems, 'personal_vision'),
+    personal_philosophy: listValuesByType(listItems, 'personal_philosophy'),
+    industry_views: listValuesByType(listItems, 'industry_view'),
+    ideology: listValuesByType(listItems, 'ideology'),
+    life_elements: listValuesByType(listItems, 'life_element'),
+    macro_vision: listValuesByType(listItems, 'macro_vision'),
+    personal_vision: listValuesByType(listItems, 'personal_vision'),
     qa: sortByOrder(thoughtQa).map((item) => ({
       question: item.question,
       answer: item.answer,

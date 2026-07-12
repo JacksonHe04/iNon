@@ -4,14 +4,15 @@ export function sortByOrder<T extends { sort_order: number }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.sort_order - b.sort_order);
 }
 
-export function valuesByType(rows: ValueRow[], type: string): string[] {
-  return sortByOrder(
-    rows.filter(
-      (row) =>
-        (row as ValueRow & { tag_type?: string; list_type?: string }).tag_type === type ||
-        (row as ValueRow & { list_type?: string }).list_type === type
-    )
-  ).map((row) => row.value);
+type TagTypeRow = ValueRow & { tag_type: string };
+type ListTypeRow = ValueRow & { list_type: string };
+
+export function tagValuesByType(rows: TagTypeRow[], type: string): string[] {
+  return sortByOrder(rows.filter((row) => row.tag_type === type)).map((row) => row.value);
+}
+
+export function listValuesByType(rows: ListTypeRow[], type: string): string[] {
+  return sortByOrder(rows.filter((row) => row.list_type === type)).map((row) => row.value);
 }
 
 export function groupByKey<T extends Record<string, string | number>>(rows: T[], key: keyof T): Map<string, T[]> {
