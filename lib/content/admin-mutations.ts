@@ -5,5 +5,5 @@ export { updateExperienceSection, updateEducationSection } from './mutations/exp
 export { updateWorkSection } from './mutations/work';
 export { updateDevelopmentSection } from './mutations/development';
 export { updateProductsSection, updateCreationSection } from './mutations/products-creation';
-export { updateReadingSection, updateFilmsSection, updateMusicSection, updateEventsSection } from './mutations/media-events';
+export { updateLibrarySection, updateEventsSection } from './mutations/media-events';
 export { updateContactSection, updateThoughtsSection, updateNotificationsSection, updateMessageStatus } from './mutations/contact-thoughts';

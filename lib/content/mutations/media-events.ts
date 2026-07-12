@@ -1,177 +1,113 @@
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/admin';
-import type { ReadmeData } from '@/types';
+import type { ReadmeData, LibraryByKind, LibraryKind } from '@/types';
 import {
   MutationScope,
   ensureString,
   getProfile,
-  replaceProfileScopedRows,
   SupabaseAdminClient,
+  replaceProfileScopedRows,
 } from './helpers';
-import { dedupeBy } from '../mappers/utils';
 
-/**
- * Drop inbound rows whose business content is identical before persisting.
- * `replaceMediaDomain` is "delete-all-then-insert", so duplicates in the input
- * would otherwise be written straight back to the DB. We deduplicate using the
- * same keys the reader uses, so the source of truth stays consistent.
- */
-function dedupeMediaRows<T extends Record<string, unknown>>(
-  rows: T[],
-  keys: (keyof T)[]
-): T[] {
-  return dedupeBy(rows, keys);
-}
-
-async function replaceMediaDomain(
-  adminClient: SupabaseAdminClient,
-  profileId: string,
-  domain: 'reading' | 'films' | 'music' | 'hiphop',
-  rows: Record<string, unknown>[]
+export async function updateLibrarySection(
+  payload: LibraryByKind,
+  scope: MutationScope = { kind: 'admin' }
 ) {
-  const { error: deleteError } = await adminClient
-    .from('media_items')
-    .delete()
-    .eq('profile_id', profileId)
-    .eq('domain', domain);
-  if (deleteError) throw deleteError;
+  const adminClient = createAdminClient();
+  const profile = await getProfile(adminClient, scope);
 
-  if (rows.length) {
-    const { error } = await adminClient.from('media_items').insert(rows);
+  // Delete all existing items and categories
+  const { error: deleteItemsError } = await adminClient
+    .from('library_items')
+    .delete()
+    .eq('profile_id', profile.id);
+  if (deleteItemsError) throw deleteItemsError;
+
+  const { error: deleteCategoriesError } = await adminClient
+    .from('library_categories')
+    .delete()
+    .eq('profile_id', profile.id);
+  if (deleteCategoriesError) throw deleteCategoriesError;
+
+  // Insert categories
+  const categoriesToInsert = [];
+  for (const kind of ['music', 'film', 'game', 'book'] as LibraryKind[]) {
+    const kindData = payload[kind];
+    if (kindData && kindData.categories) {
+      for (const cat of kindData.categories) {
+        categoriesToInsert.push({
+          profile_id: profile.id,
+          kind,
+          name: cat.name,
+          sort_order: cat.sortOrder,
+        });
+      }
+    }
+  }
+
+  let insertedCategories: { id: string; kind: string; name: string }[] = [];
+  if (categoriesToInsert.length > 0) {
+    const { data, error } = await adminClient
+      .from('library_categories')
+      .insert(categoriesToInsert)
+      .select('id, kind, name');
     if (error) throw error;
+    insertedCategories = data || [];
+  }
+
+  const categoryLookup = new Map<string, string>();
+  for (const cat of insertedCategories) {
+    categoryLookup.set(`${cat.kind}:${cat.name}`, cat.id);
+  }
+
+  // Insert items
+  const itemsToInsert = [];
+  for (const kind of ['music', 'film', 'game', 'book'] as LibraryKind[]) {
+    const kindData = payload[kind];
+    if (!kindData) continue;
+
+    const subtypes = ['work', 'creator'];
+    if (kind === 'music') {
+      subtypes.push('song');
+    }
+
+    for (const subtype of subtypes) {
+      const itemsList = (kindData as any)[subtype === 'work' ? 'works' : subtype === 'creator' ? 'creators' : 'songs'] || [];
+      for (const item of itemsList) {
+        const categoryKey = item.categoryName ? `${kind}:${item.categoryName}` : '';
+        const categoryId = categoryKey ? (categoryLookup.get(categoryKey) || null) : null;
+
+        itemsToInsert.push({
+          profile_id: profile.id,
+          kind,
+          subtype,
+          category_id: categoryId,
+          name: ensureString(item.name),
+          creator: ensureString(item.creator),
+          link: ensureString(item.link),
+          comment: ensureString(item.comment),
+          image_url: item.imageUrl ? ensureString(item.imageUrl) : null,
+          sort_order: item.sortOrder ?? 0,
+        });
+      }
+    }
+  }
+
+  if (itemsToInsert.length > 0) {
+    const { error: insertItemsError } = await adminClient
+      .from('library_items')
+      .insert(itemsToInsert);
+    if (insertItemsError) throw insertItemsError;
+  }
+
+  revalidatePath('/');
+  revalidatePath('/admin/content');
+  if (profile.slug) {
+    revalidatePath(`/${profile.slug}`);
+    revalidatePath(`/i/${profile.slug}`);
   }
 }
 
-export async function updateReadingSection(
-  data: ReadmeData['reading'],
-  scope: MutationScope = { kind: 'admin' }
-) {
-  const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient, scope);
-
-  await replaceMediaDomain(adminClient, profile.id, 'reading', dedupeMediaRows([
-    ...data.books.map((item, index) => ({
-      profile_id: profile.id,
-      domain: 'reading',
-      item_type: 'book',
-      name: ensureString(item.name),
-      creator: ensureString(item.author),
-      album: '',
-      country_or_region: ensureString(item.country),
-      link: ensureString(item.link),
-      comment: ensureString(item.comment),
-      image_url: ensureString(item.image_url),
-      sort_order: index,
-    })),
-    ...data.authors.map((item, index) => ({
-      profile_id: profile.id,
-      domain: 'reading',
-      item_type: 'author',
-      name: ensureString(item.name),
-      creator: '',
-      album: '',
-      country_or_region: ensureString(item.country),
-      link: ensureString(item.link),
-      comment: ensureString(item.comment),
-      image_url: ensureString(item.image_url),
-      sort_order: data.books.length + index,
-    })),
-  ], ['domain', 'item_type', 'name', 'creator', 'country_or_region']));
-
-  revalidatePath('/');
-  revalidatePath('/admin/content');
-}
-
-export async function updateFilmsSection(data: ReadmeData['films'], scope: MutationScope = { kind: 'admin' }) {
-  const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient, scope);
-
-  await replaceMediaDomain(adminClient, profile.id, 'films', dedupeMediaRows([
-    ...data.films.map((item, index) => ({
-      profile_id: profile.id,
-      domain: 'films',
-      item_type: 'film',
-      name: ensureString(item.name),
-      creator: ensureString(item.director),
-      album: '',
-      country_or_region: ensureString(item.country),
-      link: ensureString(item.link),
-      comment: ensureString(item.comment),
-      image_url: ensureString(item.image_url),
-      sort_order: index,
-    })),
-    ...data.directors.map((item, index) => ({
-      profile_id: profile.id,
-      domain: 'films',
-      item_type: 'director',
-      name: ensureString(item.name),
-      creator: '',
-      album: '',
-      country_or_region: ensureString(item.country),
-      link: ensureString(item.link),
-      comment: ensureString(item.comment),
-      image_url: ensureString(item.image_url),
-      sort_order: data.films.length + index,
-    })),
-  ], ['domain', 'item_type', 'name', 'creator', 'country_or_region']));
-
-  revalidatePath('/');
-  revalidatePath('/admin/content');
-}
-
-export async function updateMusicSection(
-  section: 'music' | 'hiphop',
-  data: ReadmeData['music'] | ReadmeData['hiphop'],
-  scope: MutationScope = { kind: 'admin' }
-) {
-  const adminClient = createAdminClient();
-  const profile = await getProfile(adminClient, scope);
-
-  await replaceMediaDomain(adminClient, profile.id, section, dedupeMediaRows([
-    ...data.albums.map((item, index) => ({
-      profile_id: profile.id,
-      domain: section,
-      item_type: 'album',
-      name: ensureString(item.name),
-      creator: ensureString(item.artist),
-      album: '',
-      country_or_region: '',
-      link: ensureString(item.link),
-      comment: ensureString(item.comment),
-      image_url: ensureString(item.image_url),
-      sort_order: index,
-    })),
-    ...data.songs.map((item, index) => ({
-      profile_id: profile.id,
-      domain: section,
-      item_type: 'song',
-      name: ensureString(item.name),
-      creator: ensureString(item.artist),
-      album: ensureString(item.album),
-      country_or_region: '',
-      link: ensureString(item.link),
-      comment: ensureString(item.comment),
-      image_url: ensureString(item.image_url),
-      sort_order: data.albums.length + index,
-    })),
-    ...data.musicians.map((item, index) => ({
-      profile_id: profile.id,
-      domain: section,
-      item_type: 'musician',
-      name: ensureString(item.name),
-      creator: '',
-      album: '',
-      country_or_region: ensureString(item.region),
-      link: ensureString(item.link),
-      comment: ensureString(item.comment),
-      image_url: ensureString(item.image_url),
-      sort_order: data.albums.length + data.songs.length + index,
-    })),
-  ], ['domain', 'item_type', 'name', 'creator', 'album', 'country_or_region']));
-
-  revalidatePath('/');
-  revalidatePath('/admin/content');
-}
 
 export async function updateEventsSection(
   data: ReadmeData['events'],

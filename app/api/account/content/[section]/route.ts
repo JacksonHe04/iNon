@@ -7,13 +7,11 @@ import {
   updateEducationSection,
   updateEventsSection,
   updateExperienceSection,
-  updateFilmsSection,
   updateLifeSection,
-  updateMusicSection,
+  updateLibrarySection,
   updateNotificationsSection,
   updateProductsSection,
   updateProfileSection,
-  updateReadingSection,
   updateThoughtsSection,
   updateWorkSection,
 } from '@/lib/content/admin-mutations';
@@ -62,17 +60,8 @@ export async function PUT(req: Request, context: RouteContext) {
       case 'creation':
         await updateCreationSection(body, scope);
         break;
-      case 'reading':
-        await updateReadingSection(body, scope);
-        break;
-      case 'films':
-        await updateFilmsSection(body, scope);
-        break;
-      case 'music':
-        await updateMusicSection('music', body, scope);
-        break;
-      case 'hiphop':
-        await updateMusicSection('hiphop', body, scope);
+      case 'library':
+        await updateLibrarySection(body, scope);
         break;
       case 'events':
         await updateEventsSection(body, scope);
