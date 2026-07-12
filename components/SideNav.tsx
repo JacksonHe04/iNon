@@ -35,7 +35,6 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
   const [activeSection, setActiveSection] = useState<string>(
     navItems[0]?.id ?? 'bio'
   );
-  const [deepWaterActive, setDeepWaterActive] = useState(false);
 
   const isClickScrolling = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -92,19 +91,7 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
     };
   }, [navItems]);
 
-  useEffect(() => {
-    const handleDeepWater = (event: Event) => {
-      const detail = (event as CustomEvent<{ active: boolean }>).detail;
-      setDeepWaterActive(detail?.active ?? false);
-    };
-
-    window.addEventListener('deepwater-visibility', handleDeepWater as EventListener);
-    return () => {
-      window.removeEventListener('deepwater-visibility', handleDeepWater as EventListener);
-    };
-  }, []);
-
-  if (deepWaterActive || navItems.length === 0) {
+  if (navItems.length === 0) {
     return null;
   }
 

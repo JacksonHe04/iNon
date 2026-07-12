@@ -1,7 +1,7 @@
 import { getReadmeData } from '@/lib/content';
-import { getLayoutConfig } from '@/lib/content/layout';
-import { requireOwnerPage } from '@/lib/auth/user';
-import DashboardClient from '@/components/dashboard/DashboardClient';
+import AITestConsole from '@/components/dashboard/AITestConsole';
+import ShortcutBookmarksManager from '@/components/dashboard/ShortcutBookmarksManager';
+import ProjectShortcutsList from '@/components/dashboard/ProjectShortcutsList';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,18 +11,21 @@ interface UserDashboardPageProps {
 
 export default async function UserDashboardPage({ params }: UserDashboardPageProps) {
   const { slug } = await params;
-  await requireOwnerPage(slug, `/i/${slug}`);
-  const [data, layoutConfig] = await Promise.all([
-    getReadmeData(slug),
-    getLayoutConfig(slug),
-  ]);
+  const data = await getReadmeData(slug);
 
   return (
-    <DashboardClient
-      username={slug}
-      data={data}
-      initialLayoutConfig={layoutConfig}
-      activeTab="home"
-    />
+    <div className="space-y-6 animate-fadeIn">
+      {/* AI 对话框 */}
+      <AITestConsole name={data.basic.name} />
+
+      {/* 网页快捷入口 (Bookmarks Manager) */}
+      <ShortcutBookmarksManager
+        initialDevTools={data.development.dev_tools}
+        developmentData={data.development}
+      />
+
+      {/* 项目快捷入口 */}
+      <ProjectShortcutsList projects={data.development.projects} />
+    </div>
   );
 }

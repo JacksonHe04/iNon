@@ -12,9 +12,10 @@ export function AnimatedGradientBackground({ theme: initialTheme = 'green' }: { 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { resolvedTheme } = useTheme()
 
-  // Sync state with prop updates
+  // Sync state with prop updates and attribute on mount
   useEffect(() => {
-    setTheme(initialTheme)
+    const attrTheme = document.documentElement.getAttribute('data-color-theme')
+    setTheme(attrTheme || initialTheme)
   }, [initialTheme])
 
   // Listen to dynamic client-side theme triggers (e.g. from Theme Selector)

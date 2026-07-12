@@ -30,6 +30,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+import { AnimatedGradientBackground } from '@/components/BackGround';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,7 +40,10 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <AnimatedGradientBackground />
+          {children}
+        </Providers>
       </body>
     </html>
   );

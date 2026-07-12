@@ -1,7 +1,5 @@
 import { getReadmeData } from '@/lib/content';
-import { getLayoutConfig } from '@/lib/content/layout';
-import { requireOwnerPage } from '@/lib/auth/user';
-import DashboardClient from '@/components/dashboard/DashboardClient';
+import BlockContentEditorManager from '@/components/editor/BlockContentEditorManager';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,18 +9,11 @@ interface UserDashboardPageProps {
 
 export default async function UserContentPage({ params }: UserDashboardPageProps) {
   const { slug } = await params;
-  await requireOwnerPage(slug, `/i/${slug}/content`);
-  const [data, layoutConfig] = await Promise.all([
-    getReadmeData(slug),
-    getLayoutConfig(slug),
-  ]);
+  const data = await getReadmeData(slug);
 
   return (
-    <DashboardClient
-      username={slug}
-      data={data}
-      initialLayoutConfig={layoutConfig}
-      activeTab="content"
-    />
+    <div className="space-y-6 animate-fadeIn">
+      <BlockContentEditorManager data={data} />
+    </div>
   );
 }
