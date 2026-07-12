@@ -10,9 +10,9 @@ interface UserDashboardPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function UserDashboardPage({ params }: UserDashboardPageProps) {
+export default async function UserContentPage({ params }: UserDashboardPageProps) {
   const { slug } = await params;
-  await requireOwnerPage(slug, `/i/${slug}`);
+  await requireOwnerPage(slug, `/i/${slug}/content`);
   const [data, layoutConfig] = await Promise.all([
     getReadmeData(slug),
     getLayoutConfig(slug),
@@ -20,7 +20,12 @@ export default async function UserDashboardPage({ params }: UserDashboardPagePro
 
   return (
     <ShellLayout data={data} username={slug} showSideNav={false} theme={layoutConfig.theme}>
-      <DashboardClient username={slug} data={data} initialLayoutConfig={layoutConfig} activeTab="home" />
+      <DashboardClient
+        username={slug}
+        data={data}
+        initialLayoutConfig={layoutConfig}
+        activeTab="content"
+      />
     </ShellLayout>
   );
 }

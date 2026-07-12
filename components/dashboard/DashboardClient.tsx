@@ -31,10 +31,19 @@ interface DashboardClientProps {
   username: string;
   data: ReadmeData;
   initialLayoutConfig?: LayoutConfig;
+  activeTab: DashboardTabId;
+  initialEmail?: string;
+  initialSlugs?: string[];
 }
 
-export default function DashboardClient({ username, data, initialLayoutConfig }: DashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<DashboardTabId>('home');
+export default function DashboardClient({
+  username,
+  data,
+  initialLayoutConfig,
+  activeTab,
+  initialEmail,
+  initialSlugs,
+}: DashboardClientProps) {
 
   // Initialize bookmarks from Supabase dev_tools or default
   const initialBookmarks = data.development.dev_tools.length > 0
@@ -133,7 +142,7 @@ export default function DashboardClient({ username, data, initialLayoutConfig }:
       <div className="w-full py-2">
         {/* Side Nav & Main Body Layout */}
         <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
-          <DashboardSideNav username={username} activeTab={activeTab} onTabChange={setActiveTab} />
+          <DashboardSideNav username={username} activeTab={activeTab} />
 
           <main className="flex-1 min-w-0 space-y-6 w-full">
 
@@ -322,7 +331,11 @@ export default function DashboardClient({ username, data, initialLayoutConfig }:
         {/* Tab 4: 账号管理 (Account, Username, Slugs & Password Reset) */}
         {activeTab === 'account' && (
           <div className="space-y-6 animate-fadeIn">
-            <AccountSettingsForm currentUsername={username} />
+            <AccountSettingsForm
+              currentUsername={username}
+              initialEmail={initialEmail}
+              initialSlugs={initialSlugs}
+            />
           </div>
         )}
           </main>

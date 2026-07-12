@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, type KeyboardEvent } from 'react';
+import { useState, useEffect, useCallback, type KeyboardEvent, useTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, MapPin, RefreshCw, User, Sun, Moon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Bell, MapPin, RefreshCw, User, Sun, Moon, Eye, Loader2 } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { ReadmeData } from '@/types';
 import pkg from '@/package.json';
@@ -67,6 +67,8 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
         }))
     : [];
   const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
   const { theme, setTheme } = useTheme();
   const [currentTime, setCurrentTime] = useState('');
   const [yearProgress, setYearProgress] = useState({ daysPassed: 0, totalDays: 0, percentage: 0 });
@@ -150,6 +152,16 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
       setIsRefreshingLocation(false);
     }
   }, [cityCoords]);
+
+  const isConsolePage = pathname?.startsWith('/i/') ?? false;
+
+  const handlePrefetch = useCallback(() => {
+    if (userEmail) {
+      const name = userEmail.split('@')[0];
+      const targetPath = isConsolePage ? `/${name}` : `/i/${name}`;
+      router.prefetch(targetPath);
+    }
+  }, [userEmail, isConsolePage, router]);
 
 
 
@@ -494,16 +506,26 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
                 onClick={() => {
                   if (userEmail) {
                     const name = userEmail.split('@')[0];
-                    router.push(`/i/${name}`);
+                    const targetPath = isConsolePage ? `/${name}` : `/i/${name}`;
+                    startTransition(() => {
+                      router.push(targetPath);
+                    });
                   } else {
                     setShowAuthModal(true);
                   }
                 }}
+                onMouseEnter={handlePrefetch}
                 className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
-                title={userEmail ? "进入我的个人 OS 控制台" : "登录"}
-                aria-label={userEmail ? "进入控制台" : "登录"}
+                title={userEmail ? (isConsolePage ? "预览公开主页" : "进入我的个人 OS 控制台") : "登录"}
+                aria-label={userEmail ? (isConsolePage ? "预览公开主页" : "进入控制台") : "登录"}
               >
-                <User className="h-4 w-4" />
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-teal-500" />
+                ) : isConsolePage ? (
+                  <Eye className="h-4 w-4" />
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
               </button>
             </div>
           </div>

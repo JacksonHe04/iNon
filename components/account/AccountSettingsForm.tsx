@@ -6,13 +6,23 @@ import GlassCard from '@/components/GlassCard';
 import PasswordResetForm from '@/components/auth/PasswordResetForm';
 import { User, Link as LinkIcon, Plus, Trash2, Check, AlertCircle, Loader2, Home } from 'lucide-react';
 
-export default function AccountSettingsForm({ currentUsername }: { currentUsername: string }) {
+interface AccountSettingsFormProps {
+  currentUsername: string;
+  initialEmail?: string;
+  initialSlugs?: string[];
+}
+
+export default function AccountSettingsForm({
+  currentUsername,
+  initialEmail,
+  initialSlugs,
+}: AccountSettingsFormProps) {
   const router = useRouter();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialEmail);
   const [username, setUsername] = useState(currentUsername);
-  const [slugs, setSlugs] = useState<string[]>([]);
-  const [email, setEmail] = useState('');
+  const [slugs, setSlugs] = useState<string[]>(initialSlugs || []);
+  const [email, setEmail] = useState(initialEmail || '');
 
   const [newSlugInput, setNewSlugInput] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -20,6 +30,10 @@ export default function AccountSettingsForm({ currentUsername }: { currentUserna
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
+    if (initialEmail !== undefined) {
+      setLoading(false);
+      return;
+    }
     async function loadAccountSettings() {
       try {
         setLoading(true);
@@ -38,7 +52,7 @@ export default function AccountSettingsForm({ currentUsername }: { currentUserna
       }
     }
     loadAccountSettings();
-  }, []);
+  }, [initialEmail]);
 
   const handleAddSlug = (e: React.FormEvent) => {
     e.preventDefault();
