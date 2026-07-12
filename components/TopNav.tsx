@@ -17,6 +17,7 @@ import NavLeft from './nav/NavLeft';
 import NavMiddle from './nav/NavMiddle';
 import NavRight from './nav/NavRight';
 import NavModals from './nav/NavModals';
+import FloatingAIPanel from './nav/FloatingAIPanel';
 
 interface TopNavProps {
   data: ReadmeData;
@@ -29,7 +30,8 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
     ? blocks
         .filter((block) => block.visible)
         .map((block) => ({
-          id: block.sectionId || block.id,
+          id: block.id,
+          scrollId: block.sectionId || block.id,
           label: getBlockTitle(block.blockType),
         }))
     : [];
@@ -200,6 +202,19 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
         setShowMobilePanel={setShowMobilePanel}
         aiState={aiState}
         setAIState={setAIState}
+      />
+
+      <FloatingAIPanel
+        aiState={aiState}
+        setAIState={setAIState}
+        messages={messages}
+        aiInput={aiInput}
+        setAIInput={setAIInput}
+        isStreaming={isStreaming}
+        errorMessage={errorMessage}
+        handleSend={handleSend}
+        handleInputKeyDown={handleInputKeyDown}
+        getInputPlaceholder={getInputPlaceholder}
       />
     </>
   );
