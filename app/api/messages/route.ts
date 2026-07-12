@@ -48,15 +48,19 @@ export async function POST(req: Request) {
     const clientIp = forwardedFor.split(',')[0]?.trim() || 'unknown';
     const userAgent = req.headers.get('user-agent') || '';
 
-    const insertResult = await supabase.from('messages').insert({
-      profile_id: profileResult.data.id,
-      nickname,
-      contact,
-      content,
-      ip_hash: hashIp(clientIp),
-      user_agent: userAgent,
-      status: 'pending',
-    });
+    const insertResult = await supabase
+      .from('messages')
+      .insert({
+        profile_id: profileResult.data.id,
+        nickname,
+        contact,
+        content,
+        ip_hash: hashIp(clientIp),
+        user_agent: userAgent,
+        status: 'approved',
+      })
+      .select('id, nickname, content, created_at')
+      .single();
 
     if (insertResult.error) {
       return NextResponse.json(
@@ -65,7 +69,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, message: insertResult.data });
   } catch (error) {
     return NextResponse.json(
       { error: '请求处理失败', detail: (error as Error).message },

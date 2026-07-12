@@ -1,6 +1,7 @@
 import { getReadmeData } from '@/lib/content';
 import { getLayoutConfig } from '@/lib/content/layout';
 import { getProfileIdBySlug } from '@/lib/analytics/profile-id';
+import { listVisibleMessages } from '@/lib/content/messages';
 import ShellLayout from '@/components/layout/ShellLayout';
 import PublicBlockRenderer from '@/components/blocks/PublicBlockRenderer';
 import PageViewTracker from '@/components/analytics/PageViewTracker';
@@ -20,6 +21,8 @@ export default async function UserPublicPage({ params }: UserPublicPageProps) {
     getProfileIdBySlug(slug),
   ]);
 
+  const messages = profileId ? await listVisibleMessages(profileId) : [];
+
   return (
     <ShellLayout
       data={data}
@@ -28,7 +31,7 @@ export default async function UserPublicPage({ params }: UserPublicPageProps) {
       blocks={layoutConfig.blocks}
       theme={layoutConfig.theme}
     >
-      <PublicBlockRenderer data={data} layoutConfig={layoutConfig} />
+      <PublicBlockRenderer data={data} layoutConfig={layoutConfig} messages={messages} />
       {profileId ? <PageViewTracker profileId={profileId} /> : null}
       <Analytics />
     </ShellLayout>
