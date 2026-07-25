@@ -1,6 +1,7 @@
 import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createBootstrapHeaders } from "./lib/bootstrap-request.mjs";
 
 const projectKeys = ["inon", "leaf", "pine", "sayless", "treez"];
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -11,12 +12,6 @@ const endpoint = new URL(
   "/api/sso/internal/oauth-clients/bootstrap",
   process.env.INON_SSO_WORKER_URL ?? "https://inon.space",
 );
-const internalToken = process.env.INON_SSO_INTERNAL_TOKEN;
-
-if (!internalToken) {
-  throw new Error("INON_SSO_INTERNAL_TOKEN is required.");
-}
-
 let existing = { clients: {} };
 try {
   existing = JSON.parse(await readFile(outputPath, "utf8"));
@@ -28,9 +23,7 @@ try {
 
 const response = await fetch(endpoint, {
   method: "POST",
-  headers: {
-    authorization: `Bearer ${internalToken}`,
-  },
+  headers: createBootstrapHeaders(),
 });
 if (!response.ok) {
   throw new Error(
