@@ -35,13 +35,13 @@ party.
 
 ### Stage 2: central account web
 
-- [ ] Add `/sso`, `/sso/login`, and `/sso/account`.
-- [ ] Support email OTP registration/login, email password login, username
+- [x] Add `/sso`, `/sso/login`, and `/sso/account`.
+- [x] Support email OTP registration/login, email password login, username
   password login, and GitHub login.
-- [ ] Add Turnstile to every protected form with the exact server action.
-- [ ] Add optional username/password setup, device/session listing, and
+- [x] Add Turnstile to every protected form with the exact server action.
+- [x] Add optional username/password setup, device/session listing, and
   selective session revocation.
-- [ ] Preserve safe first-party return URLs without open redirects.
+- [x] Preserve safe first-party return URLs without open redirects.
 - [ ] Verify responsive, keyboard, reduced-motion, loading, and failure states.
 
 ### Stage 3: reusable Next.js package

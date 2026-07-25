@@ -1,0 +1,345 @@
+.sso-form {
+  width: min(100%, 440px);
+}
+
+.sso-form-header {
+  margin-bottom: 30px;
+}
+
+.sso-kicker {
+  margin: 0 0 10px;
+  color: #08765a;
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.sso-form h2 {
+  margin: 0;
+  color: #13231d;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 620;
+  letter-spacing: -0.055em;
+  line-height: 1.05;
+}
+
+.sso-form-header > p:last-child {
+  margin: 14px 0 0;
+  color: #65746d;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.sso-tabs {
+  display: grid;
+  margin-bottom: 24px;
+  padding: 4px;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid rgba(19, 35, 29, 0.1);
+  border-radius: 14px;
+  background: rgba(228, 239, 233, 0.7);
+}
+
+.sso-tab {
+  min-height: 38px;
+  border: 0;
+  border-radius: 10px;
+  color: #65746d;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sso-tab[data-active="true"] {
+  color: #13231d;
+  background: white;
+  box-shadow: 0 4px 14px rgba(19, 35, 29, 0.08);
+}
+
+.sso-stack {
+  display: grid;
+  gap: 15px;
+}
+
+.sso-label {
+  display: grid;
+  gap: 7px;
+  color: #33453d;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.sso-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(19, 35, 29, 0.16);
+  border-radius: 13px;
+  outline: none;
+  color: #13231d;
+  background: rgba(255, 255, 255, 0.86);
+  font: inherit;
+  font-size: 14px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.sso-input:focus {
+  border-color: #0f9f78;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(15, 159, 120, 0.11);
+}
+
+.sso-input::placeholder {
+  color: #94a29c;
+}
+
+.sso-button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 17px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  color: white;
+  background: #13231d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    opacity 160ms ease;
+}
+
+.sso-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #08765a;
+}
+
+.sso-button:focus-visible,
+.sso-tab:focus-visible,
+.sso-link-button:focus-visible {
+  outline: 3px solid rgba(15, 159, 120, 0.25);
+  outline-offset: 2px;
+}
+
+.sso-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.sso-button-secondary {
+  color: #13231d;
+  border-color: rgba(19, 35, 29, 0.14);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.sso-button-secondary:hover:not(:disabled) {
+  background: white;
+}
+
+.sso-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 23px 0;
+  color: #8a9791;
+  font-family: var(--font-geist-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sso-divider::before,
+.sso-divider::after {
+  height: 1px;
+  flex: 1;
+  content: "";
+  background: rgba(19, 35, 29, 0.11);
+}
+
+.sso-status {
+  margin: 0;
+  padding: 11px 13px;
+  border: 1px solid rgba(15, 159, 120, 0.2);
+  border-radius: 11px;
+  color: #08765a;
+  background: rgba(15, 159, 120, 0.08);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.sso-error {
+  margin: 0;
+  padding: 11px 13px;
+  border: 1px solid rgba(190, 58, 43, 0.18);
+  border-radius: 11px;
+  color: #9c3328;
+  background: rgba(224, 110, 79, 0.09);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.sso-footnote {
+  margin: 22px 0 0;
+  color: #7b8983;
+  font-size: 10px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.sso-challenge {
+  min-height: 68px;
+}
+
+.sso-challenge-error {
+  margin: 0;
+  color: #9c3328;
+  font-size: 11px;
+}
+
+.sso-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.38);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: sso-spin 700ms linear infinite;
+}
+
+.sso-account {
+  width: min(100%, 610px);
+}
+
+.sso-account-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.sso-card {
+  padding: 20px;
+  border: 1px solid rgba(19, 35, 29, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.sso-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.sso-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #13231d;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+
+.sso-card-head p,
+.sso-card > p {
+  margin: 5px 0 0;
+  color: #718079;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.sso-badge {
+  flex: none;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #08765a;
+  background: rgba(15, 159, 120, 0.1);
+  font-family: var(--font-geist-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.sso-session-list {
+  display: grid;
+  gap: 9px;
+}
+
+.sso-session {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(231, 240, 235, 0.65);
+}
+
+.sso-session strong,
+.sso-session small {
+  display: block;
+}
+
+.sso-session strong {
+  color: #273a31;
+  font-size: 11px;
+}
+
+.sso-session small {
+  margin-top: 3px;
+  color: #7b8983;
+  font-size: 9px;
+}
+
+.sso-link-button {
+  padding: 7px 9px;
+  border: 1px solid rgba(19, 35, 29, 0.12);
+  border-radius: 9px;
+  color: #33453d;
+  background: white;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.sso-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@keyframes sso-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 520px) {
+  .sso-card {
+    padding: 17px;
+  }
+
+  .sso-session {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sso-spinner {
+    animation-duration: 1.5s;
+  }
+}
