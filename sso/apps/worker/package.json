@@ -2,6 +2,9 @@
   "name": "@inon-sso/worker",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "build": "wrangler deploy --dry-run",
     "test": "vitest run",

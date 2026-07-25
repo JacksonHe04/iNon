@@ -19,6 +19,7 @@
 - 所有 SQL 使用参数绑定。
 - 所有公开 JSON 错误遵循同一 Schema。
 - 依赖锁定精确版本并提交 `sso/pnpm-lock.yaml`。
+- SSO Workspace 的 Node.js 版本必须为 `>=20.19.0`。
 - Secret 不进入 Git；本阶段不需要生产 Secret。
 - 每个任务遵循测试先行并形成独立提交。
 
@@ -85,6 +86,9 @@ Expected: failure because the workspace manifests do not exist yet.
   "name": "@inon/sso-workspace",
   "private": true,
   "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "build": "pnpm -r build",
     "check:workspace": "node tools/verify-workspace.mjs",
@@ -93,6 +97,9 @@ Expected: failure because the workspace manifests do not exist yet.
   },
   "devDependencies": {
     "typescript": "6.0.3"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-darwin-arm64": "1.1.5"
   }
 }
 ```
@@ -420,7 +427,7 @@ import { env, SELF } from "cloudflare:test";
 import { expect, it } from "vitest";
 
 it("returns a canonical health response", async () => {
-  const response = await SELF.fetch("https://inon.space/sso/api/health");
+  const response = await SELF.fetch("https://inon.space/api/sso/health");
   expect(response.status).toBe(200);
   expect(await response.json()).toEqual({
     status: "ok",
@@ -438,7 +445,7 @@ import { SELF } from "cloudflare:test";
 import { expect, it } from "vitest";
 
 it("does not accept a stateful request on the internal origin", async () => {
-  const response = await SELF.fetch("https://inon-sso.internal/sso/api/session", {
+  const response = await SELF.fetch("https://inon-sso.internal/api/sso/session", {
     method: "POST",
   });
   expect(response.status).toBe(421);
@@ -491,7 +498,7 @@ import type { Env } from "./env";
 type Bindings = { Bindings: Env; Variables: { requestId: string } };
 
 export function createApp() {
-  const app = new Hono<Bindings>().basePath("/sso/api");
+  const app = new Hono<Bindings>().basePath("/api/sso");
 
   app.get("/health", (context) =>
     context.json({
@@ -748,7 +755,7 @@ git commit -m "feat(sso): add project authorization repositories"
 
 **Interfaces:**
 - Consumes: D1 `projects` table.
-- Produces: authenticated-internal `GET /sso/api/internal/projects` and final foundation verification evidence.
+- Produces: authenticated-internal `GET /api/sso/internal/projects` and final foundation verification evidence.
 
 - [ ] **Step 1: Write the failing route test**
 
@@ -758,14 +765,14 @@ import { expect, it } from "vitest";
 
 it("does not expose project diagnostics without the internal token", async () => {
   const response = await SELF.fetch(
-    "https://inon.space/sso/api/internal/projects",
+    "https://inon.space/api/sso/internal/projects",
   );
   expect(response.status).toBe(401);
 });
 
 it("returns the seeded project registry to an internal caller", async () => {
   const response = await SELF.fetch(
-    "https://inon.space/sso/api/internal/projects",
+    "https://inon.space/api/sso/internal/projects",
     { headers: { authorization: "Bearer test-internal-token" } },
   );
   expect(response.status).toBe(200);

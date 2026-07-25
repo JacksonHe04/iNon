@@ -49,7 +49,7 @@
 | Cloudflare D1 | Better Auth 已提供 D1 支持；实施时锁定精确版本并验证迁移 |
 | OAuth/OIDC Provider | Better Auth OAuth Provider 支持 OAuth 2.1、OIDC、PKCE、JWKS 和 Trusted Client |
 | GitHub | Better Auth 提供 GitHub Provider；必须请求 `user:email` 并检查 verified 邮箱 |
-| Vercel 路径代理 | External Rewrite 能将 `/sso/api/*` 转发到 Worker；必须建立 `Set-Cookie` 和 Metadata 集成探针 |
+| Vercel 路径代理 | External Rewrite 能将 `/api/sso/*` 转发到 Worker；必须建立 `Set-Cookie` 和 Metadata 集成探针 |
 | 30/90 会话 | 30 天滑动为框架配置；90 天绝对上限需要额外字段和服务端钩子 |
 | D1 原子性 | D1 不支持传统交互式事务；关键状态转换必须使用条件更新/批处理并进行竞态测试 |
 | 多项目复用 | 通过共享 Contracts、Next.js SDK 和 UI 包避免五份重复协议代码 |

@@ -4,7 +4,7 @@
 
 **Goal:** 在 Cloudflare 上建设 iNon 中央身份服务，并让 iNon、Leaf、PINE、SAYLESS、Treez 通过同一套 Next.js SDK 接入真正的 SSO。
 
-**Architecture:** `inon.space` 上的 Next.js 页面负责中央用户界面，Vercel 将 `/sso/api/*` 反向代理到 Cloudflare Worker；Worker 使用 Better Auth、OAuth 2.1/OIDC 和 D1 维护唯一身份与会话。五个项目只依赖版本化共享 SDK，不复制协议、Cookie 和权限代码。
+**Architecture:** `inon.space` 上的 Next.js 页面负责中央用户界面，Vercel 将 `/api/sso/*` 反向代理到 Cloudflare Worker；Worker 使用 Better Auth、OAuth 2.1/OIDC 和 D1 维护唯一身份与会话。五个项目只依赖版本化共享 SDK，不复制协议、Cookie 和权限代码。
 
 **Tech Stack:** TypeScript 6.0.3、Next.js 16.2.10、React 19.2.7、Cloudflare Workers、D1、Better Auth 1.6.25、OAuth Provider 1.6.25、Hono 4.12.32、Vitest 4.1.10、Workers Vitest Pool 0.18.8、Resend 6.18.0、Zod 3.23.8。
 

@@ -170,7 +170,7 @@ flowchart LR
     subgraph Vercel["Vercel"]
         SSOUI["inon.space/sso\n登录、注册、账户中心"]
         Apps["iNon / Leaf / PINE / SAYLESS / Treez"]
-        Gateway["inon.space/sso/api/*\n外部 Rewrite"]
+        Gateway["inon.space/api/sso/*\n外部 Rewrite"]
     end
 
     subgraph Cloudflare["Cloudflare"]
@@ -206,10 +206,11 @@ flowchart LR
 
 建议的后端前缀：
 
-- `/sso/api/auth/*`
-- `/sso/api/oauth2/*`
-- `/sso/api/admin/*`
-- `/sso/api/projects/*`
+- `/api/sso/auth/*`
+- `/api/sso/oauth2/*`
+- `/api/sso/admin/*`
+- `/api/sso/projects/*`
+- `/api/sso/github/callback`
 
 OAuth/OIDC Metadata 和 JWKS 必须通过 `inon.space` 的公开地址访问。
 
@@ -228,7 +229,7 @@ Vercel 负责：
 
 - iNon SSO 页面。
 - 五个 Next.js 项目。
-- `/sso/api/*` 到 Worker 的外部 Rewrite。
+- `/api/sso/*` 到 Worker 的外部 Rewrite。
 - 环境变量分发。
 - Preview 和 Production 部署。
 - 应用侧 Cookie 写入。
@@ -821,7 +822,10 @@ D1 在破坏性迁移前必须记录 Time Travel Bookmark，并保留可逆迁�
 1. 在阿里云 DNS 添加 Resend 返回的 SPF、DKIM 等验证记录。
 2. 创建 GitHub OAuth App，并提供 Client ID 和 Client Secret：
    - Homepage URL 使用 `https://inon.space`。
-   - Authorization callback URL 使用最终确定的 `https://inon.space/sso/api/auth/callback/github`。
+   - Authorization callback URL 使用 `https://inon.space/api/sso/github/callback`。
+
+GitHub OAuth App 已于 2026-07-26 创建，名称为 `iNon`。Client ID 和 Client
+Secret 只进入本地忽略文件及 Cloudflare Secret，不写入本文档或 Git。
 
 在回调路由完成并通过本地/Preview 验证前，不要求用户提前创建 GitHub OAuth App。
 
