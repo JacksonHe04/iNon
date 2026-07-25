@@ -7,10 +7,21 @@ import { cookieFrom } from "./auth-test-helpers";
 describe("central authentication routes", () => {
   it("exposes email registration and optional credentials through the public API", async () => {
     const deliveries: VerificationOTPMessage[] = [];
+    const protectedActions: string[] = [];
+    const securityNotifications: string[] = [];
     const app = createApp({
       createEmailService: () => ({
         sendVerificationOTP: async (message) => {
           deliveries.push(message);
+        },
+        sendSecurityNotification: async ({ event }) => {
+          securityNotifications.push(event);
+        },
+      }),
+      createSecurityGuard: () => ({
+        protect: async ({ action }) => {
+          protectedActions.push(action);
+          return { allowed: true };
         },
       }),
       deferBackgroundTasks: false,
@@ -98,5 +109,16 @@ describe("central authentication routes", () => {
       env,
     );
     expect(usernameSignIn.status).toBe(200);
+    expect(protectedActions).toEqual([
+      "otp_send",
+      "otp_verify",
+      "account_mutation",
+      "account_mutation",
+      "password_login",
+    ]);
+    expect(securityNotifications).toEqual([
+      "username_updated",
+      "password_updated",
+    ]);
   });
 });

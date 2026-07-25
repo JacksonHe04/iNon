@@ -3,6 +3,7 @@ import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { emailOTP, jwt, username } from "better-auth/plugins";
 import type { Env } from "../env";
+import type { SecurityNotificationEvent } from "../email/templates/security-notification";
 import { createFirstPartyOAuthProvider } from "../oauth/provider";
 import {
   AUTH_BASE_PATH,
@@ -30,10 +31,29 @@ export interface VerificationOTPMessage {
 
 export interface AuthDependencies {
   sendVerificationOTP(message: VerificationOTPMessage): Promise<void>;
+  recordSecurityEvent?(input: {
+    event: SecurityNotificationEvent;
+    userId: string;
+  }): Promise<void>;
   runInBackground?(promise: Promise<unknown>): void;
 }
 
 export function createAuth(env: Env, dependencies: AuthDependencies) {
+  const recordSecurityEvent = (
+    event: SecurityNotificationEvent,
+    userId: string,
+  ) => {
+    if (!dependencies.recordSecurityEvent) {
+      return;
+    }
+    const task = dependencies
+      .recordSecurityEvent({ event, userId })
+      .catch(() => undefined);
+    if (dependencies.runInBackground) {
+      dependencies.runInBackground(task);
+    }
+  };
+
   return betterAuth({
     appName: "iNon",
     baseURL: AUTH_BASE_URL,
@@ -98,17 +118,34 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
             };
           },
         },
+        delete: {
+          after: async (session) => {
+            recordSecurityEvent("session_revoked", session.userId);
+          },
+        },
       },
       account: {
         create: {
           before: async (account) => ({
             data: stripUpstreamProviderTokens(account),
           }),
+          after: async (account) => {
+            if (account.providerId === "github") {
+              recordSecurityEvent("github_linked", account.userId);
+            }
+          },
         },
         update: {
           before: async (account) => ({
             data: stripUpstreamProviderTokens(account),
           }),
+        },
+        delete: {
+          after: async (account) => {
+            if (account.providerId === "github") {
+              recordSecurityEvent("github_unlinked", account.userId);
+            }
+          },
         },
       },
     },

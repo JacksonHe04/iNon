@@ -264,12 +264,12 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - Test: `sso/apps/worker/test/security/turnstile.test.ts`
 - Test: `sso/apps/worker/test/security/rate-limit.test.ts`
 
-- [ ] Verify Turnstile server-side with timeouts, expected action, expected production hostname, and single-use token behavior.
-- [ ] Require Turnstile on OTP send and sensitive credential attempts, but retain Cloudflare test keys for deterministic local tests.
-- [ ] Implement D1-backed limits by normalized identifier and privacy-preserving IP digest.
-- [ ] Rate-limit OTP send, OTP verify, password login, GitHub start, and account mutations separately.
-- [ ] Send security notifications for password set/change, username change, GitHub link/unlink, and session revocation.
-- [ ] Ensure security failures fail closed without leaking whether an account exists.
+- [x] Verify Turnstile server-side with a five-second timeout, idempotency key, exact action, expected production hostname, and Cloudflare's single-use Siteverify result.
+- [x] Require Turnstile on OTP send, OTP verify, password login, GitHub start, and account mutations; inject a deterministic guard in Worker route tests.
+- [x] Implement D1-backed limits by normalized identifier and keyed, privacy-preserving IP digest.
+- [x] Rate-limit OTP send, OTP verify, password login, GitHub start, and account mutations separately.
+- [x] Send security notifications for password set/change, username change, GitHub link/unlink, and session revocation.
+- [x] Ensure security failures fail closed without leaking whether an account exists.
 - [ ] Commit as `feat(sso): harden authentication entry points`.
 
 ## Task 11: Production resources and verification

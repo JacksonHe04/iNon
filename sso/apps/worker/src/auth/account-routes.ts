@@ -1,7 +1,10 @@
 import { Hono, type Context } from "hono";
 import { z } from "zod";
 import type { AppBindings } from "../env";
+import type { SecurityNotificationEvent } from "../email/templates/security-notification";
 import { createApiError } from "../http/errors";
+import type { AuthEntryPointGuard } from "../security/auth-entry-points";
+import { enforceAuthEntryPoint } from "../security/http-enforcement";
 import {
   AccountPolicyError,
   AccountService,
@@ -56,7 +59,19 @@ async function requireVerifiedSession(
   return { session } as const;
 }
 
-export function createAccountRoutes(createCentralAuth: CentralAuthFactory) {
+export function createAccountRoutes(
+  createCentralAuth: CentralAuthFactory,
+  createSecurityGuard: (
+    context: Context<AppBindings>,
+  ) => AuthEntryPointGuard,
+  recordSecurityEvent: (
+    context: Context<AppBindings>,
+    input: {
+      event: SecurityNotificationEvent;
+      userId: string;
+    },
+  ) => Promise<void>,
+) {
   const routes = new Hono<AppBindings>();
 
   routes.post("/username", async (context) => {
@@ -64,6 +79,17 @@ export function createAccountRoutes(createCentralAuth: CentralAuthFactory) {
     const authenticated = await requireVerifiedSession(context, auth);
     if ("response" in authenticated) {
       return authenticated.response;
+    }
+    const securityResponse = await enforceAuthEntryPoint(
+      context,
+      createSecurityGuard(context),
+      {
+        action: "account_mutation",
+        userId: authenticated.session.user.id,
+      },
+    );
+    if (securityResponse) {
+      return securityResponse;
     }
 
     const parsed = usernameBodySchema.safeParse(await context.req.json());
@@ -83,6 +109,10 @@ export function createAccountRoutes(createCentralAuth: CentralAuthFactory) {
         authenticated.session.user.id,
         parsed.data.username,
       );
+      await recordSecurityEvent(context, {
+        event: "username_updated",
+        userId: authenticated.session.user.id,
+      });
       return context.json({
         username: result.username,
         usernameChangedAt: result.usernameChangedAt.toISOString(),
@@ -124,6 +154,17 @@ export function createAccountRoutes(createCentralAuth: CentralAuthFactory) {
     if ("response" in authenticated) {
       return authenticated.response;
     }
+    const securityResponse = await enforceAuthEntryPoint(
+      context,
+      createSecurityGuard(context),
+      {
+        action: "account_mutation",
+        userId: authenticated.session.user.id,
+      },
+    );
+    if (securityResponse) {
+      return securityResponse;
+    }
 
     const parsed = passwordBodySchema.safeParse(await context.req.json());
     if (!parsed.success) {
@@ -140,6 +181,10 @@ export function createAccountRoutes(createCentralAuth: CentralAuthFactory) {
     await auth.api.setPassword({
       headers: context.req.raw.headers,
       body: { newPassword: parsed.data.password },
+    });
+    await recordSecurityEvent(context, {
+      event: "password_updated",
+      userId: authenticated.session.user.id,
     });
     return context.json({ success: true });
   });

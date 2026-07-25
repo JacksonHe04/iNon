@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 import type { VerificationOTPMessage } from "../auth/create-auth";
-import type { EmailService } from "./email-service";
+import type {
+  EmailService,
+  SecurityNotificationMessage,
+} from "./email-service";
+import { securityNotificationTemplate } from "./templates/security-notification";
 import { verificationCodeTemplate } from "./templates/verification-code";
 
 export interface ResendMessage {
@@ -28,6 +32,21 @@ export class ResendEmailService implements EmailService {
     message: VerificationOTPMessage,
   ): Promise<void> {
     const template = verificationCodeTemplate(message);
+    const result = await this.transport.send({
+      from: this.from,
+      to: message.email,
+      ...template,
+    });
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+  }
+
+  async sendSecurityNotification(
+    message: SecurityNotificationMessage,
+  ): Promise<void> {
+    const template = securityNotificationTemplate(message.event);
     const result = await this.transport.send({
       from: this.from,
       to: message.email,
