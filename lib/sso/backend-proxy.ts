@@ -54,9 +54,27 @@ export async function proxySsoRequest(
   );
 
   try {
-    return await fetch(upstreamRequest, {
+    const upstreamResponse = await fetch(upstreamRequest, {
       cache: "no-store",
       redirect: "manual",
+    });
+    const responseHeaders = new Headers(upstreamResponse.headers);
+    responseHeaders.delete("content-encoding");
+    responseHeaders.delete("content-length");
+    responseHeaders.delete("transfer-encoding");
+
+    const hasBody =
+      request.method !== "HEAD" &&
+      upstreamResponse.status !== 204 &&
+      upstreamResponse.status !== 304;
+    const body = hasBody
+      ? await upstreamResponse.arrayBuffer()
+      : null;
+
+    return new Response(body, {
+      status: upstreamResponse.status,
+      statusText: upstreamResponse.statusText,
+      headers: responseHeaders,
     });
   } catch {
     return Response.json(
