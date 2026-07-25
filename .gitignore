@@ -18,6 +18,7 @@ _satellites/
 .cursor/
 .screenshots/
 .playwright-cli/
+.worktrees/
 
 # ==========================================
 # 3. 依赖与环境 (Dependencies & Env)
