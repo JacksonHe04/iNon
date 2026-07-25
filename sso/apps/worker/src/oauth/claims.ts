@@ -1,9 +1,14 @@
-import type { ProjectKey, ProjectRole } from "@inon/sso-contracts";
+import {
+  INON_PROJECT_CLAIM,
+  INON_PROJECT_ROLE_CLAIM,
+  type ProjectKey,
+  type ProjectRole,
+} from "@inon/sso-contracts";
 import { ProjectMembershipRepository } from "../authorization/project-memberships";
 import { parseFirstPartyClientProject } from "./client-registry";
 
-export const PROJECT_CLAIM = "https://inon.space/project";
-export const PROJECT_ROLE_CLAIM = "https://inon.space/project_role";
+export const PROJECT_CLAIM = INON_PROJECT_CLAIM;
+export const PROJECT_ROLE_CLAIM = INON_PROJECT_ROLE_CLAIM;
 
 export interface OAuthUser {
   id: string;

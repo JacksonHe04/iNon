@@ -1,4 +1,5 @@
 import { oauthProvider } from "@better-auth/oauth-provider";
+import { inonOAuthScopes } from "@inon/sso-contracts";
 import { AUTH_BASE_URL } from "../auth/constants";
 import {
   PROJECT_CLAIM,
@@ -14,7 +15,7 @@ export function createFirstPartyOAuthProvider(db: D1Database) {
   return oauthProvider({
     loginPage: "/sso/login",
     consentPage: "/sso/consent",
-    scopes: ["openid", "profile", "email", "offline_access"],
+    scopes: [...inonOAuthScopes],
     grantTypes: ["authorization_code", "refresh_token"],
     validAudiences: [AUTH_BASE_URL],
     allowDynamicClientRegistration: false,
@@ -34,7 +35,7 @@ export function createFirstPartyOAuthProvider(db: D1Database) {
     customUserInfoClaims: ({ jwt }) =>
       projectClaimsFromAccessToken(jwt as Record<string, unknown>),
     advertisedMetadata: {
-      scopes_supported: ["openid", "profile", "email", "offline_access"],
+      scopes_supported: [...inonOAuthScopes],
       claims_supported: [
         "sub",
         "email",

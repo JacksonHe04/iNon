@@ -6,6 +6,7 @@
     "node": ">=20.19.0"
   },
   "scripts": {
+    "bootstrap:oauth-clients": "node tools/bootstrap-oauth-clients.mjs",
     "build": "pnpm -r build",
     "check:workspace": "node tools/verify-workspace.mjs",
     "test": "pnpm -r test",

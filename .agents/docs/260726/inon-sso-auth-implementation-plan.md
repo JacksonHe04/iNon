@@ -231,7 +231,7 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - [x] Call `ensureMembership` while producing project Claims so first entry creates only a normal member.
 - [x] Prove through the authorization repository boundary that a project admin cannot assign another admin; OAuth exposes no role-mutation route.
 - [ ] Verify OpenID Configuration, JWKS, issuer, audience, nonce, state, and PKCE error behavior.
-- [ ] Commit as `feat(sso): add first party oauth provider`.
+- [x] Commit as `feat(sso): add first party oauth provider`.
 
 ## Task 9: Bootstrap five trusted clients safely
 
@@ -243,10 +243,10 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - Test: `sso/apps/worker/test/internal/oauth-client-routes.test.ts`
 - Test: `sso/apps/worker/test/oauth/token-concurrency.test.ts`
 
-- [ ] Add an internal-token-protected, idempotent bootstrap endpoint.
+- [x] Add an internal-token-protected, idempotent bootstrap endpoint.
 - [ ] Create exactly iNon, Leaf, PINE, SAYLESS, and Treez with one callback URL each, `require_pkce=true`, `skip_consent=true`, and immutable project metadata.
-- [ ] Return a newly generated Client Secret only at creation time.
-- [ ] Write bootstrap output to a mode-0600 ignored `.secrets/` file without printing it.
+- [x] Return a newly generated Client Secret only at creation time.
+- [x] Write bootstrap output to a mode-0600 ignored `.secrets/` file without printing it.
 - [ ] Add tests proving Authorization Codes are single-use under concurrency.
 - [ ] Add tests proving Refresh Tokens rotate and an old token cannot win a concurrent replay.
 - [ ] Add tests rejecting unknown Redirect URI, Client, project metadata, and non-S256 PKCE.

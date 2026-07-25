@@ -5,7 +5,9 @@ import {
 } from "./auth/auth-routes";
 import type { AppBindings } from "./env";
 import { canonicalOriginMiddleware } from "./http/canonical-origin";
+import { internalApiAuthMiddleware } from "./http/internal-auth";
 import { requestIdMiddleware } from "./http/request-id";
+import { createOAuthClientRoutes } from "./internal/oauth-client-routes";
 import { createProjectRoutes } from "./projects/project-routes";
 
 export function createApp(authOptions: AuthRouteOptions = {}) {
@@ -22,7 +24,9 @@ export function createApp(authOptions: AuthRouteOptions = {}) {
     }),
   );
   app.route("/", createAuthRoutes(authOptions));
+  app.use("/internal/*", internalApiAuthMiddleware);
   app.route("/internal", createProjectRoutes());
+  app.route("/internal", createOAuthClientRoutes());
 
   return app;
 }
