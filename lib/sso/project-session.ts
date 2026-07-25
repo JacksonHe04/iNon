@@ -1,5 +1,5 @@
-import type { InonProjectSession } from "@inon/sso-next";
-import { InonSsoError } from "@inon/sso-next";
+import type { InonProjectSession } from "@inon-ai/inon-sso";
+import { InonSsoError } from "@inon-ai/inon-sso";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getInonProjectSso } from "./project-client";

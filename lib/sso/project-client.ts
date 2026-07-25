@@ -1,4 +1,4 @@
-import { createInonSso } from "@inon/sso-next";
+import { createInonSso } from "@inon-ai/inon-sso";
 
 function requiredEnvironmentVariable(name: string): string {
   const value = process.env[name];

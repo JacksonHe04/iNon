@@ -1,4 +1,4 @@
-import { InonSsoError } from "@inon/sso-next";
+import { InonSsoError } from "@inon-ai/inon-sso";
 import { NextResponse, type NextRequest } from "next/server";
 import {
   checkUserOwnsIdentifier,

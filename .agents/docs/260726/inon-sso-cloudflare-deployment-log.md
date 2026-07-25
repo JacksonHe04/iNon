@@ -58,12 +58,26 @@ the D1 transaction commits.
 
 - Restored TypeScript 6 compatibility for existing JSON response consumers.
 - Excluded the standalone `sso` workspace from the Next.js root typecheck; the
-  main site consumes the built `@inon/sso-next` package through its exports.
+  main site consumes the built `@inon-ai/inon-sso` package through its exports.
 - Rebuilt proxied Worker responses explicitly in the Next.js route handler.
   Vercel otherwise returned the correct status and headers with an empty body.
 
 The production Vercel build completed compilation, TypeScript checking, page
 data collection, and static generation before the `inon.space` alias moved.
+
+## Shared project client package
+
+The reusable Next.js OAuth and encrypted-session client is prepared as the
+public npm package `@inon-ai/inon-sso`. Its manifest pins the public npm
+registry, public access, MIT license, source repository, and a build-only
+prepublish step. The package contains only compiled runtime files, declarations,
+source maps, its manifest, and README; application client secrets remain
+deployment environment variables.
+
+The local npm client is not currently authenticated, so the first `0.1.0`
+publish remains a manual credential boundary. Project integration can continue
+against the workspace build and switch to the published version without
+changing the package API.
 
 ## Production probes
 

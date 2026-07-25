@@ -1,4 +1,4 @@
-import type { InonProjectSession } from "@inon/sso-next";
+import type { InonProjectSession } from "@inon-ai/inon-sso";
 import { redirect } from "next/navigation";
 import { getInonProjectSession } from "@/lib/sso/project-session";
 import { createAdminClient } from "@/lib/supabase/admin";

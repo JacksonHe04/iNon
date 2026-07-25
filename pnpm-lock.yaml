@@ -8,7 +8,7 @@ importers:
 
   .:
     dependencies:
-      '@inon/sso-next':
+      '@inon-ai/inon-sso':
         specifier: file:sso/packages/next
         version: file:sso/packages/next
       '@react-three/drei':
@@ -384,7 +384,7 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@inon/sso-next@file:sso/packages/next':
+  '@inon-ai/inon-sso@file:sso/packages/next':
     resolution: {directory: sso/packages/next, type: directory}
     engines: {node: '>=20.19.0'}
 
@@ -2686,7 +2686,7 @@ snapshots:
   '@img/sharp-win32-x64@0.34.5':
     optional: true
 
-  '@inon/sso-next@file:sso/packages/next':
+  '@inon-ai/inon-sso@file:sso/packages/next':
     dependencies:
       jose: 6.2.4
 

@@ -1,6 +1,6 @@
 {
   "name": "iNon",
-  "version": "0.1.125",
+  "version": "0.1.126",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -12,7 +12,7 @@
     "db:upload-assets": "node --env-file=.env.local scripts/upload-assets.mjs"
   },
   "dependencies": {
-    "@inon/sso-next": "file:sso/packages/next",
+    "@inon-ai/inon-sso": "file:sso/packages/next",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@supabase/ssr": "^0.10.3",
