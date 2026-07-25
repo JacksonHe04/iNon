@@ -6,7 +6,15 @@
 
 iNon、Leaf、PINE、SAYLESS、Treez 五个指定项目已经全部完成代码接入，统一消费公开包 `@inon-ai/inon-sso@0.1.0`，并通过同一套中央 OAuth 2.1/OIDC、项目会话和角色模型接入 `https://inon.space`。
 
-五个项目的接入代码都已提交到各自 feature 分支、推送到 GitHub、合并并推送到默认主分支。PINE 与 Treez 已创建或更新 Vercel 生产项目、写入独立项目凭证并完成受保护部署地址的生产探针。
+五个项目的接入代码都已提交到各自 feature 分支、推送到 GitHub、合并并推送到默认主分支。五个项目均已更新 Vercel 生产部署，并在内置浏览器中完成真实的中央跳转、无感授权、项目回调、项目会话和业务页面验收。
+
+2026-07-26 的现场验收还修复了三类只会在真实浏览器和生产链路中暴露的问题：
+
+1. Vercel 到 Cloudflare Worker 的客户端 IP、请求体和 Turnstile 校验传播；
+2. Vercel 代理对 Worker 压缩响应的二次压缩；
+3. OAuth authorize JSON 跳转包未转换为浏览器 `303` 跳转，以及项目顶层 `/api` 导航被内置浏览器拦截。
+
+五个项目现在统一提供普通页面形式的 `/sso/start`、`/sso/refresh`、`/sso/end`，再在服务端交给同一 SDK 处理。登录按钮使用原生链接，受保护页面和客户端操作复用同一套路径，不再各自拼接 `/api/auth/inon/*`。
 
 ## 统一架构
 
@@ -63,11 +71,11 @@ flowchart LR
 
 | 项目 | 默认分支提交 | 生产状态 | 回调地址 | 说明 |
 | --- | --- | --- | --- | --- |
-| iNon | `8173d69` | READY | `https://inon.space/api/auth/inon/callback` | 中央站点与 relying party 同域部署 |
-| SAYLESS | `65f50e7` | READY | `https://sayless.inon.space/api/auth/inon/callback` | 已移除旧登录入口 |
-| Leaf | `d0740c1` | READY | `https://leaf.inon.space/api/auth/inon/callback` | 保留 Leaf Team Member 项目关系 |
-| PINE | `ffa819b` | READY | `https://pine.inon.space/api/auth/inon/callback` | 旧业务数据库退役，不在本工程重建 |
-| Treez | `becbf39` | READY | `https://treez.inon.space/api/auth/inon/callback` | 在现有 Next.js 迁移基线上完成接入 |
+| iNon | `87075f5` | READY | `https://inon.space/api/auth/inon/callback` | 中央站点与 relying party 同域部署 |
+| SAYLESS | `efc9102` | READY | `https://sayless.inon.space/api/auth/inon/callback` | 已移除旧登录入口 |
+| Leaf | `e3c0280` | READY | `https://leaf.inon.space/api/auth/inon/callback` | 保留 Leaf Team Member 项目关系 |
+| PINE | `bbf6a76` | READY | `https://pine.inon.space/api/auth/inon/callback` | 旧业务数据库退役，不在本工程重建 |
+| Treez | `2015f05` | READY | `https://treez.inon.space/api/auth/inon/callback` | 在现有 Next.js 迁移基线上完成接入 |
 
 ## PINE 特殊处理
 
@@ -80,91 +88,89 @@ PINE 的旧 Supabase 项目已经废弃。本轮没有重建题库、进度、�
 
 ## 生产验收证据
 
-中央服务：
+中央服务与 iNon：
 
-- `/api/sso/health`：200；
-- OIDC Discovery：200，Issuer 与端点为规范地址；
-- JWKS：200，包含可用签名密钥；
-- `/sso/login`：200；
-- 项目登录发起：303；
-- 直接访问非规范 Worker 状态写入口：421。
+- 最终部署：`dpl_Cq4gx2S4fBfZXthKGwTiVBbHBGJP`；
+- 邮箱验证码由 Resend 真实发送，并通过 Gmail 收件箱获取后完成首次注册；
+- Turnstile 在生产域名真实通过；
+- 账户中心可读取当前账号、会话、项目管理员和唯一全局超级管理员状态；
+- 密码已通过账户中心真实设置，页面显示密码能力已启用；
+- 从 `/login?next=/admin` 发起项目登录后自动返回 `/admin/assets`；
+- 后台显示当前账号，证明 iNon 项目会话和超级管理员的项目管理员映射生效。
+
+Leaf：
+
+- 最终部署：`dpl_A16BCsB6EnK5sEmUAC6eYvEEijhz`；
+- 浏览器直接进入 `/mine`；
+- 未建立 Leaf 项目会话时自动进入中央 SSO；
+- 中央会话存在时无需再次输入凭证，自动返回 `/mine`；
+- 页面确认账号已成为 Leaf 普通成员；
+- 账号未被错误映射为 Team Member，符合 Team Member 独立业务关系规则；
+- 全局超级管理员可见 Leaf 管理入口。
 
 PINE：
 
-- 最终部署：`dpl_GakBP8GDFqJdX43b6cxAHqxXXaFT`；
-- `/api/auth/me` 未登录返回空用户；
-- 登录发起 303，回调精确指向 `pine.inon.space`；
-- `/profile` 未登录返回 307；
-- `/api/db/query` 返回 410；
-- 管理员页面在页面边界向中央服务重新确认当前角色。
+- 最终部署：`dpl_FPw44USY1A3MzDcoiBfkauHawuA9`；
+- 从生产首页点击真实顶栏“登录”链接；
+- 自动完成 `PINE → inon.space → PINE`；
+- 回到首页后顶栏显示当前账号；
+- 侧栏出现“贡献题目”和“审核管理”，证明项目会话和管理员映射生效；
+- 业务数据库仍保持退役，本工程没有重建或扩大 PINE 业务数据范围。
+
+SAYLESS：
+
+- 最终部署：`dpl_84byqrz996RHquqwrAk5dny7LSjm`；
+- 从 `sayless.inon.space` 首页点击真实“登录”链接；
+- 自动完成中央 SSO 并返回 `/app`；
+- SAYLESS 真实业务数据成功加载，证明项目会话已映射到现有业务用户，而非仅完成页面跳转；
+- 登录后可访问求职总览、批次、投递和面试数据。
 
 Treez：
 
-- Vercel 项目：`yingyingdontkill/treez`；
-- 最终部署：`dpl_4mZGD2CKBASXVnEUCLC92iUQfZgM`；
-- `/api/health`：200；
-- `/api/auth/me`：200 且 `Cache-Control: private, no-store`；
-- 登录发起 303，回调精确指向 `treez.inon.space`；
-- `/user/me` 未登录返回 307。
+- 最终部署：`dpl_4XoFd5QycWp4mcRp9gHbcN2HAgZL`；
+- 从 Treez 原生登录链接进入中央 authorize；
+- 中央 authorize 正确返回 `303`，自动回到 Treez callback 和 `/basic/home`；
+- 顶栏显示当前账号；
+- 受保护的 `/user/me` 成功打开；
+- 页面显示 Treez 项目管理员身份，证明全局超级管理员映射生效。
 
-## 当前 D1 状态
+GitHub：
 
-上线后对生产 D1 进行了只读查询：
+- iNon 账户中心的 GitHub 绑定 Turnstile 已真实通过；
+- 浏览器成功进入 GitHub 官方 `Authorize iNon` 页面；
+- GitHub 页面确认请求 `read:user` 与 `user:email`，回调指向 `https://inon.space/api/sso/github/callback`；
+- 内置浏览器中的 GitHub 官方授权按钮持续处于 disabled 状态，因此本轮没有绕过 GitHub 页面强制提交，也没有把“已进入授权页”误报为“绑定完成”。
 
-```text
-user_count = 0
-super_admin_count = 0
-membership_count = 0
-```
+## 当前生产身份状态
 
-这表示生产结构、五个 OAuth Client 和权限模型已经就绪，但所有者尚未完成第一次验证登录，因此全局超级管理员还不能绑定。
+- 生产账号已通过邮箱验证码创建并验证；
+- 密码登录能力已启用；
+- 全局超级管理员已通过幂等 bootstrap 绑定，且当前仍为唯一一人；
+- 五个项目均已建立成员关系；
+- 全局超级管理员在五个项目中均解析为项目管理员；
+- Leaf Team Member 仍为独立项目关系，未被超级管理员身份自动占用；
+- 中央会话为 30 天滑动有效、90 天绝对上限；
+- 当前设备可在账户中心查看。
 
-## 需要所有者手动完成
+## 已完成的所有者操作
 
-### 1. 阿里云 DNS
+- 阿里云 DNS 已添加 `pine` 和 `treez` 记录；
+- 所有者邮箱首次验证码登录已完成；
+- 唯一全局超级管理员绑定已完成；
+- 账户密码设置已完成；
+- 五项目浏览器端到端登录已完成。
 
-在 `inon.space` 的阿里云 DNS 中添加：
+## 尚需完成
 
-| 记录类型 | 主机记录 | 记录值 |
-| --- | --- | --- |
-| A | `pine` | `76.76.21.21` |
-| A | `treez` | `76.76.21.21` |
-
-Vercel 项目已经绑定两个域名；这里只缺权威 DNS 记录。
-
-### 2. 第一次所有者登录
-
-DNS 生效后，在 `https://inon.space/sso/login` 使用所有者邮箱完成一次邮箱验证码注册或登录。账号必须处于 `emailVerified = 1` 和 `active` 状态。
-
-### 3. 唯一超级管理员绑定
-
-所有者验证完成后，使用内部 bootstrap 脚本按邮箱绑定唯一 `super_admin`。该操作幂等，若角色已经绑定到另一账号会失败关闭。
-
-### 4. 浏览器端到端验收
-
-使用同一中央账号依次验证：
-
-1. 邮箱验证码注册；
-2. 邮箱验证码登录；
-3. 设置用户名与密码；
-4. 邮箱密码登录；
-5. 用户名密码登录；
-6. GitHub 登录与绑定；
-7. 登录后进入其余四个项目无需重新输入凭证；
-8. 五个项目首次进入都只创建普通成员；
-9. 项目退出、刷新、30 天滑动和 90 天绝对上限；
-10. 超级管理员授予和撤销项目管理员；
-11. 项目管理员无法管理其他管理员；
-12. Leaf 管理员可以维护 Team Member。
-
-### 5. 生产密钥轮换
-
-端到端验收完成后，轮换在搭建沟通中暴露过的：
+1. 在可正常启用 GitHub 官方授权按钮的浏览器中完成一次授权，随后回到账户中心确认 `Linked`，再退出中央会话验证 GitHub 登录。
+2. 设置一个符合规则的用户名后，验证用户名密码登录；用户名设置不是首次登录必填项。
+3. 以非超级管理员测试项目管理员无法任命其他管理员，以及 Leaf 管理员可维护 Team Member。
+4. 轮换在搭建沟通中暴露过的：
 
 - GitHub OAuth App Client Secret；
 - Resend API Key。
 
-轮换后更新 Cloudflare Worker Secret，并再次验证 GitHub 回调与邮件验证码。
+轮换后更新 Cloudflare Worker Secret，并再次验证 GitHub 回调与邮件验证码。密钥不得写入 Git 仓库或本报告。
 
 ## 非 SSO 后续问题
 
