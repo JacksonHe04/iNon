@@ -74,10 +74,11 @@ prepublish step. The package contains only compiled runtime files, declarations,
 source maps, its manifest, and README; application client secrets remain
 deployment environment variables.
 
-The local npm client is not currently authenticated, so the first `0.1.0`
-publish remains a manual credential boundary. Project integration can continue
-against the workspace build and switch to the published version without
-changing the package API.
+Version `0.1.0` was published under the `inon-ai` npm organization with public
+access. Registry metadata, the `latest` tag, the tarball URL, package
+collaborator permissions, and the published integrity hash were read back
+successfully. SAYLESS then installed the exact registry version and locked the
+same integrity hash.
 
 ## Production probes
 
