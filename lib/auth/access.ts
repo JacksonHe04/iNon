@@ -1,27 +1,12 @@
-import { createAdminClient } from '@/lib/supabase/admin';
 import {
   getPrimaryUsername,
   loadUserProfile,
   profileOwnsIdentifier,
 } from '@/lib/auth/user';
+import { getInonProjectAdminSession } from '@/lib/sso/project-session';
 
-export async function checkIsAdmin(userId: string, email?: string): Promise<boolean> {
-  const adminClient = createAdminClient();
-  const normalizedEmail = email?.toLowerCase();
-
-  let query = adminClient
-    .from('admin_users')
-    .select('id')
-    .eq('is_active', true);
-
-  if (normalizedEmail) {
-    query = query.or(`user_id.eq.${userId},email.eq.${normalizedEmail}`);
-  } else {
-    query = query.eq('user_id', userId);
-  }
-
-  const { data } = await query.maybeSingle();
-  return Boolean(data);
+export async function checkIsAdmin(): Promise<boolean> {
+  return (await getInonProjectAdminSession()) !== null;
 }
 
 export async function checkUserOwnsIdentifier(

@@ -1,19 +1,13 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 
 export default function AdminSignOutButton() {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+  const handleSignOut = () => {
     startTransition(() => {
-      router.push('/login');
-      router.refresh();
+      window.location.assign('/api/auth/inon/logout?returnTo=/');
     });
   };
 

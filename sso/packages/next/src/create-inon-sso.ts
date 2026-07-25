@@ -640,6 +640,17 @@ export function createInonSso(input: InonSsoConfig): InonSsoClient {
     if (pathname === `${config.basePath}/logout`) {
       return logout(request);
     }
+    if (pathname === `${config.basePath}/session`) {
+      const session = await storedSession(request);
+      return Response.json(
+        {
+          session: session === null ? null : publicSession(session),
+        },
+        {
+          headers: { "Cache-Control": "no-store" },
+        },
+      );
+    }
 
     return Response.json(
       { error: "NOT_FOUND" },

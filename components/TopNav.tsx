@@ -6,7 +6,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import type { ReadmeData } from '@/types';
 import { calculateAge, getAuthorNickname } from '@/lib/utils';
-import { createClient } from '@/lib/supabase/client';
 import type { BlockConfig } from '@/types/layout';
 import { getBlockTitle } from '@/lib/blocks/registry';
 import { APP_EVENTS, addAppEventListener } from '@/lib/dom-events';
@@ -86,20 +85,31 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
   }, [setAIState]);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) {
-        setUserEmail(user.email);
-      }
-    });
+    const controller = new AbortController();
+    fetch('/api/auth/inon/session', {
+      cache: 'no-store',
+      credentials: 'include',
+      signal: controller.signal,
+    })
+      .then(async (response): Promise<unknown> =>
+        response.ok ? response.json() : null,
+      )
+      .then((payload) => {
+        const session =
+          payload &&
+          typeof payload === 'object' &&
+          'session' in payload &&
+          payload.session &&
+          typeof payload.session === 'object'
+            ? payload.session
+            : null;
+        const email =
+          session && 'email' in session ? session.email : null;
+        setUserEmail(typeof email === 'string' ? email : null);
+      })
+      .catch(() => undefined);
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserEmail(session?.user?.email ?? null);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => controller.abort();
   }, []);
 
   const markNotificationsRead = () => {

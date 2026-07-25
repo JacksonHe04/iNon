@@ -52,8 +52,11 @@ export async function PUT(req: Request) {
   }
 
   const { profile, user } = userContext;
-  const body = await req.json();
-  const layoutConfig: LayoutConfig = body.layoutConfig;
+  const body: unknown = await req.json();
+  const layoutConfig =
+    body && typeof body === 'object'
+      ? (body as { layoutConfig?: LayoutConfig }).layoutConfig
+      : undefined;
 
   if (!layoutConfig || !Array.isArray(layoutConfig.blocks)) {
     return NextResponse.json({ error: 'Invalid layout configuration structure' }, { status: 400 });
@@ -68,7 +71,7 @@ export async function PUT(req: Request) {
         layout_config: layoutConfig,
       })
       .eq('id', profile.id)
-      .eq('user_id', user.id);
+      .eq('inon_user_id', user.id);
 
     if (error) {
       console.error('Failed to update layout_config in profiles:', error.message);

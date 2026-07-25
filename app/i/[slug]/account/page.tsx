@@ -17,7 +17,11 @@ export default async function UserAccountPage({ params }: UserDashboardPageProps
   return (
     <div className="space-y-6 animate-fadeIn">
       <AccountSettingsForm
-        currentUsername={slug}
+        currentUsername={
+          userContext.user.username ??
+          userContext.profile.username ??
+          userContext.profile.slug
+        }
         initialEmail={initialEmail}
         initialSlugs={initialSlugs}
       />

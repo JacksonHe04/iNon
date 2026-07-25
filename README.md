@@ -199,9 +199,10 @@ iNon/
 │   ├── analytics/               # Analytics + IP hashing
 │   └── utils.ts                 # utilities (distance, age, formatting)
 ├── types/                       # TypeScript types (database / layout / index)
-├── scripts/                     # migrations, import, validate, upload, admin seed
+├── scripts/                     # maintenance and version utilities
 ├── supabase/                    # Supabase config + migrations
-├── proxy.ts                     # Next.js Proxy (session refresh + route protection)
+├── sso/                         # central Cloudflare identity service and shared SDK
+├── proxy.ts                     # iNon SSO project-session and route protection
 ├── components.json              # shadcn-style component config
 └── docs/                        # Multi-language READMEs + UI preview images
 ```
@@ -224,9 +225,14 @@ OPENAI_API_KEY=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SECRET_KEY=
-ADMIN_EMAIL=
-ADMIN_DISPLAY_NAME=
 ANALYTICS_IP_SALT=
+INON_SSO_BACKEND_URL=
+INON_SSO_PROXY_SECRET=
+INON_SSO_PUBLIC_ORIGIN=https://inon.space
+NEXT_PUBLIC_INON_TURNSTILE_SITE_KEY=
+INON_SSO_CLIENT_ID=
+INON_SSO_CLIENT_SECRET=
+INON_SSO_SESSION_SECRET=
 ```
 
 ### Install & run
@@ -246,7 +252,6 @@ Local server runs at `http://localhost:3000`.
 ```bash
 pnpm db:push             # Push Supabase migrations
 pnpm db:validate         # Validate DB schema and field integrity
-pnpm db:seed-admin       # Seed initial admin account
 pnpm db:upload-assets    # Upload local assets to Supabase Storage
 pnpm lint                # ESLint
 pnpm build               # Production build
@@ -256,7 +261,8 @@ pnpm build               # Production build
 
 ## Roadmap
 
-- [x] Full migration to Supabase (Postgres + Auth + Storage) with Console CMS
+- [x] Supabase project data and Storage with Console CMS
+- [x] Central iNon SSO identity and project-role authorization on Cloudflare
 - [x] Visual canvas drag layout engine (`BlockCanvasEngine`)
 - [x] 22 Non Blocks driven by a unified registry
 - [x] Multi-theme + dark mode + dynamic canvas background

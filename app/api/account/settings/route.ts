@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { getUserContext } from '@/lib/auth/user';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
-import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
 
 function isValidIdentifier(val: string): boolean {
   if (val === '') return true;
@@ -29,7 +28,7 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     profileId: profile.id,
-    username: profile.username || profile.slug || DEFAULT_PROFILE_SLUG,
+    username: user.username,
     name: profileRow?.name ?? null,
     slugs,
     email: user.email,
@@ -43,20 +42,13 @@ export async function PUT(req: Request) {
   }
 
   const { profile, user } = userContext;
-  const body = await req.json();
-  const rawUsername = typeof body.username === 'string' ? body.username.trim() : '';
-  const rawSlugs = Array.isArray(body.slugs) ? body.slugs : [];
-
-  if (!rawUsername) {
-    return NextResponse.json({ error: '用户名不能为空' }, { status: 400 });
-  }
-
-  if (!/^[a-zA-Z0-9_-]{2,32}$/.test(rawUsername)) {
-    return NextResponse.json(
-      { error: '用户名格式不符合要求（仅支持 2-32 位英文字母、数字、下划线及减号）' },
-      { status: 400 }
-    );
-  }
+  const body: unknown = await req.json();
+  const rawSlugs =
+    body &&
+    typeof body === 'object' &&
+    Array.isArray((body as { slugs?: unknown }).slugs)
+      ? (body as { slugs: unknown[] }).slugs
+      : [];
 
   const cleanedSlugs: string[] = [];
   const seenLower = new Set<string>();
@@ -78,20 +70,6 @@ export async function PUT(req: Request) {
 
   const adminClient = createAdminClient();
 
-  const { data: existingUser } = await adminClient
-    .from('profiles')
-    .select('id')
-    .neq('id', profile.id)
-    .or(`username.ilike.${rawUsername},slug.ilike.${rawUsername}`)
-    .maybeSingle();
-
-  if (existingUser) {
-    return NextResponse.json(
-      { error: `用户名 "${rawUsername}" 已被其他账号占用` },
-      { status: 400 }
-    );
-  }
-
   const { data: otherSlugs } = await adminClient
     .from('profile_slugs')
     .select('profile_id, slug')
@@ -100,12 +78,6 @@ export async function PUT(req: Request) {
   if (otherSlugs) {
     for (const row of otherSlugs) {
       const rowLower = row.slug.toLowerCase();
-      if (rowLower === rawUsername.toLowerCase()) {
-        return NextResponse.json(
-          { error: `用户名 "${rawUsername}" 与其他账号的路径 Slug 冲突` },
-          { status: 400 }
-        );
-      }
       if (seenLower.has(rowLower)) {
         return NextResponse.json(
           { error: `Slug "${row.slug}" 已被其他账号占用` },
@@ -115,17 +87,17 @@ export async function PUT(req: Request) {
     }
   }
 
-  const primarySlug = cleanedSlugs.find((s) => s.length > 0) || rawUsername;
+  const primarySlug =
+    cleanedSlugs.find((s) => s.length > 0) || profile.slug;
   const previousUsername = profile.username || profile.slug;
 
   const { error: updateProfErr } = await adminClient
     .from('profiles')
     .update({
-      username: rawUsername,
       slug: primarySlug,
     })
     .eq('id', profile.id)
-    .eq('user_id', user.id);
+    .eq('inon_user_id', user.id);
 
   if (updateProfErr) {
     return NextResponse.json({ error: updateProfErr.message }, { status: 500 });
@@ -142,8 +114,8 @@ export async function PUT(req: Request) {
 
   revalidatePath('/');
   revalidatePath('/i');
-  revalidatePath(`/${rawUsername}`);
-  revalidatePath(`/i/${rawUsername}`);
+  revalidatePath(`/${primarySlug}`);
+  revalidatePath(`/i/${primarySlug}`);
   if (previousUsername) {
     revalidatePath(`/${previousUsername}`);
     revalidatePath(`/i/${previousUsername}`);
@@ -157,7 +129,7 @@ export async function PUT(req: Request) {
 
   return NextResponse.json({
     ok: true,
-    username: rawUsername,
+    username: user.username,
     slugs: cleanedSlugs,
   });
 }

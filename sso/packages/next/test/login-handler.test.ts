@@ -34,4 +34,23 @@ describe("OAuth login handler", () => {
     );
     expect(response.headers.get("set-cookie")).not.toContain("Secure");
   });
+
+  it("exposes only the public project session shape", async () => {
+    const client = createInonSso({
+      project: "inon",
+      clientId: "inon-client",
+      clientSecret: "inon-secret",
+      appOrigin: "http://localhost:3000",
+      sessionSecret: "s".repeat(32),
+      secureCookies: false,
+    });
+
+    const response = await client.handler(
+      new Request("http://localhost:3000/api/auth/inon/session"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ session: null });
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
 });

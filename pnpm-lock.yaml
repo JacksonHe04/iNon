@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@inon/sso-next':
+        specifier: file:sso/packages/next
+        version: file:sso/packages/next
       '@react-three/drei':
         specifier: ^10.7.7
         version: 10.7.7(@react-three/fiber@9.6.1(@types/react@19.2.14)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(three@0.181.2))(@types/react@19.2.14)(@types/three@0.181.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(three@0.181.2)
@@ -380,6 +383,10 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
+
+  '@inon/sso-next@file:sso/packages/next':
+    resolution: {directory: sso/packages/next, type: directory}
+    engines: {node: '>=20.19.0'}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1629,6 +1636,9 @@ packages:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
+  jose@6.2.4:
+    resolution: {integrity: sha512-N8acGzVsQy6M/fjFcxtysNc4Q379TcM5dM/qKkNtsHFji88yANnXTr7BLeP75iPnFwBfQzM/jg2BZ9+HZrHCZA==}
+
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -2675,6 +2685,10 @@ snapshots:
 
   '@img/sharp-win32-x64@0.34.5':
     optional: true
+
+  '@inon/sso-next@file:sso/packages/next':
+    dependencies:
+      jose: 6.2.4
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -4032,6 +4046,8 @@ snapshots:
       - '@types/react'
 
   jiti@2.7.0: {}
+
+  jose@6.2.4: {}
 
   js-tokens@4.0.0: {}
 

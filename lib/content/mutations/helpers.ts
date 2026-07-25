@@ -19,7 +19,7 @@ export async function getProfile(adminClient: SupabaseAdminClient, scope: Mutati
     const { data, error } = await adminClient
       .from('profiles')
       .select('id, slug, username')
-      .eq('user_id', scope.userId)
+      .eq('inon_user_id', scope.userId)
       .maybeSingle();
 
     if (error) throw error;
@@ -37,7 +37,7 @@ export async function getProfile(adminClient: SupabaseAdminClient, scope: Mutati
   const { data: userProfile } = await adminClient
     .from('profiles')
     .select('id, slug, username')
-    .eq('user_id', context.user.id)
+    .eq('inon_user_id', context.user.id)
     .maybeSingle();
 
   if (userProfile) {

@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import Modal from '@/components/Modal';
-import AuthForm from '@/components/auth/AuthForm';
-import { createClient } from '@/lib/supabase/client';
-import { LogOut, Loader2 } from 'lucide-react';
+import { LogIn, LogOut, Loader2 } from 'lucide-react';
 
 interface AuthModalProps {
   open: boolean;
@@ -14,12 +12,21 @@ interface AuthModalProps {
 
 export default function AuthModal({ open, onClose, userEmail }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
 
   const handleSignOut = async () => {
     setLoading(true);
-    await supabase.auth.signOut();
-    window.location.reload();
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(
+      `/api/auth/inon/logout?returnTo=${encodeURIComponent(returnTo)}`,
+    );
+  };
+
+  const handleSignIn = () => {
+    setLoading(true);
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(
+      `/api/auth/inon/login?returnTo=${encodeURIComponent(returnTo)}`,
+    );
   };
 
   return (
@@ -44,7 +51,28 @@ export default function AuthModal({ open, onClose, userEmail }: AuthModalProps) 
           </button>
         </div>
       ) : (
-        <AuthForm onSuccess={() => setTimeout(() => window.location.reload(), 800)} />
+        <div className="space-y-4 text-center">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              使用 iNon 账号
+            </h3>
+            <p className="mt-2 text-sm text-gray-500">
+              一次登录即可进入 iNon、Leaf、PINE、SAYLESS 与 Treez。
+            </p>
+          </div>
+          <button
+            onClick={handleSignIn}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 hover:bg-teal-500/20 transition text-sm font-semibold"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <LogIn className="w-4 h-4" />
+            )}
+            <span>前往 iNon SSO</span>
+          </button>
+        </div>
       )}
     </Modal>
   );

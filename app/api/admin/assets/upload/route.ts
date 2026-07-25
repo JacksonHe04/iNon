@@ -23,12 +23,11 @@ export async function POST(req: Request) {
 
     const adminClient = createAdminClient();
 
-    // 查找审计用 profile_id：当前管理员本人。null 表示 admin_users 行未绑定到
-    // 某个 profile（极少数情况），不阻塞上传；profile_id 仅为审计字段。
+    // 查找审计用 profile_id：身份来自中央 iNon SSO，Supabase 仅保存项目档案。
     const { data: adminProfile } = await adminClient
       .from('profiles')
       .select('id')
-      .eq('user_id', admin.user.id)
+      .eq('inon_user_id', admin.user.id)
       .maybeSingle();
     const uploaderProfileId = adminProfile?.id ?? null;
 

@@ -1,6 +1,6 @@
 {
   "name": "iNon",
-  "version": "0.1.116",
+  "version": "0.1.117",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -9,7 +9,6 @@
     "lint": "next lint",
     "db:push": "supabase db push",
     "db:validate": "node --env-file=.env.local scripts/validate-readme-db.mjs",
-    "db:seed-admin": "node --env-file=.env.local scripts/seed-admin-user.mjs",
     "db:upload-assets": "node --env-file=.env.local scripts/upload-assets.mjs"
   },
   "dependencies": {

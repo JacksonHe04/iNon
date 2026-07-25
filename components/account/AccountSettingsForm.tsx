@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import GlassCard from '@/components/GlassCard';
-import PasswordResetForm from '@/components/auth/PasswordResetForm';
-import { User, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Check, AlertCircle, KeyRound, Loader2 } from 'lucide-react';
 import SlugSettingsManager from './SlugSettingsManager';
 
 interface AccountSettingsFormProps {
@@ -41,10 +41,19 @@ export default function AccountSettingsForm({
         if (!res.ok) {
           throw new Error('无法加载账号信息');
         }
-        const data = await res.json();
-        if (data.username) setUsername(data.username);
-        if (data.slugs) setSlugs(data.slugs);
-        if (data.email) setEmail(data.email);
+        const payload: unknown = await res.json();
+        const data =
+          payload && typeof payload === 'object'
+            ? (payload as Record<string, unknown>)
+            : {};
+        if (typeof data.username === 'string') setUsername(data.username);
+        if (
+          Array.isArray(data.slugs) &&
+          data.slugs.every((slug) => typeof slug === 'string')
+        ) {
+          setSlugs(data.slugs);
+        }
+        if (typeof data.email === 'string') setEmail(data.email);
       } catch (err: any) {
         setErrorMessage(err.message || '加载账号设置失败');
       } finally {
@@ -83,15 +92,22 @@ export default function AccountSettingsForm({
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username,
           slugs,
         }),
       });
 
-      const data = await res.json();
+      const payload: unknown = await res.json();
+      const data =
+        payload && typeof payload === 'object'
+          ? (payload as Record<string, unknown>)
+          : {};
 
       if (!res.ok) {
-        throw new Error(data.error || '保存账号配置失败');
+        throw new Error(
+          typeof data.error === 'string'
+            ? data.error
+            : '保存账号配置失败',
+        );
       }
 
       setSaveStatus('saved');
@@ -102,12 +118,7 @@ export default function AccountSettingsForm({
         setSuccessMessage('');
       }, 3000);
 
-      // If username changed, redirect to new dashboard URL
-      if (username && username !== currentUsername) {
-        router.push(`/i/${username}/home`);
-      } else {
-        router.refresh();
-      }
+      router.refresh();
     } catch (err: any) {
       setSaveStatus('error');
       setErrorMessage(err.message || '网络或系统异常');
@@ -153,15 +164,14 @@ export default function AccountSettingsForm({
               </span>
               <input
                 type="text"
-                required
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="例如: JacksonHe04"
-                className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
+                readOnly
+                placeholder="尚未设置"
+                className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-800/70 text-sm font-mono"
               />
             </div>
             <p className="text-[11px] text-gray-500 dark:text-gray-400">
-              用户名在系统内全局唯一。可通过 <code className="text-teal-600 dark:text-teal-400">/{username || 'username'}</code> 访问公开页，通过 <code className="text-teal-600 dark:text-teal-400">/i/{username || 'username'}</code> 进入控制台。
+              这是五个项目共用的全局用户名，只能在 <Link className="text-teal-600 dark:text-teal-400" href="/sso/account">iNon 账号安全</Link> 中修改。
             </p>
           </div>
 
@@ -214,8 +224,23 @@ export default function AccountSettingsForm({
         </form>
       </GlassCard>
 
-      {/* Password Reset Section */}
-      <PasswordResetForm />
+      <GlassCard className="p-6 space-y-3 border-white/20">
+        <div className="flex items-center gap-2">
+          <KeyRound className="w-5 h-5 text-teal-500" />
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            iNon 账号安全
+          </h2>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          邮箱、全局用户名、密码、GitHub 绑定和登录设备统一在中央账号页管理。
+        </p>
+        <Link
+          href="/sso/account"
+          className="inline-flex items-center rounded-xl border border-teal-500/20 bg-teal-500/10 px-4 py-2 text-sm font-semibold text-teal-700 transition hover:bg-teal-500/20 dark:text-teal-300"
+        >
+          打开 iNon 账号安全
+        </Link>
+      </GlassCard>
     </div>
   );
 }

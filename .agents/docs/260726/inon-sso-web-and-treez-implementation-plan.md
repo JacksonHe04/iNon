@@ -63,6 +63,19 @@ access token. The packed SDK contains compiled JavaScript and declarations
 and has only one public runtime dependency (`jose`); it does not leak an
 internal `workspace:*` dependency into the five independently deployed apps.
 
+### Stage 3b: iNon relying-party cutover
+
+- [x] Install the shared SDK in the iNon Next.js application.
+- [x] Add login, callback, refresh, logout, and public-session routes.
+- [x] Replace Supabase Auth page, API, navigation, and admin guards.
+- [x] Resolve project-admin access from current central D1 roles.
+- [x] Add a verified-email legacy profile link without accepting old
+  passwords or sessions.
+- [x] Apply the additive opaque-subject profile migration to production
+  Supabase.
+- [ ] Install the generated iNon Client credentials in Vercel and verify the
+  production callback.
+
 ### Stage 4: Treez first cutover
 
 - [x] Inspect Treez's current authentication, users, roles, and environment.
