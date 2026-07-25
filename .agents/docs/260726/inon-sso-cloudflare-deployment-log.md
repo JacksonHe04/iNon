@@ -91,9 +91,25 @@ same integrity hash.
 | iNon OAuth login start | 303 to the canonical authorize endpoint |
 | Direct Worker stateful request | 421, canonical-origin policy enforced |
 
+## Main-branch promotion
+
+The completed SSO branch was pushed and fast-forwarded into `main`. The first
+Git-backed production build exposed that the iNon application still consumed
+the SDK through `file:sso/packages/next`. That path worked in the development
+worktree only because publishing had generated an ignored local `dist/`
+directory; a clean Vercel checkout correctly had no package entrypoint.
+
+The application dependency and lockfile now use the published
+`@inon-ai/inon-sso@0.1.0` tarball and its verified registry integrity, matching
+Leaf and SAYLESS. A clean dependency installation, direct SDK import, and
+Next.js production build succeeded locally. Git-backed deployment
+`dpl_G4HhaG4YRamhoJa6PwgGmbcYZbJy` then reached `READY` and acquired the
+`inon.space` alias. The canonical health endpoint, login page, and iNon project
+OAuth start were verified again against that deployment.
+
 ## Remaining deployment work
 
-- Integrate and deploy Leaf, PINE, SAYLESS, and Treez.
+- Integrate and deploy PINE and Treez.
 - Complete the first verified owner login and one-time global superadmin
   bootstrap.
 - Exercise email OTP, password setup/login, GitHub login, refresh, logout, and
