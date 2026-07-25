@@ -19,6 +19,7 @@ export default defineConfig(async () => {
           bindings: {
             ENVIRONMENT: "development",
             CANONICAL_ORIGIN: "https://inon.space",
+            INTERNAL_API_TOKEN: "test-internal-token",
             TEST_MIGRATIONS: migrations,
           },
         },

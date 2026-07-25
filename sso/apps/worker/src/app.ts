@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { AppBindings } from "./env";
 import { canonicalOriginMiddleware } from "./http/canonical-origin";
 import { requestIdMiddleware } from "./http/request-id";
+import { createProjectRoutes } from "./projects/project-routes";
 
 export function createApp() {
   const app = new Hono<AppBindings>().basePath("/api/sso");
@@ -16,6 +17,7 @@ export function createApp() {
       environment: context.env.ENVIRONMENT,
     }),
   );
+  app.route("/internal", createProjectRoutes());
 
   return app;
 }
