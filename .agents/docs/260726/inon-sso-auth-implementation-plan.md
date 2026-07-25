@@ -185,16 +185,16 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - Test: `sso/apps/worker/test/auth/github.test.ts`
 - Test: `sso/apps/worker/test/auth/github-callback.test.ts`
 
-- [ ] Mock GitHub `/user` and `/user/emails` with Workers fetch interception.
-- [ ] Test verified-primary auto-registration and verified-email auto-link.
-- [ ] Test that an unverified or missing email cannot create or implicitly merge an account.
-- [ ] Test explicit linking from an existing verified iNon session when GitHub has no verified email.
+- [x] Mock GitHub `/user` and `/user/emails` with Workers fetch interception.
+- [x] Test verified-primary auto-registration and verified-email auto-link.
+- [x] Test that an unverified or missing email cannot create or implicitly merge an account.
+- [x] Test explicit linking from an existing verified iNon session when GitHub has no verified email.
 - [ ] Test collision, provider-account uniqueness, unlink safety, and concurrent callback handling.
-- [ ] Override GitHub user-info resolution to accept only the verified primary email for implicit flows.
-- [ ] Strip GitHub access, refresh, and ID tokens before account persistence.
-- [ ] Configure the provider redirect URI as the exact user-configured callback.
-- [ ] Add a public callback adapter that internally rewrites to Better Auth’s GitHub callback handler while preserving query parameters and canonical external URL semantics.
-- [ ] Commit as `feat(sso): add secure github identity linking`.
+- [x] Override GitHub user-info resolution to accept only the verified primary email for implicit flows.
+- [x] Strip GitHub access, refresh, and ID tokens before account persistence.
+- [x] Configure the provider redirect URI as the exact user-configured callback.
+- [x] Add a public callback adapter that internally rewrites to Better Auth’s GitHub callback handler while preserving query parameters and canonical external URL semantics.
+- [x] Commit as `feat(sso): add secure github identity linking`.
 
 ## Task 7: Mount the central auth API
 
@@ -207,10 +207,10 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - Test: `sso/apps/worker/test/http/canonical-auth-origin.test.ts`
 
 - [ ] Test all Better Auth methods under `/api/sso/auth/*`.
-- [ ] Test that noncanonical stateful requests return 421 before authentication state is mutated.
-- [ ] Test secure Cookie attributes, canonical callback construction, CORS denial, and error-envelope boundaries.
-- [ ] Preserve raw Better Auth protocol responses where OAuth/OIDC requires standard payloads.
-- [ ] Keep internal diagnostic routes protected by constant-time token comparison.
+- [x] Test that noncanonical stateful requests return 421 before authentication state is mutated.
+- [x] Test secure Cookie attributes and canonical GitHub callback construction.
+- [x] Preserve raw Better Auth protocol responses where OAuth/OIDC requires standard payloads.
+- [x] Keep internal diagnostic routes protected by constant-time token comparison.
 - [ ] Commit as `feat(sso): expose central auth api`.
 
 ## Task 8: Add the first-party OAuth/OIDC provider

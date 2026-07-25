@@ -19,7 +19,16 @@ export default defineConfig(async () => {
           bindings: {
             ENVIRONMENT: "development",
             CANONICAL_ORIGIN: "https://inon.space",
+            BETTER_AUTH_SECRET:
+              "test-only-better-auth-secret-at-least-thirty-two-characters",
+            GITHUB_CLIENT_ID: "test-github-client-id",
+            GITHUB_CLIENT_SECRET: "test-github-client-secret",
             INTERNAL_API_TOKEN: "test-internal-token",
+            RESEND_API_KEY: "test-resend-api-key",
+            RESEND_FROM: "iNon <account@inon.space>",
+            TURNSTILE_HOSTNAMES: "inon.space",
+            TURNSTILE_SECRET_KEY: "test-turnstile-secret-key",
+            TURNSTILE_SITE_KEY: "test-turnstile-site-key",
             TEST_MIGRATIONS: migrations,
           },
         },

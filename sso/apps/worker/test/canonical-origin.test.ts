@@ -11,3 +11,14 @@ it("does not accept a stateful request on the internal origin", async () => {
     error: { code: "INVALID_REQUEST" },
   });
 });
+
+it("does not accept a GitHub callback on a noncanonical origin", async () => {
+  const response = await SELF.fetch(
+    "https://inon-sso.internal/api/sso/github/callback?code=code&state=state",
+  );
+
+  expect(response.status).toBe(421);
+  expect(await response.json()).toMatchObject({
+    error: { code: "INVALID_REQUEST" },
+  });
+});

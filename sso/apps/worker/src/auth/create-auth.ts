@@ -30,6 +30,7 @@ export interface VerificationOTPMessage {
 
 export interface AuthDependencies {
   sendVerificationOTP(message: VerificationOTPMessage): Promise<void>;
+  runInBackground?(promise: Promise<unknown>): void;
 }
 
 export function createAuth(env: Env, dependencies: AuthDependencies) {
@@ -40,6 +41,15 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
     secret: env.BETTER_AUTH_SECRET,
     database: env.DB,
     trustedOrigins: [CANONICAL_ORIGIN],
+    ...(dependencies.runInBackground
+      ? {
+          advanced: {
+            backgroundTasks: {
+              handler: dependencies.runInBackground,
+            },
+          },
+        }
+      : {}),
     disabledPaths: [
       "/sign-up/email",
       "/is-username-available",
