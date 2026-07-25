@@ -35,6 +35,11 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
     secret: env.BETTER_AUTH_SECRET,
     database: env.DB,
     trustedOrigins: [CANONICAL_ORIGIN],
+    disabledPaths: [
+      "/sign-up/email",
+      "/is-username-available",
+      "/update-user",
+    ],
     hooks: {
       before: createAuthMiddleware(async (context) => {
         const body = context.body as Record<string, unknown> | undefined;

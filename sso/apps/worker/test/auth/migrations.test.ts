@@ -16,6 +16,7 @@ describe("authentication migration invariants", () => {
     expect(before.results.map(({ name }) => name)).toEqual([
       "0001_authorization_foundation.sql",
       "0002_better_auth.sql",
+      "0003_username_policy.sql",
     ]);
     expect(after.results).toEqual(before.results);
   });

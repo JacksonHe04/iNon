@@ -2,18 +2,7 @@ import { env } from "cloudflare:test";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { VerificationOTPMessage } from "../../src/auth/create-auth";
 import { createAuth } from "../../src/auth/create-auth";
-import { AUTH_BASE_URL, CANONICAL_ORIGIN } from "../../src/auth/constants";
-
-function authRequest(path: string, body: Record<string, unknown>) {
-  return new Request(`${AUTH_BASE_URL}${path}`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      origin: CANONICAL_ORIGIN,
-    },
-    body: JSON.stringify(body),
-  });
-}
+import { authRequest } from "./auth-test-helpers";
 
 describe("email OTP authentication", () => {
   let deliveries: VerificationOTPMessage[];
@@ -257,7 +246,7 @@ describe("email OTP authentication", () => {
       }),
     );
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
     expect(
       await env.DB.prepare("SELECT id FROM user WHERE email = ?")
         .bind("forbidden-password-signup@inon.space")

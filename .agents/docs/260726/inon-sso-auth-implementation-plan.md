@@ -138,22 +138,22 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 **Files:**
 
 - Create: `sso/apps/worker/src/auth/account-service.ts`
-- Create: `sso/apps/worker/src/auth/account-routes.ts`
+- Create in Task 7: `sso/apps/worker/src/auth/account-routes.ts`
 - Modify: `sso/apps/worker/src/auth/create-auth.ts`
 - Modify: `sso/packages/contracts/src/username.ts`
 - Test: `sso/apps/worker/test/auth/account-service.test.ts`
 - Test: `sso/apps/worker/test/auth/password-login.test.ts`
 
-- [ ] Write tests for the shared Han/English/digit/underscore/hyphen username rule and global uniqueness.
-- [ ] Write tests proving an email-only user can continue without username or password.
-- [ ] Write tests proving only an authenticated verified user can set a password.
-- [ ] Write tests for email/password and username/password login.
-- [ ] Write tests proving username changes are rejected until 30 rolling days have elapsed, including concurrent updates.
-- [ ] Configure the username plugin so normalized and displayed username are identical.
-- [ ] Disable public username enumeration; expose only the authenticated account update workflow.
-- [ ] Update username and `usernameChangedAt` atomically in D1.
-- [ ] Keep self-service account deletion disabled.
-- [ ] Commit as `feat(sso): add optional account credentials`.
+- [x] Write tests for the shared Han/English/digit/underscore/hyphen username rule and global uniqueness.
+- [x] Write tests proving an email-only user can continue without username or password.
+- [x] Write tests proving only an authenticated verified user can set a password.
+- [x] Write tests for email/password and username/password login.
+- [x] Write tests proving username changes are rejected until 30 rolling days have elapsed, including concurrent updates.
+- [x] Configure the username plugin so normalized and displayed username are identical.
+- [x] Disable public username enumeration; expose only the authenticated account update workflow when Task 7 mounts account routes.
+- [x] Update username and `usernameChangedAt` atomically in D1.
+- [x] Keep self-service account deletion disabled.
+- [x] Commit as `feat(sso): add optional account credentials`.
 
 ## Task 5: Enforce 30-day sliding and 90-day absolute sessions
 
