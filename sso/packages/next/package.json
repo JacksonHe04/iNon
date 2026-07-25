@@ -21,7 +21,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@inon/sso-contracts": "workspace:*",
     "jose": "6.2.4"
   },
   "devDependencies": {

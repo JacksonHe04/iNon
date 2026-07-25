@@ -1,4 +1,3 @@
-import type { ProjectKey, ProjectRole } from "@inon/sso-contracts";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import {
   DEFAULT_BASE_PATH,
@@ -28,6 +27,8 @@ import type {
   InonProjectSession,
   InonSsoClient,
   InonSsoConfig,
+  ProjectKey,
+  ProjectRole,
 } from "./types";
 
 const TRANSACTION_TOKEN_TYPE = "inon-oauth-transaction+jwt";

@@ -1,8 +1,8 @@
-import {
-  INON_PROJECT_CLAIM,
-  INON_PROJECT_ROLE_CLAIM,
-} from "@inon/sso-contracts";
 import { describe, expect, it } from "vitest";
+import {
+  PROJECT_CLAIM,
+  PROJECT_ROLE_CLAIM,
+} from "../src/constants";
 import { identityFromClaims } from "../src/identity";
 
 const validClaims = {
@@ -10,8 +10,8 @@ const validClaims = {
   email: "member@example.com",
   email_verified: true,
   preferred_username: "成员-one",
-  [INON_PROJECT_CLAIM]: "treez",
-  [INON_PROJECT_ROLE_CLAIM]: "admin",
+  [PROJECT_CLAIM]: "treez",
+  [PROJECT_ROLE_CLAIM]: "admin",
 };
 
 describe("project identity validation", () => {

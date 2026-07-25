@@ -59,7 +59,9 @@ successful refresh renews only the 30-day browser-cookie window. The package
 never returns OAuth tokens to application code. `requireProjectAdmin` calls
 central `userinfo` on every authorization decision, and `userinfo` resolves
 the current D1 membership instead of copying the role embedded in an older
-access token.
+access token. The packed SDK contains compiled JavaScript and declarations
+and has only one public runtime dependency (`jose`); it does not leak an
+internal `workspace:*` dependency into the five independently deployed apps.
 
 ### Stage 4: Treez first cutover
 

@@ -1,12 +1,41 @@
-import {
-  projectKeySchema,
-  projectRoleSchema,
-  type ProjectKey,
-} from "@inon/sso-contracts";
 import type { JWTPayload } from "jose";
 import { PROJECT_CLAIM, PROJECT_ROLE_CLAIM } from "./constants";
 import { InonSsoError } from "./errors";
-import type { InonIdentity } from "./types";
+import type {
+  InonIdentity,
+  ProjectKey,
+  ProjectRole,
+} from "./types";
+
+const projectKeys = new Set<ProjectKey>([
+  "inon",
+  "leaf",
+  "pine",
+  "sayless",
+  "treez",
+]);
+
+function parseProjectKey(value: unknown): ProjectKey {
+  if (typeof value !== "string" || !projectKeys.has(value as ProjectKey)) {
+    throw new InonSsoError(
+      "OAUTH_ERROR",
+      "The iNon identity contains an invalid project.",
+    );
+  }
+
+  return value as ProjectKey;
+}
+
+function parseProjectRole(value: unknown): ProjectRole {
+  if (value !== "member" && value !== "admin") {
+    throw new InonSsoError(
+      "OAUTH_ERROR",
+      "The iNon identity contains an invalid project role.",
+    );
+  }
+
+  return value;
+}
 
 function requiredString(
   value: unknown,
@@ -26,8 +55,8 @@ export function identityFromClaims(
   claims: JWTPayload | Record<string, unknown>,
   expectedProject: ProjectKey,
 ): InonIdentity {
-  const project = projectKeySchema.parse(claims[PROJECT_CLAIM]);
-  const projectRole = projectRoleSchema.parse(claims[PROJECT_ROLE_CLAIM]);
+  const project = parseProjectKey(claims[PROJECT_CLAIM]);
+  const projectRole = parseProjectRole(claims[PROJECT_ROLE_CLAIM]);
 
   if (project !== expectedProject) {
     throw new InonSsoError(

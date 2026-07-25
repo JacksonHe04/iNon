@@ -1,4 +1,11 @@
-import type { ProjectKey, ProjectRole } from "@inon/sso-contracts";
+export type ProjectKey =
+  | "inon"
+  | "leaf"
+  | "pine"
+  | "sayless"
+  | "treez";
+
+export type ProjectRole = "member" | "admin";
 
 export interface InonSsoConfig {
   project: ProjectKey;

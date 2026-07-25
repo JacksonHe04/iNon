@@ -68,9 +68,6 @@ importers:
 
   packages/next:
     dependencies:
-      '@inon/sso-contracts':
-        specifier: workspace:*
-        version: link:../contracts
       jose:
         specifier: 6.2.4
         version: 6.2.4
