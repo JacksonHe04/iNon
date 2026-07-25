@@ -1,9 +1,9 @@
 import { normalizeUsername, validateUsername } from "@inon/sso-contracts";
-import { oauthProvider } from "@better-auth/oauth-provider";
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { emailOTP, jwt, username } from "better-auth/plugins";
 import type { Env } from "../env";
+import { createFirstPartyOAuthProvider } from "../oauth/provider";
 import {
   AUTH_BASE_PATH,
   AUTH_BASE_URL,
@@ -185,21 +185,7 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
         },
         disableSettingJwtHeader: true,
       }),
-      oauthProvider({
-        loginPage: "/sso/login",
-        consentPage: "/sso/consent",
-        scopes: ["openid", "profile", "email", "offline_access"],
-        grantTypes: ["authorization_code", "refresh_token"],
-        validAudiences: [AUTH_BASE_URL],
-        allowDynamicClientRegistration: false,
-        allowUnauthenticatedClientRegistration: false,
-        storeClientSecret: "hashed",
-        storeTokens: "hashed",
-        silenceWarnings: {
-          oauthAuthServerConfig: true,
-          openidConfig: true,
-        },
-      }),
+      createFirstPartyOAuthProvider(env.DB),
     ],
   });
 }

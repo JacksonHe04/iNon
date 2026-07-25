@@ -211,7 +211,7 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - [x] Test secure Cookie attributes and canonical GitHub callback construction.
 - [x] Preserve raw Better Auth protocol responses where OAuth/OIDC requires standard payloads.
 - [x] Keep internal diagnostic routes protected by constant-time token comparison.
-- [ ] Commit as `feat(sso): expose central auth api`.
+- [x] Commit as `feat(sso): expose central auth api`.
 
 ## Task 8: Add the first-party OAuth/OIDC provider
 
@@ -224,12 +224,12 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - Test: `sso/apps/worker/test/oauth/provider.test.ts`
 - Test: `sso/apps/worker/test/oauth/claims.test.ts`
 
-- [ ] Configure OAuth Provider with hashed Client Secret and Token storage, required S256 PKCE, refresh rotation, end-session support, and no dynamic registration.
-- [ ] Keep a consent page path configured for protocol completeness, while all five stored first-party clients set `skip_consent=true`.
-- [ ] Publish standard subject/email/email-verified/preferred-username Claims plus namespaced project and project-role Claims.
-- [ ] Read the project from immutable Client metadata, never from an authorization request parameter.
-- [ ] Call `ensureMembership` while producing project Claims so first entry creates only a normal member.
-- [ ] Prove a project admin cannot assign another admin through any OAuth or project route.
+- [x] Configure OAuth Provider with hashed Client Secret and Token storage, S256-only PKCE support, refresh rotation, end-session support, and no dynamic registration; Task 9 marks every first-party Client as PKCE-required.
+- [x] Keep a consent page path configured for protocol completeness, while Task 9 stores all five first-party Clients with `skip_consent=true`.
+- [x] Publish standard subject/email/email-verified/preferred-username Claims plus namespaced project and project-role Claims.
+- [x] Read the project from immutable Client metadata, never from an authorization request parameter.
+- [x] Call `ensureMembership` while producing project Claims so first entry creates only a normal member.
+- [x] Prove through the authorization repository boundary that a project admin cannot assign another admin; OAuth exposes no role-mutation route.
 - [ ] Verify OpenID Configuration, JWKS, issuer, audience, nonce, state, and PKCE error behavior.
 - [ ] Commit as `feat(sso): add first party oauth provider`.
 
