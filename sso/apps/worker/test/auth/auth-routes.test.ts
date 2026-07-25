@@ -93,6 +93,38 @@ describe("central authentication routes", () => {
     );
     expect(passwordResponse.status).toBe(200);
 
+    const profileResponse = await app.request(
+      "https://inon.space/api/sso/account/profile",
+      {
+        headers: { cookie },
+      },
+      env,
+    );
+    expect(profileResponse.status).toBe(200);
+    expect(await profileResponse.json()).toMatchObject({
+      user: {
+        email,
+        username: "中央-user",
+      },
+      hasPassword: true,
+      githubLinked: false,
+    });
+
+    const sessionsResponse = await app.request(
+      "https://inon.space/api/sso/account/sessions",
+      {
+        headers: { cookie },
+      },
+      env,
+    );
+    expect(sessionsResponse.status).toBe(200);
+    const sessions = await sessionsResponse.json<{
+      sessions: Array<Record<string, unknown>>;
+    }>();
+    expect(sessions.sessions).toHaveLength(1);
+    expect(sessions.sessions[0]).not.toHaveProperty("token");
+    expect(sessions.sessions[0]).toMatchObject({ current: true });
+
     const usernameSignIn = await app.request(
       "https://inon.space/api/sso/auth/sign-in/username",
       {

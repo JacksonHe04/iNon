@@ -78,6 +78,15 @@ async function classifyProtectedAuthRequest(
   ) {
     return { action: "github_start" };
   }
+  if (
+    pathname.endsWith("/link-social") &&
+    body.provider === "github"
+  ) {
+    return { action: "github_start" };
+  }
+  if (pathname.endsWith("/unlink-account")) {
+    return { action: "account_mutation" };
+  }
 
   return null;
 }

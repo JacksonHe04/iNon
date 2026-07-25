@@ -21,6 +21,7 @@ const usernameBodySchema = z.object({
 });
 
 const passwordBodySchema = z.object({
+  currentPassword: z.string().min(8).max(128).optional(),
   password: z.string().min(8).max(128),
 });
 
@@ -73,6 +74,34 @@ export function createAccountRoutes(
   ) => Promise<void>,
 ) {
   const routes = new Hono<AppBindings>();
+
+  routes.get("/profile", async (context) => {
+    const auth = createCentralAuth(context);
+    const authenticated = await requireVerifiedSession(context, auth);
+    if ("response" in authenticated) {
+      return authenticated.response;
+    }
+
+    const accounts = await context.env.DB.prepare(
+      `SELECT "providerId"
+       FROM "account"
+       WHERE "userId" = ?`,
+    )
+      .bind(authenticated.session.user.id)
+      .all<{ providerId: string }>();
+    const providers = new Set(
+      accounts.results.map(({ providerId }) => providerId),
+    );
+    return context.json({
+      user: {
+        id: authenticated.session.user.id,
+        email: authenticated.session.user.email,
+        username: authenticated.session.user.username ?? null,
+      },
+      hasPassword: providers.has("credential"),
+      githubLinked: providers.has("github"),
+    });
+  });
 
   routes.post("/username", async (context) => {
     const auth = createCentralAuth(context);
@@ -178,13 +207,141 @@ export function createAccountRoutes(
       );
     }
 
-    await auth.api.setPassword({
-      headers: context.req.raw.headers,
-      body: { newPassword: parsed.data.password },
-    });
+    const credentialAccount = await context.env.DB.prepare(
+      `SELECT "id"
+       FROM "account"
+       WHERE "userId" = ? AND "providerId" = 'credential'
+       LIMIT 1`,
+    )
+      .bind(authenticated.session.user.id)
+      .first<{ id: string }>();
+    if (credentialAccount) {
+      if (!parsed.data.currentPassword) {
+        return context.json(
+          createApiError(
+            "INVALID_REQUEST",
+            "The current password is required.",
+            context.get("requestId"),
+          ),
+          400,
+        );
+      }
+      await auth.api.changePassword({
+        headers: context.req.raw.headers,
+        body: {
+          currentPassword: parsed.data.currentPassword,
+          newPassword: parsed.data.password,
+          revokeOtherSessions: true,
+        },
+      });
+    } else {
+      await auth.api.setPassword({
+        headers: context.req.raw.headers,
+        body: { newPassword: parsed.data.password },
+      });
+    }
     await recordSecurityEvent(context, {
       event: "password_updated",
       userId: authenticated.session.user.id,
+    });
+    return context.json({
+      success: true,
+      mode: credentialAccount ? "changed" : "set",
+    });
+  });
+
+  routes.get("/sessions", async (context) => {
+    const auth = createCentralAuth(context);
+    const authenticated = await requireVerifiedSession(context, auth);
+    if ("response" in authenticated) {
+      return authenticated.response;
+    }
+
+    const sessions = await context.env.DB.prepare(
+      `SELECT
+        "id",
+        "createdAt",
+        "updatedAt",
+        "expiresAt",
+        "ipAddress",
+        "userAgent"
+       FROM "session"
+       WHERE "userId" = ?
+         AND "expiresAt" > ?
+       ORDER BY "updatedAt" DESC`,
+    )
+      .bind(
+        authenticated.session.user.id,
+        new Date().toISOString(),
+      )
+      .all<{
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        expiresAt: string;
+        ipAddress: string | null;
+        userAgent: string | null;
+      }>();
+
+    return context.json({
+      sessions: sessions.results.map((session) => ({
+        ...session,
+        current: session.id === authenticated.session.session.id,
+      })),
+    });
+  });
+
+  routes.post("/sessions/:sessionId/revoke", async (context) => {
+    const auth = createCentralAuth(context);
+    const authenticated = await requireVerifiedSession(context, auth);
+    if ("response" in authenticated) {
+      return authenticated.response;
+    }
+    const securityResponse = await enforceAuthEntryPoint(
+      context,
+      createSecurityGuard(context),
+      {
+        action: "account_mutation",
+        userId: authenticated.session.user.id,
+      },
+    );
+    if (securityResponse) {
+      return securityResponse;
+    }
+
+    const sessionId = context.req.param("sessionId");
+    if (sessionId === authenticated.session.session.id) {
+      return context.json(
+        createApiError(
+          "INVALID_REQUEST",
+          "Use sign out to end the current session.",
+          context.get("requestId"),
+        ),
+        400,
+      );
+    }
+    const target = await context.env.DB.prepare(
+      `SELECT "token"
+       FROM "session"
+       WHERE "id" = ? AND "userId" = ?
+       LIMIT 1`,
+    )
+      .bind(sessionId, authenticated.session.user.id)
+      .first<{ token: string }>();
+    if (!target) {
+      return context.json(
+        createApiError(
+          "NOT_FOUND",
+          "The session was not found.",
+          context.get("requestId"),
+        ),
+        404,
+      );
+    }
+
+    await auth.api.revokeSession({
+      headers: context.req.raw.headers,
+      body: { token: target.token },
     });
     return context.json({ success: true });
   });
