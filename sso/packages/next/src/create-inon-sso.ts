@@ -6,22 +6,22 @@ import {
   INON_SESSION_SLIDING_SECONDS,
   OAUTH_SCOPES,
   OAUTH_TRANSACTION_SECONDS,
-} from "./constants";
+} from "./constants.js";
 import {
   cookieNames,
   expireCookie,
   readCookie,
   serializeCookie,
-} from "./cookies";
+} from "./cookies.js";
 import {
   createPkceChallenge,
   decryptPayload,
   deriveEncryptionKey,
   encryptPayload,
   randomValue,
-} from "./crypto";
-import { InonSsoError } from "./errors";
-import { identityFromClaims } from "./identity";
+} from "./crypto.js";
+import { InonSsoError } from "./errors.js";
+import { identityFromClaims } from "./identity.js";
 import type {
   InonIdentity,
   InonProjectSession,
@@ -29,7 +29,7 @@ import type {
   InonSsoConfig,
   ProjectKey,
   ProjectRole,
-} from "./types";
+} from "./types.js";
 
 const TRANSACTION_TOKEN_TYPE = "inon-oauth-transaction+jwt";
 const SESSION_TOKEN_TYPE = "inon-project-session+jwt";

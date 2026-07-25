@@ -1,11 +1,11 @@
 import type { JWTPayload } from "jose";
-import { PROJECT_CLAIM, PROJECT_ROLE_CLAIM } from "./constants";
-import { InonSsoError } from "./errors";
+import { PROJECT_CLAIM, PROJECT_ROLE_CLAIM } from "./constants.js";
+import { InonSsoError } from "./errors.js";
 import type {
   InonIdentity,
   ProjectKey,
   ProjectRole,
-} from "./types";
+} from "./types.js";
 
 const projectKeys = new Set<ProjectKey>([
   "inon",
