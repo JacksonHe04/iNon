@@ -13,7 +13,9 @@
     }
   ],
   "vars": {
-    "ENVIRONMENT": "development",
-    "CANONICAL_ORIGIN": "https://inon.space"
+    "ENVIRONMENT": "production",
+    "CANONICAL_ORIGIN": "https://inon.space",
+    "RESEND_FROM": "iNon <account@inon.space>",
+    "TURNSTILE_HOSTNAMES": "inon.space"
   }
 }
