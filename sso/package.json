@@ -7,6 +7,7 @@
   },
   "scripts": {
     "bootstrap:oauth-clients": "node tools/bootstrap-oauth-clients.mjs",
+    "bootstrap:super-admin": "node tools/bootstrap-super-admin.mjs",
     "build": "pnpm -r build",
     "check:workspace": "node tools/verify-workspace.mjs",
     "test": "pnpm -r test",

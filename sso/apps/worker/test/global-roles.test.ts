@@ -18,3 +18,24 @@ it("finds the sole global super administrator", async () => {
   await expect(repository.isSuperAdmin("user_super")).resolves.toBe(true);
   await expect(repository.isSuperAdmin("user_other")).resolves.toBe(false);
 });
+
+it("binds the bootstrap once and rejects a different user", async () => {
+  await expect(
+    repository.bootstrap({
+      userId: "user_owner",
+      requestId: "req_owner",
+      now: 1,
+    }),
+  ).resolves.toBe(true);
+  await expect(repository.getSuperAdminUserId()).resolves.toBe(
+    "user_owner",
+  );
+
+  await expect(
+    repository.bootstrap({
+      userId: "user_conflict",
+      requestId: "req_conflict",
+      now: 2,
+    }),
+  ).rejects.toThrow("different user");
+});

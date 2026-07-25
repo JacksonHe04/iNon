@@ -8,6 +8,7 @@ import { canonicalOriginMiddleware } from "./http/canonical-origin";
 import { internalApiAuthMiddleware } from "./http/internal-auth";
 import { requestIdMiddleware } from "./http/request-id";
 import { createOAuthClientRoutes } from "./internal/oauth-client-routes";
+import { createSuperAdminRoutes } from "./internal/super-admin-routes";
 import { createProjectRoutes } from "./projects/project-routes";
 
 export function createApp(authOptions: AuthRouteOptions = {}) {
@@ -27,6 +28,7 @@ export function createApp(authOptions: AuthRouteOptions = {}) {
   app.use("/internal/*", internalApiAuthMiddleware);
   app.route("/internal", createProjectRoutes());
   app.route("/internal", createOAuthClientRoutes());
+  app.route("/internal", createSuperAdminRoutes());
 
   return app;
 }

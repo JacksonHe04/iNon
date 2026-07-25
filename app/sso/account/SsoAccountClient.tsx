@@ -16,6 +16,7 @@ import {
 import { TurnstileField } from "@/components/sso/TurnstileField";
 import { GithubIcon } from "@/components/icons/PlatformIcons";
 import { requestSsoJson, SsoApiError } from "@/lib/sso/browser-client";
+import { SsoAdminPanel } from "./SsoAdminPanel";
 
 interface AccountProfile {
   user: {
@@ -25,6 +26,7 @@ interface AccountProfile {
   };
   hasPassword: boolean;
   githubLinked: boolean;
+  globalRole: "super_admin" | null;
 }
 
 interface AccountSession {
@@ -265,6 +267,10 @@ export function SsoAccountClient({ siteKey }: SsoAccountClientProps) {
       {error ? <p className="sso-error" role="alert">{error}</p> : null}
 
       <div className="sso-account-grid" style={{ marginTop: 18 }}>
+        {profile.globalRole === "super_admin" ? (
+          <SsoAdminPanel siteKey={siteKey} />
+        ) : null}
+
         <section className="sso-card">
           <div className="sso-card-head">
             <div>

@@ -272,6 +272,29 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - [x] Ensure security failures fail closed without leaking whether an account exists.
 - [ ] Commit as `feat(sso): harden authentication entry points`.
 
+## Task 9b: Bootstrap and operate the sole super administrator
+
+**Files:**
+
+- Create: `sso/apps/worker/src/internal/super-admin-routes.ts`
+- Create: `sso/apps/worker/src/authorization/admin-routes.ts`
+- Create: `sso/tools/bootstrap-super-admin.mjs`
+- Modify: `app/sso/account/*`
+
+- [x] Bind the sole global role only through an internal-token-protected,
+  one-time bootstrap after the target account has verified its email.
+- [x] Never infer or grant the role from a configured email during a user
+  request.
+- [x] Make the bootstrap idempotent for the same user and fail closed for a
+  different user.
+- [x] Audit the initial binding and every project-role mutation.
+- [x] Notify the affected verified account after a project-role change.
+- [x] Expose user search and five-project role controls only to the live
+  global super administrator session.
+- [x] Keep project administrators unable to appoint or revoke administrators.
+- [x] Give the global super administrator effective admin access to every
+  project without duplicating five mutable role assignments.
+
 ## Task 11: Production resources and verification
 
 **Files:**

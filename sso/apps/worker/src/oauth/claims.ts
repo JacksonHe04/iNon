@@ -4,6 +4,7 @@ import {
   type ProjectKey,
   type ProjectRole,
 } from "@inon/sso-contracts";
+import { GlobalRoleRepository } from "../authorization/global-roles";
 import { ProjectMembershipRepository } from "../authorization/project-memberships";
 import { parseFirstPartyClientProject } from "./client-registry";
 
@@ -27,6 +28,7 @@ export async function resolveProjectIdentityClaims(
   clientMetadata: unknown,
 ): Promise<ProjectIdentityClaims> {
   const project = parseFirstPartyClientProject(clientMetadata);
+  const globalRoles = new GlobalRoleRepository(db);
   const role = await new ProjectMembershipRepository(db).ensureMember(
     user.id,
     project,
@@ -38,6 +40,8 @@ export async function resolveProjectIdentityClaims(
       ? { preferred_username: user.username }
       : {}),
     [PROJECT_CLAIM]: project,
-    [PROJECT_ROLE_CLAIM]: role,
+    [PROJECT_ROLE_CLAIM]: (await globalRoles.isSuperAdmin(user.id))
+      ? "admin"
+      : role,
   };
 }

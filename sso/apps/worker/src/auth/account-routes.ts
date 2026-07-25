@@ -2,6 +2,7 @@ import { Hono, type Context } from "hono";
 import { z } from "zod";
 import type { AppBindings } from "../env";
 import type { SecurityNotificationEvent } from "../email/templates/security-notification";
+import { GlobalRoleRepository } from "../authorization/global-roles";
 import { createApiError } from "../http/errors";
 import type { AuthEntryPointGuard } from "../security/auth-entry-points";
 import { enforceAuthEntryPoint } from "../security/http-enforcement";
@@ -25,7 +26,7 @@ const passwordBodySchema = z.object({
   password: z.string().min(8).max(128),
 });
 
-async function requireVerifiedSession(
+export async function requireVerifiedSession(
   context: Context<AppBindings>,
   auth: CentralAuth,
 ) {
@@ -92,6 +93,9 @@ export function createAccountRoutes(
     const providers = new Set(
       accounts.results.map(({ providerId }) => providerId),
     );
+    const globalRole = await new GlobalRoleRepository(
+      context.env.DB,
+    ).isSuperAdmin(authenticated.session.user.id);
     return context.json({
       user: {
         id: authenticated.session.user.id,
@@ -100,6 +104,7 @@ export function createAccountRoutes(
       },
       hasPassword: providers.has("credential"),
       githubLinked: providers.has("github"),
+      globalRole: globalRole ? "super_admin" : null,
     });
   });
 

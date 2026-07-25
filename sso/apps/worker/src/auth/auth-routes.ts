@@ -1,5 +1,6 @@
 import { Hono, type Context } from "hono";
 import { normalizeUsername } from "@inon/sso-contracts";
+import { createAdminRoutes } from "../authorization/admin-routes";
 import type { AppBindings } from "../env";
 import type { EmailService } from "../email/email-service";
 import { createResendEmailService } from "../email/resend-email-service";
@@ -151,6 +152,14 @@ export function createAuthRoutes(options: AuthRouteOptions = {}) {
   routes.route(
     "/account",
     createAccountRoutes(
+      createCentralAuth,
+      createSecurityGuard,
+      recordSecurityEvent,
+    ),
+  );
+  routes.route(
+    "/admin",
+    createAdminRoutes(
       createCentralAuth,
       createSecurityGuard,
       recordSecurityEvent,

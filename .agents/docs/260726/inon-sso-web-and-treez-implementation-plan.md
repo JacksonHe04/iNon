@@ -63,12 +63,18 @@ access token.
 
 ### Stage 4: Treez first cutover
 
-- [ ] Inspect Treez's current authentication, users, roles, and environment.
+- [x] Inspect Treez's current authentication, users, roles, and environment.
 - [ ] Register the production Client ID/Secret in Vercel.
 - [ ] Add login, callback, logout, refresh, member creation, and admin guards.
 - [ ] Map all first visits to ordinary Treez membership.
 - [ ] Remove acceptance of old passwords and sessions.
 - [ ] Verify the real deployed flow before proceeding to the other projects.
+
+The current Treez Next.js rewrite contains only login and registration
+placeholders; it has no active user store, session implementation, or admin
+guard to migrate. Its entire Vite/Nest-to-Next baseline is currently an
+uncommitted working-tree change, so SSO edits are intentionally paused rather
+than mixing unrelated ownership into the first Treez SSO commit.
 
 ## Verification
 

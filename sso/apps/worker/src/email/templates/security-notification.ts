@@ -5,6 +5,7 @@ export type SecurityNotificationEvent =
   | "username_updated"
   | "github_linked"
   | "github_unlinked"
+  | "project_role_updated"
   | "session_revoked";
 
 const eventCopy: Record<
@@ -26,6 +27,10 @@ const eventCopy: Record<
   github_unlinked: {
     subject: "GitHub 已从你的 iNon 账号解绑",
     description: "GitHub 身份刚刚从你的 iNon 账号解绑。",
+  },
+  project_role_updated: {
+    subject: "你的 iNon 项目权限已更新",
+    description: "你的一个 iNon 项目成员身份刚刚被更新。",
   },
   session_revoked: {
     subject: "一个 iNon 登录会话已撤销",
