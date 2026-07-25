@@ -17,6 +17,7 @@ export interface AppBindings {
   Bindings: Env;
   Variables: {
     canonicalRequest: Request;
+    clientIp: string | null;
     requestId: string;
   };
 }
