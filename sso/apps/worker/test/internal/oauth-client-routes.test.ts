@@ -3,6 +3,11 @@ import { expect, it } from "vitest";
 import { projectKeys } from "@inon/sso-contracts";
 
 it("bootstraps exactly five idempotent first-party OAuth clients", async () => {
+  const credentials = projectKeys.map((project) => ({
+    project,
+    clientId: `${project}_client_id`.padEnd(32, "_"),
+    clientSecret: `${project}_client_secret`.padEnd(43, "_"),
+  }));
   const request = () =>
     SELF.fetch(
       "https://inon.space/api/sso/internal/oauth-clients/bootstrap",
@@ -10,7 +15,9 @@ it("bootstraps exactly five idempotent first-party OAuth clients", async () => {
         method: "POST",
         headers: {
           authorization: "Bearer test-internal-token",
+          "content-type": "application/json",
         },
+        body: JSON.stringify({ clients: credentials }),
       },
     );
 
@@ -21,7 +28,6 @@ it("bootstraps exactly five idempotent first-party OAuth clients", async () => {
     clients: Array<{
       project: string;
       clientId: string;
-      clientSecret?: string;
       created: boolean;
     }>;
   }>();
@@ -29,11 +35,9 @@ it("bootstraps exactly five idempotent first-party OAuth clients", async () => {
     [...projectKeys].sort(),
   );
   expect(first.clients.every(({ created }) => created)).toBe(true);
-  expect(
-    first.clients.every(({ clientId, clientSecret }) =>
-      Boolean(clientId && clientSecret),
-    ),
-  ).toBe(true);
+  expect(first.clients.every(({ clientId }) => Boolean(clientId))).toBe(
+    true,
+  );
 
   const stored = await env.DB.prepare(
     `SELECT "clientId", "clientSecret"
@@ -46,25 +50,26 @@ it("bootstraps exactly five idempotent first-party OAuth clients", async () => {
     const row = stored.results.find(
       ({ clientId }) => clientId === client.clientId,
     );
-    expect(row?.clientSecret).not.toBe(client.clientSecret);
+    const credential = credentials.find(
+      ({ clientId }) => clientId === client.clientId,
+    );
+    expect(row?.clientSecret).not.toBe(credential?.clientSecret);
   }
 
   const secondResponse = await request();
   expect(secondResponse.status).toBe(200);
   const second = await secondResponse.json<typeof first>();
   expect(
-    second.clients.map(({ clientId, project, created, clientSecret }) => ({
+    second.clients.map(({ clientId, project, created }) => ({
       clientId,
       project,
       created,
-      clientSecret,
     })),
   ).toEqual(
     first.clients.map(({ clientId, project }) => ({
       clientId,
       project,
       created: false,
-      clientSecret: undefined,
     })),
   );
 });

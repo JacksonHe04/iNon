@@ -1,11 +1,14 @@
 import {
   inonOAuthScopes,
+  projectKeySchema,
   type ProjectKey,
+  projectKeys,
 } from "@inon/sso-contracts";
-import type { CentralAuth } from "../auth/account-routes";
+import { z } from "zod";
 import {
   FIRST_PARTY_CLIENTS,
   parseFirstPartyClientProject,
+  serializeFirstPartyClientMetadata,
 } from "./client-registry";
 
 const CLIENT_SCOPES = inonOAuthScopes;
@@ -16,6 +19,7 @@ const CLIENT_GRANT_TYPES = [
 
 interface StoredOAuthClient {
   clientId: string;
+  clientSecret: string | null;
   name: string | null;
   redirectUris: string;
   scopes: string | null;
@@ -32,9 +36,40 @@ interface StoredOAuthClient {
 export interface BootstrappedOAuthClient {
   project: ProjectKey;
   clientId: string;
-  clientSecret?: string;
   created: boolean;
 }
+
+const firstPartyOAuthClientCredentialSchema = z.object({
+  project: projectKeySchema,
+  clientId: z.string().regex(/^[A-Za-z0-9_-]{32,128}$/),
+  clientSecret: z.string().regex(/^[A-Za-z0-9_-]{43,128}$/),
+});
+
+export const firstPartyOAuthClientBootstrapSchema = z
+  .object({
+    clients: z
+      .array(firstPartyOAuthClientCredentialSchema)
+      .length(projectKeys.length),
+  })
+  .superRefine(({ clients }, context) => {
+    const suppliedProjects = new Set(
+      clients.map(({ project }) => project),
+    );
+    if (
+      suppliedProjects.size !== projectKeys.length ||
+      projectKeys.some((project) => !suppliedProjects.has(project))
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Exactly one credential per first-party project is required.",
+        path: ["clients"],
+      });
+    }
+  });
+
+export type FirstPartyOAuthClientCredential = z.infer<
+  typeof firstPartyOAuthClientCredentialSchema
+>;
 
 export class OAuthClientBootstrapError extends Error {
   constructor(
@@ -45,29 +80,6 @@ export class OAuthClientBootstrapError extends Error {
     this.name = "OAuthClientBootstrapError";
   }
 }
-
-interface AdminCreateOAuthClientResult {
-  client_id: string;
-  client_secret?: string;
-}
-
-type AdminCreateOAuthClient = (input: {
-  body: {
-    client_name: string;
-    client_uri: string;
-    redirect_uris: string[];
-    scope: string;
-    token_endpoint_auth_method: "client_secret_basic";
-    grant_types: Array<"authorization_code" | "refresh_token">;
-    response_types: ["code"];
-    type: "web";
-    skip_consent: true;
-    enable_end_session: true;
-    require_pkce: true;
-    subject_type: "public";
-    metadata: { project: ProjectKey };
-  };
-}) => Promise<AdminCreateOAuthClientResult>;
 
 function parseStoredStringArray(value: string | null): string[] {
   if (value === null) {
@@ -91,15 +103,40 @@ function haveSameValues(actual: string[], expected: readonly string[]) {
   );
 }
 
-function assertStoredClientConfiguration(
+function encodeBase64Url(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary)
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replace(/=+$/u, "");
+}
+
+async function hashClientSecret(clientSecret: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(clientSecret),
+  );
+  return encodeBase64Url(new Uint8Array(digest));
+}
+
+async function assertStoredClientConfiguration(
   row: StoredOAuthClient,
   definition: (typeof FIRST_PARTY_CLIENTS)[number],
+  credential: FirstPartyOAuthClientCredential,
 ) {
   const project = parseFirstPartyClientProject(
     row.metadata === null ? null : JSON.parse(row.metadata),
   );
+  const expectedSecret = await hashClientSecret(
+    credential.clientSecret,
+  );
   const valid =
     project === definition.project &&
+    row.clientId === credential.clientId &&
+    row.clientSecret === expectedSecret &&
     row.name === definition.name &&
     haveSameValues(
       parseStoredStringArray(row.redirectUris),
@@ -132,6 +169,7 @@ async function readStoredClients(
     .prepare(
       `SELECT
         "clientId",
+        "clientSecret",
         "name",
         "redirectUris",
         "scopes",
@@ -161,59 +199,106 @@ async function readStoredClients(
 
 export async function bootstrapFirstPartyOAuthClients(
   db: D1Database,
-  auth: CentralAuth,
+  credentials: FirstPartyOAuthClientCredential[],
 ): Promise<BootstrappedOAuthClient[]> {
   const storedClients = await readStoredClients(db);
-  const result: BootstrappedOAuthClient[] = [];
-  // Better Auth 1.6.25's generated endpoint type intersects Response.type
-  // with OAuthClient.type and collapses to never. Runtime data is the
-  // documented OAuth client response, so keep the workaround at this boundary.
-  const adminCreateOAuthClient =
-    auth.api.adminCreateOAuthClient as unknown as AdminCreateOAuthClient;
+  const credentialByProject = new Map(
+    credentials.map((credential) => [
+      credential.project,
+      credential,
+    ]),
+  );
+  const missing: Array<{
+    credential: FirstPartyOAuthClientCredential;
+    definition: (typeof FIRST_PARTY_CLIENTS)[number];
+  }> = [];
 
   for (const definition of FIRST_PARTY_CLIENTS) {
+    const credential = credentialByProject.get(definition.project);
+    if (!credential) {
+      throw new OAuthClientBootstrapError(
+        definition.project,
+        `OAuth client credentials for ${definition.name} are missing.`,
+      );
+    }
     const existing = storedClients.get(definition.project);
     if (existing) {
-      assertStoredClientConfiguration(existing, definition);
-      result.push({
-        project: definition.project,
-        clientId: existing.clientId,
-        created: false,
-      });
+      await assertStoredClientConfiguration(
+        existing,
+        definition,
+        credential,
+      );
       continue;
     }
 
-    const created = await adminCreateOAuthClient({
-      body: {
-        client_name: definition.name,
-        client_uri: new URL(definition.redirectUri).origin,
-        redirect_uris: [definition.redirectUri],
-        scope: CLIENT_SCOPES.join(" "),
-        token_endpoint_auth_method: "client_secret_basic",
-        grant_types: [...CLIENT_GRANT_TYPES],
-        response_types: ["code"],
-        type: "web",
-        skip_consent: true,
-        enable_end_session: true,
-        require_pkce: true,
-        subject_type: "public",
-        metadata: { project: definition.project },
-      },
-    });
-    if (!created.client_secret) {
-      throw new OAuthClientBootstrapError(
-        definition.project,
-        `Better Auth did not issue a secret for ${definition.name}.`,
-      );
-    }
-
-    result.push({
-      project: definition.project,
-      clientId: created.client_id,
-      clientSecret: created.client_secret,
-      created: true,
+    missing.push({
+      credential,
+      definition,
     });
   }
 
-  return result;
+  if (missing.length > 0) {
+    const now = new Date().toISOString();
+    const statements = await Promise.all(
+      missing.map(async ({ credential, definition }) =>
+        db
+          .prepare(
+            `INSERT INTO "oauthClient" (
+              "id",
+              "clientId",
+              "clientSecret",
+              "disabled",
+              "skipConsent",
+              "enableEndSession",
+              "subjectType",
+              "scopes",
+              "createdAt",
+              "updatedAt",
+              "name",
+              "uri",
+              "redirectUris",
+              "tokenEndpointAuthMethod",
+              "grantTypes",
+              "responseTypes",
+              "public",
+              "type",
+              "requirePKCE",
+              "metadata"
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          )
+          .bind(
+            crypto.randomUUID(),
+            credential.clientId,
+            await hashClientSecret(credential.clientSecret),
+            0,
+            1,
+            1,
+            "public",
+            JSON.stringify(CLIENT_SCOPES),
+            now,
+            now,
+            definition.name,
+            new URL(definition.redirectUri).origin,
+            JSON.stringify([definition.redirectUri]),
+            "client_secret_basic",
+            JSON.stringify(CLIENT_GRANT_TYPES),
+            JSON.stringify(["code"]),
+            0,
+            "web",
+            1,
+            serializeFirstPartyClientMetadata(definition.project),
+          ),
+      ),
+    );
+    await db.batch(statements);
+  }
+
+  const createdProjects = new Set(
+    missing.map(({ definition }) => definition.project),
+  );
+  return FIRST_PARTY_CLIENTS.map((definition) => ({
+    project: definition.project,
+    clientId: credentialByProject.get(definition.project)!.clientId,
+    created: createdProjects.has(definition.project),
+  }));
 }

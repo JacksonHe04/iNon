@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import { createAuth } from "../auth/create-auth";
 import type { AppBindings } from "../env";
 import { createApiError } from "../http/errors";
 import {
   bootstrapFirstPartyOAuthClients,
+  firstPartyOAuthClientBootstrapSchema,
   OAuthClientBootstrapError,
 } from "../oauth/client-bootstrap";
 
@@ -11,16 +11,23 @@ export function createOAuthClientRoutes() {
   const routes = new Hono<AppBindings>();
 
   routes.post("/oauth-clients/bootstrap", async (context) => {
-    const auth = createAuth(context.env, {
-      sendVerificationOTP: async () => {
-        throw new Error("Email delivery is unavailable on internal routes.");
-      },
-    });
+    const body = await context.req.json().catch(() => null);
+    const parsed = firstPartyOAuthClientBootstrapSchema.safeParse(body);
+    if (!parsed.success) {
+      return context.json(
+        createApiError(
+          "INVALID_REQUEST",
+          "A complete first-party OAuth client registry is required.",
+          context.get("requestId"),
+        ),
+        400,
+      );
+    }
 
     try {
       const clients = await bootstrapFirstPartyOAuthClients(
         context.env.DB,
-        auth,
+        parsed.data.clients,
       );
       context.header("cache-control", "no-store");
       return context.json({ clients });

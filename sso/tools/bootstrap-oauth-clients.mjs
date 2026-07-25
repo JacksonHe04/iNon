@@ -1,4 +1,5 @@
 import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { randomBytes } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createBootstrapHeaders } from "./lib/bootstrap-request.mjs";
@@ -21,9 +22,54 @@ try {
   }
 }
 
+function generateCredential(bytes) {
+  return randomBytes(bytes).toString("base64url");
+}
+
+const clients = {};
+for (const project of projectKeys) {
+  const previous = existing.clients?.[project];
+  clients[project] = {
+    clientId: previous?.clientId ?? generateCredential(32),
+    clientSecret: previous?.clientSecret ?? generateCredential(48),
+  };
+}
+
+async function storeRegistry() {
+  await mkdir(secretsDirectory, { recursive: true, mode: 0o700 });
+  await chmod(secretsDirectory, 0o700);
+  const temporaryPath = `${outputPath}.${process.pid}.tmp`;
+  await writeFile(
+    temporaryPath,
+    `${JSON.stringify(
+      {
+        issuer: "https://inon.space/api/sso/auth",
+        clients,
+      },
+      null,
+      2,
+    )}\n`,
+    { mode: 0o600 },
+  );
+  await rename(temporaryPath, outputPath);
+  await chmod(outputPath, 0o600);
+}
+
+// Persist candidates before the request so a committed D1 write can always be
+// retried with the same client IDs and secrets after a network interruption.
+await storeRegistry();
+
 const response = await fetch(endpoint, {
   method: "POST",
-  headers: createBootstrapHeaders(),
+  headers: createBootstrapHeaders({
+    "content-type": "application/json",
+  }),
+  body: JSON.stringify({
+    clients: projectKeys.map((project) => ({
+      project,
+      ...clients[project],
+    })),
+  }),
 });
 if (!response.ok) {
   throw new Error(
@@ -39,46 +85,17 @@ if (
   throw new Error("OAuth client bootstrap returned an incomplete registry.");
 }
 
-const clients = {};
 for (const project of projectKeys) {
   const current = payload.clients.find((client) => client.project === project);
-  const previous = existing.clients?.[project];
   if (!current?.clientId) {
     throw new Error(`OAuth client ${project} is missing its client ID.`);
   }
-  if (previous?.clientId && previous.clientId !== current.clientId) {
+  if (clients[project].clientId !== current.clientId) {
     throw new Error(`OAuth client ${project} changed its client ID.`);
   }
-
-  const clientSecret = current.clientSecret ?? previous?.clientSecret;
-  if (!clientSecret) {
-    throw new Error(
-      `OAuth client ${project} already exists but its local secret is unavailable.`,
-    );
-  }
-  clients[project] = {
-    clientId: current.clientId,
-    clientSecret,
-  };
 }
 
-await mkdir(secretsDirectory, { recursive: true, mode: 0o700 });
-await chmod(secretsDirectory, 0o700);
-const temporaryPath = `${outputPath}.${process.pid}.tmp`;
-await writeFile(
-  temporaryPath,
-  `${JSON.stringify(
-    {
-      issuer: "https://inon.space/api/sso/auth",
-      clients,
-    },
-    null,
-    2,
-  )}\n`,
-  { mode: 0o600 },
-);
-await rename(temporaryPath, outputPath);
-await chmod(outputPath, 0o600);
+await storeRegistry();
 
 const createdCount = payload.clients.filter(({ created }) => created).length;
 console.log(
