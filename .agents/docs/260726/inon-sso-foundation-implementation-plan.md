@@ -33,7 +33,9 @@
 - Create: `sso/.gitignore`
 - Create: `sso/README.md`
 - Create: `sso/apps/worker/package.json`
+- Create: `sso/apps/worker/src/index.ts`
 - Create: `sso/packages/contracts/package.json`
+- Create: `sso/packages/contracts/src/index.ts`
 - Create: `sso/packages/contracts/tsconfig.json`
 - Create: `sso/apps/worker/tsconfig.json`
 
@@ -82,7 +84,7 @@ Expected: failure because the workspace manifests do not exist yet.
 {
   "name": "@inon/sso-workspace",
   "private": true,
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@9.12.0",
   "scripts": {
     "build": "pnpm -r build",
     "check:workspace": "node tools/verify-workspace.mjs",
@@ -112,7 +114,7 @@ packages:
     "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "lib": ["ES2024", "WebWorker"],
+    "lib": ["ES2024"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,
@@ -188,7 +190,7 @@ Run:
 
 ```bash
 cd /Users/jackson/Codes/iNon/sso
-pnpm install --save-exact
+pnpm install
 pnpm check:workspace
 pnpm typecheck
 ```
