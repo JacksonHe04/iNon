@@ -16,6 +16,7 @@ import {
   SESSION_ADDITIONAL_FIELDS,
   USER_ADDITIONAL_FIELDS,
 } from "./schema";
+import { capSessionExpiration } from "./session-policy";
 
 export interface VerificationOTPMessage {
   email: string;
@@ -57,6 +58,31 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
               email: normalizeEmail(user.email),
             },
           }),
+        },
+      },
+      session: {
+        update: {
+          before: async (session, context) => {
+            const absoluteValue =
+              context?.context.session?.session.absoluteExpiresAt;
+            if (!session.expiresAt || !absoluteValue) {
+              return;
+            }
+
+            const expiresAt = new Date(session.expiresAt);
+            const absoluteExpiresAt = new Date(
+              absoluteValue as string | Date,
+            );
+            return {
+              data: {
+                ...session,
+                expiresAt: capSessionExpiration(
+                  expiresAt,
+                  absoluteExpiresAt,
+                ),
+              },
+            };
+          },
         },
       },
     },

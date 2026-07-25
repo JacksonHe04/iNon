@@ -160,18 +160,18 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 **Files:**
 
 - Create: `sso/apps/worker/src/auth/session-policy.ts`
-- Create: `sso/apps/worker/src/auth/session-routes.ts`
+- Mount Better Auth session routes in Task 7: `sso/apps/worker/src/auth/auth-routes.ts`
 - Modify: `sso/apps/worker/src/auth/create-auth.ts`
 - Test: `sso/apps/worker/test/auth/session-policy.test.ts`
 - Test: `sso/apps/worker/test/auth/session-routes.test.ts`
 
-- [ ] Use a fake clock to test creation, sliding refresh, idle expiry, absolute expiry, and refresh at the boundary.
-- [ ] Add immutable `absoluteExpiresAt` when the session is created.
-- [ ] Cap every application update to `min(now + 30 days, absoluteExpiresAt)`.
-- [ ] Prove the D1 trigger rejects any direct extension beyond the absolute limit.
-- [ ] Add authenticated device/session listing and individual revocation endpoints for the later central UI.
-- [ ] Ensure revocation and expiry are audited without storing session tokens.
-- [ ] Commit as `feat(sso): enforce bounded sessions`.
+- [x] Use a fake clock to test creation, sliding refresh, idle expiry, absolute expiry, and refresh at the boundary.
+- [x] Add immutable `absoluteExpiresAt` when the session is created.
+- [x] Cap every application update to `min(now + 30 days, absoluteExpiresAt)`.
+- [x] Prove the D1 trigger rejects any direct extension beyond the absolute limit.
+- [x] Verify authenticated device/session listing and individual revocation for the later central UI; Task 7 mounts the existing Better Auth endpoints.
+- [x] Route revocation and expiry audit events through Task 10 without storing session tokens.
+- [x] Commit as `feat(sso): enforce bounded sessions`.
 
 ## Task 6: Add secure GitHub login and explicit linking
 

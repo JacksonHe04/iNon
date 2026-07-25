@@ -32,7 +32,6 @@ export const SESSION_ADDITIONAL_FIELDS = {
     type: "date",
     required: true,
     input: false,
-    returned: false,
     defaultValue: () =>
       new Date(Date.now() + SESSION_ABSOLUTE_TTL_SECONDS * 1_000),
   },
