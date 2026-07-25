@@ -91,6 +91,8 @@ function defaultEmailService(context: Context<AppBindings>): EmailService {
 
 export function createAuthRoutes(options: AuthRouteOptions = {}) {
   const routes = new Hono<AppBindings>();
+  const canonicalRequest = (context: Context<AppBindings>) =>
+    context.get("canonicalRequest") ?? context.req.raw;
   const getEmailService = (context: Context<AppBindings>) =>
     options.createEmailService?.(context) ?? defaultEmailService(context);
   const recordSecurityEvent = async (
@@ -147,7 +149,10 @@ export function createAuthRoutes(options: AuthRouteOptions = {}) {
   );
 
   routes.all("/github/callback", (context) =>
-    handleGitHubCallback(createCentralAuth(context), context.req.raw),
+    handleGitHubCallback(
+      createCentralAuth(context),
+      canonicalRequest(context),
+    ),
   );
 
   routes.all("/auth/*", async (context) => {
@@ -165,7 +170,7 @@ export function createAuthRoutes(options: AuthRouteOptions = {}) {
       }
     }
 
-    return createCentralAuth(context).handler(context.req.raw);
+    return createCentralAuth(context).handler(canonicalRequest(context));
   });
 
   return routes;

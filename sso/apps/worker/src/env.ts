@@ -10,12 +10,13 @@ export interface Env {
   RESEND_FROM: string;
   TURNSTILE_HOSTNAMES: string;
   TURNSTILE_SECRET_KEY: string;
-  TURNSTILE_SITE_KEY: string;
+  VERCEL_PROXY_SECRET: string;
 }
 
 export interface AppBindings {
   Bindings: Env;
   Variables: {
+    canonicalRequest: Request;
     requestId: string;
   };
 }

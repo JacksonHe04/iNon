@@ -28,7 +28,7 @@ export default defineConfig(async () => {
             RESEND_FROM: "iNon <account@inon.space>",
             TURNSTILE_HOSTNAMES: "inon.space",
             TURNSTILE_SECRET_KEY: "test-turnstile-secret-key",
-            TURNSTILE_SITE_KEY: "test-turnstile-site-key",
+            VERCEL_PROXY_SECRET: "test-vercel-proxy-secret",
             TEST_MIGRATIONS: migrations,
           },
         },
