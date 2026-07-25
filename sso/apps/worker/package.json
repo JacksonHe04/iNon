@@ -12,8 +12,11 @@
     "types": "wrangler types worker-runtime.d.ts --include-env false"
   },
   "dependencies": {
+    "@better-auth/oauth-provider": "1.6.25",
     "@inon/sso-contracts": "workspace:*",
+    "better-auth": "1.6.25",
     "hono": "4.12.32",
+    "resend": "6.18.0",
     "zod": "3.23.8"
   },
   "devDependencies": {

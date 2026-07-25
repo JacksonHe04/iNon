@@ -83,13 +83,13 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - Create: `sso/apps/worker/src/auth/constants.ts`
 - Test: `sso/apps/worker/test/auth/constants.test.ts`
 
-- [ ] Write failing tests for canonical base URL, base path, 30-day sliding duration, 90-day absolute duration, GitHub callback, issuer, and the five callback URLs.
-- [ ] Add exact Better Auth, OAuth Provider, and Resend versions.
-- [ ] Extend the typed environment without assigning secrets to Wrangler `vars`.
-- [ ] Ignore `.secrets/` and retain `.dev.vars` ignore coverage.
-- [ ] Implement constants from one source of truth and make the tests pass.
-- [ ] Run Worker tests, typecheck, build, and the secret diff scan.
-- [ ] Commit as `chore(sso): lock central auth runtime`.
+- [x] Write failing tests for canonical base URL, base path, 30-day sliding duration, 90-day absolute duration, GitHub callback, issuer, and the five callback URLs.
+- [x] Add exact Better Auth, OAuth Provider, and Resend versions.
+- [x] Extend the typed environment without assigning secrets to Wrangler `vars`.
+- [x] Ignore `.secrets/` and retain `.dev.vars` ignore coverage.
+- [x] Implement constants from one source of truth and make the tests pass.
+- [x] Run Worker tests, typecheck, build, and the secret diff scan.
+- [x] Commit as `chore(sso): lock central auth runtime`.
 
 ## Task 2: Derive and protect the Better Auth D1 schema
 
