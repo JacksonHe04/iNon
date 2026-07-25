@@ -109,10 +109,16 @@ OAuth start were verified again against that deployment.
 
 ## Remaining deployment work
 
-- Integrate and deploy PINE and Treez.
+- PINE and Treez are now integrated, deployed, pushed, and merged to their
+  default branches. Both Vercel projects are bound to their canonical domains.
+- Add the `pine` and `treez` A records in Aliyun DNS so the new canonical
+  domains resolve to Vercel.
 - Complete the first verified owner login and one-time global superadmin
   bootstrap.
 - Exercise email OTP, password setup/login, GitHub login, refresh, logout, and
   cross-project SSO in a browser.
 - Rotate the GitHub OAuth and Resend credentials that were exposed during
   setup, then update their platform secrets.
+
+The complete five-project status and remaining owner actions are recorded in
+`inon-sso-five-project-rollout.md`.
