@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { AdminAsset } from '@/lib/content/admin-data';
+import { readJsonRecord, readJsonString } from '@/lib/http/json-response';
 
 interface UseAssetUploadProps {
   onUploaded: (newAssets: AdminAsset[]) => void;
@@ -66,22 +67,24 @@ export function useAssetUpload({ onUploaded, showToast }: UseAssetUploadProps) {
         });
 
         if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || '上传请求失败');
+          const errData = await readJsonRecord(response);
+          throw new Error(
+            readJsonString(errData, 'error') || '上传请求失败'
+          );
         }
 
-        const result = await response.json();
+        const result = await readJsonRecord(response);
         successCount++;
 
         const newAsset: AdminAsset = {
           id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           bucket: 'public-assets',
-          object_path: result.objectPath || '',
+          object_path: readJsonString(result, 'objectPath') || '',
           asset_type: defaultAssetType,
           title: defaultTitle,
           alt_text: '',
           file_name: file.name,
-          public_url: result.publicUrl || '',
+          public_url: readJsonString(result, 'publicUrl') || '',
           source_path: '',
           file_size_bytes: file.size,
           created_at: new Date().toISOString(),

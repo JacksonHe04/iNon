@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, Image as ImageIcon, Upload, Loader2 } from 'lucide-react';
+import { readJsonRecord, readJsonString } from '@/lib/http/json-response';
 
 interface ImageInputProps {
   label: string;
@@ -36,13 +37,16 @@ export function ImageInput({ label, value, onChange, placeholder, disableUpload 
       });
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || '图片上传接口错误');
+        const errData = await readJsonRecord(response);
+        throw new Error(
+          readJsonString(errData, 'error') || '图片上传接口错误'
+        );
       }
 
-      const result = await response.json();
-      if (result.publicUrl) {
-        onChange(result.publicUrl);
+      const result = await readJsonRecord(response);
+      const publicUrl = readJsonString(result, 'publicUrl');
+      if (publicUrl) {
+        onChange(publicUrl);
       }
     } catch (err: any) {
       console.error('Failed to upload image:', err);

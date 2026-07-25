@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Grid, List, X } from 'lucide-react';
 import type { AdminAsset } from '@/lib/content/admin-data';
+import { readJsonRecord, readJsonString } from '@/lib/http/json-response';
 import useAssetUpload from '@/hooks/useAssetUpload';
 import UploadZone from './UploadZone';
 import AssetCard from './AssetCard';
@@ -68,8 +69,8 @@ export default function AdminAssetsManager({ initialAssets }: AdminAssetsManager
       });
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || '更新失败');
+        const errData = await readJsonRecord(response);
+        throw new Error(readJsonString(errData, 'error') || '更新失败');
       }
 
       setAssets((prev) =>
@@ -89,8 +90,8 @@ export default function AdminAssetsManager({ initialAssets }: AdminAssetsManager
       });
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || '删除失败');
+        const errData = await readJsonRecord(response);
+        throw new Error(readJsonString(errData, 'error') || '删除失败');
       }
 
       setAssets((prev) => prev.filter((a) => a.id !== id));

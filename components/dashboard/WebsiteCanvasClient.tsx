@@ -4,6 +4,7 @@ import BlockCanvasEngine from '@/components/blocks/BlockCanvasEngine';
 import { GlassCardContext } from '@/components/GlassCard';
 import type { ReadmeData } from '@/types';
 import type { LayoutConfig } from '@/types/layout';
+import { readJsonRecord, readJsonString } from '@/lib/http/json-response';
 
 interface WebsiteCanvasClientProps {
   data: ReadmeData;
@@ -25,8 +26,10 @@ export default function WebsiteCanvasClient({ data, layoutConfig }: WebsiteCanva
               body: JSON.stringify({ layoutConfig: newLayoutConfig }),
             });
             if (!res.ok) {
-              const errData = await res.json();
-              throw new Error(errData.error || '保存排版方案失败');
+              const errData = await readJsonRecord(res);
+              throw new Error(
+                readJsonString(errData, 'error') || '保存排版方案失败'
+              );
             }
           }}
         />

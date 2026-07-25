@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { readJsonRecord, readJsonString } from '@/lib/http/json-response';
 import type { SaveStatus } from '../EditorSectionCard';
 
 // Global map to sequence saves for each section to prevent overlapping fetch race conditions
@@ -98,8 +99,12 @@ export function useSectionSave(sectionName: string) {
             });
 
             if (!res.ok) {
-              const errData = await res.json();
-              throw new Error(errData.detail || errData.error || '保存失败');
+              const errData = await readJsonRecord(res);
+              throw new Error(
+                readJsonString(errData, 'detail') ||
+                  readJsonString(errData, 'error') ||
+                  '保存失败'
+              );
             }
 
             // Record the just-saved payload so future identical saves are skipped.

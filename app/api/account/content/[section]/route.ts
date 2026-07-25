@@ -37,43 +37,82 @@ export async function PUT(req: Request, context: RouteContext) {
   try {
     switch (section) {
       case 'profile':
-        await updateProfileSection(body, scope);
+        await updateProfileSection(
+          body as Parameters<typeof updateProfileSection>[0],
+          scope
+        );
         break;
       case 'life':
-        await updateLifeSection(body, scope);
+        await updateLifeSection(
+          body as Parameters<typeof updateLifeSection>[0],
+          scope
+        );
         break;
       case 'experience':
-        await updateExperienceSection(body, scope);
+        await updateExperienceSection(
+          body as Parameters<typeof updateExperienceSection>[0],
+          scope
+        );
         break;
       case 'education':
-        await updateEducationSection(body, scope);
+        await updateEducationSection(
+          body as Parameters<typeof updateEducationSection>[0],
+          scope
+        );
         break;
       case 'work':
-        await updateWorkSection(body, scope);
+        await updateWorkSection(
+          body as Parameters<typeof updateWorkSection>[0],
+          scope
+        );
         break;
       case 'development':
-        await updateDevelopmentSection(body, scope);
+        await updateDevelopmentSection(
+          body as Parameters<typeof updateDevelopmentSection>[0],
+          scope
+        );
         break;
       case 'products':
-        await updateProductsSection(body, scope);
+        await updateProductsSection(
+          body as Parameters<typeof updateProductsSection>[0],
+          scope
+        );
         break;
       case 'creation':
-        await updateCreationSection(body, scope);
+        await updateCreationSection(
+          body as Parameters<typeof updateCreationSection>[0],
+          scope
+        );
         break;
       case 'library':
-        await updateLibrarySection(body, scope);
+        await updateLibrarySection(
+          body as Parameters<typeof updateLibrarySection>[0],
+          scope
+        );
         break;
       case 'events':
-        await updateEventsSection(body, scope);
+        await updateEventsSection(
+          body as Parameters<typeof updateEventsSection>[0],
+          scope
+        );
         break;
       case 'contact':
-        await updateContactSection(body, scope);
+        await updateContactSection(
+          body as Parameters<typeof updateContactSection>[0],
+          scope
+        );
         break;
       case 'thoughts':
-        await updateThoughtsSection(body, scope);
+        await updateThoughtsSection(
+          body as Parameters<typeof updateThoughtsSection>[0],
+          scope
+        );
         break;
       case 'notifications':
-        await updateNotificationsSection(body, scope);
+        await updateNotificationsSection(
+          body as Parameters<typeof updateNotificationsSection>[0],
+          scope
+        );
         break;
       default:
         return NextResponse.json({ error: 'Unknown section' }, { status: 404 });
