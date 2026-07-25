@@ -52,7 +52,7 @@ export class CloudflareTurnstileVerifier implements TurnstileVerifier {
     }
 
     try {
-      const response = await this.fetcher(SITEVERIFY_URL, {
+      const response = await this.fetcher.call(globalThis, SITEVERIFY_URL, {
         method: "POST",
         headers: {
           "content-type": "application/x-www-form-urlencoded",
@@ -61,20 +61,39 @@ export class CloudflareTurnstileVerifier implements TurnstileVerifier {
         signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
       });
       if (!response.ok) {
+        console.warn("Turnstile siteverify request failed.", {
+          status: response.status,
+        });
         return false;
       }
 
       const parsed = siteverifyResponseSchema.safeParse(
         await response.json(),
       );
-      return (
+      const verified =
         parsed.success &&
         parsed.data.success &&
         parsed.data.action === input.action &&
         typeof parsed.data.hostname === "string" &&
-        this.allowedHostnames.has(parsed.data.hostname)
-      );
-    } catch {
+        this.allowedHostnames.has(parsed.data.hostname);
+      if (!verified) {
+        console.warn("Turnstile verification rejected.", {
+          expectedAction: input.action,
+          response: parsed.success
+            ? {
+                action: parsed.data.action ?? null,
+                errorCodes: parsed.data["error-codes"] ?? [],
+                hostname: parsed.data.hostname ?? null,
+                success: parsed.data.success,
+              }
+            : { malformed: true },
+        });
+      }
+      return verified;
+    } catch (error) {
+      console.warn("Turnstile siteverify request threw.", {
+        message: error instanceof Error ? error.message : "unknown error",
+      });
       return false;
     }
   }
