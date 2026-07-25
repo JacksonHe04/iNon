@@ -13,6 +13,10 @@ import {
 } from "./constants";
 import { normalizeEmail } from "./email";
 import {
+  createGitHubUserInfoResolver,
+  stripUpstreamProviderTokens,
+} from "./github";
+import {
   SESSION_ADDITIONAL_FIELDS,
   USER_ADDITIONAL_FIELDS,
 } from "./schema";
@@ -85,6 +89,18 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
           },
         },
       },
+      account: {
+        create: {
+          before: async (account) => ({
+            data: stripUpstreamProviderTokens(account),
+          }),
+        },
+        update: {
+          before: async (account) => ({
+            data: stripUpstreamProviderTokens(account),
+          }),
+        },
+      },
     },
     emailAndPassword: {
       enabled: true,
@@ -105,11 +121,20 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
     verification: {
       storeIdentifier: "hashed",
     },
+    account: {
+      accountLinking: {
+        enabled: true,
+        trustedProviders: ["github"],
+        allowDifferentEmails: true,
+        allowUnlinkingAll: false,
+      },
+    },
     socialProviders: {
       github: {
         clientId: env.GITHUB_CLIENT_ID,
         clientSecret: env.GITHUB_CLIENT_SECRET,
         redirectURI: GITHUB_CALLBACK_URL,
+        getUserInfo: createGitHubUserInfoResolver(env.DB),
       },
     },
     plugins: [
