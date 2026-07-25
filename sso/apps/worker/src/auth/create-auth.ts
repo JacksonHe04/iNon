@@ -1,6 +1,7 @@
 import { normalizeUsername, validateUsername } from "@inon/sso-contracts";
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { betterAuth } from "better-auth";
+import { createAuthMiddleware } from "better-auth/api";
 import { emailOTP, jwt, username } from "better-auth/plugins";
 import type { Env } from "../env";
 import {
@@ -10,6 +11,7 @@ import {
   GITHUB_CALLBACK_URL,
   SESSION_SLIDING_TTL_SECONDS,
 } from "./constants";
+import { normalizeEmail } from "./email";
 import {
   SESSION_ADDITIONAL_FIELDS,
   USER_ADDITIONAL_FIELDS,
@@ -33,6 +35,26 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
     secret: env.BETTER_AUTH_SECRET,
     database: env.DB,
     trustedOrigins: [CANONICAL_ORIGIN],
+    hooks: {
+      before: createAuthMiddleware(async (context) => {
+        const body = context.body as Record<string, unknown> | undefined;
+        if (body && typeof body.email === "string") {
+          body.email = normalizeEmail(body.email);
+        }
+      }),
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user) => ({
+            data: {
+              ...user,
+              email: normalizeEmail(user.email),
+            },
+          }),
+        },
+      },
+    },
     emailAndPassword: {
       enabled: true,
       disableSignUp: true,
@@ -48,6 +70,9 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
       expiresIn: SESSION_SLIDING_TTL_SECONDS,
       updateAge: 24 * 60 * 60,
       additionalFields: SESSION_ADDITIONAL_FIELDS,
+    },
+    verification: {
+      storeIdentifier: "hashed",
     },
     socialProviders: {
       github: {
@@ -70,8 +95,16 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
         },
       }),
       emailOTP({
-        sendVerificationOTP: (message) =>
-          dependencies.sendVerificationOTP(message),
+        sendVerificationOTP: async (message, context) => {
+          try {
+            await dependencies.sendVerificationOTP(message);
+          } catch (error) {
+            await context?.context.internalAdapter.deleteVerificationByIdentifier(
+              `${message.type}-otp-${message.email}`,
+            );
+            throw error;
+          }
+        },
         expiresIn: 10 * 60,
         allowedAttempts: 5,
         storeOTP: "hashed",
@@ -96,6 +129,10 @@ export function createAuth(env: Env, dependencies: AuthDependencies) {
         allowUnauthenticatedClientRegistration: false,
         storeClientSecret: "hashed",
         storeTokens: "hashed",
+        silenceWarnings: {
+          oauthAuthServerConfig: true,
+          openidConfig: true,
+        },
       }),
     ],
   });

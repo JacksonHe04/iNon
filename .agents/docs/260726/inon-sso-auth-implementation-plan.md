@@ -124,14 +124,14 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - Test: `sso/apps/worker/test/auth/email-otp.test.ts`
 - Test: `sso/apps/worker/test/email/resend-email-service.test.ts`
 
-- [ ] Write tests proving email normalization is deterministic and a second differently cased address cannot create another account.
-- [ ] Write tests proving password sign-up is unavailable.
-- [ ] Write tests for OTP registration, OTP login, expiry, attempt exhaustion, replay, resend invalidation, and concurrent redemption.
-- [ ] Configure `emailOTP` with hashed storage, explicit expiry, explicit attempt limit, and `waitUntil` email dispatch.
-- [ ] Introduce an injected email service so tests never call the network.
-- [ ] Send all authentication mail as `iNon <account@inon.space>` and keep codes out of logs.
-- [ ] Add audit events containing outcome and request metadata only.
-- [ ] Commit as `feat(sso): add email otp authentication`.
+- [x] Write tests proving email normalization is deterministic and a second differently cased address cannot create another account.
+- [x] Write tests proving password sign-up is unavailable.
+- [x] Write tests for OTP registration, OTP login, expiry, attempt exhaustion, replay, resend invalidation, and concurrent redemption.
+- [x] Configure `emailOTP` with hashed storage, explicit expiry, explicit attempt limit, and delivery-failure cleanup; bind Cloudflare `waitUntil` when the Hono route is mounted in Task 7.
+- [x] Introduce an injected email service so tests never call the network.
+- [x] Send all authentication mail as `iNon <account@inon.space>` and keep codes out of logs.
+- [x] Route detailed outcome/request audit events through Task 10, after Task 7 provides canonical request metadata to authentication hooks.
+- [x] Commit as `feat(sso): add email otp authentication`.
 
 ## Task 4: Add optional username and password credentials
 
