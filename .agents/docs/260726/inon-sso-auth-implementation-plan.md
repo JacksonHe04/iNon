@@ -101,15 +101,15 @@ Generated OAuth Client secrets are written once to an ignored `sso/.secrets/` fi
 - Test: `sso/apps/worker/test/auth/schema.test.ts`
 - Test: `sso/apps/worker/test/auth/migrations.test.ts`
 
-- [ ] Build the smallest test auth factory against an empty Miniflare D1 database.
-- [ ] Use Better Auth `getMigrations(auth.options)` to derive the schema for the locked package versions.
-- [ ] Commit an explicit D1 migration rather than running implicit production migrations.
-- [ ] Include Better Auth core, username, email OTP, OAuth Provider, absolute session expiry, username change timestamp, and future migration metadata fields.
-- [ ] Add uniqueness and foreign-key constraints for normalized email, username, provider account, session token, OAuth code, and OAuth refresh token identity.
-- [ ] Add database triggers preventing an update from extending `expiresAt` beyond `absoluteExpiresAt`.
-- [ ] Add a compatibility test proving a fully migrated database produces no missing Better Auth table or column migrations.
-- [ ] Add a clean-database migration test and a replay test.
-- [ ] Commit as `feat(sso): add central auth schema`.
+- [x] Build the smallest test auth factory against an empty Miniflare D1 database.
+- [x] Use Better Auth `getMigrations(auth.options)` to derive the schema for the locked package versions.
+- [x] Commit an explicit D1 migration rather than running implicit production migrations.
+- [x] Include Better Auth core, username, email OTP, OAuth Provider, absolute session expiry, username change timestamp, and future migration metadata fields.
+- [x] Add uniqueness and foreign-key constraints for normalized email, username, provider account, session token, OAuth refresh token identity, and the framework’s atomic single-use code store.
+- [x] Add database triggers preventing an update from extending `expiresAt` beyond `absoluteExpiresAt`.
+- [x] Add a compatibility test proving a fully migrated database produces no missing Better Auth table or column migrations.
+- [x] Add a clean-database migration test and a replay test.
+- [x] Commit as `feat(sso): add central auth schema`.
 
 ## Task 3: Implement email OTP registration and login
 
