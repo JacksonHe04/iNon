@@ -38,6 +38,6 @@
   "exclude": [
     "node_modules",
     "_satellites",
-    "sso/apps/worker"
+    "sso"
   ]
 }
