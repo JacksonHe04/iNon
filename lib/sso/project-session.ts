@@ -3,6 +3,10 @@ import { InonSsoError } from "@inon-ai/inon-sso";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getInonProjectSso } from "./project-client";
+import {
+  inonLoginPath,
+  inonRefreshPath,
+} from "./public-paths";
 
 export async function currentInonRequest(): Promise<Request> {
   const requestHeaders = await headers();
@@ -43,11 +47,13 @@ export async function requireInonProjectUser(
       await currentInonRequest(),
     );
   } catch (error) {
-    if (
-      error instanceof InonSsoError &&
-      error.code === "UNAUTHENTICATED"
-    ) {
-      redirect(getInonProjectSso().loginUrl(returnTo));
+    if (error instanceof InonSsoError) {
+      if (error.code === "UNAUTHENTICATED") {
+        redirect(inonLoginPath(returnTo));
+      }
+      if (error.code === "REFRESH_REQUIRED") {
+        redirect(inonRefreshPath(returnTo));
+      }
     }
     throw error;
   }
@@ -63,10 +69,10 @@ export async function requireInonProjectAdmin(
   } catch (error) {
     if (error instanceof InonSsoError) {
       if (error.code === "UNAUTHENTICATED") {
-        redirect(getInonProjectSso().loginUrl(returnTo));
+        redirect(inonLoginPath(returnTo));
       }
       if (error.code === "REFRESH_REQUIRED") {
-        redirect(getInonProjectSso().refreshUrl(returnTo));
+        redirect(inonRefreshPath(returnTo));
       }
       if (error.code === "FORBIDDEN") {
         redirect("/");

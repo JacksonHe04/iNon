@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Modal from '@/components/Modal';
 import { LogIn, LogOut, Loader2 } from 'lucide-react';
+import { inonLoginPath, inonLogoutPath } from '@/lib/sso/public-paths';
 
 interface AuthModalProps {
   open: boolean;
@@ -12,22 +14,13 @@ interface AuthModalProps {
 
 export default function AuthModal({ open, onClose, userEmail }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
 
-  const handleSignOut = async () => {
+  const handleNavigation = () => {
     setLoading(true);
-    const returnTo = `${window.location.pathname}${window.location.search}`;
-    window.location.assign(
-      `/api/auth/inon/logout?returnTo=${encodeURIComponent(returnTo)}`,
-    );
   };
 
-  const handleSignIn = () => {
-    setLoading(true);
-    const returnTo = `${window.location.pathname}${window.location.search}`;
-    window.location.assign(
-      `/api/auth/inon/login?returnTo=${encodeURIComponent(returnTo)}`,
-    );
-  };
+  const returnTo = pathname || '/';
 
   return (
     <Modal open={open} onClose={onClose} position="center" className="max-w-md p-6">
@@ -41,14 +34,15 @@ export default function AuthModal({ open, onClose, userEmail }: AuthModalProps) 
             <p className="text-sm text-gray-500 font-mono mt-1">{userEmail}</p>
           </div>
 
-          <button
-            onClick={handleSignOut}
-            disabled={loading}
+          <a
+            href={inonLogoutPath(returnTo)}
+            onClick={handleNavigation}
+            aria-disabled={loading}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition text-sm font-semibold"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
             <span>退出登录</span>
-          </button>
+          </a>
         </div>
       ) : (
         <div className="space-y-4 text-center">
@@ -60,9 +54,10 @@ export default function AuthModal({ open, onClose, userEmail }: AuthModalProps) 
               一次登录即可进入 iNon、Leaf、PINE、SAYLESS 与 Treez。
             </p>
           </div>
-          <button
-            onClick={handleSignIn}
-            disabled={loading}
+          <a
+            href={inonLoginPath(returnTo)}
+            onClick={handleNavigation}
+            aria-disabled={loading}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 hover:bg-teal-500/20 transition text-sm font-semibold"
           >
             {loading ? (
@@ -71,7 +66,7 @@ export default function AuthModal({ open, onClose, userEmail }: AuthModalProps) 
               <LogIn className="w-4 h-4" />
             )}
             <span>前往 iNon SSO</span>
-          </button>
+          </a>
         </div>
       )}
     </Modal>
