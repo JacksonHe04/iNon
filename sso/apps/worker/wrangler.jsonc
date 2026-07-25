@@ -4,6 +4,14 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-07-22",
   "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "inon-sso",
+      "database_id": "e47147b0-d2a3-427b-83b6-e8796181070c",
+      "migrations_dir": "migrations"
+    }
+  ],
   "vars": {
     "ENVIRONMENT": "development",
     "CANONICAL_ORIGIN": "https://inon.space"
