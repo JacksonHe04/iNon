@@ -1,0 +1,31 @@
+{
+  "name": "@inon/sso-next",
+  "version": "0.1.0",
+  "description": "Server-side OAuth and project-session integration for iNon SSO clients.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@inon/sso-contracts": "workspace:*",
+    "jose": "6.2.4"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

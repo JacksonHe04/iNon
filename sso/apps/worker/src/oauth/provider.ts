@@ -4,7 +4,6 @@ import { AUTH_BASE_URL } from "../auth/constants";
 import {
   PROJECT_CLAIM,
   PROJECT_ROLE_CLAIM,
-  projectClaimsFromAccessToken,
   resolveProjectIdentityClaims,
 } from "./claims";
 
@@ -32,8 +31,10 @@ export function createFirstPartyOAuthProvider(db: D1Database) {
       user
         ? resolveProjectIdentityClaims(db, user, metadata)
         : Promise.resolve({}),
-    customUserInfoClaims: ({ jwt }) =>
-      projectClaimsFromAccessToken(jwt as Record<string, unknown>),
+    customUserInfoClaims: ({ user, jwt }) =>
+      resolveProjectIdentityClaims(db, user, {
+        project: jwt[PROJECT_CLAIM],
+      }),
     advertisedMetadata: {
       scopes_supported: [...inonOAuthScopes],
       claims_supported: [

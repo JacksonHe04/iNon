@@ -46,12 +46,20 @@ party.
 
 ### Stage 3: reusable Next.js package
 
-- [ ] Generate PKCE verifier/challenge, state, and nonce on the server.
-- [ ] Exchange codes and rotate Refresh Tokens only on the server.
-- [ ] Validate issuer, audience, signature, nonce, project, role, and expiry.
-- [ ] Store project session material only in a Secure, HttpOnly, Host-only,
+- [x] Generate PKCE verifier/challenge, state, and nonce on the server.
+- [x] Exchange codes and rotate Refresh Tokens only on the server.
+- [x] Validate issuer, audience, signature, nonce, project, role, and expiry.
+- [x] Store project session material only in a Secure, HttpOnly, Host-only,
   SameSite=Lax cookie.
-- [ ] Export stable session and authorization helpers.
+- [x] Export stable session and authorization helpers.
+
+`@inon/sso-next` now owns the complete relying-party protocol boundary. Its
+project session preserves the original 90-day absolute deadline while a
+successful refresh renews only the 30-day browser-cookie window. The package
+never returns OAuth tokens to application code. `requireProjectAdmin` calls
+central `userinfo` on every authorization decision, and `userinfo` resolves
+the current D1 membership instead of copying the role embedded in an older
+access token.
 
 ### Stage 4: Treez first cutover
 

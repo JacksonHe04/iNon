@@ -66,6 +66,22 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(@types/node@24.13.3)(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1))
 
+  packages/next:
+    dependencies:
+      '@inon/sso-contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      jose:
+        specifier: 6.2.4
+        version: 6.2.4
+    devDependencies:
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1))
+
 packages:
 
   '@better-auth/core@1.6.25':

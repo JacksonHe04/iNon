@@ -41,19 +41,3 @@ export async function resolveProjectIdentityClaims(
     [PROJECT_ROLE_CLAIM]: role,
   };
 }
-
-export function projectClaimsFromAccessToken(
-  jwt: Record<string, unknown>,
-): Partial<ProjectIdentityClaims> {
-  return {
-    ...(typeof jwt.preferred_username === "string"
-      ? { preferred_username: jwt.preferred_username }
-      : {}),
-    ...(typeof jwt[PROJECT_CLAIM] === "string"
-      ? { [PROJECT_CLAIM]: jwt[PROJECT_CLAIM] as ProjectKey }
-      : {}),
-    ...(typeof jwt[PROJECT_ROLE_CLAIM] === "string"
-      ? { [PROJECT_ROLE_CLAIM]: jwt[PROJECT_ROLE_CLAIM] as ProjectRole }
-      : {}),
-  };
-}
