@@ -36,6 +36,7 @@ describe("Turnstile server verification", () => {
     ).resolves.toBe(false);
 
     const submitted = fetcher.mock.calls[0]![1]!.body as URLSearchParams;
+    expect(fetcher.mock.contexts[0]).toBe(globalThis);
     expect(submitted.get("secret")).toBe("test-secret");
     expect(submitted.get("response")).toBe("single-use-token");
     expect(submitted.get("remoteip")).toBe("203.0.113.1");

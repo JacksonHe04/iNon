@@ -55,6 +55,7 @@ export async function proxySsoRequest(
   for (const name of HOP_BY_HOP_HEADERS) {
     upstreamRequest.headers.delete(name);
   }
+  upstreamRequest.headers.set("accept-encoding", "identity");
   upstreamRequest.headers.set(
     "x-inon-proxy-secret",
     requiredServerEnvironment("INON_SSO_PROXY_SECRET"),
@@ -80,6 +81,7 @@ export async function proxySsoRequest(
     responseHeaders.delete("content-encoding");
     responseHeaders.delete("content-length");
     responseHeaders.delete("transfer-encoding");
+    responseHeaders.set("cache-control", "no-store");
 
     const hasBody =
       request.method !== "HEAD" &&
