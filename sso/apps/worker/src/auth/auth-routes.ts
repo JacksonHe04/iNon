@@ -29,6 +29,37 @@ interface ProtectedAuthRequest {
   identifier?: string;
 }
 
+async function normalizeOAuthAuthorizeResponse(
+  request: Request,
+  response: Response,
+): Promise<Response> {
+  if (
+    request.method !== "GET" ||
+    !new URL(request.url).pathname.endsWith("/oauth2/authorize") ||
+    !response.headers.get("content-type")?.includes("application/json")
+  ) {
+    return response;
+  }
+
+  const payload = await response
+    .clone()
+    .json<{ redirect?: unknown; url?: unknown }>()
+    .catch(() => null);
+  if (
+    payload?.redirect !== true ||
+    typeof payload.url !== "string"
+  ) {
+    return response;
+  }
+
+  const headers = new Headers(response.headers);
+  headers.delete("content-length");
+  headers.delete("content-type");
+  headers.set("cache-control", "no-store");
+  headers.set("location", payload.url);
+  return new Response(null, { status: 303, headers });
+}
+
 async function classifyProtectedAuthRequest(
   request: Request,
 ): Promise<ProtectedAuthRequest | null> {
@@ -188,7 +219,9 @@ export function createAuthRoutes(options: AuthRouteOptions = {}) {
       }
     }
 
-    return createCentralAuth(context).handler(canonicalRequest(context));
+    const request = canonicalRequest(context);
+    const response = await createCentralAuth(context).handler(request);
+    return normalizeOAuthAuthorizeResponse(request, response);
   });
 
   return routes;
