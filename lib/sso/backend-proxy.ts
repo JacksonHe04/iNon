@@ -18,6 +18,18 @@ function requiredServerEnvironment(name: string): string {
   return value;
 }
 
+function clientIpFromVercel(request: Request): string | null {
+  const value = request.headers.get("x-forwarded-for")?.trim();
+  if (!value) {
+    return null;
+  }
+
+  const clientIp = value.split(",", 1)[0]?.trim() ?? "";
+  return clientIp.length > 0 && clientIp.length <= 64
+    ? clientIp
+    : null;
+}
+
 export async function proxySsoRequest(
   request: Request,
   pathSegments: readonly string[],
@@ -52,6 +64,12 @@ export async function proxySsoRequest(
     "x-forwarded-proto",
     publicOrigin.protocol.slice(0, -1),
   );
+  const clientIp = clientIpFromVercel(request);
+  if (clientIp) {
+    upstreamRequest.headers.set("x-inon-client-ip", clientIp);
+  } else {
+    upstreamRequest.headers.delete("x-inon-client-ip");
+  }
 
   try {
     const upstreamResponse = await fetch(upstreamRequest, {

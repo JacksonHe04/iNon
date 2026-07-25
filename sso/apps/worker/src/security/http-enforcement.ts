@@ -2,7 +2,6 @@ import type { Context } from "hono";
 import type { AppBindings } from "../env";
 import { createApiError } from "../http/errors";
 import {
-  requestRemoteIp,
   type AuthEntryPointGuard,
 } from "./auth-entry-points";
 import type { SecurityAction } from "./rate-limit";
@@ -18,7 +17,7 @@ export async function enforceAuthEntryPoint(
 ): Promise<Response | null> {
   const decision = await guard.protect({
     ...input,
-    remoteIp: requestRemoteIp(context.req.raw),
+    remoteIp: context.get("clientIp") ?? null,
     turnstileToken:
       context.req.header("x-turnstile-token")?.trim() || null,
   });

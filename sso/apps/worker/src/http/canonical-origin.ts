@@ -24,7 +24,7 @@ function isStatefulRequest(method: string, pathname: string): boolean {
 async function canonicalizeVercelProxyRequest(
   context: Parameters<MiddlewareHandler<AppBindings>>[0],
   canonicalOrigin: URL,
-): Promise<Request | null> {
+): Promise<{ clientIp: string | null; request: Request } | null> {
   const proxySecret = context.req.header("x-inon-proxy-secret");
   const forwardedHost = context.req
     .header("x-forwarded-host")
@@ -44,9 +44,17 @@ async function canonicalizeVercelProxyRequest(
   const publicUrl = new URL(context.req.url);
   publicUrl.protocol = canonicalOrigin.protocol;
   publicUrl.host = canonicalOrigin.host;
-  const request = new Request(publicUrl, context.req.raw);
+  const clientIpHeader = context.req.header("x-inon-client-ip")?.trim();
+  const clientIp =
+    clientIpHeader &&
+    clientIpHeader.length <= 64 &&
+    !clientIpHeader.includes(",")
+      ? clientIpHeader
+      : null;
+  const request = new Request(publicUrl, context.req.raw.clone());
   request.headers.delete("x-inon-proxy-secret");
-  return request;
+  request.headers.delete("x-inon-client-ip");
+  return { clientIp, request };
 }
 
 export const canonicalOriginMiddleware: MiddlewareHandler<AppBindings> = async (
@@ -63,10 +71,16 @@ export const canonicalOriginMiddleware: MiddlewareHandler<AppBindings> = async (
     ? null
     : await canonicalizeVercelProxyRequest(context, canonicalOrigin);
   const canonicalRequest =
-    directCanonicalRequest ?? proxiedCanonicalRequest;
+    directCanonicalRequest ?? proxiedCanonicalRequest?.request ?? null;
 
   if (canonicalRequest) {
     context.set("canonicalRequest", canonicalRequest);
+    context.set(
+      "clientIp",
+      directCanonicalRequest
+        ? context.req.header("cf-connecting-ip")?.trim() ?? null
+        : proxiedCanonicalRequest?.clientIp ?? null,
+    );
   }
 
   if (!isStatefulRequest(context.req.method, requestUrl.pathname)) {

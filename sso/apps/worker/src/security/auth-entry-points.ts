@@ -86,12 +86,3 @@ export class DefaultAuthEntryPointGuard
       : { allowed: false, reason: "turnstile_failed" };
   }
 }
-
-export function requestRemoteIp(request: Request): string | null {
-  const connectingIp = request.headers.get("cf-connecting-ip");
-  if (connectingIp) {
-    return connectingIp;
-  }
-  return request.headers.get("x-forwarded-for")?.split(",", 1)[0]?.trim() ??
-    null;
-}

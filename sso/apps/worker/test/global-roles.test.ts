@@ -1,8 +1,12 @@
 import { env } from "cloudflare:test";
-import { expect, it } from "vitest";
+import { beforeEach, expect, it } from "vitest";
 import { GlobalRoleRepository } from "../src/authorization/global-roles";
 
 const repository = new GlobalRoleRepository(env.DB);
+
+beforeEach(async () => {
+  await env.DB.prepare("DELETE FROM global_roles").run();
+});
 
 it("finds the sole global super administrator", async () => {
   await expect(repository.getSuperAdminUserId()).resolves.toBeNull();

@@ -1,5 +1,6 @@
-import { SELF } from "cloudflare:test";
+import { env, SELF } from "cloudflare:test";
 import { expect, it } from "vitest";
+import { createApp } from "../src/app";
 
 it("does not accept a stateful request on the internal origin", async () => {
   const response = await SELF.fetch("https://inon-sso.internal/api/sso/session", {
@@ -21,4 +22,53 @@ it("does not accept a GitHub callback on a noncanonical origin", async () => {
   expect(await response.json()).toMatchObject({
     error: { code: "INVALID_REQUEST" },
   });
+});
+
+it("trusts the client IP only after authenticating the Vercel proxy", async () => {
+  const protectedRequests: Array<{
+    remoteIp: string | null;
+    turnstileToken: string | null;
+  }> = [];
+  const app = createApp({
+    createEmailService: () => ({
+      sendVerificationOTP: async () => {},
+      sendSecurityNotification: async () => {},
+    }),
+    createSecurityGuard: () => ({
+      protect: async ({ remoteIp, turnstileToken }) => {
+        protectedRequests.push({ remoteIp, turnstileToken });
+        return { allowed: true };
+      },
+    }),
+    deferBackgroundTasks: false,
+  });
+
+  const response = await app.request(
+    "https://inon-sso.internal/api/sso/auth/email-otp/send-verification-otp",
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: "https://inon.space",
+        "x-forwarded-host": "inon.space",
+        "x-forwarded-proto": "https",
+        "x-inon-client-ip": "203.0.113.42",
+        "x-inon-proxy-secret": "test-vercel-proxy-secret",
+        "x-turnstile-token": "test-token",
+      },
+      body: JSON.stringify({
+        email: "proxy-ip@inon.space",
+        type: "sign-in",
+      }),
+    },
+    env,
+  );
+
+  expect(response.status).toBe(200);
+  expect(protectedRequests).toEqual([
+    {
+      remoteIp: "203.0.113.42",
+      turnstileToken: "test-token",
+    },
+  ]);
 });

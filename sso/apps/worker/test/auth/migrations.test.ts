@@ -17,6 +17,8 @@ describe("authentication migration invariants", () => {
       "0001_authorization_foundation.sql",
       "0002_better_auth.sql",
       "0003_username_policy.sql",
+      "0004_first_party_oauth_clients.sql",
+      "0005_auth_security.sql",
     ]);
     expect(after.results).toEqual(before.results);
   });
