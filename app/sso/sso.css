@@ -217,6 +217,90 @@
   animation: sso-spin 700ms linear infinite;
 }
 
+.sso-handoff {
+  min-height: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.sso-handoff-spinner {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  margin-bottom: 28px;
+  place-items: center;
+  border: 1px solid rgba(19, 35, 29, 0.1);
+  border-radius: 20px;
+  background: rgba(239, 247, 243, 0.9);
+}
+
+.sso-handoff-spinner span {
+  width: 23px;
+  height: 23px;
+  border: 2px solid rgba(15, 159, 120, 0.17);
+  border-top-color: #08765a;
+  border-radius: 50%;
+  animation: sso-spin 700ms linear infinite;
+}
+
+.sso-handoff > p:not(.sso-kicker) {
+  max-width: 300px;
+  margin: 14px 0 0;
+  color: #65746d;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.sso-handoff-progress {
+  width: min(100%, 260px);
+  display: grid;
+  margin-top: 34px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.sso-handoff-progress span {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(19, 35, 29, 0.08);
+}
+
+.sso-handoff-progress span::after {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  content: "";
+  background: #0f9f78;
+  transform: translateX(-105%);
+  animation: sso-handoff-progress 2.2s ease-in-out infinite;
+}
+
+.sso-handoff-progress span:nth-child(2)::after {
+  animation-delay: 240ms;
+}
+
+.sso-handoff-progress span:nth-child(3)::after {
+  animation-delay: 480ms;
+}
+
+@keyframes sso-handoff-progress {
+  0% {
+    transform: translateX(-105%);
+  }
+  45%,
+  70% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(105%);
+  }
+}
+
 .sso-account {
   width: min(100%, 610px);
 }

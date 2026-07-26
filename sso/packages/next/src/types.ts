@@ -7,6 +7,8 @@ export type ProjectKey =
 
 export type ProjectRole = "member" | "admin";
 
+export type InonSsoTransitionAction = "login" | "refresh" | "logout";
+
 export interface InonSsoConfig {
   project: ProjectKey;
   clientId: string;
@@ -40,6 +42,10 @@ export interface InonSsoClient {
   readonly handlers: {
     GET: (request: Request) => Promise<Response>;
   };
+  transition(
+    request: Request,
+    action: InonSsoTransitionAction,
+  ): Response;
   getSession(request: Request): Promise<InonProjectSession | null>;
   requireUser(request: Request): Promise<InonProjectSession>;
   requireProjectAdmin(request: Request): Promise<InonProjectSession>;

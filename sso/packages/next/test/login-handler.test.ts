@@ -53,4 +53,32 @@ describe("OAuth login handler", () => {
     expect(await response.json()).toEqual({ session: null });
     expect(response.headers.get("cache-control")).toBe("no-store");
   });
+
+  it("keeps a branded transition visible before entering OAuth", async () => {
+    const client = createInonSso({
+      project: "leaf",
+      clientId: "leaf-client",
+      clientSecret: "leaf-secret",
+      appOrigin: "http://localhost:3000",
+      sessionSecret: "s".repeat(32),
+      secureCookies: false,
+    });
+
+    const response = client.transition(
+      new Request(
+        "http://localhost:3000/sso/start?returnTo=%2Fmine",
+      ),
+      "login",
+    );
+    const html = await response.text();
+
+    expect(response.headers.get("content-type")).toContain("text/html");
+    expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(html).toContain("正在连接 iNon");
+    expect(html).toContain("正在安全地将你从 Leaf 送往统一账号服务");
+    expect(html).toContain(
+      "/api/auth/inon/login?returnTo=%2Fmine",
+    );
+    expect(html).toContain('role="status"');
+  });
 });
