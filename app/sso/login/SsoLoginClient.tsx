@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { TurnstileField } from "@/components/sso/TurnstileField";
+import { SsoHandoff } from "@/components/sso/SsoHandoff";
 import { GithubIcon } from "@/components/icons/PlatformIcons";
 import { requestSsoJson, SsoApiError } from "@/lib/sso/browser-client";
 
@@ -21,6 +22,11 @@ interface SsoLoginClientProps {
 interface SessionResponse {
   session: unknown;
   user: unknown;
+}
+
+interface HandoffState {
+  description: string;
+  title: string;
 }
 
 function messageFrom(error: unknown): string {
@@ -51,12 +57,24 @@ export function SsoLoginClient({
   const [challengeVersion, setChallengeVersion] = useState(0);
   const [busy, setBusy] = useState(false);
   const [githubBusy, setGithubBusy] = useState(false);
+  const [handoff, setHandoff] = useState<HandoffState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
+  const beginHandoff = useCallback(
+    (destination: string, nextHandoff: HandoffState) => {
+      setHandoff(nextHandoff);
+      window.setTimeout(() => window.location.assign(destination), 280);
+    },
+    [],
+  );
+
   const continueAfterLogin = useCallback(() => {
-    window.location.assign(resumeUrl);
-  }, [resumeUrl]);
+    beginHandoff(resumeUrl, {
+      title: "身份验证完成",
+      description: "正在返回你刚才访问的项目，请稍候。",
+    });
+  }, [beginHandoff, resumeUrl]);
 
   useEffect(() => {
     requestSsoJson<SessionResponse | null>("/auth/get-session")
@@ -144,13 +162,25 @@ export function SsoLoginClient({
       if (!response.url) {
         throw new Error("GitHub 登录地址未能生成。");
       }
-      window.location.assign(response.url);
+      beginHandoff(response.url, {
+        title: "正在前往 GitHub",
+        description: "完成 GitHub 授权后，你会自动回到 iNon。",
+      });
     } catch (requestError) {
       setError(messageFrom(requestError));
       resetFormChallenge();
     } finally {
       setGithubBusy(false);
     }
+  }
+
+  if (handoff) {
+    return (
+      <SsoHandoff
+        title={handoff.title}
+        description={handoff.description}
+      />
+    );
   }
 
   return (

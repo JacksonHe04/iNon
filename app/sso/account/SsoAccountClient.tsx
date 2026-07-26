@@ -14,6 +14,7 @@ import {
   useState,
 } from "react";
 import { TurnstileField } from "@/components/sso/TurnstileField";
+import { SsoHandoff } from "@/components/sso/SsoHandoff";
 import { GithubIcon } from "@/components/icons/PlatformIcons";
 import { requestSsoJson, SsoApiError } from "@/lib/sso/browser-client";
 import { SsoAdminPanel } from "./SsoAdminPanel";
@@ -95,6 +96,10 @@ export function SsoAccountClient({ siteKey }: SsoAccountClientProps) {
   const [githubToken, setGithubToken] = useState<string | null>(null);
   const [challengeVersion, setChallengeVersion] = useState(0);
   const [busy, setBusy] = useState<string | null>("loading");
+  const [handoff, setHandoff] = useState<{
+    description: string;
+    title: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
@@ -230,7 +235,11 @@ export function SsoAccountClient({ siteKey }: SsoAccountClientProps) {
       if (!response.url) {
         throw new Error("GitHub 绑定地址未能生成。");
       }
-      window.location.assign(response.url);
+      setHandoff({
+        title: "正在前往 GitHub",
+        description: "完成授权后会自动回到 iNon 账号中心。",
+      });
+      window.setTimeout(() => window.location.assign(response.url!), 280);
     } catch (requestError) {
       setError(messageFrom(requestError));
       setGithubToken(null);
@@ -240,10 +249,23 @@ export function SsoAccountClient({ siteKey }: SsoAccountClientProps) {
 
   async function signOut() {
     setBusy("signout");
+    setHandoff({
+      title: "正在退出 iNon",
+      description: "正在安全结束中央登录会话。",
+    });
     await requestSsoJson("/auth/sign-out", {
       body: {},
     }).catch(() => undefined);
     window.location.assign("/sso/login");
+  }
+
+  if (handoff) {
+    return (
+      <SsoHandoff
+        title={handoff.title}
+        description={handoff.description}
+      />
+    );
   }
 
   if (!profile || busy === "loading") {

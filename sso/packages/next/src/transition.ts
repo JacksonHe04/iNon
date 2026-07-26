@@ -270,9 +270,7 @@ export function transitionResponse(options: {
     </main>
     <script>
       const destination = ${destinationScript};
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => window.location.replace(destination));
-      });
+      setTimeout(() => window.location.replace(destination), 420);
     </script>
   </body>
 </html>`;
