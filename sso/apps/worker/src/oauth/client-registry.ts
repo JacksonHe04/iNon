@@ -4,12 +4,12 @@ import {
   type ProjectKey,
 } from "@inon/sso-contracts";
 import { z } from "zod";
-import { PROJECT_CALLBACK_URLS } from "../auth/constants";
+import { PROJECT_REDIRECT_URIS } from "../auth/constants";
 
 export interface FirstPartyClient {
   name: string;
   project: ProjectKey;
-  redirectUri: string;
+  redirectUris: readonly [string, ...string[]];
 }
 
 const CLIENT_NAMES = {
@@ -24,7 +24,7 @@ export const FIRST_PARTY_CLIENTS = projectKeys.map(
   (project): FirstPartyClient => ({
     name: CLIENT_NAMES[project],
     project,
-    redirectUri: PROJECT_CALLBACK_URLS[project],
+    redirectUris: PROJECT_REDIRECT_URIS[project],
   }),
 );
 

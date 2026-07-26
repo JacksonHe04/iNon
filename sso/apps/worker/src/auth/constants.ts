@@ -18,3 +18,17 @@ export const PROJECT_CALLBACK_URLS = {
   sayless: "https://sayless.inon.space/api/auth/inon/callback",
   treez: "https://treez.inon.space/api/auth/inon/callback",
 } as const satisfies Record<ProjectKey, string>;
+
+export const PROJECT_REDIRECT_URIS = {
+  inon: [PROJECT_CALLBACK_URLS.inon],
+  leaf: [PROJECT_CALLBACK_URLS.leaf],
+  pine: [PROJECT_CALLBACK_URLS.pine],
+  sayless: [
+    PROJECT_CALLBACK_URLS.sayless,
+    "http://localhost:3000/api/auth/inon/callback",
+  ],
+  treez: [PROJECT_CALLBACK_URLS.treez],
+} as const satisfies Record<
+  ProjectKey,
+  readonly [string, ...string[]]
+>;

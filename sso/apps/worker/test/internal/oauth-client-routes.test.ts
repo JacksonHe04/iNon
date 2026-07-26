@@ -40,11 +40,15 @@ it("bootstraps exactly five idempotent first-party OAuth clients", async () => {
   );
 
   const stored = await env.DB.prepare(
-    `SELECT "clientId", "clientSecret"
+    `SELECT "clientId", "clientSecret", "redirectUris"
      FROM "oauthClient"
      WHERE json_extract("metadata", '$.project')
        IN ('inon', 'leaf', 'pine', 'sayless', 'treez')`,
-  ).all<{ clientId: string; clientSecret: string }>();
+  ).all<{
+    clientId: string;
+    clientSecret: string;
+    redirectUris: string;
+  }>();
   expect(stored.results).toHaveLength(5);
   for (const client of first.clients) {
     const row = stored.results.find(
@@ -54,6 +58,14 @@ it("bootstraps exactly five idempotent first-party OAuth clients", async () => {
       ({ clientId }) => clientId === client.clientId,
     );
     expect(row?.clientSecret).not.toBe(credential?.clientSecret);
+    expect(JSON.parse(row?.redirectUris ?? "[]")).toEqual(
+      client.project === "sayless"
+        ? [
+            "https://sayless.inon.space/api/auth/inon/callback",
+            "http://localhost:3000/api/auth/inon/callback",
+          ]
+        : [expect.stringMatching(/^https:\/\/.+\/api\/auth\/inon\/callback$/)],
+    );
   }
 
   const secondResponse = await request();

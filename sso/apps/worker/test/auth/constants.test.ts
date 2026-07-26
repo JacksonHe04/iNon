@@ -5,6 +5,7 @@ import {
   GITHUB_CALLBACK_URL,
   OAUTH_ISSUER,
   PROJECT_CALLBACK_URLS,
+  PROJECT_REDIRECT_URIS,
   SESSION_ABSOLUTE_TTL_SECONDS,
   SESSION_SLIDING_TTL_SECONDS,
 } from "../../src/auth/constants";
@@ -24,13 +25,23 @@ describe("central authentication constants", () => {
     expect(SESSION_ABSOLUTE_TTL_SECONDS).toBe(90 * 24 * 60 * 60);
   });
 
-  it("defines one exact callback for each supported project", () => {
+  it("defines canonical callbacks and exact redirect URI allowlists", () => {
     expect(PROJECT_CALLBACK_URLS).toEqual({
       inon: "https://inon.space/api/auth/inon/callback",
       leaf: "https://leaf.inon.space/api/auth/inon/callback",
       pine: "https://pine.inon.space/api/auth/inon/callback",
       sayless: "https://sayless.inon.space/api/auth/inon/callback",
       treez: "https://treez.inon.space/api/auth/inon/callback",
+    });
+    expect(PROJECT_REDIRECT_URIS).toEqual({
+      inon: ["https://inon.space/api/auth/inon/callback"],
+      leaf: ["https://leaf.inon.space/api/auth/inon/callback"],
+      pine: ["https://pine.inon.space/api/auth/inon/callback"],
+      sayless: [
+        "https://sayless.inon.space/api/auth/inon/callback",
+        "http://localhost:3000/api/auth/inon/callback",
+      ],
+      treez: ["https://treez.inon.space/api/auth/inon/callback"],
     });
   });
 });

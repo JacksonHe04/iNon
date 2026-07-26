@@ -140,7 +140,7 @@ async function assertStoredClientConfiguration(
     row.name === definition.name &&
     haveSameValues(
       parseStoredStringArray(row.redirectUris),
-      [definition.redirectUri],
+      definition.redirectUris,
     ) &&
     haveSameValues(parseStoredStringArray(row.scopes), CLIENT_SCOPES) &&
     row.tokenEndpointAuthMethod === "client_secret_basic" &&
@@ -278,8 +278,8 @@ export async function bootstrapFirstPartyOAuthClients(
             now,
             now,
             definition.name,
-            new URL(definition.redirectUri).origin,
-            JSON.stringify([definition.redirectUri]),
+            new URL(definition.redirectUris[0]).origin,
+            JSON.stringify(definition.redirectUris),
             "client_secret_basic",
             JSON.stringify(CLIENT_GRANT_TYPES),
             JSON.stringify(["code"]),
