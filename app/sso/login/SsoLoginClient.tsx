@@ -48,7 +48,6 @@ export function SsoLoginClient({
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [formToken, setFormToken] = useState<string | null>(null);
-  const [githubToken, setGithubToken] = useState<string | null>(null);
   const [challengeVersion, setChallengeVersion] = useState(0);
   const [busy, setBusy] = useState(false);
   const [githubBusy, setGithubBusy] = useState(false);
@@ -68,13 +67,6 @@ export function SsoLoginClient({
       })
       .catch(() => undefined);
   }, [continueAfterLogin]);
-
-  const formAction =
-    mode === "password"
-      ? "password_login"
-      : otpSent
-        ? "otp_verify"
-        : "otp_send";
 
   const resetFormChallenge = () => {
     setFormToken(null);
@@ -130,8 +122,8 @@ export function SsoLoginClient({
   }
 
   async function continueWithGitHub() {
-    if (!githubToken) {
-      setError("请先完成 GitHub 登录下方的安全验证。");
+    if (!formToken) {
+      setError("请先完成人机验证。");
       return;
     }
     setGithubBusy(true);
@@ -147,7 +139,7 @@ export function SsoLoginClient({
           callbackURL,
           newUserCallbackURL: callbackURL,
         },
-        turnstileToken: githubToken,
+        turnstileToken: formToken,
       });
       if (!response.url) {
         throw new Error("GitHub 登录地址未能生成。");
@@ -155,7 +147,7 @@ export function SsoLoginClient({
       window.location.assign(response.url);
     } catch (requestError) {
       setError(messageFrom(requestError));
-      setGithubToken(null);
+      resetFormChallenge();
     } finally {
       setGithubBusy(false);
     }
@@ -184,7 +176,6 @@ export function SsoLoginClient({
             setMode("otp");
             setOtpSent(false);
             setError(null);
-            resetFormChallenge();
           }}
         >
           邮箱验证码
@@ -199,7 +190,6 @@ export function SsoLoginClient({
             setMode("password");
             setOtpSent(false);
             setError(null);
-            resetFormChallenge();
           }}
         >
           密码登录
@@ -273,8 +263,8 @@ export function SsoLoginClient({
         )}
 
         <TurnstileField
-          key={`${formAction}-${challengeVersion}`}
-          action={formAction}
+          key={`login-${challengeVersion}`}
+          action="login"
           siteKey={siteKey}
           onToken={setFormToken}
         />
@@ -283,7 +273,7 @@ export function SsoLoginClient({
         <button
           className="sso-button"
           type="submit"
-          disabled={busy || !formToken}
+          disabled={busy || githubBusy || !formToken}
         >
           {busy ? (
             <span className="sso-spinner" aria-hidden="true" />
@@ -304,15 +294,10 @@ export function SsoLoginClient({
       <div className="sso-divider">或者</div>
 
       <div className="sso-stack">
-        <TurnstileField
-          action="github_start"
-          siteKey={siteKey}
-          onToken={setGithubToken}
-        />
         <button
           className="sso-button sso-button-secondary"
           type="button"
-          disabled={githubBusy || !githubToken}
+          disabled={busy || githubBusy || !formToken}
           onClick={continueWithGitHub}
         >
           {githubBusy ? (

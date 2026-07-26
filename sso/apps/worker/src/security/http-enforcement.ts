@@ -12,6 +12,7 @@ export async function enforceAuthEntryPoint(
   input: {
     action: SecurityAction;
     identifier?: string;
+    turnstileAction?: string;
     userId?: string;
   },
 ): Promise<Response | null> {

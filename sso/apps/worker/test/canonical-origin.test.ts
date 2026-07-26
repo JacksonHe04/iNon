@@ -27,6 +27,7 @@ it("does not accept a GitHub callback on a noncanonical origin", async () => {
 it("trusts the client IP only after authenticating the Vercel proxy", async () => {
   const protectedRequests: Array<{
     remoteIp: string | null;
+    turnstileAction?: string;
     turnstileToken: string | null;
   }> = [];
   const app = createApp({
@@ -35,8 +36,16 @@ it("trusts the client IP only after authenticating the Vercel proxy", async () =
       sendSecurityNotification: async () => {},
     }),
     createSecurityGuard: () => ({
-      protect: async ({ remoteIp, turnstileToken }) => {
-        protectedRequests.push({ remoteIp, turnstileToken });
+      protect: async ({
+        remoteIp,
+        turnstileAction,
+        turnstileToken,
+      }) => {
+        protectedRequests.push({
+          remoteIp,
+          ...(turnstileAction ? { turnstileAction } : {}),
+          turnstileToken,
+        });
         return { allowed: true };
       },
     }),
@@ -68,6 +77,7 @@ it("trusts the client IP only after authenticating the Vercel proxy", async () =
   expect(protectedRequests).toEqual([
     {
       remoteIp: "203.0.113.42",
+      turnstileAction: "login",
       turnstileToken: "test-token",
     },
   ]);
