@@ -2,6 +2,7 @@ import type { InonProjectSession } from "@inon-ai/inon-sso";
 import { InonSsoError } from "@inon-ai/inon-sso";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { inonProjectOrigin } from "./origin";
 import { getInonProjectSso } from "./project-client";
 import {
   inonLoginPath,
@@ -12,7 +13,7 @@ export async function currentInonRequest(): Promise<Request> {
   const requestHeaders = await headers();
   const cookie = requestHeaders.get("cookie");
   return new Request(
-    process.env.INON_SSO_PUBLIC_ORIGIN ?? "https://inon.space",
+    inonProjectOrigin(),
     cookie ? { headers: { cookie } } : {},
   );
 }
