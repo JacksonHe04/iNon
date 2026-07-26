@@ -59,12 +59,10 @@ it("bootstraps exactly five idempotent first-party OAuth clients", async () => {
     );
     expect(row?.clientSecret).not.toBe(credential?.clientSecret);
     expect(JSON.parse(row?.redirectUris ?? "[]")).toEqual(
-      client.project === "sayless"
-        ? [
-            "https://sayless.inon.space/api/auth/inon/callback",
-            "http://localhost:3000/api/auth/inon/callback",
-          ]
-        : [expect.stringMatching(/^https:\/\/.+\/api\/auth\/inon\/callback$/)],
+      [
+        expect.stringMatching(/^https:\/\/.+\/api\/auth\/inon\/callback$/),
+        "http://localhost:3000/api/auth/inon/callback",
+      ],
     );
   }
 

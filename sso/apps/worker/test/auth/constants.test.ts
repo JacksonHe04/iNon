@@ -3,6 +3,7 @@ import {
   AUTH_BASE_PATH,
   AUTH_BASE_URL,
   GITHUB_CALLBACK_URL,
+  LOCAL_PROJECT_CALLBACK_URL,
   OAUTH_ISSUER,
   PROJECT_CALLBACK_URLS,
   PROJECT_REDIRECT_URIS,
@@ -34,14 +35,26 @@ describe("central authentication constants", () => {
       treez: "https://treez.inon.space/api/auth/inon/callback",
     });
     expect(PROJECT_REDIRECT_URIS).toEqual({
-      inon: ["https://inon.space/api/auth/inon/callback"],
-      leaf: ["https://leaf.inon.space/api/auth/inon/callback"],
-      pine: ["https://pine.inon.space/api/auth/inon/callback"],
+      inon: [
+        "https://inon.space/api/auth/inon/callback",
+        LOCAL_PROJECT_CALLBACK_URL,
+      ],
+      leaf: [
+        "https://leaf.inon.space/api/auth/inon/callback",
+        LOCAL_PROJECT_CALLBACK_URL,
+      ],
+      pine: [
+        "https://pine.inon.space/api/auth/inon/callback",
+        LOCAL_PROJECT_CALLBACK_URL,
+      ],
       sayless: [
         "https://sayless.inon.space/api/auth/inon/callback",
-        "http://localhost:3000/api/auth/inon/callback",
+        LOCAL_PROJECT_CALLBACK_URL,
       ],
-      treez: ["https://treez.inon.space/api/auth/inon/callback"],
+      treez: [
+        "https://treez.inon.space/api/auth/inon/callback",
+        LOCAL_PROJECT_CALLBACK_URL,
+      ],
     });
   });
 });
