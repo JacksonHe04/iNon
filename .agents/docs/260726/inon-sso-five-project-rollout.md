@@ -14,6 +14,8 @@ iNon、Leaf、PINE、SAYLESS、Treez 五个指定项目已经全部完成代码�
 2. Vercel 代理对 Worker 压缩响应的二次压缩；
 3. OAuth authorize JSON 跳转包未转换为浏览器 `303` 跳转，以及项目顶层 `/api` 导航被内置浏览器拦截。
 
+随后完成的第二轮真实浏览器验收又统一了中央登录页的人机验证：邮箱验证码、邮箱密码和 GitHub 登录共用同一个 Managed Turnstile，不再为 GitHub 单独渲染第二个挑战。组件使用 `appearance: "always"`，因此验证区域始终展示；是否要求用户实际勾选复选框由 Cloudflare 的风险判断决定，低风险会话可能自动通过，应用不能强制每次都出现复选框。
+
 五个项目现在统一提供普通页面形式的 `/sso/start`、`/sso/refresh`、`/sso/end`，再在服务端交给同一 SDK 处理。登录按钮使用原生链接，受保护页面和客户端操作复用同一套路径，不再各自拼接 `/api/auth/inon/*`。
 
 ## 统一架构
@@ -71,7 +73,7 @@ flowchart LR
 
 | 项目 | 默认分支提交 | 生产状态 | 回调地址 | 说明 |
 | --- | --- | --- | --- | --- |
-| iNon | `87075f5` | READY | `https://inon.space/api/auth/inon/callback` | 中央站点与 relying party 同域部署 |
+| iNon | `8f46846` | READY | `https://inon.space/api/auth/inon/callback` | 中央站点与 relying party 同域部署；登录页共用单个 Turnstile |
 | SAYLESS | `efc9102` | READY | `https://sayless.inon.space/api/auth/inon/callback` | 已移除旧登录入口 |
 | Leaf | `e3c0280` | READY | `https://leaf.inon.space/api/auth/inon/callback` | 保留 Leaf Team Member 项目关系 |
 | PINE | `bbf6a76` | READY | `https://pine.inon.space/api/auth/inon/callback` | 旧业务数据库退役，不在本工程重建 |
@@ -90,12 +92,15 @@ PINE 的旧 Supabase 项目已经废弃。本轮没有重建题库、进度、�
 
 中央服务与 iNon：
 
-- 最终部署：`dpl_Cq4gx2S4fBfZXthKGwTiVBbHBGJP`；
+- 最终 Vercel 部署：`dpl_2FRvxUBUMKDBReCc481Jwggovr9q`；
+- 最终 Cloudflare Worker 版本：`ed9f198c-dfd2-4653-af89-2af13a9ff490`；
 - 邮箱验证码由 Resend 真实发送，并通过 Gmail 收件箱获取后完成首次注册；
-- Turnstile 在生产域名真实通过；
+- 登录页只渲染一个 Managed Turnstile，邮箱验证码、邮箱密码和 GitHub 登录共用该挑战；
+- Managed Turnstile 在本次低风险浏览器会话中自动通过，切换“验证码 / 密码”模式后仍保持单一挑战且提交按钮正常可用；
 - 账户中心可读取当前账号、会话、项目管理员和唯一全局超级管理员状态；
 - 密码已通过账户中心真实设置，页面显示密码能力已启用；
 - 退出中央会话后使用邮箱和密码成功重新登录同一个账号；
+- 再次退出中央会话后，使用 Gmail 实际收到的最新验证码成功登录同一个账号；
 - 从 `/login?next=/admin` 发起项目登录后自动返回 `/admin/assets`；
 - 后台显示当前账号，证明 iNon 项目会话和超级管理员的项目管理员映射生效。
 
@@ -107,7 +112,8 @@ Leaf：
 - 中央会话存在时无需再次输入凭证，自动返回 `/mine`；
 - 页面确认账号已成为 Leaf 普通成员；
 - 账号未被错误映射为 Team Member，符合 Team Member 独立业务关系规则；
-- 全局超级管理员可见 Leaf 管理入口。
+- 全局超级管理员可见 Leaf 管理入口；
+- 点击“退出 Leaf”后回到未登录首页，再点击真实“登录”入口后经中央会话自动返回 `/mine`，普通成员状态恢复。
 
 PINE：
 
@@ -116,6 +122,7 @@ PINE：
 - 自动完成 `PINE → inon.space → PINE`；
 - 回到首页后顶栏显示当前账号；
 - 侧栏出现“贡献题目”和“审核管理”，证明项目会话和管理员映射生效；
+- 从账号菜单点击“登出”后页面切换为访客态，再点击顶栏真实“登录”入口后自动返回并恢复邮箱身份与管理入口；
 - 业务数据库仍保持退役，本工程没有重建或扩大 PINE 业务数据范围。
 
 SAYLESS：
@@ -124,16 +131,16 @@ SAYLESS：
 - 从 `sayless.inon.space` 首页点击真实“登录”链接；
 - 自动完成中央 SSO 并返回 `/app`；
 - SAYLESS 真实业务数据成功加载，证明项目会话已映射到现有业务用户，而非仅完成页面跳转；
-- 登录后可访问求职总览、批次、投递和面试数据。
+- 登录后可访问求职总览、批次、投递和面试数据；
+- 从设置页点击“退出 SAYLESS”后首页恢复未登录入口，再次点击“登录”后自动返回 `/app`，现场加载出 117 条投递等真实数据。
 
 Treez：
 
 - 最终部署：`dpl_4XoFd5QycWp4mcRp9gHbcN2HAgZL`；
 - 从 Treez 原生登录链接进入中央 authorize；
-- 中央 authorize 正确返回 `303`，自动回到 Treez callback 和 `/basic/home`；
-- 顶栏显示当前账号；
-- 受保护的 `/user/me` 成功打开；
-- 页面显示 Treez 项目管理员身份，证明全局超级管理员映射生效。
+- 中央 authorize 正确返回 `303`，自动回到 Treez callback 和首页；
+- 登录后首页显示“小缨缨”及 222 条真实鉴赏数据，`/me` 档案页可正常打开；
+- 从移动导航点击“退出登录”后首页恢复“使用 iNon SSO 开始”，再次点击后自动返回并恢复同一份鉴赏档案。
 
 GitHub：
 
@@ -163,7 +170,8 @@ GitHub：
 - 账户密码设置已完成；
 - 邮箱密码登录已完成；
 - GitHub 绑定与 GitHub 登录已完成；
-- 五项目浏览器端到端登录已完成。
+- 五项目浏览器端到端登录已完成；
+- 五项目均已在同一真实浏览器中完成“已登录 → 项目退出 → 通过中央 SSO 重新登录”的闭环。
 
 ## 尚需完成
 
