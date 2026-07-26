@@ -24,5 +24,18 @@ export const sso = createInonSso({
 Mount `sso.handler` at `/api/auth/inon/[action]`. The supported actions are
 `login`, `callback`, `refresh`, `logout`, and `session`.
 
+For browser-facing `/sso/start`, `/sso/refresh`, and `/sso/end` routes, return
+the shared transition document before entering the OAuth handler:
+
+```ts
+export function GET(request: Request): Response {
+  return sso.transition(request, "login");
+}
+```
+
+The transition document keeps a branded, accessible progress state visible
+through the cross-origin OAuth redirect chain and includes a no-JavaScript
+fallback link.
+
 No application secret is bundled in this package. Each application receives
 its own OAuth client ID and client secret from the iNon SSO deployment.

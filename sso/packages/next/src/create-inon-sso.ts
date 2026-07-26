@@ -22,11 +22,13 @@ import {
 } from "./crypto.js";
 import { InonSsoError } from "./errors.js";
 import { identityFromClaims } from "./identity.js";
+import { transitionResponse } from "./transition.js";
 import type {
   InonIdentity,
   InonProjectSession,
   InonSsoClient,
   InonSsoConfig,
+  InonSsoTransitionAction,
   ProjectKey,
   ProjectRole,
 } from "./types.js";
@@ -149,6 +151,14 @@ function routeLink(
   const url = new URL(`${config.basePath}/${action}`, config.appOrigin);
   url.searchParams.set("returnTo", safeReturnTo(returnTo));
   return `${url.pathname}${url.search}`;
+}
+
+function transitionDestination(
+  config: NormalizedConfig,
+  request: Request,
+  action: InonSsoTransitionAction,
+): string {
+  return routeLink(config, action, queryReturnTo(request));
 }
 
 function redirect(
@@ -714,6 +724,13 @@ export function createInonSso(input: InonSsoConfig): InonSsoClient {
     basePath: config.basePath,
     handler,
     handlers: { GET: handler },
+    transition(request, action) {
+      return transitionResponse({
+        action,
+        destination: transitionDestination(config, request, action),
+        project: config.project,
+      });
+    },
     async getSession(request) {
       const session = await storedSession(request);
       return session === null ? null : publicSession(session);
