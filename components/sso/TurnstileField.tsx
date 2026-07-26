@@ -9,7 +9,9 @@ interface TurnstileApi {
     container: HTMLElement,
     options: {
       action: string;
+      appearance: "always";
       callback(token: string): void;
+      execution: "render";
       "error-callback"(): void;
       "expired-callback"(): void;
       sitekey: string;
@@ -54,6 +56,8 @@ export function TurnstileField({
     const widgetId = window.turnstile.render(containerRef.current, {
       sitekey: siteKey,
       action,
+      appearance: "always",
+      execution: "render",
       theme: "auto",
       size: "flexible",
       callback: (token) => callbackRef.current(token),

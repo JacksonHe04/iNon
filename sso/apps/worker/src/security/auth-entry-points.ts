@@ -25,6 +25,7 @@ export interface AuthEntryPointGuard {
     identifier?: string;
     userId?: string;
     remoteIp: string | null;
+    turnstileAction?: string;
     turnstileToken: string | null;
   }): Promise<AuthEntryPointDecision>;
 }
@@ -53,6 +54,7 @@ export class DefaultAuthEntryPointGuard
     identifier?: string;
     userId?: string;
     remoteIp: string | null;
+    turnstileAction?: string;
     turnstileToken: string | null;
   }): Promise<AuthEntryPointDecision> {
     const subjects: RateLimitSubject[] = [];
@@ -78,7 +80,7 @@ export class DefaultAuthEntryPointGuard
 
     const verified = await this.turnstile.verify({
       token: input.turnstileToken,
-      action: input.action,
+      action: input.turnstileAction ?? input.action,
       remoteIp: input.remoteIp,
     });
     return verified

@@ -7,7 +7,10 @@ import { cookieFrom } from "./auth-test-helpers";
 describe("central authentication routes", () => {
   it("exposes email registration and optional credentials through the public API", async () => {
     const deliveries: VerificationOTPMessage[] = [];
-    const protectedActions: string[] = [];
+    const protectedActions: Array<{
+      action: string;
+      turnstileAction?: string;
+    }> = [];
     const securityNotifications: string[] = [];
     const app = createApp({
       createEmailService: () => ({
@@ -19,8 +22,11 @@ describe("central authentication routes", () => {
         },
       }),
       createSecurityGuard: () => ({
-        protect: async ({ action }) => {
-          protectedActions.push(action);
+        protect: async ({ action, turnstileAction }) => {
+          protectedActions.push({
+            action,
+            ...(turnstileAction ? { turnstileAction } : {}),
+          });
           return { allowed: true };
         },
       }),
@@ -142,11 +148,11 @@ describe("central authentication routes", () => {
     );
     expect(usernameSignIn.status).toBe(200);
     expect(protectedActions).toEqual([
-      "otp_send",
-      "otp_verify",
-      "account_mutation",
-      "account_mutation",
-      "password_login",
+      { action: "otp_send", turnstileAction: "login" },
+      { action: "otp_verify", turnstileAction: "login" },
+      { action: "account_mutation" },
+      { action: "account_mutation" },
+      { action: "password_login", turnstileAction: "login" },
     ]);
     expect(securityNotifications).toEqual([
       "username_updated",

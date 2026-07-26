@@ -27,6 +27,7 @@ export interface AuthRouteOptions {
 interface ProtectedAuthRequest {
   action: SecurityAction;
   identifier?: string;
+  turnstileAction?: string;
 }
 
 async function normalizeOAuthAuthorizeResponse(
@@ -75,6 +76,7 @@ async function classifyProtectedAuthRequest(
   if (pathname.endsWith("/email-otp/send-verification-otp")) {
     return {
       action: "otp_send",
+      turnstileAction: "login",
       ...(typeof body.email === "string"
         ? { identifier: normalizeEmail(body.email) }
         : {}),
@@ -83,6 +85,7 @@ async function classifyProtectedAuthRequest(
   if (pathname.endsWith("/sign-in/email-otp")) {
     return {
       action: "otp_verify",
+      turnstileAction: "login",
       ...(typeof body.email === "string"
         ? { identifier: normalizeEmail(body.email) }
         : {}),
@@ -91,6 +94,7 @@ async function classifyProtectedAuthRequest(
   if (pathname.endsWith("/sign-in/email")) {
     return {
       action: "password_login",
+      turnstileAction: "login",
       ...(typeof body.email === "string"
         ? { identifier: normalizeEmail(body.email) }
         : {}),
@@ -99,6 +103,7 @@ async function classifyProtectedAuthRequest(
   if (pathname.endsWith("/sign-in/username")) {
     return {
       action: "password_login",
+      turnstileAction: "login",
       ...(typeof body.username === "string"
         ? { identifier: normalizeUsername(body.username) }
         : {}),
@@ -108,7 +113,7 @@ async function classifyProtectedAuthRequest(
     pathname.endsWith("/sign-in/social") &&
     body.provider === "github"
   ) {
-    return { action: "github_start" };
+    return { action: "github_start", turnstileAction: "login" };
   }
   if (
     pathname.endsWith("/link-social") &&
