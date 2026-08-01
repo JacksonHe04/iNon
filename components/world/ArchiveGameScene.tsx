@@ -345,6 +345,39 @@ const campfireFragment = /* glsl */ `
   }
 `;
 
+const cinemaScreenFragment = /* glsl */ `
+  uniform float uTime;
+  varying vec2 vUv;
+
+  float hash(vec2 point) {
+    return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    float grain = hash(floor(uv * vec2(210.0, 120.0)) + floor(uTime * 9.0));
+    float flicker = 0.94 + sin(uTime * 16.0) * 0.018 + grain * 0.045;
+    vec3 paper = vec3(0.69, 0.66, 0.54);
+    vec3 forest = vec3(0.10, 0.18, 0.13);
+    vec3 fog = vec3(0.40, 0.48, 0.38);
+    float ridge = 0.34 + sin(uv.x * 8.0 + 0.8) * 0.05 + sin(uv.x * 19.0) * 0.018;
+    float hill = smoothstep(ridge + 0.025, ridge - 0.025, uv.y);
+    float distantRidge = 0.49 + sin(uv.x * 5.0) * 0.055;
+    float distanceHill = smoothstep(distantRidge + 0.03, distantRidge - 0.03, uv.y);
+    vec3 color = mix(paper, fog, distanceHill * 0.62);
+    color = mix(color, forest, hill * 0.9);
+    float moon = 1.0 - smoothstep(0.065, 0.078, distance(uv, vec2(0.72, 0.7)));
+    color = mix(color, vec3(0.78, 0.72, 0.52), moon * 0.62);
+    float scratch = step(0.996, hash(vec2(floor(uv.x * 170.0), floor(uTime * 1.4))));
+    color += scratch * 0.16;
+    float vignette = 1.0 - smoothstep(0.22, 0.7, distance(uv, vec2(0.5)));
+    color *= mix(0.62, 1.0, vignette) * flicker;
+    gl_FragColor = vec4(color, 1.0);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
 function seededRandom(seed: number) {
   let state = seed >>> 0;
   return () => {
@@ -1476,6 +1509,165 @@ function WorkshopFieldSheets() {
   );
 }
 
+function TimberBeamBetween({
+  start,
+  end,
+  radius = 0.16,
+  color = '#463528',
+}: {
+  start: [number, number, number];
+  end: [number, number, number];
+  radius?: number;
+  color?: string;
+}) {
+  const transform = useMemo(() => {
+    const from = new Vector3(...start);
+    const to = new Vector3(...end);
+    const direction = to.clone().sub(from);
+    const length = direction.length();
+    return {
+      position: from.add(to).multiplyScalar(0.5),
+      quaternion: new Quaternion().setFromUnitVectors(
+        new Vector3(0, 1, 0),
+        direction.normalize(),
+      ),
+      length,
+    };
+  }, [end, start]);
+
+  return (
+    <mesh position={transform.position} quaternion={transform.quaternion} castShadow>
+      <cylinderGeometry args={[radius * 0.72, radius, transform.length, 8]} />
+      <meshStandardMaterial color={color} roughness={1} />
+    </mesh>
+  );
+}
+
+function TimberRailwayPlatform() {
+  const floorTransforms = useMemo(
+    () => Array.from({ length: 7 }, (_, index) => {
+      const x = -6 + index * 2;
+      return [-1, 1].map((z) => new Matrix4().makeTranslation(x, 0.22, z));
+    }).flat(),
+    [],
+  );
+
+  return (
+    <group name="timber-railway-platform">
+      <InstancedGltfAsset src={`${MEDIEVAL_ASSET_ROOT}/Floor_WoodDark.gltf`} transforms={floorTransforms} />
+      {[-6.95, 6.95].map((x) => (
+        <mesh key={x} position={[x, 0.1, 0]} castShadow>
+          <boxGeometry args={[0.18, 0.38, 4.35]} />
+          <meshStandardMaterial color="#3d3027" roughness={1} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function OpenSurveyTripod() {
+  const legs = [
+    { start: [-2.45, 0, -1.25] as [number, number, number], end: [0, 5.4, 0.05] as [number, number, number] },
+    { start: [2.25, 0, 0.8] as [number, number, number], end: [0, 5.4, 0.05] as [number, number, number] },
+    { start: [0.7, 0, -2.55] as [number, number, number], end: [0, 5.4, 0.05] as [number, number, number] },
+  ];
+
+  return (
+    <group name="open-survey-tripod">
+      {legs.map((leg, index) => (
+        <TimberBeamBetween key={index} start={leg.start} end={leg.end} radius={0.2} />
+      ))}
+      <mesh position={[0, 5.37, 0.05]} rotation-z={0.08} castShadow>
+        <torusGeometry args={[0.5, 0.09, 8, 28]} />
+        <meshStandardMaterial color="#93875f" metalness={0.38} roughness={0.62} />
+      </mesh>
+      <mesh position={[0.08, 4.42, 0]} rotation={[0.16, 0.72, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.17, 0.23, 2.35, 12]} />
+        <meshStandardMaterial color="#667061" metalness={0.44} roughness={0.64} />
+      </mesh>
+      <mesh position={[0.72, 4.64, -0.65]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.36, 0.07, 8, 24]} />
+        <meshStandardMaterial color="#b0a269" metalness={0.35} roughness={0.68} />
+      </mesh>
+      <mesh position={[0, 0.24, 0]} receiveShadow>
+        <cylinderGeometry args={[1.2, 1.45, 0.48, 9]} />
+        <meshStandardMaterial color="#3e4a40" roughness={1} />
+      </mesh>
+      <FantasyProp name="Workbench_Drawers" position={[-3.15, 0, 1.75]} rotation={[0, 0.24, 0]} scale={[1.1, 1, 0.92]} />
+      <FantasyProp name="Scroll_1" position={[-3.05, 0.96, 1.72]} rotation={[0, -0.28, 0]} scale={3.4} />
+      <MedievalAsset name="Prop_Crate" position={[2.75, 0.12, -1.7]} rotation={[0, 0.42, 0]} scale={0.82} />
+    </group>
+  );
+}
+
+function OutdoorCinemaScreen() {
+  const material = useRef<ShaderMaterial>(null);
+  const uniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
+
+  useFrame(({ clock }) => {
+    if (material.current) material.current.uniforms.uTime.value = clock.elapsedTime;
+  });
+
+  return (
+    <group name="open-air-cinema-installation">
+      <TimberBeamBetween start={[-5.1, 0, -1]} end={[-4.85, 6.05, -1]} radius={0.17} />
+      <TimberBeamBetween start={[5.15, 0, -1]} end={[4.82, 5.92, -1]} radius={0.17} />
+      <mesh position={[0, 5.72, -1]} rotation-z={Math.PI / 2 + 0.005} castShadow>
+        <cylinderGeometry args={[0.07, 0.07, 9.9, 7]} />
+        <meshStandardMaterial color="#4b382a" roughness={1} />
+      </mesh>
+      <mesh position={[0, 3.32, -1.03]} rotation-z={-0.012} castShadow>
+        <planeGeometry args={[8.95, 4.35, 18, 8]} />
+        <shaderMaterial
+          ref={material}
+          uniforms={uniforms}
+          vertexShader={campfireVertex}
+          fragmentShader={cinemaScreenFragment}
+          side={DoubleSide}
+        />
+      </mesh>
+      {[[-4.62, 5.45], [4.58, 5.38], [-4.55, 1.18], [4.54, 1.2]].map(([x, y], index) => (
+        <mesh key={`${x}:${y}`} position={[x, y, -0.96]} rotation-z={(index - 1.5) * 0.08}>
+          <torusGeometry args={[0.12, 0.025, 5, 14]} />
+          <meshStandardMaterial color="#8a7652" roughness={1} />
+        </mesh>
+      ))}
+      <group position={[1.65, 0, 6.35]}>
+        <mesh position={[0, 0.82, 0]} castShadow>
+          <boxGeometry args={[1.05, 0.72, 1.2]} />
+          <meshStandardMaterial color="#4a574b" roughness={0.84} metalness={0.18} />
+        </mesh>
+        {[[-0.28, 1.48, 0.4], [0.3, 1.42, 0.34]].map(([x, y, radius]) => (
+          <group key={`${x}:${y}`} position={[x, y, 0.64]}>
+            <mesh>
+              <ringGeometry args={[radius * 0.72, radius, 30]} />
+              <meshStandardMaterial color="#777663" metalness={0.28} roughness={0.64} side={DoubleSide} />
+            </mesh>
+            <mesh position={[0, 0, 0.02]}>
+              <circleGeometry args={[0.085, 18]} />
+              <meshStandardMaterial color="#948665" metalness={0.32} roughness={0.58} side={DoubleSide} />
+            </mesh>
+            {[0, Math.PI / 2].map((rotation) => (
+              <mesh key={rotation} position={[0, 0, 0.015]} rotation-z={rotation}>
+                <boxGeometry args={[radius * 1.55, 0.045, 0.025]} />
+                <meshStandardMaterial color="#777663" metalness={0.28} roughness={0.64} />
+              </mesh>
+            ))}
+          </group>
+        ))}
+        <mesh position={[0, 0.87, -0.84]} rotation-x={Math.PI / 2} castShadow>
+          <cylinderGeometry args={[0.15, 0.26, 0.58, 12]} />
+          <meshStandardMaterial color="#747465" metalness={0.5} roughness={0.52} />
+        </mesh>
+        <mesh position={[0, 0.83, 0.61]}>
+          <boxGeometry args={[0.48, 0.12, 0.035]} />
+          <meshStandardMaterial color="#9b875e" metalness={0.24} roughness={0.7} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
 function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'camp') {
     return (
@@ -1499,7 +1691,7 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'station') {
     return (
       <group>
-        <mesh position={[0, 0.22, 0]} receiveShadow><boxGeometry args={[13, 0.44, 4.8]} /><meshStandardMaterial color="#555244" roughness={1} /></mesh>
+        <TimberRailwayPlatform />
         <mesh position={[-4.35, 2.45, -1.25]} rotation-z={-0.035} castShadow>
           <cylinderGeometry args={[0.13, 0.22, 4.9, 8]} />
           <meshStandardMaterial color="#3f392f" roughness={1} />
@@ -1521,29 +1713,13 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
         <FantasyProp name="Stall_Cart_Empty" position={[3.2, 0.45, -2.05]} rotation={[0, -0.3, 0]} scale={0.78} />
         <FantasyProp name="Bag" position={[1.8, 0.47, 1.05]} rotation={[0, 0.55, 0]} scale={0.78} />
         <FantasyProp name="Lantern_Wall" position={[-4.35, 2.5, -1.12]} rotation={[0, Math.PI / 2, 0]} scale={1.15} />
-        <mesh position={[1.4, 1.1, -1.85]} rotation={[0.12, -0.2, 0.04]} castShadow><boxGeometry args={[3.1, 1.5, 0.16]} /><meshStandardMaterial color="#77725e" roughness={1} /></mesh>
         {[-2.1, 2.1].map((rail) => <mesh key={rail} position={[rail, 0.1, 8]}><boxGeometry args={[0.12, 0.12, 28]} /><meshStandardMaterial color="#31352f" metalness={0.5} /></mesh>)}
         {[-4, 0, 4, 8, 12, 16, 20].map((z) => <mesh key={`tie-${z}`} position={[0, 0.04, z]}><boxGeometry args={[5.2, 0.12, 0.24]} /><meshStandardMaterial color="#4a382d" roughness={1} /></mesh>)}
       </group>
     );
   }
   if (kind === 'watchtower') {
-    const surveyPosts = [
-      [-1.75, -0.85, -0.035],
-      [2.05, 0.45, 0.025],
-      [0.75, -2.05, 0.045],
-    ] as const;
-    return (
-      <group>
-        {surveyPosts.map(([x, z, lean]) => <mesh key={`${x}:${z}`} position={[x, 2.35, z]} rotation-z={lean} castShadow><cylinderGeometry args={[0.15, 0.28, 4.7, 8]} /><meshStandardMaterial color="#493629" roughness={1} /></mesh>)}
-        <mesh position={[0.25, 4.72, -0.2]} rotation-z={0.035} castShadow><boxGeometry args={[5.5, 0.3, 4.2]} /><meshStandardMaterial color="#40382b" roughness={1} /></mesh>
-        {[-1.95, 2.32].map((x, index) => <mesh key={`rail-x-${x}`} position={[x, 5.65, -0.2]} rotation-z={index ? 0.03 : -0.02}><boxGeometry args={[0.1, 1.7, 4]} /><meshStandardMaterial color="#514032" /></mesh>)}
-        <mesh position={[0.35, 5.57, -0.55]} rotation={[0.18, 0.5, Math.PI / 2]} castShadow><cylinderGeometry args={[0.18, 0.26, 2.3, 12]} /><meshStandardMaterial color="#667061" metalness={0.46} roughness={0.66} /></mesh>
-        <mesh position={[0.97, 5.78, 0.08]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.4, 0.08, 8, 24]} /><meshStandardMaterial color="#b0a269" metalness={0.35} roughness={0.68} /></mesh>
-        <MedievalAsset name="Stairs_Exterior_Straight" position={[-0.4, 0, 2.5]} rotation={[0, -0.18, 0]} scale={1.3} />
-        <MedievalAsset name="Prop_Crate" position={[2.7, 0.15, -1.6]} rotation={[0, 0.4, 0]} scale={0.85} />
-      </group>
-    );
+    return <OpenSurveyTripod />;
   }
   if (kind === 'sawmill') {
     return (
@@ -1600,11 +1776,8 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'cinema') {
     return (
       <group>
-        <mesh position={[0, 3.4, -1]} castShadow><boxGeometry args={[9.8, 5.5, 0.28]} /><meshStandardMaterial color="#d4ceb3" roughness={0.92} /></mesh>
-        <mesh position={[0, 3.4, -1.18]}><planeGeometry args={[8.7, 4.45]} /><meshStandardMaterial color="#b8b69f" emissive="#817c68" emissiveIntensity={0.2} /></mesh>
+        <OutdoorCinemaScreen />
         {[-3.4, 0, 3.4].map((x, index) => <FantasyProp key={x} name="Bench" position={[x, 0, 4]} rotation={[0, (index - 1) * 0.05, 0]} scale={1.05} />)}
-        <mesh position={[0, 1, 7]} castShadow><boxGeometry args={[1.3, 1.25, 1.9]} /><meshStandardMaterial color="#2d332e" roughness={0.85} /></mesh>
-        <FantasyProp name="Lantern_Wall" position={[-5.2, 2.2, -0.65]} rotation={[0, Math.PI / 2, 0]} scale={1.3} />
       </group>
     );
   }
@@ -1657,9 +1830,13 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
             <meshStandardMaterial color={index % 2 ? '#b7ad87' : '#d0c498'} side={DoubleSide} roughness={1} />
           </mesh>
         ))}
-        <mesh position={[0, 0.9, 0]} castShadow>
-          <boxGeometry args={[2.1, 1.5, 1.35]} />
-          <meshStandardMaterial color="#6b704f" roughness={1} />
+        <FantasyProp name="Workbench" position={[0, 0, 0]} scale={[1.22, 1, 1]} />
+        <FantasyProp name="Workbench_Drawers" position={[0, 0, 0]} scale={[1.22, 1, 1]} />
+        <FantasyProp name="Scroll_1" position={[-0.38, 0.96, -0.05]} rotation={[0, -0.18, 0]} scale={3.6} />
+        <FantasyProp name="Scroll_2" position={[0.48, 0.97, 0.12]} rotation={[0, 0.35, 0]} scale={2.9} />
+        <mesh position={[0.72, 1.02, -0.22]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.16, 0.035, 7, 18]} />
+          <meshStandardMaterial color="#70493a" roughness={1} />
         </mesh>
         <FantasyProp name="Bag" position={[1.7, 0.02, 0.8]} rotation={[0, -0.3, 0]} scale={0.9} />
         <FantasyProp name="Barrel" position={[-1.85, 0.02, -0.65]} rotation={[0, 0.2, 0]} scale={0.95} />
@@ -1697,13 +1874,13 @@ function DestinationSite({
 
 function SiteColliders({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'station') return <><CuboidCollider args={[6.5, 0.22, 2.4]} position={[0, 0.22, 0]} /><CuboidCollider args={[0.24, 2.45, 0.24]} position={[-4.35, 2.45, -1.25]} /></>;
-  if (kind === 'watchtower') return <><CuboidCollider args={[0.28, 2.35, 0.28]} position={[-1.75, 2.35, -0.85]} /><CuboidCollider args={[0.28, 2.35, 0.28]} position={[2.05, 2.35, 0.45]} /><CuboidCollider args={[0.28, 2.35, 0.28]} position={[0.75, 2.35, -2.05]} /><CuboidCollider args={[2.75, 0.15, 2.1]} position={[0.25, 4.72, -0.2]} /></>;
+  if (kind === 'watchtower') return <><CuboidCollider args={[0.3, 2.45, 0.3]} position={[-1.15, 2.45, -0.58]} rotation={[0, 0, -0.42]} /><CuboidCollider args={[0.3, 2.45, 0.3]} position={[1.05, 2.45, 0.42]} rotation={[0, 0, 0.4]} /><CuboidCollider args={[0.3, 2.45, 0.3]} position={[0.35, 2.45, -1.2]} rotation={[0.2, 0, 0.14]} /><CuboidCollider args={[1.35, 0.25, 1.35]} position={[0, 0.25, 0]} /></>;
   if (kind === 'sawmill') return <><CuboidCollider args={[3.7, 0.15, 0.7]} position={[0, 0.78, 0]} /><CuboidCollider args={[0.7, 1.1, 3.3]} position={[4.4, 0.8, 0]} /></>;
-  if (kind === 'cinema') return <><CuboidCollider args={[4.9, 2.75, 0.2]} position={[0, 3.4, -1]} />{[-3.4, 0, 3.4].map((x) => <CuboidCollider key={x} args={[1.5, 0.4, 0.45]} position={[x, 0.4, 4]} />)}</>;
+  if (kind === 'cinema') return <><CuboidCollider args={[0.22, 3, 0.22]} position={[-4.98, 3, -1]} /><CuboidCollider args={[0.22, 3, 0.22]} position={[4.98, 3, -1]} />{[-3.4, 0, 3.4].map((x) => <CuboidCollider key={x} args={[1.5, 0.4, 0.45]} position={[x, 0.4, 4]} />)}<CuboidCollider args={[0.62, 0.82, 0.75]} position={[1.65, 0.82, 6.35]} /></>;
   if (kind === 'cabin') return <CuboidCollider args={[2.2, 3.2, 3.2]} position={[0, 3.2, 0]} />;
   if (kind === 'workshop') return <>{[[-2.65, 0.15], [0.2, -0.5], [2.8, 0.65]].map(([x, z]) => <CuboidCollider key={`${x}:${z}`} args={[1.25, 0.55, 0.75]} position={[x, 0.55, z]} />)}{[-4.75, -0.48, 3.35].map((x) => <CuboidCollider key={`line-post-${x}`} args={[0.14, 1.75, 0.14]} position={[x, 1.75, -2.22]} />)}</>;
   if (kind === 'record') return <CuboidCollider args={[3.7, 1.7, 0.85]} position={[0, 1.7, 0]} />;
-  if (kind === 'post') return <CuboidCollider args={[1.1, 0.75, 0.75]} position={[0, 0.9, 0]} />;
+  if (kind === 'post') return <CuboidCollider args={[1.45, 0.58, 0.78]} position={[0, 0.58, 0]} />;
   if (kind === 'camp') return <><CuboidCollider args={[0.72, 0.58, 0.62]} position={[-1.8, 0.58, -0.9]} /><CuboidCollider args={[1.15, 0.12, 0.46]} position={[1.85, 0.12, -1]} /></>;
   return <CuboidCollider args={[2.2, 1.1, 1.9]} position={[0, 1.1, 0]} />;
 }
