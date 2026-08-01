@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { InstancedMesh, Matrix4, Object3D, type Vector3 } from 'three';
+import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
 import type { GameDestination } from '@/components/world/ArchiveGameScene';
 import {
   QUATERNIUS_NATURE_ROOT,
@@ -82,8 +83,7 @@ export default function QuaterniusGroundCover({
                   : variantRoll < 0.94
                     ? 4
                     : 5;
-          const pathCenter = Math.sin(z * 0.055) * 1.6 + Math.sin(z * 0.017) * 0.9;
-          const pathClearance = Math.abs(x - pathCenter) < 2.4 && Math.abs(z) < 80;
+          const pathClearance = isInsideWorldTrail(x, z, 0.75);
           const siteClearance = destinations.some(
             (site) => Math.hypot(x - site.position[0], z - site.position[2]) < 7,
           );

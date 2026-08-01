@@ -50,6 +50,10 @@ import QuaterniusForest, {
 } from '@/components/world/QuaterniusForest';
 import QuaterniusGroundCover from '@/components/world/QuaterniusGroundCover';
 import ArchiveWildlife from '@/components/world/ArchiveWildlife';
+import {
+  WORLD_TRAIL_SEGMENTS,
+  isInsideWorldTrail,
+} from '@/components/world/archiveWorldTrails';
 
 export interface GameDestination {
   blockType: BlockType;
@@ -101,6 +105,11 @@ export const RIVER_BRIDGE_POSITION = [59, 2.5, -160] as const;
 const WORLD_INFRASTRUCTURE_CLEARINGS = [
   [RIVER_BRIDGE_POSITION[0], RIVER_BRIDGE_POSITION[2], 18],
 ] as const;
+
+const WORLD_TRAIL_GLSL = WORLD_TRAIL_SEGMENTS.map(
+  ({ start, end, halfWidth }) =>
+    `distance = min(distance, segmentDistance(point, vec2(${start[0].toFixed(1)}, ${start[1].toFixed(1)}), vec2(${end[0].toFixed(1)}, ${end[1].toFixed(1)})) / ${halfWidth.toFixed(2)});`,
+).join('\n');
 
 const WORLD_KEEPSAKES = [
   ['field-01', 0, 16],
@@ -242,13 +251,26 @@ const terrainFragment = /* glsl */ `
   varying vec3 vWorld;
   varying float vGrain;
 
+  float segmentDistance(vec2 point, vec2 start, vec2 end) {
+    vec2 segment = end - start;
+    float amount = clamp(dot(point - start, segment) / dot(segment, segment), 0.0, 1.0);
+    return length(point - (start + segment * amount));
+  }
+
+  float worldTrailDistance(vec2 point) {
+    float distance = 9999.0;
+    ${WORLD_TRAIL_GLSL}
+    return distance;
+  }
+
   void main() {
     float waves = sin(vWorld.x * 0.035 + uTime * 0.04) * cos(vWorld.z * 0.04);
-    float pathCenter = sin(vWorld.z * 0.055) * 1.6 + sin(vWorld.z * 0.017) * 0.9;
-    float pathMask = (1.0 - smoothstep(1.2, 3.8, abs(vWorld.x - pathCenter)));
-    pathMask *= 1.0 - smoothstep(54.0, 82.0, abs(vWorld.z));
+    float trailDistance = worldTrailDistance(vWorld.xz);
+    float pathMask = 1.0 - smoothstep(0.72, 1.22, trailDistance);
+    float pathCore = 1.0 - smoothstep(0.22, 0.76, trailDistance);
+    float pathWear = 0.82 + 0.18 * sin(vWorld.x * 1.7 + vWorld.z * 2.1);
     vec3 ground = mix(uForest, uMoss, 0.52 + waves * 0.14);
-    ground = mix(ground, uPath, pathMask * 0.15);
+    ground = mix(ground, uPath, pathMask * (0.26 + pathCore * 0.16) * pathWear);
     vec3 forestFloor = texture2D(uGround, vWorld.xz * 0.035).rgb;
     forestFloor *= vec3(0.50, 0.82, 0.54);
     ground = mix(ground, forestFloor, 0.52);
@@ -668,7 +690,7 @@ function forestCollidersAround(centerX: number, centerZ: number, destinations: G
         const z = chunkZ * chunkSize + random() * chunkSize;
         const heightScale = 0.78 + random() * 0.54;
         const widthScale = heightScale * (0.88 + random() * 0.22);
-        const roadClearance = Math.abs(x) < 5.2 && z > -96 && z < 68;
+        const roadClearance = isInsideWorldTrail(x, z, 1.75);
         const siteClearance = destinations.some((site) => Math.hypot(x - site.position[0], z - site.position[2]) < 12);
         const infrastructureClearance = WORLD_INFRASTRUCTURE_CLEARINGS.some(
           ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,

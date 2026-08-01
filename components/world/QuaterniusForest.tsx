@@ -12,6 +12,7 @@ import {
   type BufferGeometry,
   type Material,
 } from 'three';
+import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
 import type { GameDestination } from '@/components/world/ArchiveGameScene';
 
 export const QUATERNIUS_NATURE_ROOT = '/archive-world/quaternius-nature';
@@ -115,7 +116,7 @@ export default function QuaterniusForest({
           const z = chunkZ * CHUNK_SIZE + random() * CHUNK_SIZE;
           const heightScale = 0.78 + random() * 0.54;
           const widthScale = heightScale * (0.88 + random() * 0.22);
-          const roadClearance = Math.abs(x) < 5.2 && z > -96 && z < 68;
+          const roadClearance = isInsideWorldTrail(x, z, 2.2);
           const siteClearance = destinations.some(
             (site) => Math.hypot(x - site.position[0], z - site.position[2]) < 12,
           );
