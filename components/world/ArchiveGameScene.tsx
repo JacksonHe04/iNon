@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ComponentProps,
   type MutableRefObject,
 } from 'react';
 import { Html, useGLTF, useTexture } from '@react-three/drei';
@@ -21,7 +22,6 @@ import {
   type RapierRigidBody,
 } from '@react-three/rapier';
 import {
-  AdditiveBlending,
   BackSide,
   BufferAttribute,
   BufferGeometry,
@@ -34,6 +34,7 @@ import {
   Matrix4,
   Mesh,
   Object3D,
+  PointLight,
   Quaternion,
   RepeatWrapping,
   ShaderMaterial,
@@ -241,7 +242,8 @@ const terrainFragment = /* glsl */ `
     vec3 ground = mix(uForest, uMoss, 0.52 + waves * 0.14);
     ground = mix(ground, uPath, pathMask * 0.15);
     vec3 forestFloor = texture2D(uGround, vWorld.xz * 0.035).rgb;
-    ground = mix(ground, forestFloor, 0.68);
+    forestFloor *= vec3(0.50, 0.82, 0.54);
+    ground = mix(ground, forestFloor, 0.52);
     ground += (vGrain - 0.5) * 0.055;
     gl_FragColor = vec4(ground, 1.0);
     #include <tonemapping_fragment>
@@ -273,6 +275,41 @@ const weatherFragment = /* glsl */ `
   void main() {
     vec3 color = mix(uPaper, uOchre, max(0.0, vPulse) * 0.18);
     gl_FragColor = vec4(color, 0.08 + max(0.0, vPulse) * 0.42);
+  }
+`;
+
+const campfireVertex = /* glsl */ `
+  varying vec2 vUv;
+
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const campfireFragment = /* glsl */ `
+  uniform float uTime;
+  varying vec2 vUv;
+
+  float hash(vec2 point) {
+    return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
+  }
+
+  void main() {
+    float height = clamp(vUv.y, 0.0, 1.0);
+    float sway = sin(uTime * 4.1 + height * 8.0) * 0.055 * height;
+    sway += sin(uTime * 7.7 - height * 12.0) * 0.024;
+    float width = mix(0.45, 0.055, pow(height, 1.28));
+    float edge = abs(vUv.x - 0.5 + sway);
+    float flame = 1.0 - smoothstep(width * 0.72, width, edge);
+    flame *= smoothstep(0.0, 0.08, height) * (1.0 - smoothstep(0.8, 1.0, height));
+    float grain = hash(floor(vUv * vec2(18.0, 26.0)) + floor(uTime * 10.0));
+    flame *= 0.78 + grain * 0.22;
+    if (flame < 0.025) discard;
+    vec3 ember = vec3(0.66, 0.16, 0.045);
+    vec3 gold = vec3(1.0, 0.64, 0.19);
+    vec3 color = mix(gold, ember, smoothstep(0.12, 0.88, height));
+    gl_FragColor = vec4(color, flame * 0.88);
   }
 `;
 
@@ -360,8 +397,8 @@ function InfiniteTerrain({ playerPosition }: { playerPosition: MutableRefObject<
     () => ({
       uTime: { value: 0 },
       uGround: { value: groundTexture },
-      uMoss: { value: new Color('#70806a') },
-      uForest: { value: new Color('#2e4635') },
+      uMoss: { value: new Color('#62785c') },
+      uForest: { value: new Color('#243d2d') },
       uPath: { value: new Color('#9a8b67') },
     }),
     [groundTexture],
@@ -1017,39 +1054,50 @@ function OutdoorCrates() {
 }
 
 const MEDIEVAL_ASSET_ROOT = '/archive-world/quaternius-medieval';
+const FANTASY_PROP_ROOT = '/archive-world/quaternius-props';
 
-function MedievalAsset({
-  name,
+function TintedGltfAsset({
+  src,
   position = [0, 0, 0],
   rotation = [0, 0, 0],
   scale = 1,
+  tint = '#8a9680',
 }: {
-  name: string;
+  src: string;
   position?: [number, number, number];
   rotation?: [number, number, number];
   scale?: number | [number, number, number];
+  tint?: string;
 }) {
-  const { scene } = useGLTF(`${MEDIEVAL_ASSET_ROOT}/${name}.gltf`);
+  const { scene } = useGLTF(src);
   const clone = useMemo(() => {
     const root = scene.clone(true);
     root.traverse((object) => {
       if (!(object instanceof Mesh)) return;
-      const tint = (material: Material) => {
+      const tintMaterial = (material: Material) => {
         const copy = material.clone();
-        if ('color' in copy && copy.color instanceof Color) copy.color.multiply(new Color('#8a9680'));
+        if ('color' in copy && copy.color instanceof Color) copy.color.multiply(new Color(tint));
         copy.needsUpdate = true;
         return copy;
       };
       object.material = Array.isArray(object.material)
-        ? object.material.map((material) => tint(material))
-        : tint(object.material);
+        ? object.material.map((material) => tintMaterial(material))
+        : tintMaterial(object.material);
       object.castShadow = true;
       object.receiveShadow = true;
     });
     return root;
-  }, [scene]);
+  }, [scene, tint]);
 
   return <primitive object={clone} position={position} rotation={rotation} scale={scale} />;
+}
+
+function MedievalAsset({ name, ...props }: Omit<ComponentProps<typeof TintedGltfAsset>, 'src'> & { name: string }) {
+  return <TintedGltfAsset src={`${MEDIEVAL_ASSET_ROOT}/${name}.gltf`} {...props} />;
+}
+
+function FantasyProp({ name, ...props }: Omit<ComponentProps<typeof TintedGltfAsset>, 'src'> & { name: string }) {
+  return <TintedGltfAsset src={`${FANTASY_PROP_ROOT}/${name}.gltf`} tint="#a2ad98" {...props} />;
 }
 
 function ArchiveBookCottage() {
@@ -1125,28 +1173,56 @@ function TimberCabin({ postOffice = false }: { postOffice?: boolean }) {
   );
 }
 
+function FieldCampfire({ position }: { position: [number, number, number] }) {
+  const flame = useRef<Mesh>(null);
+  const flameMaterial = useRef<ShaderMaterial>(null);
+  const glow = useRef<PointLight>(null);
+  const uniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
+
+  useFrame(({ camera, clock }) => {
+    const pulse = 0.88 + Math.sin(clock.elapsedTime * 7.4) * 0.1 + Math.sin(clock.elapsedTime * 13.1) * 0.04;
+    if (flame.current) {
+      flame.current.scale.set(0.92 + pulse * 0.08, pulse, 1);
+      flame.current.lookAt(camera.position);
+    }
+    if (flameMaterial.current) flameMaterial.current.uniforms.uTime.value = clock.elapsedTime;
+    if (glow.current) glow.current.intensity = 7.4 + pulse * 2.8;
+  });
+
+  return (
+    <group position={position}>
+      {[0, Math.PI / 2, Math.PI / 4].map((rotation) => (
+        <mesh key={rotation} position={[0, 0.18, 0]} rotation={[0, rotation, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.11, 0.15, 1.5, 7]} />
+          <meshStandardMaterial color="#3b2b20" roughness={1} />
+        </mesh>
+      ))}
+      <mesh ref={flame} position={[0, 0.74, 0]}>
+        <planeGeometry args={[1.35, 1.65]} />
+        <shaderMaterial ref={flameMaterial} uniforms={uniforms} vertexShader={campfireVertex} fragmentShader={campfireFragment} transparent depthWrite={false} side={DoubleSide} />
+      </mesh>
+      <pointLight ref={glow} position={[0, 0.8, 0]} intensity={8} distance={12} color="#d49b55" />
+    </group>
+  );
+}
+
 function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'camp') {
     return (
       <group>
-        <mesh position={[0, 1.3, 0]} rotation-x={-0.55} castShadow>
-          <boxGeometry args={[4.8, 0.08, 3.6]} />
-          <meshStandardMaterial color="#7d785e" roughness={1} />
+        <MedievalAsset name="Prop_Crate" position={[-1.8, 0.12, -0.9]} rotation={[0, 0.28, 0]} scale={0.82} />
+        <FantasyProp name="Bag" position={[-0.35, 0.02, -1.2]} rotation={[0, -0.4, 0]} scale={0.9} />
+        <FantasyProp name="Bucket_Wooden_1" position={[-2.85, 0.02, 0.65]} rotation={[0, 0.25, 0]} scale={1.25} />
+        <FantasyProp name="Scroll_2" position={[-1.75, 0.98, -0.88]} rotation={[0, 0.65, 0]} scale={3.2} />
+        <mesh position={[1.85, 0.11, -1]} rotation-y={-0.18} castShadow>
+          <boxGeometry args={[2.3, 0.16, 0.92]} />
+          <meshStandardMaterial color="#59644f" roughness={1} />
         </mesh>
-        {[-2.05, 2.05].map((x) => (
-          <mesh key={x} position={[x, 1.28, -1.45]} castShadow>
-            <cylinderGeometry args={[0.08, 0.13, 2.56, 7]} />
-            <meshStandardMaterial color="#493528" roughness={1} />
-          </mesh>
-        ))}
-        <MedievalAsset name="Prop_Crate" position={[-1.1, 0.12, -0.5]} rotation={[0, 0.28, 0]} scale={0.82} />
-        {[0, Math.PI / 2, Math.PI / 4].map((rotation) => (
-          <mesh key={rotation} position={[3, 0.18, 1]} rotation={[0, rotation, Math.PI / 2]} castShadow>
-            <cylinderGeometry args={[0.11, 0.15, 1.5, 7]} />
-            <meshStandardMaterial color="#3b2b20" roughness={1} />
-          </mesh>
-        ))}
-        <pointLight position={[3, 0.75, 1]} intensity={7} distance={10} color="#d49b55" />
+        <mesh position={[2.72, 0.24, -1]} rotation-z={Math.PI / 2} castShadow>
+          <cylinderGeometry args={[0.26, 0.26, 0.65, 12]} />
+          <meshStandardMaterial color="#77725b" roughness={1} />
+        </mesh>
+        <FieldCampfire position={[0.9, 0, 1.1]} />
       </group>
     );
   }
@@ -1171,7 +1247,10 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
           <meshStandardMaterial color="#6b785f" roughness={0.8} />
         </mesh>
         <MedievalAsset name="Prop_Crate" position={[3.9, 0.45, -0.45]} scale={1.5} />
-        <mesh position={[-0.1, 0.76, 1.2]} rotation-z={-0.018} castShadow><boxGeometry args={[4.3, 0.32, 0.7]} /><meshStandardMaterial color="#5b422f" roughness={1} /></mesh>
+        <FantasyProp name="Bench" position={[-0.1, 0.45, 1.2]} rotation={[0, -0.03, 0]} scale={1.18} />
+        <FantasyProp name="Stall_Cart_Empty" position={[3.2, 0.45, -2.05]} rotation={[0, -0.3, 0]} scale={0.78} />
+        <FantasyProp name="Bag" position={[1.8, 0.47, 1.05]} rotation={[0, 0.55, 0]} scale={0.78} />
+        <FantasyProp name="Lantern_Wall" position={[-4.35, 2.5, -1.12]} rotation={[0, Math.PI / 2, 0]} scale={1.15} />
         <mesh position={[1.4, 1.1, -1.85]} rotation={[0.12, -0.2, 0.04]} castShadow><boxGeometry args={[3.1, 1.5, 0.16]} /><meshStandardMaterial color="#77725e" roughness={1} /></mesh>
         {[-2.1, 2.1].map((rail) => <mesh key={rail} position={[rail, 0.1, 8]}><boxGeometry args={[0.12, 0.12, 28]} /><meshStandardMaterial color="#31352f" metalness={0.5} /></mesh>)}
         {[-4, 0, 4, 8, 12, 16, 20].map((z) => <mesh key={`tie-${z}`} position={[0, 0.04, z]}><boxGeometry args={[5.2, 0.12, 0.24]} /><meshStandardMaterial color="#4a382d" roughness={1} /></mesh>)}
@@ -1202,13 +1281,16 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
         {[-2.2, 0, 2.2].map((z, index) => <mesh key={z} position={[4.3 + index * 0.15, 0.55, z]} rotation-z={Math.PI / 2} castShadow><cylinderGeometry args={[0.48, 0.55, 5.5 - index * 0.45, 10]} /><meshStandardMaterial color="#61462f" roughness={1} /></mesh>)}
         {[-3.4, 3.4].map((x) => <mesh key={x} position={[x, 1.35, 0]} castShadow><boxGeometry args={[0.24, 2.7, 0.3]} /><meshStandardMaterial color="#493426" roughness={1} /></mesh>)}
         <mesh position={[0, 2.58, 0]} rotation-z={0.045} castShadow><boxGeometry args={[7.2, 0.24, 0.3]} /><meshStandardMaterial color="#493426" roughness={1} /></mesh>
-        <mesh position={[0, 0.78, 0]} castShadow><boxGeometry args={[7.4, 0.3, 1.4]} /><meshStandardMaterial color="#73543a" roughness={1} /></mesh>
+        <FantasyProp name="Workbench" position={[0, 0, 0]} scale={[1.85, 1.45, 1.3]} />
         <mesh position={[0, 1.65, 0]} rotation-y={Math.PI / 2}><cylinderGeometry args={[1.35, 1.35, 0.18, 26]} /><meshStandardMaterial color="#77796e" metalness={0.58} roughness={0.5} /></mesh>
         {Array.from({ length: 14 }, (_, index) => {
           const angle = (index / 14) * Math.PI * 2;
           return <mesh key={`saw-${index}`} position={[Math.cos(angle) * 1.48, 1.65 + Math.sin(angle) * 1.48, 0]} rotation-z={angle}><boxGeometry args={[0.34, 0.52, 0.12]} /><meshStandardMaterial color="#77796e" metalness={0.58} roughness={0.5} /></mesh>;
         })}
         <MedievalAsset name="Prop_Crate" position={[-4.7, 0.15, -2.1]} rotation={[0, -0.3, 0]} />
+        <FantasyProp name="Axe_Bronze" position={[-2.5, 1.05, 0.2]} rotation={[0.08, 0.25, -0.28]} scale={1.6} />
+        <FantasyProp name="Rope_1" position={[-4.2, 0.05, 1.5]} rotation={[0, 0.35, 0]} scale={1.7} />
+        <FantasyProp name="Bucket_Metal" position={[2.55, 0.02, -1.65]} rotation={[0, -0.2, 0]} scale={1.35} />
       </group>
     );
   }
@@ -1250,8 +1332,9 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
       <group>
         <mesh position={[0, 3.4, -1]} castShadow><boxGeometry args={[9.8, 5.5, 0.28]} /><meshStandardMaterial color="#d4ceb3" roughness={0.92} /></mesh>
         <mesh position={[0, 3.4, -1.18]}><planeGeometry args={[8.7, 4.45]} /><meshStandardMaterial color="#b8b69f" emissive="#817c68" emissiveIntensity={0.2} /></mesh>
-        {[-4, 0, 4].map((x) => <mesh key={x} position={[x, 0.45, 4]} castShadow><boxGeometry args={[3.2, 0.6, 0.75]} /><meshStandardMaterial color="#473628" roughness={1} /></mesh>)}
+        {[-3.4, 0, 3.4].map((x, index) => <FantasyProp key={x} name="Bench" position={[x, 0, 4]} rotation={[0, (index - 1) * 0.05, 0]} scale={1.05} />)}
         <mesh position={[0, 1, 7]} castShadow><boxGeometry args={[1.3, 1.25, 1.9]} /><meshStandardMaterial color="#2d332e" roughness={0.85} /></mesh>
+        <FantasyProp name="Lantern_Wall" position={[-5.2, 2.2, -0.65]} rotation={[0, Math.PI / 2, 0]} scale={1.3} />
       </group>
     );
   }
@@ -1260,15 +1343,17 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
       <group>
         {[[-2.65, 0.15, 0.18], [0.2, -0.5, -0.08], [2.8, 0.65, 0.12]].map(([x, z, rotation], index) => (
           <group key={`draft-table-${index}`} position={[x, 0, z]} rotation-y={rotation}>
-            <mesh position={[0, 0.88, 0]} rotation-x={-0.12} castShadow><boxGeometry args={[2.4, 0.2, 1.55]} /><meshStandardMaterial color="#694a31" roughness={1} /></mesh>
-            {[-0.85, 0.85].map((leg) => <mesh key={leg} position={[leg, 0.43, 0]} rotation-z={leg < 0 ? -0.08 : 0.08}><boxGeometry args={[0.16, 0.9, 1.15]} /><meshStandardMaterial color="#4c382a" roughness={1} /></mesh>)}
-            <mesh position={[0, 1.01, 0]} rotation-x={-Math.PI / 2 - 0.12}><planeGeometry args={[1.9, 1.08]} /><meshStandardMaterial color={index % 2 ? '#b2a981' : '#c5b98b'} roughness={1} /></mesh>
+            <FantasyProp name="Workbench" scale={index === 1 ? [1.15, 1, 1.05] : [1.1, 1, 1.08]} />
+            {index === 1 && <FantasyProp name="Workbench_Drawers" scale={[1.15, 1, 1.05]} />}
+            <FantasyProp name={index === 2 ? 'Scroll_2' : 'Scroll_1'} position={[index === 1 ? -0.32 : 0.2, 0.93, index === 0 ? 0.05 : -0.12]} rotation={[0, index * 0.55 - 0.35, 0]} scale={3.8} />
           </group>
         ))}
         <mesh position={[-3.5, 1.65, -2.3]} rotation={[0.04, 0.25, -0.025]} castShadow><boxGeometry args={[3.5, 2.8, 0.18]} /><meshStandardMaterial color="#59624d" roughness={1} /></mesh>
         {[[-4.15, 1.82], [-3.1, 1.22], [-3.7, 0.58]].map(([x, y], index) => <mesh key={`pinned-${index}`} position={[x, y, -2.41]} rotation-z={(index - 1) * 0.09}><planeGeometry args={[0.85 + index * 0.16, 0.58]} /><meshStandardMaterial color={index === 1 ? '#8f9a73' : '#c2b587'} roughness={1} /></mesh>)}
         <MedievalAsset name="Prop_Crate" position={[4.2, 0.12, -1.6]} rotation={[0, 0.32, 0]} />
         <MedievalAsset name="Prop_Crate" position={[4.6, 0.12, -0.3]} rotation={[0, -0.18, 0]} scale={0.76} />
+        <FantasyProp name="Bag" position={[3.65, 0.02, 1.65]} rotation={[0, -0.4, 0]} scale={0.82} />
+        <FantasyProp name="Rope_2" position={[-1.4, 0.04, 1.6]} rotation={[0, 0.8, 0]} scale={1.7} />
       </group>
     );
   }
@@ -1295,6 +1380,8 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
           <boxGeometry args={[2.1, 1.5, 1.35]} />
           <meshStandardMaterial color="#6b704f" roughness={1} />
         </mesh>
+        <FantasyProp name="Bag" position={[1.7, 0.02, 0.8]} rotation={[0, -0.3, 0]} scale={0.9} />
+        <FantasyProp name="Barrel" position={[-1.85, 0.02, -0.65]} rotation={[0, 0.2, 0]} scale={0.95} />
       </group>
     );
   }
@@ -1331,12 +1418,12 @@ function SiteColliders({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'station') return <><CuboidCollider args={[6.5, 0.22, 2.4]} position={[0, 0.22, 0]} /><CuboidCollider args={[0.24, 2.45, 0.24]} position={[-4.35, 2.45, -1.25]} /></>;
   if (kind === 'watchtower') return <><CuboidCollider args={[0.28, 2.35, 0.28]} position={[-1.75, 2.35, -0.85]} /><CuboidCollider args={[0.28, 2.35, 0.28]} position={[2.05, 2.35, 0.45]} /><CuboidCollider args={[0.28, 2.35, 0.28]} position={[0.75, 2.35, -2.05]} /><CuboidCollider args={[2.75, 0.15, 2.1]} position={[0.25, 4.72, -0.2]} /></>;
   if (kind === 'sawmill') return <><CuboidCollider args={[3.7, 0.15, 0.7]} position={[0, 0.78, 0]} /><CuboidCollider args={[0.7, 1.1, 3.3]} position={[4.4, 0.8, 0]} /></>;
-  if (kind === 'cinema') return <><CuboidCollider args={[4.9, 2.75, 0.2]} position={[0, 3.4, -1]} /><CuboidCollider args={[1.7, 0.45, 0.5]} position={[0, 0.45, 4]} /></>;
+  if (kind === 'cinema') return <><CuboidCollider args={[4.9, 2.75, 0.2]} position={[0, 3.4, -1]} />{[-3.4, 0, 3.4].map((x) => <CuboidCollider key={x} args={[1.5, 0.4, 0.45]} position={[x, 0.4, 4]} />)}</>;
   if (kind === 'cabin') return <CuboidCollider args={[2.2, 3.2, 3.2]} position={[0, 3.2, 0]} />;
-  if (kind === 'workshop') return <><CuboidCollider args={[4.3, 0.58, 1.25]} position={[0, 0.58, 0.2]} /><CuboidCollider args={[1.8, 1.4, 0.15]} position={[-3.5, 1.4, -2.3]} /></>;
+  if (kind === 'workshop') return <>{[[-2.65, 0.15], [0.2, -0.5], [2.8, 0.65]].map(([x, z]) => <CuboidCollider key={`${x}:${z}`} args={[1.25, 0.55, 0.75]} position={[x, 0.55, z]} />)}<CuboidCollider args={[1.8, 1.4, 0.15]} position={[-3.5, 1.4, -2.3]} /></>;
   if (kind === 'record') return <CuboidCollider args={[3.7, 1.7, 0.85]} position={[0, 1.7, 0]} />;
   if (kind === 'post') return <CuboidCollider args={[1.1, 0.75, 0.75]} position={[0, 0.9, 0]} />;
-  if (kind === 'camp') return <><CuboidCollider args={[2.4, 0.05, 1.8]} position={[0, 1.3, 0]} rotation={[-0.55, 0, 0]} /><CuboidCollider args={[0.13, 1.28, 0.13]} position={[-2.05, 1.28, -1.45]} /><CuboidCollider args={[0.13, 1.28, 0.13]} position={[2.05, 1.28, -1.45]} /></>;
+  if (kind === 'camp') return <><CuboidCollider args={[0.72, 0.58, 0.62]} position={[-1.8, 0.58, -0.9]} /><CuboidCollider args={[1.15, 0.12, 0.46]} position={[1.85, 0.12, -1]} /></>;
   return <CuboidCollider args={[2.2, 1.1, 1.9]} position={[0, 1.1, 0]} />;
 }
 
@@ -1877,7 +1964,7 @@ export default function ArchiveGameScene({
   const { scene } = useThree();
 
   useEffect(() => {
-    scene.fog = new Fog('#778274', 24, 215);
+    scene.fog = new Fog('#667565', 24, 215);
     return () => {
       scene.fog = null;
     };
@@ -1885,7 +1972,7 @@ export default function ArchiveGameScene({
 
   return (
     <>
-      <color attach="background" args={['#a7ad9d']} />
+      <color attach="background" args={['#919d8b']} />
       <ambientLight intensity={0.85} color="#d8d2b8" />
       <hemisphereLight args={['#cbd0bd', '#24392c', 1.3]} />
       <directionalLight
