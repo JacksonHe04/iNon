@@ -70,10 +70,12 @@ export function collectQuaterniusParts(root: Object3D): QuaterniusAssetPart[] {
 export default function QuaterniusForest({
   playerPosition,
   destinations,
+  clearings = [],
   heightAt,
 }: {
   playerPosition: MutableRefObject<import('three').Vector3>;
   destinations: GameDestination[];
+  clearings?: readonly (readonly [number, number, number])[];
   heightAt: (x: number, z: number) => number;
 }) {
   const common1 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/CommonTree_1.gltf`);
@@ -117,9 +119,12 @@ export default function QuaterniusForest({
           const siteClearance = destinations.some(
             (site) => Math.hypot(x - site.position[0], z - site.position[2]) < 12,
           );
+          const infrastructureClearance = clearings.some(
+            ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
+          );
           const spawnClearance = Math.hypot(x, z + 2) < 12;
           const groundHeight = heightAt(x, z);
-          if (roadClearance || siteClearance || spawnClearance || groundHeight < -0.78) continue;
+          if (roadClearance || siteClearance || infrastructureClearance || spawnClearance || groundHeight < -0.78) continue;
 
           const variant = Math.min(
             partsByVariant.length - 1,

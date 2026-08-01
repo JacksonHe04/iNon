@@ -20,11 +20,13 @@ const MAX_PER_VARIANT = 120;
 export default function QuaterniusGroundCover({
   playerPosition,
   destinations,
+  clearings = [],
   heightAt,
   waterLevel,
 }: {
   playerPosition: MutableRefObject<Vector3>;
   destinations: GameDestination[];
+  clearings?: readonly (readonly [number, number, number])[];
   heightAt: (x: number, z: number) => number;
   waterLevel: number;
 }) {
@@ -85,8 +87,11 @@ export default function QuaterniusGroundCover({
           const siteClearance = destinations.some(
             (site) => Math.hypot(x - site.position[0], z - site.position[2]) < 7,
           );
+          const infrastructureClearance = clearings.some(
+            ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
+          );
           const spawnClearance = Math.hypot(x, z + 2) < 7.5;
-          if (pathClearance || siteClearance || spawnClearance || y <= waterLevel + 0.16) continue;
+          if (pathClearance || siteClearance || infrastructureClearance || spawnClearance || y <= waterLevel + 0.16) continue;
           if (placements[variant].length >= MAX_PER_VARIANT) continue;
 
           const rawScale = random();

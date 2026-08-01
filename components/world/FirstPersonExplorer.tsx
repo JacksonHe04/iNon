@@ -118,7 +118,8 @@ export default function FirstPersonExplorer({
     appliedTravelId.current = travelRequest.id;
     nearest.current = null;
     nearestKey.current = null;
-  }, [heightAt, playerPosition, travelRequest]);
+    onNearby(null);
+  }, [heightAt, onNearby, playerPosition, travelRequest]);
 
   useEffect(() => {
     const travel = (event: Event) => {
@@ -135,10 +136,11 @@ export default function FirstPersonExplorer({
       appliedTravelId.current = detail.id;
       nearest.current = null;
       nearestKey.current = null;
+      onNearby(null);
     };
     window.addEventListener('archive-world:travel', travel);
     return () => window.removeEventListener('archive-world:travel', travel);
-  }, [heightAt, playerPosition]);
+  }, [heightAt, onNearby, playerPosition]);
 
   useEffect(() => {
     const restore = () => {
@@ -162,6 +164,7 @@ export default function FirstPersonExplorer({
       appliedTravelId.current = travelRequest.id;
       nearest.current = null;
       nearestKey.current = null;
+      onNearby(null);
     }
     const translation = rigidBody.translation();
     playerPosition.current.set(translation.x, translation.y, translation.z);

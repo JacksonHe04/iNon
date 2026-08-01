@@ -40,6 +40,7 @@ import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
 import { getBlockTitle } from '@/lib/blocks/registry';
 import BlockCanvasEngine from '@/components/blocks/BlockCanvasEngine';
 import ArchiveGameScene, {
+  RIVER_BRIDGE_POSITION,
   WORLD_KEEPSAKE_COUNT,
   type GameDestination,
   type GameTelemetry,
@@ -56,6 +57,15 @@ interface ArchiveWorldProps {
 
 type LandmarkDefinition = GameDestination;
 
+interface WorldWaypoint {
+  id: string;
+  label: string;
+  number: string;
+  position: readonly [number, number, number];
+  arrival: readonly [number, number, number];
+  yaw: number;
+}
+
 const LANDMARKS: GameDestination[] = [
   { blockType: 'bio', position: [-18, 0, 13], number: '01', subtitle: '旅行营地 · 身份与此刻', siteKind: 'camp' },
   { blockType: 'projects', position: [54, 0, -34], number: '02', subtitle: '木工作坊 · 正在生长的事物', siteKind: 'workshop' },
@@ -66,6 +76,17 @@ const LANDMARKS: GameDestination[] = [
   { blockType: 'movies', position: [-206, 0, 116], number: '07', subtitle: '露天放映场 · 影片与导演', siteKind: 'cinema' },
   { blockType: 'books', position: [214, 0, 132], number: '08', subtitle: '林间书屋 · 页边痕迹', siteKind: 'cabin' },
   { blockType: 'messages', position: [18, 0, -258], number: '09', subtitle: '边地邮局 · 来信与回声', siteKind: 'post' },
+];
+
+const WORLD_WAYPOINTS: WorldWaypoint[] = [
+  {
+    id: 'river-footbridge',
+    label: '旧木桥',
+    number: 'B',
+    position: RIVER_BRIDGE_POSITION,
+    arrival: [RIVER_BRIDGE_POSITION[0] - 16, 0, RIVER_BRIDGE_POSITION[2]],
+    yaw: -Math.PI / 2,
+  },
 ];
 
 const vertexNoise = /* glsl */ `
@@ -684,11 +705,15 @@ function WorldOverlay({ children }: { children: ReactNode }) {
 function WorldMinimap({
   telemetry,
   destinations,
+  waypoints,
   onTravel,
+  onTravelWaypoint,
 }: {
   telemetry: GameTelemetry;
   destinations: GameDestination[];
+  waypoints: WorldWaypoint[];
   onTravel: (destination: GameDestination) => void;
+  onTravelWaypoint: (waypoint: WorldWaypoint) => void;
 }) {
   const mapRadius = 72;
   const worldExtent = 285;
@@ -736,6 +761,15 @@ function WorldMinimap({
             </g>
           );
         })}
+        {waypoints.map((waypoint) => {
+          const [mapX, mapY] = project(waypoint.position[0], waypoint.position[2]);
+          return (
+            <g key={waypoint.id} transform={`translate(${mapX} ${mapY}) rotate(45)`}>
+              <rect x="-4.2" y="-4.2" width="8.4" height="8.4" fill="#8ca58b" stroke="#e7d8a8" strokeWidth="1" />
+              <title>{`传送到${waypoint.label}`}</title>
+            </g>
+          );
+        })}
         <g transform={`translate(${playerMapX} ${playerMapY}) rotate(${telemetry.heading})`}>
           <path d="M0 -10 6 8 0 5 -6 8Z" fill="#f0e5c5" stroke="#24372b" strokeWidth="1.2" />
         </g>
@@ -750,6 +784,18 @@ function WorldMinimap({
               aria-label={`传送到${getBlockTitle(destination.blockType)}`}
               title={`传送到${getBlockTitle(destination.blockType)}`}
               onClick={() => onTravel(destination)}
+            />
+          );
+        })}
+        {waypoints.map((waypoint) => {
+          const [mapX, mapY] = project(waypoint.position[0], waypoint.position[2]);
+          return (
+            <button
+              key={waypoint.id}
+              style={{ left: `${(mapX / 180) * 100}%`, top: `${(mapY / 180) * 100}%` }}
+              aria-label={`传送到${waypoint.label}`}
+              title={`传送到${waypoint.label}`}
+              onClick={() => onTravelWaypoint(waypoint)}
             />
           );
         })}
@@ -1008,6 +1054,19 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     window.dispatchEvent(new CustomEvent('archive-world:travel', { detail: request }));
   };
 
+  const travelToWaypoint = (waypoint: WorldWaypoint) => {
+    setCodexOpen(false);
+    setInventoryOpen(false);
+    setNearbyDestination(null);
+    const request: GameTravelRequest = {
+      id: Date.now(),
+      position: [...waypoint.arrival],
+      yaw: waypoint.yaw,
+    };
+    setTravelRequest(request);
+    window.dispatchEvent(new CustomEvent('archive-world:travel', { detail: request }));
+  };
+
   return (
     <section className="archive-world" aria-label="iNon 绿迹开放世界">
       <div className="archive-world__canvas">
@@ -1108,7 +1167,13 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             </div>
             <p>第一人称探索 · 拖动镜头 · WASD 移动 · Shift 疾跑 · 点击地图传送 · 空格跳跃</p>
           </div>
-          <WorldMinimap telemetry={telemetry} destinations={LANDMARKS} onTravel={travelTo} />
+          <WorldMinimap
+            telemetry={telemetry}
+            destinations={LANDMARKS}
+            waypoints={WORLD_WAYPOINTS}
+            onTravel={travelTo}
+            onTravelWaypoint={travelToWaypoint}
+          />
           {nearbyDestination && (
             <button
               className="archive-world-interact"

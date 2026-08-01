@@ -45,7 +45,9 @@ import {
 import type { BlockType } from '@/types/layout';
 import { getBlockTitle } from '@/lib/blocks/registry';
 import FirstPersonExplorer from '@/components/world/FirstPersonExplorer';
-import QuaterniusForest from '@/components/world/QuaterniusForest';
+import QuaterniusForest, {
+  collectQuaterniusParts,
+} from '@/components/world/QuaterniusForest';
 import QuaterniusGroundCover from '@/components/world/QuaterniusGroundCover';
 
 export interface GameDestination {
@@ -93,6 +95,11 @@ const TERRAIN_CHUNK_SIZE = 84;
 const TERRAIN_SEGMENTS = 22;
 const HORSE_POSITION = new Vector3(3.4, 0, 19);
 export const WORLD_KEEPSAKE_COUNT = 18;
+export const RIVER_BRIDGE_POSITION = [59, 2.5, -160] as const;
+
+const WORLD_INFRASTRUCTURE_CLEARINGS = [
+  [RIVER_BRIDGE_POSITION[0], RIVER_BRIDGE_POSITION[2], 18],
+] as const;
 
 const WORLD_KEEPSAKES = [
   ['field-01', 0, 16],
@@ -662,9 +669,12 @@ function forestCollidersAround(centerX: number, centerZ: number, destinations: G
         const widthScale = heightScale * (0.88 + random() * 0.22);
         const roadClearance = Math.abs(x) < 5.2 && z > -96 && z < 68;
         const siteClearance = destinations.some((site) => Math.hypot(x - site.position[0], z - site.position[2]) < 12);
+        const infrastructureClearance = WORLD_INFRASTRUCTURE_CLEARINGS.some(
+          ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
+        );
         const spawnClearance = Math.hypot(x, z + 2) < 12;
         const groundHeight = terrainHeightAt(x, z);
-        if (roadClearance || siteClearance || spawnClearance || groundHeight < -0.78) continue;
+        if (roadClearance || siteClearance || infrastructureClearance || spawnClearance || groundHeight < -0.78) continue;
         random();
         random();
         if (tree >= 11) continue;
@@ -1098,6 +1108,76 @@ function MedievalAsset({ name, ...props }: Omit<ComponentProps<typeof TintedGltf
 
 function FantasyProp({ name, ...props }: Omit<ComponentProps<typeof TintedGltfAsset>, 'src'> & { name: string }) {
   return <TintedGltfAsset src={`${FANTASY_PROP_ROOT}/${name}.gltf`} tint="#a2ad98" {...props} />;
+}
+
+function InstancedGltfAsset({ src, transforms }: { src: string; transforms: Matrix4[] }) {
+  const { scene } = useGLTF(src);
+  const parts = useMemo(() => collectQuaterniusParts(scene), [scene]);
+  const meshes = useRef<Array<InstancedMesh | null>>([]);
+
+  useEffect(() => {
+    parts.forEach((part, partIndex) => {
+      const mesh = meshes.current[partIndex];
+      if (!mesh) return;
+      transforms.forEach((transform, index) => {
+        mesh.setMatrixAt(index, new Matrix4().multiplyMatrices(transform, part.localMatrix));
+      });
+      mesh.count = transforms.length;
+      mesh.instanceMatrix.needsUpdate = true;
+      mesh.computeBoundingSphere();
+    });
+  }, [parts, transforms]);
+
+  return parts.map((part, index) => (
+    <instancedMesh
+      key={`${src}:${index}`}
+      ref={(mesh) => { meshes.current[index] = mesh; }}
+      args={[part.geometry, part.material, transforms.length]}
+      castShadow
+      receiveShadow
+    />
+  ));
+}
+
+function RiverFootbridge() {
+  const floorTransforms = useMemo(
+    () => Array.from({ length: 14 }, (_, index) => {
+      const x = -13 + index * 2;
+      return [-1, 1].map((z) => new Matrix4().makeTranslation(x, 0, z));
+    }).flat(),
+    [],
+  );
+  const fenceTransforms = useMemo(
+    () => Array.from({ length: 14 }, (_, index) => {
+      const x = -13 + index * 2;
+      return [-2.05, 2.05].map((z) => new Matrix4().makeTranslation(x, 0.12, z));
+    }).flat(),
+    [],
+  );
+  const evenFences = useMemo(() => fenceTransforms.filter((_, index) => Math.floor(index / 2) % 2 === 0), [fenceTransforms]);
+  const oddFences = useMemo(() => fenceTransforms.filter((_, index) => Math.floor(index / 2) % 2 === 1), [fenceTransforms]);
+
+  return (
+    <RigidBody
+      type="fixed"
+      colliders={false}
+      position={[...RIVER_BRIDGE_POSITION]}
+      rotation={[0, 0, -0.04]}
+    >
+      <CuboidCollider args={[14, 0.18, 2]} position={[0, 0, 0]} />
+      <InstancedGltfAsset src={`${MEDIEVAL_ASSET_ROOT}/Floor_WoodDark.gltf`} transforms={floorTransforms} />
+      <InstancedGltfAsset src={`${MEDIEVAL_ASSET_ROOT}/Prop_WoodenFence_Single.gltf`} transforms={evenFences} />
+      <InstancedGltfAsset src={`${MEDIEVAL_ASSET_ROOT}/Prop_WoodenFence_Extension1.gltf`} transforms={oddFences} />
+      {[-9, -3, 3, 9].flatMap((x) => [-1.55, 1.55].map((z) => (
+        <mesh key={`${x}:${z}`} position={[x, -1.5, z]} castShadow>
+          <cylinderGeometry args={[0.18, 0.28, 3.2, 8]} />
+          <meshStandardMaterial color="#3e3026" roughness={1} />
+        </mesh>
+      )))}
+      <FantasyProp name="Lantern_Wall" position={[-10.7, 1.05, -2.18]} rotation={[0, Math.PI / 2, 0]} scale={1.05} />
+      <FantasyProp name="Lantern_Wall" position={[8.9, 1.05, 2.18]} rotation={[0, -Math.PI / 2, 0]} scale={1.05} />
+    </RigidBody>
+  );
 }
 
 function ArchiveBookCottage() {
@@ -1997,11 +2077,13 @@ export default function ArchiveGameScene({
         <QuaterniusForest
           playerPosition={playerPosition}
           destinations={destinations}
+          clearings={WORLD_INFRASTRUCTURE_CLEARINGS}
           heightAt={terrainHeightAt}
         />
         <QuaterniusGroundCover
           playerPosition={playerPosition}
           destinations={destinations}
+          clearings={WORLD_INFRASTRUCTURE_CLEARINGS}
           heightAt={terrainHeightAt}
           waterLevel={WATER_LEVEL}
         />
@@ -2017,6 +2099,7 @@ export default function ArchiveGameScene({
         <Physics gravity={[0, -14, 0]} timeStep="vary">
           <InfiniteTerrain playerPosition={playerPosition} />
           <InfiniteForestColliders playerPosition={playerPosition} destinations={destinations} />
+          <RiverFootbridge />
           <WorldLandmarks destinations={destinations} onOpen={onOpen} />
           <FirstPersonExplorer
             enabled={entered}
