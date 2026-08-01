@@ -49,6 +49,7 @@ import QuaterniusForest, {
   collectQuaterniusParts,
 } from '@/components/world/QuaterniusForest';
 import QuaterniusGroundCover from '@/components/world/QuaterniusGroundCover';
+import ArchiveWildlife from '@/components/world/ArchiveWildlife';
 
 export interface GameDestination {
   blockType: BlockType;
@@ -2089,6 +2090,9 @@ export default function ArchiveGameScene({
         />
       </Suspense>
       <DynamicWeather playerPosition={playerPosition} />
+      <Suspense fallback={null}>
+        <ArchiveWildlife playerPosition={playerPosition} heightAt={terrainHeightAt} />
+      </Suspense>
       <WorldKeepsakes
         enabled={entered}
         playerPosition={playerPosition}
