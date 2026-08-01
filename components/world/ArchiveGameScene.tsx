@@ -2468,7 +2468,11 @@ export default function ArchiveGameScene({
       </Suspense>
       <DynamicWeather playerPosition={playerPosition} />
       <Suspense fallback={null}>
-        <ArchiveWildlife playerPosition={playerPosition} heightAt={terrainHeightAt} />
+        <ArchiveWildlife
+          playerPosition={playerPosition}
+          heightAt={terrainHeightAt}
+          animalsEnabled={entered}
+        />
       </Suspense>
       <WorldKeepsakes
         enabled={entered}

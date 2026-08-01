@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
+import { Suspense, useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
@@ -60,7 +60,7 @@ function AnimatedAnimal({
   playerPosition: MutableRefObject<Vector3>;
   heightAt: (x: number, z: number) => number;
 }) {
-  const url = `${ANIMAL_ROOT}/${config.species === 'deer' ? 'Deer' : 'Fox'}.gltf`;
+  const url = `${ANIMAL_ROOT}/${config.species === 'deer' ? 'Deer' : 'Fox'}.glb`;
   const gltf = useGLTF(url);
   const root = useRef<Group>(null);
   const scene = useMemo(() => cloneSkeleton(gltf.scene), [gltf.scene]);
@@ -294,24 +294,27 @@ function MigratingBirds({ playerPosition, count = 28 }: { playerPosition: Mutabl
 export default function ArchiveWildlife({
   playerPosition,
   heightAt,
+  animalsEnabled,
 }: {
   playerPosition: MutableRefObject<Vector3>;
   heightAt: (x: number, z: number) => number;
+  animalsEnabled: boolean;
 }) {
   return (
     <group name="archive-world-wildlife">
       <MigratingBirds playerPosition={playerPosition} />
-      {ANIMALS.map((config) => (
-        <AnimatedAnimal
-          key={config.id}
-          config={config}
-          playerPosition={playerPosition}
-          heightAt={heightAt}
-        />
-      ))}
+      {animalsEnabled && (
+        <Suspense fallback={null}>
+          {ANIMALS.map((config) => (
+            <AnimatedAnimal
+              key={config.id}
+              config={config}
+              playerPosition={playerPosition}
+              heightAt={heightAt}
+            />
+          ))}
+        </Suspense>
+      )}
     </group>
   );
 }
-
-useGLTF.preload(`${ANIMAL_ROOT}/Deer.gltf`);
-useGLTF.preload(`${ANIMAL_ROOT}/Fox.gltf`);
