@@ -1287,6 +1287,111 @@ function FieldCampfire({ position }: { position: [number, number, number] }) {
   );
 }
 
+const WORKSHOP_FIELD_SHEETS = [
+  [-4.2, 2.55, -2.32, 0.78, 0.52, -0.11, '#c6b989'],
+  [-3.05, 2.36, -2.26, 1.08, 0.68, 0.08, '#87936f'],
+  [-1.62, 2.54, -2.3, 0.72, 0.92, -0.07, '#d1c59a'],
+  [-3.48, 1.34, -2.28, 0.92, 0.6, 0.13, '#a79b72'],
+  [-2.12, 1.22, -2.34, 1.18, 0.72, -0.04, '#c7bd96'],
+  [0.98, 1.38, -2.2, 0.82, 0.56, 0.09, '#7e8c69'],
+  [2.18, 1.53, -2.25, 1.15, 0.8, -0.1, '#c9bb88'],
+] as const;
+
+function WorkshopFieldSheets() {
+  const papers = useRef<InstancedMesh>(null);
+  const annotations = useRef<InstancedMesh>(null);
+  const stamps = useRef<InstancedMesh>(null);
+  const clips = useRef<InstancedMesh>(null);
+
+  useEffect(() => {
+    if (!papers.current || !annotations.current || !stamps.current || !clips.current) return;
+    papers.current.instanceColor = null;
+    const paperMaterials = Array.isArray(papers.current.material)
+      ? papers.current.material
+      : [papers.current.material];
+    paperMaterials.forEach((material) => {
+      material.needsUpdate = true;
+    });
+    const base = new Object3D();
+    const instance = new Object3D();
+    const matrix = new Matrix4();
+    let annotationIndex = 0;
+    let stampIndex = 0;
+
+    WORKSHOP_FIELD_SHEETS.forEach(([x, y, z, width, height, tilt], index) => {
+      const yaw = (index % 3 - 1) * 0.05;
+      base.position.set(x, y, z);
+      base.rotation.set(0, yaw, tilt);
+      base.scale.set(1, 1, 1);
+      base.updateMatrix();
+
+      instance.position.set(x, y, z);
+      instance.rotation.set(0, yaw, tilt);
+      instance.scale.set(width, height, 1);
+      instance.updateMatrix();
+      papers.current?.setMatrixAt(index, instance.matrix);
+
+      Array.from({ length: 2 + (index % 3) }, (_, line) => {
+        instance.position.set(
+          -width * 0.11 + line * width * 0.035,
+          height * 0.18 - line * height * 0.2,
+          0.012,
+        );
+        instance.rotation.set(0, 0, (line - 1) * 0.025);
+        instance.scale.set(width * (0.48 + ((index + line) % 3) * 0.12), 0.022, 0.012);
+        instance.updateMatrix();
+        matrix.multiplyMatrices(base.matrix, instance.matrix);
+        annotations.current?.setMatrixAt(annotationIndex, matrix);
+        annotationIndex += 1;
+      });
+
+      if (index % 3 === 1) {
+        const stampScale = Math.min(width, height) * 0.12;
+        instance.position.set(width * 0.28, -height * 0.27, 0.018);
+        instance.rotation.set(0, 0, 0);
+        instance.scale.setScalar(stampScale);
+        instance.updateMatrix();
+        matrix.multiplyMatrices(base.matrix, instance.matrix);
+        stamps.current?.setMatrixAt(stampIndex, matrix);
+        stampIndex += 1;
+      }
+
+      instance.position.set(0, height * 0.5 + 0.025, 0.025);
+      instance.rotation.set(0, 0, Math.PI / 2);
+      instance.scale.set(1, 0.18, 1);
+      instance.updateMatrix();
+      matrix.multiplyMatrices(base.matrix, instance.matrix);
+      clips.current?.setMatrixAt(index, matrix);
+    });
+
+    for (const mesh of [papers.current, annotations.current, stamps.current, clips.current]) {
+      mesh.instanceMatrix.needsUpdate = true;
+      mesh.computeBoundingSphere();
+    }
+  }, []);
+
+  return (
+    <group name="misaligned-field-drawings">
+      <instancedMesh ref={papers} args={[undefined, undefined, WORKSHOP_FIELD_SHEETS.length]} castShadow>
+        <planeGeometry args={[1, 1]} />
+        <meshBasicMaterial color="#b6aa7d" side={DoubleSide} />
+      </instancedMesh>
+      <instancedMesh ref={annotations} args={[undefined, undefined, 20]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshBasicMaterial color="#514d3d" />
+      </instancedMesh>
+      <instancedMesh ref={stamps} args={[undefined, undefined, 2]}>
+        <torusGeometry args={[1, 0.14, 5, 18]} />
+        <meshBasicMaterial color="#6e4739" />
+      </instancedMesh>
+      <instancedMesh ref={clips} args={[undefined, undefined, WORKSHOP_FIELD_SHEETS.length]}>
+        <cylinderGeometry args={[0.035, 0.035, 1, 6]} />
+        <meshStandardMaterial color="#493b2d" roughness={1} />
+      </instancedMesh>
+    </group>
+  );
+}
+
 function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'camp') {
     return (
@@ -1429,8 +1534,19 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
             <FantasyProp name={index === 2 ? 'Scroll_2' : 'Scroll_1'} position={[index === 1 ? -0.32 : 0.2, 0.93, index === 0 ? 0.05 : -0.12]} rotation={[0, index * 0.55 - 0.35, 0]} scale={3.8} />
           </group>
         ))}
-        <mesh position={[-3.5, 1.65, -2.3]} rotation={[0.04, 0.25, -0.025]} castShadow><boxGeometry args={[3.5, 2.8, 0.18]} /><meshStandardMaterial color="#59624d" roughness={1} /></mesh>
-        {[[-4.15, 1.82], [-3.1, 1.22], [-3.7, 0.58]].map(([x, y], index) => <mesh key={`pinned-${index}`} position={[x, y, -2.41]} rotation-z={(index - 1) * 0.09}><planeGeometry args={[0.85 + index * 0.16, 0.58]} /><meshStandardMaterial color={index === 1 ? '#8f9a73' : '#c2b587'} roughness={1} /></mesh>)}
+        {[-4.75, -0.48, 3.35].map((x, index) => (
+          <mesh key={`drawing-line-post-${x}`} position={[x, 1.72 + index * 0.08, -2.22]} rotation-z={(index - 1) * 0.035} castShadow>
+            <cylinderGeometry args={[0.1, 0.16, 3.45 + index * 0.16, 7]} />
+            <meshStandardMaterial color="#433326" roughness={1} />
+          </mesh>
+        ))}
+        {[1.66, 2.88].map((y, index) => (
+          <mesh key={`drawing-line-${y}`} position={[-0.7, y, -2.25]} rotation={[0, 0, Math.PI / 2 + (index ? -0.012 : 0.018)]}>
+            <cylinderGeometry args={[0.025, 0.025, 8.15, 6]} />
+            <meshStandardMaterial color="#79664d" roughness={1} />
+          </mesh>
+        ))}
+        <WorkshopFieldSheets />
         <MedievalAsset name="Prop_Crate" position={[4.2, 0.12, -1.6]} rotation={[0, 0.32, 0]} />
         <MedievalAsset name="Prop_Crate" position={[4.6, 0.12, -0.3]} rotation={[0, -0.18, 0]} scale={0.76} />
         <FantasyProp name="Bag" position={[3.65, 0.02, 1.65]} rotation={[0, -0.4, 0]} scale={0.82} />
@@ -1501,7 +1617,7 @@ function SiteColliders({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'sawmill') return <><CuboidCollider args={[3.7, 0.15, 0.7]} position={[0, 0.78, 0]} /><CuboidCollider args={[0.7, 1.1, 3.3]} position={[4.4, 0.8, 0]} /></>;
   if (kind === 'cinema') return <><CuboidCollider args={[4.9, 2.75, 0.2]} position={[0, 3.4, -1]} />{[-3.4, 0, 3.4].map((x) => <CuboidCollider key={x} args={[1.5, 0.4, 0.45]} position={[x, 0.4, 4]} />)}</>;
   if (kind === 'cabin') return <CuboidCollider args={[2.2, 3.2, 3.2]} position={[0, 3.2, 0]} />;
-  if (kind === 'workshop') return <>{[[-2.65, 0.15], [0.2, -0.5], [2.8, 0.65]].map(([x, z]) => <CuboidCollider key={`${x}:${z}`} args={[1.25, 0.55, 0.75]} position={[x, 0.55, z]} />)}<CuboidCollider args={[1.8, 1.4, 0.15]} position={[-3.5, 1.4, -2.3]} /></>;
+  if (kind === 'workshop') return <>{[[-2.65, 0.15], [0.2, -0.5], [2.8, 0.65]].map(([x, z]) => <CuboidCollider key={`${x}:${z}`} args={[1.25, 0.55, 0.75]} position={[x, 0.55, z]} />)}{[-4.75, -0.48, 3.35].map((x) => <CuboidCollider key={`line-post-${x}`} args={[0.14, 1.75, 0.14]} position={[x, 1.75, -2.22]} />)}</>;
   if (kind === 'record') return <CuboidCollider args={[3.7, 1.7, 0.85]} position={[0, 1.7, 0]} />;
   if (kind === 'post') return <CuboidCollider args={[1.1, 0.75, 0.75]} position={[0, 0.9, 0]} />;
   if (kind === 'camp') return <><CuboidCollider args={[0.72, 0.58, 0.62]} position={[-1.8, 0.58, -0.9]} /><CuboidCollider args={[1.15, 0.12, 0.46]} position={[1.85, 0.12, -1]} /></>;
