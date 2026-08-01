@@ -90,17 +90,17 @@
 		{
 			"mimeType":"image/png",
 			"name":"Bark_TwistedTree_Normal",
-			"uri":"Bark_TwistedTree_Normal.png"
+			"uri":"Bark_TwistedTree_Normal.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Bark_TwistedTree",
-			"uri":"Bark_TwistedTree.png"
+			"uri":"Bark_TwistedTree.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Leaves_TwistedTree_C",
-			"uri":"Leaves_TwistedTree_C.png"
+			"uri":"Leaves_TwistedTree_C.webp"
 		}
 	],
 	"accessors":[

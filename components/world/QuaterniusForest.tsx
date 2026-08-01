@@ -123,7 +123,7 @@ export default function QuaterniusForest({
           const infrastructureClearance = clearings.some(
             ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
           );
-          const spawnClearance = Math.hypot(x, z + 2) < 12;
+          const spawnClearance = Math.hypot(x, z + 2) < 20;
           const groundHeight = heightAt(x, z);
           if (roadClearance || siteClearance || infrastructureClearance || spawnClearance || groundHeight < -0.78) continue;
 

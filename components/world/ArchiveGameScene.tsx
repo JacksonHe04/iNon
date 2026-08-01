@@ -730,7 +730,7 @@ function forestCollidersAround(centerX: number, centerZ: number, destinations: G
         const infrastructureClearance = WORLD_INFRASTRUCTURE_CLEARINGS.some(
           ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
         );
-        const spawnClearance = Math.hypot(x, z + 2) < 12;
+        const spawnClearance = Math.hypot(x, z + 2) < 20;
         const groundHeight = terrainHeightAt(x, z);
         if (roadClearance || siteClearance || infrastructureClearance || spawnClearance || groundHeight < -0.78) continue;
         random();

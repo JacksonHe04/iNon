@@ -90,7 +90,7 @@ export default function QuaterniusGroundCover({
           const infrastructureClearance = clearings.some(
             ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
           );
-          const spawnClearance = Math.hypot(x, z + 2) < 7.5;
+          const spawnClearance = Math.hypot(x, z + 2) < 10;
           if (pathClearance || siteClearance || infrastructureClearance || spawnClearance || y <= waterLevel + 0.16) continue;
           if (placements[variant].length >= MAX_PER_VARIANT) continue;
 
