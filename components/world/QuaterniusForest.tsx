@@ -5,6 +5,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
   Color,
+  DynamicDrawUsage,
   InstancedMesh,
   Matrix4,
   Mesh,
@@ -20,6 +21,19 @@ const CHUNK_SIZE = 38;
 const CHUNK_RADIUS = 3;
 const TREES_PER_CHUNK = 15;
 const MAX_INSTANCES_PER_VARIANT = 180;
+const HIGH_DETAIL_CHUNK_RADIUS = 2;
+const MAX_FAR_TREES = (CHUNK_RADIUS * 2 + 1) ** 2 * TREES_PER_CHUNK;
+
+interface FarTreePlacement {
+  x: number;
+  y: number;
+  z: number;
+  height: number;
+  width: number;
+  rotation: number;
+  pine: boolean;
+  shade: number;
+}
 
 export interface QuaterniusAssetPart {
   geometry: BufferGeometry;
@@ -94,6 +108,9 @@ export default function QuaterniusForest({
     [common1, common2, common4, pine1, pine3, pine5, twisted2, twisted5],
   );
   const meshes = useRef<Array<Array<InstancedMesh | null>>>([]);
+  const farTrunks = useRef<InstancedMesh>(null);
+  const farPines = useRef<InstancedMesh>(null);
+  const farDeciduous = useRef<InstancedMesh>(null);
   const lastChunk = useRef('');
   const dummy = useMemo(() => new Object3D(), []);
   const baseMatrix = useMemo(() => new Matrix4(), []);
@@ -104,10 +121,16 @@ export default function QuaterniusForest({
     const centerZ = Math.floor(playerPosition.current.z / CHUNK_SIZE);
     const chunkKey = `${centerX}:${centerZ}`;
     if (chunkKey === lastChunk.current) return;
-    if (meshes.current.length !== partsByVariant.length) return;
+    if (
+      meshes.current.length !== partsByVariant.length
+      || !farTrunks.current
+      || !farPines.current
+      || !farDeciduous.current
+    ) return;
     lastChunk.current = chunkKey;
 
     const placements = partsByVariant.map(() => [] as Matrix4[]);
+    const farPlacements: FarTreePlacement[] = [];
     for (let chunkX = centerX - CHUNK_RADIUS; chunkX <= centerX + CHUNK_RADIUS; chunkX += 1) {
       for (let chunkZ = centerZ - CHUNK_RADIUS; chunkZ <= centerZ + CHUNK_RADIUS; chunkZ += 1) {
         const random = seededRandom(coordinateSeed(chunkX, chunkZ));
@@ -131,12 +154,32 @@ export default function QuaterniusForest({
             partsByVariant.length - 1,
             Math.floor(random() * partsByVariant.length),
           );
-          if (placements[variant].length >= MAX_INSTANCES_PER_VARIANT) continue;
-          dummy.position.set(x, groundHeight, z);
-          dummy.rotation.set(0, random() * Math.PI * 2, (random() - 0.5) * 0.035);
-          dummy.scale.set(widthScale, heightScale, widthScale);
-          dummy.updateMatrix();
-          placements[variant].push(dummy.matrix.clone());
+          const rotation = random() * Math.PI * 2;
+          const tilt = (random() - 0.5) * 0.035;
+          const isHighDetail = Math.max(
+            Math.abs(chunkX - centerX),
+            Math.abs(chunkZ - centerZ),
+          ) <= HIGH_DETAIL_CHUNK_RADIUS;
+
+          if (isHighDetail) {
+            if (placements[variant].length >= MAX_INSTANCES_PER_VARIANT) continue;
+            dummy.position.set(x, groundHeight, z);
+            dummy.rotation.set(0, rotation, tilt);
+            dummy.scale.set(widthScale, heightScale, widthScale);
+            dummy.updateMatrix();
+            placements[variant].push(dummy.matrix.clone());
+          } else if (farPlacements.length < MAX_FAR_TREES) {
+            farPlacements.push({
+              x,
+              y: groundHeight,
+              z,
+              height: 7.4 * heightScale,
+              width: widthScale,
+              rotation,
+              pine: variant >= 3 && variant <= 5,
+              shade: (coordinateSeed(Math.floor(x * 3), Math.floor(z * 3)) % 100) / 100,
+            });
+          }
         }
       }
     }
@@ -156,6 +199,82 @@ export default function QuaterniusForest({
         mesh.computeBoundingSphere();
       });
     });
+
+    let pineIndex = 0;
+    let deciduousIndex = 0;
+    farPlacements.forEach((tree, trunkIndex) => {
+      dummy.position.set(tree.x, tree.y + tree.height * 0.31, tree.z);
+      dummy.rotation.set(0, tree.rotation, 0);
+      dummy.scale.set(tree.width * 0.28, tree.height * 0.62, tree.width * 0.28);
+      dummy.updateMatrix();
+      farTrunks.current?.setMatrixAt(trunkIndex, dummy.matrix);
+      farTrunks.current?.setColorAt(
+        trunkIndex,
+        new Color().setHSL(0.08, 0.18, 0.34 + tree.shade * 0.1),
+      );
+
+      if (tree.pine) {
+        const pineLayers = [
+          { y: 0.61, width: 1.82, height: 0.43, lightness: 0.36 },
+          { y: 0.81, width: 1.34, height: 0.37, lightness: 0.4 },
+        ];
+        pineLayers.forEach((layer) => {
+          dummy.position.set(tree.x, tree.y + tree.height * layer.y, tree.z);
+          dummy.scale.set(
+            tree.width * layer.width,
+            tree.height * layer.height,
+            tree.width * layer.width,
+          );
+          dummy.updateMatrix();
+          farPines.current?.setMatrixAt(pineIndex, dummy.matrix);
+          farPines.current?.setColorAt(
+            pineIndex,
+            new Color().setHSL(0.32, 0.24, layer.lightness + tree.shade * 0.1),
+          );
+          pineIndex += 1;
+        });
+      } else {
+        const offsetX = Math.cos(tree.rotation) * tree.width * 0.48;
+        const offsetZ = Math.sin(tree.rotation) * tree.width * 0.48;
+        const crownLayers = [
+          { x: -offsetX, z: -offsetZ, y: 0.68, width: 1.42, height: 0.3 },
+          { x: offsetX, z: offsetZ, y: 0.77, width: 1.5, height: 0.32 },
+        ];
+        crownLayers.forEach((layer, crownIndex) => {
+          dummy.position.set(
+            tree.x + layer.x,
+            tree.y + tree.height * layer.y,
+            tree.z + layer.z,
+          );
+          dummy.scale.set(
+            tree.width * layer.width,
+            tree.height * layer.height,
+            tree.width * layer.width * 0.92,
+          );
+          dummy.updateMatrix();
+          farDeciduous.current?.setMatrixAt(deciduousIndex, dummy.matrix);
+          farDeciduous.current?.setColorAt(
+            deciduousIndex,
+            new Color().setHSL(
+              0.03 + tree.shade * 0.08,
+              0.2,
+              0.38 + tree.shade * 0.11 + crownIndex * 0.025,
+            ),
+          );
+          deciduousIndex += 1;
+        });
+      }
+    });
+
+    farTrunks.current.count = farPlacements.length;
+    farPines.current.count = pineIndex;
+    farDeciduous.current.count = deciduousIndex;
+    for (const mesh of [farTrunks.current, farPines.current, farDeciduous.current]) {
+      mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      mesh.computeBoundingSphere();
+    }
   });
 
   useEffect(() => {
@@ -180,6 +299,18 @@ export default function QuaterniusForest({
           ))}
         </group>
       ))}
+      <instancedMesh ref={farTrunks} args={[undefined, undefined, MAX_FAR_TREES]}>
+        <cylinderGeometry args={[1, 1, 1, 6]} />
+        <meshBasicMaterial vertexColors />
+      </instancedMesh>
+      <instancedMesh ref={farPines} args={[undefined, undefined, MAX_FAR_TREES * 2]}>
+        <coneGeometry args={[1, 1, 7]} />
+        <meshBasicMaterial vertexColors />
+      </instancedMesh>
+      <instancedMesh ref={farDeciduous} args={[undefined, undefined, MAX_FAR_TREES * 2]}>
+        <dodecahedronGeometry args={[1, 0]} />
+        <meshBasicMaterial vertexColors />
+      </instancedMesh>
     </group>
   );
 }
