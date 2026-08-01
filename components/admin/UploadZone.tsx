@@ -22,7 +22,7 @@ export function UploadZone({
       onDragOver={handleDrag}
       onDragLeave={handleDrag}
       onDrop={handleDrop}
-      className={`relative border-2 border-dashed rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all duration-300 backdrop-blur-md bg-white/40 dark:bg-gray-900/30 ${
+      className={`archive-upload-zone relative border-2 border-dashed rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all duration-300 backdrop-blur-md bg-white/40 dark:bg-gray-900/30 ${
         dragActive
           ? 'border-emerald-500 bg-emerald-500/5 scale-[0.99]'
           : 'border-gray-300 dark:border-gray-700/60 hover:border-gray-400 dark:hover:border-gray-500'

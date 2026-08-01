@@ -8,6 +8,7 @@ import EditableBlockWrapper from './EditableBlockWrapper';
 import useBlockLayout from '@/hooks/useBlockLayout';
 import { Reorder } from 'framer-motion';
 import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
+import ArchiveBlockFrame from '@/components/archive/ArchiveBlockFrame';
 
 interface BlockCanvasEngineProps {
   data: ReadmeData;
@@ -39,23 +40,32 @@ export default function BlockCanvasEngine({
 
   if (mode === 'readonly') {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        {activeBlocks.map((block) => {
+      <section className="archive-block-grid" aria-label="个人档案目录">
+        <header className="archive-block-grid__prologue">
+          <div>
+            <p className="archive-kicker">Collected fragments · private field catalogue</p>
+            <h2>个人档案索引</h2>
+          </div>
+          <p>
+            <strong>{String(activeBlocks.length).padStart(2, '0')}</strong>
+            份记录沿着时间、兴趣与创造彼此交叠。
+          </p>
+        </header>
+        {activeBlocks.map((block, index) => {
           const isFullWidth = block.colSpan === 2;
           return (
-            <div
+            <ArchiveBlockFrame
               key={block.id}
-              className={`relative transition-all duration-300 ${
-                isFullWidth ? 'col-span-1 md:col-span-2' : 'col-span-1'
-              }`}
+              blockType={block.blockType}
+              index={index}
+              isWide={isFullWidth}
+              id={block.sectionId || block.id}
             >
-              <div id={block.sectionId || block.id}>
-                <BlockRenderer block={block} data={data} />
-              </div>
-            </div>
+              <BlockRenderer block={block} data={data} />
+            </ArchiveBlockFrame>
           );
         })}
-      </div>
+      </section>
     );
   }
 

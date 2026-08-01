@@ -14,7 +14,7 @@ export default function HeaderNav({ data, username, blocks }: HeaderNavProps) {
       <TopNav
         data={data}
         blocks={blocks}
-        className="relative z-40 bg-white/20 border-b border-white/30 backdrop-blur-[40px]"
+        className="relative z-40 border-b border-[var(--archive-line-strong)] bg-[rgb(var(--archive-paper-rgb)/0.96)] archive-top-nav"
       />
     </div>
   );

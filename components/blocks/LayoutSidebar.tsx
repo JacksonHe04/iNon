@@ -5,11 +5,11 @@ import type { BlockConfig } from '@/types/layout';
 import { getBlockTitle } from '@/lib/blocks/registry';
 
 const THEMES = [
-  { id: 'green', name: '翠绿 (Green)', previewBg: 'linear-gradient(135deg, #22c55e, #14b8a6)' },
-  { id: 'red', name: '红粉 (Red-Pink)', previewBg: 'linear-gradient(135deg, #fb7185, #ec4899)' },
-  { id: 'orange', name: '橙黄 (Orange-Yellow)', previewBg: 'linear-gradient(135deg, #fbbf24, #f97316)' },
-  { id: 'blue', name: '天蓝 (Sky Blue)', previewBg: 'linear-gradient(135deg, #38bdf8, #3b82f6)' },
-  { id: 'gray', name: '黑灰 (Black-Gray)', previewBg: 'linear-gradient(135deg, #9ca3af, #4b5563)' },
+  { id: 'green', name: '苔绿 (Sage)', previewBg: '#6f7b63' },
+  { id: 'red', name: '印泥 (Seal)', previewBg: '#763e32' },
+  { id: 'orange', name: '赭黄 (Ochre)', previewBg: '#b58a43' },
+  { id: 'blue', name: '雾绿 (Mist)', previewBg: '#98a18a' },
+  { id: 'gray', name: '旧墨 (Ink)', previewBg: '#6b6454' },
 ] as const;
 
 interface LayoutSidebarProps {

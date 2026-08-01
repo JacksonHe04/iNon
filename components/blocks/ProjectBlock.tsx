@@ -2,6 +2,7 @@
 
 import GlassCard from '@/components/GlassCard';
 import { Briefcase, ExternalLink, GitBranch } from 'lucide-react';
+import ArchiveSectionHeading from '@/components/archive/ArchiveSectionHeading';
 
 export interface ProjectItem {
   id?: string;
@@ -20,21 +21,13 @@ interface ProjectBlockProps {
 export default function ProjectBlock({ projects, title }: ProjectBlockProps) {
   return (
     <GlassCard className="p-5 space-y-4 hover:border-emerald-400/40 transition">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            <Briefcase className="w-5 h-5" />
-          </div>
-          {title && <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>}
-        </div>
-        <span className="text-xs text-gray-400 font-mono">{projects.length} 项</span>
-      </div>
+      <ArchiveSectionHeading title={title || '项目档案'} icon={Briefcase} count={projects.length} countLabel="PROJECTS" />
 
       <div className="space-y-3">
         {projects.map((proj, idx) => (
           <div
             key={idx}
-            className="p-3.5 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:border-emerald-400/50 transition space-y-2"
+            className="archive-index-card p-3.5 bg-white/40 dark:bg-gray-800/40 border border-[var(--archive-line)] hover:border-emerald-400/50 transition space-y-2"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-bold text-sm text-gray-900 dark:text-white">

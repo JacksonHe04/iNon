@@ -96,7 +96,7 @@ export default function ReadingDeskScene({ books, onSelect, activeTitle, mode = 
                     ? { y: -18, rotateY: -12, rotateZ: -2, z: 15, scale: 1.04 }
                     : {}
                 }
-                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() =>
                   onSelect({
                     title: book.name,

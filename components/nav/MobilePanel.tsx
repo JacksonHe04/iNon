@@ -56,7 +56,7 @@ export function MobilePanel({
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'spring', stiffness: 260, damping: 30 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-y-0 left-0 z-50 w-[min(24rem,50vw)] max-w-full bg-white/85 backdrop-blur-2xl border-r border-white/40 p-5 flex flex-col gap-6 text-gray-800 sm:hidden"
           >
             <div className="flex items-center justify-between flex-shrink-0">

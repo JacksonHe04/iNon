@@ -5,6 +5,7 @@ import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { ExternalLink } from 'lucide-react';
 import BlockImage from './BlockImage';
+import ArchiveSectionHeading from '@/components/archive/ArchiveSectionHeading';
 
 export interface CollectionItem {
   id?: string;
@@ -106,29 +107,14 @@ export default function CollectionGridBlock({
     orange: 'text-orange-500',
   };
 
-  const iconBgClasses: Record<string, string> = {
-    indigo: 'bg-indigo-500/10',
-    amber: 'bg-amber-500/10',
-    emerald: 'bg-emerald-500/10',
-    cyan: 'bg-cyan-500/10',
-    orange: 'bg-orange-500/10',
-  };
-
   return (
     <GlassCard className={`p-5 space-y-5 transition-all duration-300 ${hoverBorderClasses[themeColorClass] || hoverBorderClasses.indigo}`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className={`p-2 rounded-lg ${iconBgClasses[themeColorClass] || iconBgClasses.indigo} ${textColors[themeColorClass] || textColors.indigo}`}>
-            <BlockIcon className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>
-          </div>
-        </div>
+      <div className="relative">
+        <ArchiveSectionHeading title={title} icon={BlockIcon} count={items.length} />
         {onToggleScene && interactiveScene && colSpan === 2 && (
           <button
             onClick={onToggleScene}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 hover:bg-white/60 dark:hover:bg-gray-800/60 text-gray-600 dark:text-gray-300 font-medium transition cursor-pointer"
+            className="absolute right-20 top-1 flex items-center gap-1 px-2.5 py-1 text-[9px] font-mono border border-[var(--archive-line)] hover:border-[var(--archive-line-strong)] text-gray-600 dark:text-gray-300 transition cursor-pointer"
           >
             <span>{showScene ? '隐藏' : '显示'}{sceneToggleText || '互动'}</span>
           </button>
@@ -142,14 +128,14 @@ export default function CollectionGridBlock({
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 border-b border-white/10 pb-1 overflow-x-auto whitespace-nowrap scrollbar-none">
+      <div className="flex items-center gap-1.5 border-b border-[var(--archive-line)] pb-1 overflow-x-auto whitespace-nowrap scrollbar-none">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+              className={`flex items-center gap-1 px-3 py-1.5 text-[10px] font-mono font-semibold border transition cursor-pointer ${
                 isActive
                   ? `${bgClasses[themeColorClass] || bgClasses.indigo} ${textColors[themeColorClass] || textColors.indigo}`
                   : 'bg-transparent border-transparent text-gray-500 hover:text-gray-800 hover:bg-white/20 dark:hover:bg-gray-800/20'
@@ -177,7 +163,7 @@ export default function CollectionGridBlock({
                     link: item.link,
                   })
                 }
-                className={`p-3 rounded-xl bg-white/40 dark:bg-gray-800/40 border border-white/20 transition cursor-pointer flex flex-col justify-between ${hoverBorderClasses[themeColorClass] || hoverBorderClasses.indigo}`}
+                className={`archive-index-card p-3 bg-white/40 dark:bg-gray-800/40 border border-[var(--archive-line)] transition cursor-pointer flex flex-col justify-between ${hoverBorderClasses[themeColorClass] || hoverBorderClasses.indigo}`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-1.5">

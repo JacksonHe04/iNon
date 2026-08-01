@@ -40,21 +40,19 @@ export function NavMiddle({
 
   return (
     <motion.div
-      className="flex-shrink-0 absolute inset-x-0 flex justify-center pointer-events-none sm:pointer-events-auto sm:static sm:w-auto sm:flex-none"
+      className="archive-nav-oracle flex-shrink-0 absolute inset-x-0 hidden justify-center pointer-events-none sm:flex sm:pointer-events-auto sm:static sm:w-auto sm:flex-none"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onClick={handleIslandClick}
     >
       <motion.div
-        className="px-6 py-2 rounded-full border border-white/20 bg-black text-white/90 backdrop-blur-2xl cursor-pointer shadow-[0_15px_35px_rgba(0,0,0,0.35)] pointer-events-auto"
+        className="px-5 py-2 border border-[var(--archive-line-strong)] bg-black text-white/90 cursor-pointer pointer-events-auto"
+        style={{ backgroundColor: '#182119', color: '#f2ead6' }}
         animate={{
-          scale: isHovered || aiState !== 'closed' ? 1.08 : 1,
-          boxShadow:
-            aiState !== 'closed'
-              ? '0 10px 40px rgba(139,92,246,0.35)'
-              : '0 10px 20px rgba(0,0,0,0.08)',
+          y: isHovered || aiState !== 'closed' ? -1 : 0,
+          opacity: aiState !== 'closed' ? 1 : 0.92,
         }}
-        transition={{ type: 'spring', stiffness: 260 }}
+        transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="flex items-center gap-2">
           <div className="relative flex h-4 w-7 items-center justify-center rounded-full bg-white/20">
@@ -64,7 +62,7 @@ export function NavMiddle({
               transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
             />
           </div>
-          <span className="text-xs tracking-wide uppercase">小{nickname} AI</span>
+          <span className="text-[10px] font-mono tracking-[0.12em] uppercase">小{nickname} AI · ORACLE</span>
         </div>
       </motion.div>
 

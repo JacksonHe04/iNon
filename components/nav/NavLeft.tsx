@@ -35,7 +35,7 @@ export function NavLeft({
   isMounted,
 }: NavLeftProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="archive-nav-identity flex items-center gap-3">
       <button
         type="button"
         onClick={() => setShowMobilePanel(true)}

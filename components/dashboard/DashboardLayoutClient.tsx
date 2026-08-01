@@ -314,17 +314,26 @@ export default function DashboardLayoutClient({
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
+    <div className="archive-dashboard-layout flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
       {!isPublicPreview && (
         <DashboardSideNav username={username} activeTab={activeTab} onTabChange={handleTabChange} />
       )}
-      <main className="flex-1 min-w-0 space-y-6 w-full">
+      <main className="archive-dashboard-main flex-1 min-w-0 space-y-6 w-full">
+        {!isPublicPreview && (
+          <header className="archive-workspace-header">
+            <div>
+              <p className="archive-kicker">Private editing room · {username}</p>
+              <h1>{activeTab === 'home' ? '控制台' : activeTab === 'content' ? '内容档案' : activeTab === 'library' ? '私人收藏库' : activeTab === 'canvas' ? '公开展陈编排' : activeTab === 'messages' ? '来信与留言' : activeTab === 'analytics' ? '访问记录' : '账户卷宗'}</h1>
+            </div>
+            <span>AUTHORIZED / OWNER</span>
+          </header>
+        )}
         {isPublicPreview ? (
           <div className="w-full">
             <PublicBlockRenderer data={localReadmeData} layoutConfig={layoutConfig} />
           </div>
         ) : (
-          renderContent()
+          <div className="archive-dashboard-content">{renderContent()}</div>
         )}
       </main>
     </div>

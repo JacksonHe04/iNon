@@ -1,0 +1,15 @@
+{
+  "name": "Verdant Archive World",
+  "generatedAt": "2026-08-01T19:43:33.321Z",
+  "generator": "scripts/generate-archive-world-glb.mjs",
+  "assets": [
+    {
+      "path": "archive-sanctum.glb",
+      "role": "Runtime GLB landmark loaded through three/addons via drei useGLTF"
+    },
+    {
+      "path": "archive-sanctum.gltf",
+      "role": "Readable glTF source with embedded buffers"
+    }
+  ]
+}

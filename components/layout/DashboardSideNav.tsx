@@ -24,7 +24,8 @@ interface DashboardSideNavProps {
 export default function DashboardSideNav({ activeTab, className = '', username, onTabChange }: DashboardSideNavProps) {
   return (
     <aside className={`w-full md:w-52 lg:w-60 shrink-0 md:sticky md:top-24 z-30 ${className}`}>
-      <div className="rounded-3xl border border-white/30 bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-3 shadow-xl">
+      <div className="archive-dashboard-nav border border-[var(--archive-line-strong)] bg-[rgb(var(--archive-paper-rgb)/0.94)] p-3">
+        <p className="archive-kicker hidden md:block px-3 pb-3 mb-1 border-b border-[var(--archive-line)]">Archive desk</p>
         <div className="flex flex-row md:flex-col gap-1.5 overflow-x-auto scrollbar-none">
           {DASHBOARD_TABS.map((tab) => {
             const Icon = tab.icon;
@@ -40,9 +41,9 @@ export default function DashboardSideNav({ activeTab, className = '', username, 
                     onTabChange(tab.id);
                   }
                 }}
-                className={`relative flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs lg:text-sm font-medium transition-all whitespace-nowrap text-left w-full cursor-pointer ${
+                className={`relative flex items-center gap-2.5 px-4 py-3 text-xs lg:text-sm font-medium transition-all whitespace-nowrap text-left w-full cursor-pointer ${
                   isActive
-                    ? 'bg-white/50 dark:bg-gray-800/60 text-gray-900 dark:text-white shadow-md font-bold'
+                    ? 'text-gray-900 dark:text-white font-bold'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-white/20 dark:hover:bg-gray-800/30'
                 }`}
               >
@@ -52,8 +53,8 @@ export default function DashboardSideNav({ activeTab, className = '', username, 
                 {isActive && (
                   <motion.div
                     layoutId="activeDashboardTab"
-                    className="absolute inset-0 bg-teal-500/10 dark:bg-teal-400/10 rounded-2xl border border-teal-500/30"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    className="absolute inset-0 bg-teal-500/10 dark:bg-teal-400/10 border-l-2 border-teal-500/60"
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                   />
                 )}
               </Link>

@@ -56,8 +56,15 @@ export default function FooterSection({ data }: FooterSectionProps) {
   const designConcept = '用创新的交互方式，让信息在视觉美感中自然流动。';
 
   return (
-    <footer className="py-8 px-4 bg-gradient-to-b from-transparent to-gray-100 dark:to-gray-900">
+    <footer className="archive-footer py-12 px-4 border-t border-[var(--archive-line-strong)]">
       <div className="max-w-7xl mx-auto">
+        <header className="mb-7 flex items-end justify-between gap-4">
+          <div>
+            <p className="archive-kicker">Colophon · closing records</p>
+            <h2 className="mt-2 text-3xl font-medium tracking-tight">档案跋页</h2>
+          </div>
+          <span className="font-mono text-[9px] tracking-[0.14em] text-gray-500">INON / END OF FILE</span>
+        </header>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <GlassCard>
             <h3 className="font-semibold mb-2">访问次数</h3>
@@ -82,7 +89,7 @@ export default function FooterSection({ data }: FooterSectionProps) {
               {techStack.map((tech, idx) => (
                 <span
                   key={idx}
-                  className="px-3 py-1 bg-white/20 rounded-full text-sm"
+                  className="px-3 py-1 border border-[var(--archive-line)] text-sm"
                 >
                   {tech}
                 </span>

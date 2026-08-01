@@ -1,10 +1,18 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import type { ReadmeData } from '@/types';
 import type { LayoutConfig } from '@/types/layout';
-import BlockCanvasEngine from '@/components/blocks/BlockCanvasEngine';
-import FooterSection from '@/components/sections/FooterSection';
-import DeepWaterSection from '@/components/sections/DeepWaterSection';
+
+const ArchiveWorld = dynamic(() => import('@/components/world/ArchiveWorld'), {
+  ssr: false,
+  loading: () => (
+    <div className="archive-world-loading">
+      <span />
+      <p>正在生成绿迹世界坐标……</p>
+    </div>
+  ),
+});
 
 interface PublicBlockRendererProps {
   data: ReadmeData;
@@ -12,18 +20,5 @@ interface PublicBlockRendererProps {
 }
 
 export default function PublicBlockRenderer({ data, layoutConfig }: PublicBlockRendererProps) {
-  return (
-    <div className="space-y-8 animate-fadeIn max-w-7xl mx-auto">
-      {/* Dynamic Non Block Canvas Layout Engine (Readonly Mode) */}
-      <BlockCanvasEngine
-        data={data}
-        initialLayoutConfig={layoutConfig}
-        mode="readonly"
-      />
-
-      {/* Interactive Footer & DeepWater Sections */}
-      <FooterSection data={data} />
-      <DeepWaterSection data={data.thoughts} />
-    </div>
-  );
+  return <ArchiveWorld data={data} layoutConfig={layoutConfig} />;
 }

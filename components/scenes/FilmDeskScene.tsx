@@ -83,7 +83,7 @@ export default function FilmDeskScene({ films, onSelect, activeTitle, mode = 're
                 ? { rotate: [0, 8, 12, 10] } 
                 : { rotate: 0 }
             }
-            transition={{ type: 'spring', stiffness: 120, damping: 15 }}
+            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Tone arm rod */}
             <path d="M90,5 L40,80 L20,85" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
@@ -139,8 +139,8 @@ export default function FilmDeskScene({ films, onSelect, activeTitle, mode = 're
                   }
                   transition={
                     isActive 
-                      ? { rotate: { repeat: Infinity, duration: 8, ease: 'linear' }, y: { type: 'spring', stiffness: 200, damping: 20 } }
-                      : { type: 'spring', stiffness: 200, damping: 20 }
+                      ? { rotate: { repeat: Infinity, duration: 8, ease: 'linear' }, y: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+                      : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
                   }
                   onClick={() =>
                     onSelect({

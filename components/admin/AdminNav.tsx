@@ -16,12 +16,12 @@ export default function AdminNav({ email }: AdminNavProps) {
   const pathname = usePathname();
 
   return (
-    <div className="sticky top-0 z-40 border-b border-white/30 bg-white/80 backdrop-blur-2xl">
+    <div className="archive-admin-nav sticky top-0 z-40 border-b border-[var(--archive-line-strong)] bg-[rgb(var(--archive-paper-rgb)/0.97)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
         <div className="flex items-center gap-3">
-          <Link href="/admin/assets" className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            iNon 后台管理
+          <Link href="/admin/assets" className="text-lg font-semibold tracking-wide text-gray-900 flex items-center gap-2">
+            <span className="grid h-7 w-7 place-items-center rounded-full border border-[var(--archive-line-strong)] font-mono text-[8px]">IA</span>
+            iNon 档案馆
           </Link>
           <nav className="flex flex-wrap gap-2">
             {navItems.map((item) => {

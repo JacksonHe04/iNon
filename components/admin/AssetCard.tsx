@@ -34,7 +34,7 @@ export function AssetCard({
 }: AssetCardProps) {
   return (
     <div
-      className="group relative border border-white/20 dark:border-gray-700/40 bg-white/40 dark:bg-gray-800/40 backdrop-blur rounded-2xl p-3 shadow hover:shadow-lg transition-all duration-300 flex flex-col justify-between"
+      className="archive-asset-card group relative border border-white/20 dark:border-gray-700/40 bg-white/40 dark:bg-gray-800/40 backdrop-blur rounded-2xl p-3 shadow hover:shadow-lg transition-all duration-300 flex flex-col justify-between"
     >
       <div>
         <div className="aspect-square rounded-xl bg-gray-100 dark:bg-gray-950 overflow-hidden flex items-center justify-center relative shadow-inner">

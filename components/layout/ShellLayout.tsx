@@ -24,14 +24,13 @@ export default function ShellLayout({
   blocks,
   theme = 'green',
 }: ShellLayoutProps) {
-  const [currentPath, setCurrentPath] = useState(
-    typeof window !== 'undefined' ? window.location.pathname : ''
-  );
+  const [currentPath, setCurrentPath] = useState('');
 
   useEffect(() => {
     const handleLocationChange = () => {
       setCurrentPath(window.location.pathname);
     };
+    handleLocationChange();
     window.addEventListener('popstate', handleLocationChange);
     const removeLocationChange = addAppEventListener(APP_EVENTS.locationChange, handleLocationChange);
     return () => {
@@ -49,10 +48,10 @@ export default function ShellLayout({
   const actualShowSideNav = isConsole ? false : showSideNav;
 
   return (
-    <main className="relative min-h-screen">
+    <main className="relative min-h-screen archive-shell">
       <HeaderNav data={data} username={username} blocks={blocks} />
       {actualShowSideNav && <SideNav blocks={blocks} />}
-      <div className={`pt-24 transition-all duration-300 ${actualShowSideNav ? 'lg:pl-32 xl:pl-40 2xl:pl-48' : 'px-4 sm:px-6 lg:px-8'}`}>
+      <div className={`pt-24 pb-16 transition-[padding] duration-500 ${actualShowSideNav ? 'lg:pl-32 xl:pl-40 2xl:pl-48' : 'px-4 sm:px-6 lg:px-8'}`}>
         {children}
       </div>
     </main>

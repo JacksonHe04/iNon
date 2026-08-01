@@ -105,12 +105,13 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
 
   return (
     <motion.nav
-      initial={mounted ? { x: -100 } : false}
-      animate={{ x: 0 }}
+      initial={mounted ? { x: -24, opacity: 0 } : false}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       className="fixed left-2 lg:left-4 -translate-y-1/2 z-40 hidden md:block"
       style={{ top: 'calc(50% + 40px)' }}
     >
-      <div className="rounded-2xl border border-white/30 bg-white/30 backdrop-blur-xl p-3 shadow-lg">
+      <div className="archive-side-nav border border-[var(--archive-line-strong)] bg-[rgb(var(--archive-paper-rgb)/0.94)] p-2">
         <div className="flex flex-col gap-0.5 max-h-[70vh] overflow-y-auto scrollbar-none">
           {navItems.map((section) => {
             const Icon = section.blockType ? getBlockIcon(section.blockType) : null;
@@ -129,10 +130,10 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
                     isClickScrolling.current = false;
                   }, 800);
                 }}
-                className={`relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all text-left whitespace-nowrap cursor-pointer ${
+                className={`relative px-3 py-1.5 text-[10px] tracking-wide font-medium transition-all text-left whitespace-nowrap cursor-pointer ${
                   activeSection === section.id
-                    ? 'bg-white/30 dark:bg-gray-800/40 text-gray-900 dark:text-white font-bold'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-white/10'
+                    ? 'text-gray-900 dark:text-white font-bold'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-white/20'
                 }`}
               >
                 <div className="relative z-10 flex items-center gap-2">
@@ -150,8 +151,8 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
                 {activeSection === section.id && (
                   <motion.div
                     layoutId="activeSection"
-                    className="absolute inset-0 bg-white/30 dark:bg-teal-500/20 rounded-xl border border-teal-500/30"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    className="absolute inset-0 bg-teal-500/10 border-l-2 border-teal-500/70"
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                   />
                 )}
               </button>
@@ -162,4 +163,3 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
     </motion.nav>
   );
 }
-

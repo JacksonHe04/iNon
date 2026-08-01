@@ -1,0 +1,25 @@
+{
+  "collection": "iNon Verdant Archive",
+  "created": "2026-08-02",
+  "assets": [
+    {
+      "file": "verdant-hills-hero.webp",
+      "kind": "generated-original",
+      "purpose": "public and identity hero atmosphere",
+      "source": "OpenAI image generation",
+      "referenceRole": "mood and palette only"
+    },
+    {
+      "file": "aged-paper-texture.webp",
+      "kind": "generated-original",
+      "purpose": "low-opacity global paper material",
+      "source": "OpenAI image generation"
+    },
+    {
+      "file": "ephemera-sheet.png",
+      "kind": "generated-original",
+      "purpose": "decorative botanical and archival overlays",
+      "source": "OpenAI image generation with local chroma-key extraction"
+    }
+  ]
+}

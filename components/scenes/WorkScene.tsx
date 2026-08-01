@@ -108,7 +108,7 @@ export default function WorkScene({ jobs, onSelectJob, activeJobId, mode = 'read
               y: [0, -6, 0],
             }}
             transition={{
-              left: { type: 'spring', stiffness: 200, damping: 22 },
+              left: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
               y: { repeat: Infinity, duration: 1, ease: 'easeInOut' }
             }}
           >

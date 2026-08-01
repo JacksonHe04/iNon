@@ -39,14 +39,13 @@ export function NavRight({
   startTransition,
   router,
 }: NavRightProps) {
-  const [currentPath, setCurrentPath] = React.useState(
-    typeof window !== 'undefined' ? window.location.pathname : ''
-  );
+  const [currentPath, setCurrentPath] = React.useState('');
 
   React.useEffect(() => {
     const handleLocationChange = () => {
       setCurrentPath(window.location.pathname);
     };
+    handleLocationChange();
     window.addEventListener('popstate', handleLocationChange);
     const removeLocationChange = addAppEventListener(APP_EVENTS.locationChange, handleLocationChange);
     return () => {
@@ -58,7 +57,7 @@ export function NavRight({
   const activeIsConsolePage = isMounted ? (currentPath.startsWith('/i/') || currentPath === '') : isConsolePage;
 
   return (
-    <div className="flex items-center gap-2 lg:gap-4">
+    <div className="archive-nav-actions flex items-center gap-1 sm:gap-2 lg:gap-4">
       <SocialLinks platformAccounts={data.contact.platform_accounts} />
 
       <button

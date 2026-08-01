@@ -39,7 +39,7 @@ export default function Modal({ open, onClose, children, className = '', positio
             initial={{ scale: 0.94, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.94, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+            transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
             className={`max-w-lg w-full rounded-3xl border border-white/40 bg-white/60 p-6 shadow-2xl backdrop-blur-2xl text-gray-900 ${className}`}
             onClick={(event) => event.stopPropagation()}
           >
@@ -54,4 +54,3 @@ export default function Modal({ open, onClose, children, className = '', positio
 
   return createPortal(modalElement, document.body);
 }
-

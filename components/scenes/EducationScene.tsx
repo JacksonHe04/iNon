@@ -136,7 +136,7 @@ export default function EducationScene({ schools, mode = 'readonly' }: Education
                   y: [0, -12, 0],
                 }}
                 transition={{
-                  left: { type: 'spring', stiffness: 220, damping: 20 },
+                  left: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
                   y: { repeat: Infinity, duration: 1.2, ease: 'easeInOut' }
                 }}
               >

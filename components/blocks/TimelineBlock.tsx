@@ -3,6 +3,7 @@
 import GlassCard from '@/components/GlassCard';
 import { Milestone, Calendar } from 'lucide-react';
 import { getBlockTitle } from '@/lib/blocks/registry';
+import ArchiveSectionHeading from '@/components/archive/ArchiveSectionHeading';
 
 export interface TimelineItem {
   id: string;
@@ -19,15 +20,7 @@ interface TimelineBlockProps {
 export default function TimelineBlock({ items, title = getBlockTitle('timeline') }: TimelineBlockProps) {
   return (
     <GlassCard className="p-5 space-y-4 hover:border-pink-400/40 transition">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400">
-            <Milestone className="w-5 h-5" />
-          </div>
-          <h3 className="font-bold text-base text-gray-900 dark:text-white">{title}</h3>
-        </div>
-        <span className="text-xs text-gray-400 font-mono">{items.length} 个里程碑</span>
-      </div>
+      <ArchiveSectionHeading title={title} icon={Milestone} count={items.length} countLabel="MILESTONES" />
 
       <div className="relative border-l-2 border-pink-500/30 ml-3 pl-4 space-y-4">
         {items.map((item) => (
