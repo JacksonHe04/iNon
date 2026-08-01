@@ -319,6 +319,7 @@ const campfireVertex = /* glsl */ `
 
 const campfireFragment = /* glsl */ `
   uniform float uTime;
+  uniform float uSeed;
   varying vec2 vUv;
 
   float hash(vec2 point) {
@@ -327,19 +328,20 @@ const campfireFragment = /* glsl */ `
 
   void main() {
     float height = clamp(vUv.y, 0.0, 1.0);
-    float sway = sin(uTime * 4.1 + height * 8.0) * 0.055 * height;
-    sway += sin(uTime * 7.7 - height * 12.0) * 0.024;
-    float width = mix(0.45, 0.055, pow(height, 1.28));
+    float sway = sin(uTime * (4.1 + uSeed) + height * 9.0 + uSeed * 13.0) * 0.07 * height;
+    sway += sin(uTime * 7.7 - height * 15.0 + uSeed * 5.0) * 0.025;
+    float lick = sin(height * 18.0 - uTime * 5.2 + uSeed * 9.0) * 0.035 * height;
+    float width = mix(0.38, 0.035, pow(height, 1.18));
     float edge = abs(vUv.x - 0.5 + sway);
-    float flame = 1.0 - smoothstep(width * 0.72, width, edge);
-    flame *= smoothstep(0.0, 0.08, height) * (1.0 - smoothstep(0.8, 1.0, height));
-    float grain = hash(floor(vUv * vec2(18.0, 26.0)) + floor(uTime * 10.0));
-    flame *= 0.78 + grain * 0.22;
-    if (flame < 0.025) discard;
-    vec3 ember = vec3(0.66, 0.16, 0.045);
-    vec3 gold = vec3(1.0, 0.64, 0.19);
-    vec3 color = mix(gold, ember, smoothstep(0.12, 0.88, height));
-    gl_FragColor = vec4(color, flame * 0.88);
+    float flame = 1.0 - smoothstep(width * 0.58, width + lick, edge);
+    flame *= smoothstep(0.0, 0.1, height) * (1.0 - smoothstep(0.72, 1.0, height));
+    float grain = hash(floor(vUv * vec2(21.0, 31.0)) + floor(uTime * 12.0 + uSeed * 17.0));
+    flame *= 0.68 + grain * 0.32;
+    if (flame < 0.08) discard;
+    vec3 ember = vec3(0.72, 0.18, 0.045);
+    vec3 gold = vec3(1.0, 0.68, 0.22);
+    vec3 color = mix(gold, ember, smoothstep(0.18, 0.9, height));
+    gl_FragColor = vec4(color, flame * 0.82);
   }
 `;
 
@@ -1276,19 +1278,72 @@ function TimberCabin({ postOffice = false }: { postOffice?: boolean }) {
   );
 }
 
+const CAMPFIRE_FLAME_LAYERS = [
+  { position: [-0.16, 0.58, 0.08], scale: [0.66, 0.82], seed: 0.2 },
+  { position: [0.16, 0.52, -0.05], scale: [0.52, 0.72], seed: 1.4 },
+  { position: [0.01, 0.7, 0.03], scale: [0.44, 0.94], seed: 2.7 },
+] as const;
+
+function CampfireSparks() {
+  const sparks = useRef<InstancedMesh>(null);
+  const dummy = useMemo(() => new Object3D(), []);
+  const particles = useMemo(() => {
+    const random = seededRandom(818277);
+    return Array.from({ length: 14 }, () => ({
+      x: (random() - 0.5) * 0.42,
+      z: (random() - 0.5) * 0.35,
+      phase: random(),
+      speed: 0.19 + random() * 0.23,
+      drift: random() * Math.PI * 2,
+    }));
+  }, []);
+
+  useFrame(({ clock }) => {
+    if (!sparks.current) return;
+    particles.forEach((particle, index) => {
+      const progress = (clock.elapsedTime * particle.speed + particle.phase) % 1;
+      const scale = 0.85 * (1 - progress) + 0.12;
+      dummy.position.set(
+        particle.x + Math.sin(clock.elapsedTime * 1.7 + particle.drift) * progress * 0.24,
+        0.42 + progress * 1.62,
+        particle.z + Math.cos(clock.elapsedTime * 1.3 + particle.drift) * progress * 0.18,
+      );
+      dummy.scale.setScalar(scale);
+      dummy.rotation.set(0, particle.drift, 0);
+      dummy.updateMatrix();
+      sparks.current?.setMatrixAt(index, dummy.matrix);
+    });
+    sparks.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={sparks} args={[undefined, undefined, particles.length]} frustumCulled={false}>
+      <sphereGeometry args={[0.035, 5, 4]} />
+      <meshStandardMaterial color="#dda052" emissive="#d67b37" emissiveIntensity={3.2} roughness={0.72} />
+    </instancedMesh>
+  );
+}
+
 function FieldCampfire({ position }: { position: [number, number, number] }) {
-  const flame = useRef<Mesh>(null);
-  const flameMaterial = useRef<ShaderMaterial>(null);
+  const flames = useRef<Array<Mesh | null>>([]);
   const glow = useRef<PointLight>(null);
-  const uniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
+  const uniforms = useMemo(
+    () => CAMPFIRE_FLAME_LAYERS.map((layer) => ({
+      uTime: { value: 0 },
+      uSeed: { value: layer.seed },
+    })),
+    [],
+  );
 
   useFrame(({ camera, clock }) => {
     const pulse = 0.88 + Math.sin(clock.elapsedTime * 7.4) * 0.1 + Math.sin(clock.elapsedTime * 13.1) * 0.04;
-    if (flame.current) {
-      flame.current.scale.set(0.92 + pulse * 0.08, pulse, 1);
-      flame.current.lookAt(camera.position);
-    }
-    if (flameMaterial.current) flameMaterial.current.uniforms.uTime.value = clock.elapsedTime;
+    flames.current.forEach((flame, index) => {
+      if (!flame) return;
+      const layer = CAMPFIRE_FLAME_LAYERS[index];
+      flame.scale.set(layer.scale[0] * (0.94 + pulse * 0.06), layer.scale[1] * pulse, 1);
+      flame.lookAt(camera.position);
+      uniforms[index].uTime.value = clock.elapsedTime;
+    });
     if (glow.current) glow.current.intensity = 7.4 + pulse * 2.8;
   });
 
@@ -1300,10 +1355,17 @@ function FieldCampfire({ position }: { position: [number, number, number] }) {
           <meshStandardMaterial color="#3b2b20" roughness={1} />
         </mesh>
       ))}
-      <mesh ref={flame} position={[0, 0.74, 0]}>
-        <planeGeometry args={[1.35, 1.65]} />
-        <shaderMaterial ref={flameMaterial} uniforms={uniforms} vertexShader={campfireVertex} fragmentShader={campfireFragment} transparent depthWrite={false} side={DoubleSide} />
-      </mesh>
+      {CAMPFIRE_FLAME_LAYERS.map((layer, index) => (
+        <mesh
+          key={layer.seed}
+          ref={(flame) => { flames.current[index] = flame; }}
+          position={layer.position}
+        >
+          <planeGeometry args={[1, 1]} />
+          <shaderMaterial uniforms={uniforms[index]} vertexShader={campfireVertex} fragmentShader={campfireFragment} transparent depthWrite={false} side={DoubleSide} />
+        </mesh>
+      ))}
+      <CampfireSparks />
       <pointLight ref={glow} position={[0, 0.8, 0]} intensity={8} distance={12} color="#d49b55" />
     </group>
   );
