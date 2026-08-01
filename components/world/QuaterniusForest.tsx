@@ -14,19 +14,19 @@ import {
 } from 'three';
 import type { GameDestination } from '@/components/world/ArchiveGameScene';
 
-const ASSET_ROOT = '/archive-world/quaternius-nature';
+export const QUATERNIUS_NATURE_ROOT = '/archive-world/quaternius-nature';
 const CHUNK_SIZE = 38;
 const CHUNK_RADIUS = 3;
 const TREES_PER_CHUNK = 15;
 const MAX_INSTANCES_PER_VARIANT = 180;
 
-interface AssetPart {
+export interface QuaterniusAssetPart {
   geometry: BufferGeometry;
   material: Material | Material[];
   localMatrix: Matrix4;
 }
 
-function seededRandom(seed: number) {
+export function seededRandom(seed: number) {
   let state = seed >>> 0;
   return () => {
     state = (state * 1664525 + 1013904223) >>> 0;
@@ -34,7 +34,7 @@ function seededRandom(seed: number) {
   };
 }
 
-function coordinateSeed(x: number, z: number) {
+export function coordinateSeed(x: number, z: number) {
   return ((x * 73856093) ^ (z * 19349663) ^ 0x9e3779b9) >>> 0;
 }
 
@@ -50,9 +50,9 @@ function fadedMaterial(material: Material) {
   return clone;
 }
 
-function collectParts(root: Object3D): AssetPart[] {
+export function collectQuaterniusParts(root: Object3D): QuaterniusAssetPart[] {
   root.updateMatrixWorld(true);
-  const parts: AssetPart[] = [];
+  const parts: QuaterniusAssetPart[] = [];
   root.traverse((object) => {
     if (!(object instanceof Mesh)) return;
     const material = Array.isArray(object.material)
@@ -76,17 +76,17 @@ export default function QuaterniusForest({
   destinations: GameDestination[];
   heightAt: (x: number, z: number) => number;
 }) {
-  const common1 = useGLTF(`${ASSET_ROOT}/CommonTree_1.gltf`);
-  const common2 = useGLTF(`${ASSET_ROOT}/CommonTree_2.gltf`);
-  const common4 = useGLTF(`${ASSET_ROOT}/CommonTree_4.gltf`);
-  const pine1 = useGLTF(`${ASSET_ROOT}/Pine_1.gltf`);
-  const pine3 = useGLTF(`${ASSET_ROOT}/Pine_3.gltf`);
-  const pine5 = useGLTF(`${ASSET_ROOT}/Pine_5.gltf`);
-  const twisted2 = useGLTF(`${ASSET_ROOT}/TwistedTree_2.gltf`);
-  const twisted5 = useGLTF(`${ASSET_ROOT}/TwistedTree_5.gltf`);
+  const common1 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/CommonTree_1.gltf`);
+  const common2 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/CommonTree_2.gltf`);
+  const common4 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/CommonTree_4.gltf`);
+  const pine1 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Pine_1.gltf`);
+  const pine3 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Pine_3.gltf`);
+  const pine5 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Pine_5.gltf`);
+  const twisted2 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/TwistedTree_2.gltf`);
+  const twisted5 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/TwistedTree_5.gltf`);
   const partsByVariant = useMemo(
     () => [common1, common2, common4, pine1, pine3, pine5, twisted2, twisted5].map(
-      (asset) => collectParts(asset.scene),
+      (asset) => collectQuaterniusParts(asset.scene),
     ),
     [common1, common2, common4, pine1, pine3, pine5, twisted2, twisted5],
   );
@@ -95,7 +95,6 @@ export default function QuaterniusForest({
   const dummy = useMemo(() => new Object3D(), []);
   const baseMatrix = useMemo(() => new Matrix4(), []);
   const finalMatrix = useMemo(() => new Matrix4(), []);
-  const hiddenMatrix = useMemo(() => new Matrix4().makeScale(0, 0, 0), []);
 
   useFrame(() => {
     const centerX = Math.floor(playerPosition.current.x / CHUNK_SIZE);
@@ -140,16 +139,13 @@ export default function QuaterniusForest({
       parts.forEach((part, partIndex) => {
         const mesh = meshes.current[variantIndex]?.[partIndex];
         if (!mesh) return;
-        for (let index = 0; index < MAX_INSTANCES_PER_VARIANT; index += 1) {
-          const placement = placements[variantIndex][index];
-          if (placement) {
-            baseMatrix.copy(placement);
-            finalMatrix.multiplyMatrices(baseMatrix, part.localMatrix);
-            mesh.setMatrixAt(index, finalMatrix);
-          } else {
-            mesh.setMatrixAt(index, hiddenMatrix);
-          }
+        const activePlacements = placements[variantIndex];
+        for (let index = 0; index < activePlacements.length; index += 1) {
+          baseMatrix.copy(activePlacements[index]);
+          finalMatrix.multiplyMatrices(baseMatrix, part.localMatrix);
+          mesh.setMatrixAt(index, finalMatrix);
         }
+        mesh.count = activePlacements.length;
         mesh.instanceMatrix.needsUpdate = true;
         mesh.computeBoundingSphere();
       });

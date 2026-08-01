@@ -32,24 +32,27 @@ import {
   Group,
   InstancedMesh,
   Matrix4,
+  Mesh,
   Object3D,
   Quaternion,
   RepeatWrapping,
   ShaderMaterial,
   SRGBColorSpace,
   Vector3,
+  type Material,
 } from 'three';
 import type { BlockType } from '@/types/layout';
 import { getBlockTitle } from '@/lib/blocks/registry';
 import FirstPersonExplorer from '@/components/world/FirstPersonExplorer';
 import QuaterniusForest from '@/components/world/QuaterniusForest';
+import QuaterniusGroundCover from '@/components/world/QuaterniusGroundCover';
 
 export interface GameDestination {
   blockType: BlockType;
   position: [number, number, number];
   number: string;
   subtitle: string;
-  siteKind: 'camp' | 'workshop' | 'station' | 'watchtower' | 'sawmill' | 'wagon' | 'cinema' | 'cabin' | 'post';
+  siteKind: 'camp' | 'workshop' | 'station' | 'watchtower' | 'sawmill' | 'record' | 'cinema' | 'cabin' | 'post';
 }
 
 export interface GameTelemetry {
@@ -68,6 +71,7 @@ export interface GameTelemetry {
 export interface GameTravelRequest {
   id: number;
   position: [number, number, number];
+  yaw?: number;
 }
 
 interface ArchiveGameSceneProps {
@@ -79,12 +83,36 @@ interface ArchiveGameSceneProps {
   onNearby: (destination: GameDestination | null) => void;
   onTelemetry: (telemetry: GameTelemetry) => void;
   onDiagnostics: (message: string) => void;
+  collectedKeepsakes: string[];
+  onCollectKeepsake: (id: string) => void;
 }
 
 const WATER_LEVEL = -1.05;
 const TERRAIN_CHUNK_SIZE = 84;
 const TERRAIN_SEGMENTS = 22;
 const HORSE_POSITION = new Vector3(3.4, 0, 19);
+export const WORLD_KEEPSAKE_COUNT = 18;
+
+const WORLD_KEEPSAKES = [
+  ['field-01', 0, 16],
+  ['field-02', -10, 7],
+  ['field-03', 18, -7],
+  ['field-04', 39, -24],
+  ['field-05', -31, -18],
+  ['field-06', -82, -48],
+  ['field-07', 76, -88],
+  ['field-08', -122, -112],
+  ['field-09', 112, -142],
+  ['field-10', 150, -162],
+  ['field-11', -180, 94],
+  ['field-12', 187, 116],
+  ['field-13', 8, -217],
+  ['field-14', 74, 48],
+  ['field-15', 113, 26],
+  ['field-16', -67, 82],
+  ['field-17', -137, 32],
+  ['field-18', 36, -118],
+] as const;
 
 function smoothstep(edge0: number, edge1: number, value: number) {
   const amount = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
@@ -809,6 +837,76 @@ function DynamicWeather({ playerPosition, count = 980 }: { playerPosition: Mutab
   );
 }
 
+function WorldKeepsakes({
+  enabled,
+  playerPosition,
+  collected,
+  onCollect,
+}: {
+  enabled: boolean;
+  playerPosition: MutableRefObject<Vector3>;
+  collected: string[];
+  onCollect: (id: string) => void;
+}) {
+  const mesh = useRef<InstancedMesh>(null);
+  const dummy = useMemo(() => new Object3D(), []);
+  const collectedSet = useMemo(() => new Set(collected), [collected]);
+  const announced = useRef(new Set<string>());
+
+  useEffect(() => {
+    mesh.current?.instanceMatrix.setUsage(DynamicDrawUsage);
+  }, []);
+
+  useFrame(({ clock }) => {
+    if (!mesh.current) return;
+    WORLD_KEEPSAKES.forEach(([id, x, z], index) => {
+      if (collectedSet.has(id)) {
+        dummy.position.set(0, -200, 0);
+        dummy.scale.setScalar(0.001);
+      } else {
+        const ground = terrainHeightAt(x, z);
+        dummy.position.set(x, ground + 1.15 + Math.sin(clock.elapsedTime * 1.7 + index) * 0.22, z);
+        dummy.rotation.set(
+          -0.22 + Math.sin(clock.elapsedTime * 0.7 + index) * 0.12,
+          clock.elapsedTime * 0.42 + index * 0.9,
+          Math.sin(clock.elapsedTime * 0.55 + index * 0.6) * 0.32,
+        );
+        const pulse = 0.42 + Math.sin(clock.elapsedTime * 2.1 + index) * 0.055;
+        dummy.scale.set(pulse, pulse * 0.68, pulse);
+        if (
+          enabled
+          && !announced.current.has(id)
+          && Math.hypot(playerPosition.current.x - x, playerPosition.current.z - z) < 1.65
+        ) {
+          announced.current.add(id);
+          onCollect(id);
+        }
+      }
+      dummy.updateMatrix();
+      mesh.current?.setMatrixAt(index, dummy.matrix);
+    });
+    mesh.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh
+      ref={mesh}
+      args={[undefined, undefined, WORLD_KEEPSAKE_COUNT]}
+      name="collectible-field-pages"
+      frustumCulled={false}
+    >
+      <planeGeometry args={[1, 0.72]} />
+      <meshStandardMaterial
+        color="#d8cca2"
+        emissive="#8b7746"
+        emissiveIntensity={0.72}
+        roughness={0.92}
+        side={DoubleSide}
+      />
+    </instancedMesh>
+  );
+}
+
 function ArchiveLodge() {
   const { scene } = useGLTF('/archive-world/archive-lodge.glb?v=2');
   const clone = useMemo(() => scene.clone(true), [scene]);
@@ -891,6 +989,64 @@ function OutdoorCrates() {
   );
 }
 
+const MEDIEVAL_ASSET_ROOT = '/archive-world/quaternius-medieval';
+
+function MedievalAsset({
+  name,
+  position = [0, 0, 0],
+  rotation = [0, 0, 0],
+  scale = 1,
+}: {
+  name: string;
+  position?: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: number | [number, number, number];
+}) {
+  const { scene } = useGLTF(`${MEDIEVAL_ASSET_ROOT}/${name}.gltf`);
+  const clone = useMemo(() => {
+    const root = scene.clone(true);
+    root.traverse((object) => {
+      if (!(object instanceof Mesh)) return;
+      const tint = (material: Material) => {
+        const copy = material.clone();
+        if ('color' in copy && copy.color instanceof Color) copy.color.multiply(new Color('#8a9680'));
+        copy.needsUpdate = true;
+        return copy;
+      };
+      object.material = Array.isArray(object.material)
+        ? object.material.map((material) => tint(material))
+        : tint(object.material);
+      object.castShadow = true;
+      object.receiveShadow = true;
+    });
+    return root;
+  }, [scene]);
+
+  return <primitive object={clone} position={position} rotation={rotation} scale={scale} />;
+}
+
+function ArchiveBookCottage() {
+  return (
+    <group>
+      <MedievalAsset name="Wall_Plaster_Door_Round" position={[-1, 0, 3]} />
+      <MedievalAsset name="Wall_Plaster_Window_Wide_Round" position={[1, 0, 3]} />
+      <MedievalAsset name="Door_1_Round" position={[-1.52, 0, 3.05]} />
+      <MedievalAsset name="Window_Wide_Round1" position={[1, 0, 3.06]} />
+      <MedievalAsset name="WindowShutters_Wide_Round_Open" position={[1, 0, 3.05]} />
+      {[-1, 1].map((x) => <MedievalAsset key={`rear-${x}`} name="Wall_Plaster_Straight" position={[x, 0, -3]} rotation={[0, Math.PI, 0]} />)}
+      {[-2, 0, 2].map((z) => <MedievalAsset key={`left-${z}`} name="Wall_Plaster_Straight" position={[-2, 0, z]} rotation={[0, Math.PI / 2, 0]} />)}
+      {[-2, 0, 2].map((z) => <MedievalAsset key={`right-${z}`} name="Wall_Plaster_Straight" position={[2, 0, z]} rotation={[0, -Math.PI / 2, 0]} />)}
+      <MedievalAsset name="Roof_RoundTiles_4x6" position={[0, 3, 0]} />
+      <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, 3]} />
+      <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, -3]} rotation={[0, Math.PI, 0]} />
+      <MedievalAsset name="Prop_Chimney" position={[-1.35, 3.8, -0.8]} scale={0.82} />
+      <MedievalAsset name="Stairs_Exterior_Straight" position={[-1, 0, 4]} rotation={[0, Math.PI, 0]} />
+      <MedievalAsset name="Prop_Vine1" position={[1.8, 2.3, 3.13]} />
+      <pointLight position={[1, 2, 3.8]} intensity={7} distance={10} color="#c5a15d" />
+    </group>
+  );
+}
+
 function TrailToDestination({ destination }: { destination: GameDestination }) {
   const [x, , z] = destination.position;
   const y = terrainHeightAt(x, z);
@@ -946,14 +1102,17 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'camp') {
     return (
       <group>
-        <mesh position={[-1.4, 1.05, 0]} rotation-z={-0.62} castShadow>
-          <boxGeometry args={[2.9, 0.12, 3.8]} />
-          <meshStandardMaterial color="#8e8060" roughness={1} />
+        <mesh position={[0, 1.3, 0]} rotation-x={-0.55} castShadow>
+          <boxGeometry args={[4.8, 0.08, 3.6]} />
+          <meshStandardMaterial color="#7d785e" roughness={1} />
         </mesh>
-        <mesh position={[1.4, 1.05, 0]} rotation-z={0.62} castShadow>
-          <boxGeometry args={[2.9, 0.12, 3.8]} />
-          <meshStandardMaterial color="#6e7059" roughness={1} />
-        </mesh>
+        {[-2.05, 2.05].map((x) => (
+          <mesh key={x} position={[x, 1.28, -1.45]} castShadow>
+            <cylinderGeometry args={[0.08, 0.13, 2.56, 7]} />
+            <meshStandardMaterial color="#493528" roughness={1} />
+          </mesh>
+        ))}
+        <MedievalAsset name="Prop_Crate" position={[-1.1, 0.12, -0.5]} rotation={[0, 0.28, 0]} scale={0.82} />
         {[0, Math.PI / 2, Math.PI / 4].map((rotation) => (
           <mesh key={rotation} position={[3, 0.18, 1]} rotation={[0, rotation, Math.PI / 2]} castShadow>
             <cylinderGeometry args={[0.11, 0.15, 1.5, 7]} />
@@ -967,20 +1126,38 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'station') {
     return (
       <group>
-        <mesh position={[0, 0.35, 0]} receiveShadow><boxGeometry args={[13, 0.7, 5.5]} /><meshStandardMaterial color="#4d493b" roughness={1} /></mesh>
-        <mesh position={[0, 2.65, -0.5]} castShadow><boxGeometry args={[10, 4.6, 4.3]} /><meshStandardMaterial color="#74735d" roughness={1} /></mesh>
-        <mesh position={[0, 5.2, -0.5]} rotation-z={0.05} castShadow><boxGeometry args={[12.5, 0.35, 5.8]} /><meshStandardMaterial color="#2d382f" roughness={1} /></mesh>
-        {[-2.1, 2.1].map((rail) => <mesh key={rail} position={[rail, 0.1, 6]}><boxGeometry args={[0.12, 0.12, 24]} /><meshStandardMaterial color="#31352f" metalness={0.5} /></mesh>)}
+        <mesh position={[0, 0.22, 0]} receiveShadow><boxGeometry args={[13, 0.44, 4.8]} /><meshStandardMaterial color="#555244" roughness={1} /></mesh>
+        {[-4.6, -1.45, 1.7].map((x, index) => (
+          <mesh key={x} position={[x, 2.15, -1.35]} rotation-z={(index - 1) * 0.018} castShadow>
+            <cylinderGeometry args={[0.14, 0.22, 4.3, 8]} />
+            <meshStandardMaterial color="#49382c" roughness={1} />
+          </mesh>
+        ))}
+        <mesh position={[-1.5, 4.24, -1.35]} rotation-z={-0.08} castShadow>
+          <boxGeometry args={[7.8, 0.22, 3.15]} />
+          <meshStandardMaterial color="#354238" roughness={1} />
+        </mesh>
+        <MedievalAsset name="Prop_Crate" position={[3.9, 0.45, -0.45]} scale={1.5} />
+        <mesh position={[-0.1, 0.76, 1.2]} castShadow><boxGeometry args={[4.3, 0.32, 0.7]} /><meshStandardMaterial color="#5b422f" roughness={1} /></mesh>
+        {[-2.1, 2.1].map((rail) => <mesh key={rail} position={[rail, 0.1, 8]}><boxGeometry args={[0.12, 0.12, 28]} /><meshStandardMaterial color="#31352f" metalness={0.5} /></mesh>)}
       </group>
     );
   }
   if (kind === 'watchtower') {
+    const surveyPosts = [
+      [-1.75, -0.85, -0.035],
+      [2.05, 0.45, 0.025],
+      [0.75, -2.05, 0.045],
+    ] as const;
     return (
       <group>
-        {[-2, 2].flatMap((x) => [-2, 2].map((z) => <mesh key={`${x}:${z}`} position={[x, 3.4, z]} rotation-z={x * 0.035} castShadow><cylinderGeometry args={[0.16, 0.28, 7, 8]} /><meshStandardMaterial color="#493629" roughness={1} /></mesh>))}
-        <mesh position={[0, 6.7, 0]} castShadow><boxGeometry args={[5.4, 0.35, 5.4]} /><meshStandardMaterial color="#40382b" /></mesh>
-        <mesh position={[0, 8.15, 0]} castShadow><boxGeometry args={[4.4, 2.6, 4.4]} /><meshStandardMaterial color="#6c7666" roughness={0.95} /></mesh>
-        <mesh position={[0, 9.85, 0]} castShadow><coneGeometry args={[3.8, 1.4, 4]} /><meshStandardMaterial color="#29382e" roughness={1} /></mesh>
+        {surveyPosts.map(([x, z, lean]) => <mesh key={`${x}:${z}`} position={[x, 2.35, z]} rotation-z={lean} castShadow><cylinderGeometry args={[0.15, 0.28, 4.7, 8]} /><meshStandardMaterial color="#493629" roughness={1} /></mesh>)}
+        <mesh position={[0.25, 4.72, -0.2]} rotation-z={0.035} castShadow><boxGeometry args={[5.5, 0.3, 4.2]} /><meshStandardMaterial color="#40382b" roughness={1} /></mesh>
+        {[-1.95, 2.32].map((x, index) => <mesh key={`rail-x-${x}`} position={[x, 5.65, -0.2]} rotation-z={index ? 0.03 : -0.02}><boxGeometry args={[0.1, 1.7, 4]} /><meshStandardMaterial color="#514032" /></mesh>)}
+        <mesh position={[0.35, 5.57, -0.55]} rotation={[0.18, 0.5, Math.PI / 2]} castShadow><cylinderGeometry args={[0.18, 0.26, 2.3, 12]} /><meshStandardMaterial color="#667061" metalness={0.46} roughness={0.66} /></mesh>
+        <mesh position={[0.97, 5.78, 0.08]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.4, 0.08, 8, 24]} /><meshStandardMaterial color="#b0a269" metalness={0.35} roughness={0.68} /></mesh>
+        <MedievalAsset name="Stairs_Exterior_Straight" position={[-0.4, 0, 2.5]} rotation={[0, -0.18, 0]} scale={1.3} />
+        <MedievalAsset name="Prop_Crate" position={[2.7, 0.15, -1.6]} rotation={[0, 0.4, 0]} scale={0.85} />
       </group>
     );
   }
@@ -994,41 +1171,36 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
       </group>
     );
   }
-  if (kind === 'wagon') {
+  if (kind === 'record') {
     return (
       <group>
-        {[-3.1, 3.1].flatMap((x) => [-1.9, 1.9].map((z) => (
-          <mesh key={`${x}:${z}`} position={[x, 1.65, z]} castShadow>
-            <cylinderGeometry args={[0.12, 0.18, 3.3, 8]} />
-            <meshStandardMaterial color="#493629" roughness={1} />
-          </mesh>
-        )))}
-        <mesh position={[0, 3.28, 0]} rotation-z={0.035} castShadow>
-          <boxGeometry args={[7, 0.12, 4.7]} />
-          <meshStandardMaterial color="#8f8564" roughness={1} />
-        </mesh>
-        <mesh position={[0, 1.45, 0]} rotation-y={Math.PI / 2} castShadow>
-          <torusGeometry args={[1.25, 0.13, 9, 36]} />
-          <meshStandardMaterial color="#282a25" roughness={0.84} />
-        </mesh>
-        <mesh position={[0, 1.45, 0]} rotation-y={Math.PI / 2}>
-          <circleGeometry args={[1.12, 42]} />
-          <meshStandardMaterial color="#20221e" roughness={0.75} />
-        </mesh>
-        <mesh position={[0, 1.45, 0.02]} rotation-y={Math.PI / 2}>
-          <circleGeometry args={[0.24, 24]} />
-          <meshStandardMaterial color="#b19a58" roughness={0.9} />
-        </mesh>
-        <mesh position={[0, 0.62, -1.5]} castShadow>
-          <boxGeometry args={[4.9, 1.15, 0.85]} />
-          <meshStandardMaterial color="#56634f" roughness={0.96} />
-        </mesh>
-        {[-1.8, -0.9, 0, 0.9, 1.8].map((x, index) => (
-          <mesh key={x} position={[x, 1.3 + (index % 2) * 0.08, -1.05]} rotation={[0, 0, (index - 2) * 0.035]} castShadow>
-            <boxGeometry args={[0.72, 0.9, 0.08]} />
-            <meshStandardMaterial color={index % 2 ? '#a5966a' : '#68745e'} roughness={1} />
+        {[-2.7, 0, 2.55].map((x, index) => (
+          <group key={x} position={[x, 1.6 + index * 0.28, index === 1 ? -0.6 : 0.35]} rotation-y={(index - 1) * 0.28}>
+            <mesh rotation-y={Math.PI / 2} castShadow>
+              <torusGeometry args={[1.38 - index * 0.12, 0.1, 8, 42]} />
+              <meshStandardMaterial color="#242923" roughness={0.78} />
+            </mesh>
+            <mesh rotation-y={Math.PI / 2}>
+              <circleGeometry args={[1.28 - index * 0.12, 42]} />
+              <meshStandardMaterial color={index === 1 ? '#1d241e' : '#292d26'} roughness={0.72} />
+            </mesh>
+            <mesh position={[0, 0, 0.025]} rotation-y={Math.PI / 2}>
+              <circleGeometry args={[0.22, 24]} />
+              <meshStandardMaterial color={index === 1 ? '#b6a260' : '#6d775c'} roughness={0.95} />
+            </mesh>
+          </group>
+        ))}
+        {[-2.7, 0, 2.55].map((x, index) => (
+          <mesh key={`spindle-${x}`} position={[x, 0.72, index === 1 ? -0.6 : 0.35]} castShadow>
+            <cylinderGeometry args={[0.1, 0.16, 1.45, 8]} />
+            <meshStandardMaterial color="#4a382b" roughness={1} />
           </mesh>
         ))}
+        <mesh position={[0, 0.38, -1.9]} rotation-z={-0.025} castShadow>
+          <boxGeometry args={[7.2, 0.42, 1.1]} />
+          <meshStandardMaterial color="#59654f" roughness={1} />
+        </mesh>
+        <MedievalAsset name="Prop_Wagon" position={[0, 0, -3.15]} rotation={[0, Math.PI / 2, 0]} scale={0.78} />
       </group>
     );
   }
@@ -1094,7 +1266,7 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
       </group>
     );
   }
-  return <TimberCabin />;
+  return <ArchiveBookCottage />;
 }
 
 function DestinationSite({
@@ -1107,15 +1279,10 @@ function DestinationSite({
   const [x, , z] = destination.position;
   const groundHeight = terrainHeightAt(x, z);
   const rotation = Math.atan2(-x, -z);
-  const tallSite = destination.siteKind === 'watchtower';
-  const wideSite = destination.siteKind === 'station' || destination.siteKind === 'sawmill' || destination.siteKind === 'cinema';
 
   return (
     <RigidBody type="fixed" colliders={false} position={[x, groundHeight, z]} rotation={[0, rotation, 0]}>
-      <CuboidCollider
-        args={wideSite ? [5.5, 2.3, 3.2] : tallSite ? [2.5, 5, 2.5] : [3.15, 2.5, 2.65]}
-        position={[0, tallSite ? 5 : 2.5, 0]}
-      />
+      <SiteColliders kind={destination.siteKind} />
       <group
         onClick={(event) => {
           event.stopPropagation();
@@ -1126,6 +1293,19 @@ function DestinationSite({
       </group>
     </RigidBody>
   );
+}
+
+function SiteColliders({ kind }: { kind: GameDestination['siteKind'] }) {
+  if (kind === 'station') return <><CuboidCollider args={[6.5, 0.22, 2.4]} position={[0, 0.22, 0]} /><CuboidCollider args={[3.9, 0.12, 1.55]} position={[-1.5, 4.24, -1.35]} /></>;
+  if (kind === 'watchtower') return <><CuboidCollider args={[0.28, 2.35, 0.28]} position={[-1.75, 2.35, -0.85]} /><CuboidCollider args={[0.28, 2.35, 0.28]} position={[2.05, 2.35, 0.45]} /><CuboidCollider args={[0.28, 2.35, 0.28]} position={[0.75, 2.35, -2.05]} /><CuboidCollider args={[2.75, 0.15, 2.1]} position={[0.25, 4.72, -0.2]} /></>;
+  if (kind === 'sawmill') return <><CuboidCollider args={[5.5, 0.18, 3.5]} position={[0, 3.6, 0]} /><CuboidCollider args={[0.7, 1.1, 3.3]} position={[5.4, 0.8, 0]} /></>;
+  if (kind === 'cinema') return <><CuboidCollider args={[4.9, 2.75, 0.2]} position={[0, 3.4, -1]} /><CuboidCollider args={[1.7, 0.45, 0.5]} position={[0, 0.45, 4]} /></>;
+  if (kind === 'cabin') return <CuboidCollider args={[2.2, 3.2, 3.2]} position={[0, 3.2, 0]} />;
+  if (kind === 'workshop') return <CuboidCollider args={[2.8, 0.45, 1.1]} position={[0, 0.75, 0.2]} />;
+  if (kind === 'record') return <CuboidCollider args={[3.7, 1.7, 0.85]} position={[0, 1.7, 0]} />;
+  if (kind === 'post') return <CuboidCollider args={[1.1, 0.75, 0.75]} position={[0, 0.9, 0]} />;
+  if (kind === 'camp') return <><CuboidCollider args={[2.4, 0.05, 1.8]} position={[0, 1.3, 0]} rotation={[-0.55, 0, 0]} /><CuboidCollider args={[0.13, 1.28, 0.13]} position={[-2.05, 1.28, -1.45]} /><CuboidCollider args={[0.13, 1.28, 0.13]} position={[2.05, 1.28, -1.45]} /></>;
+  return <CuboidCollider args={[2.2, 1.1, 1.9]} position={[0, 1.1, 0]} />;
 }
 
 function VillageObstacles() {
@@ -1659,6 +1839,8 @@ export default function ArchiveGameScene({
   onNearby,
   onTelemetry,
   onDiagnostics,
+  collectedKeepsakes,
+  onCollectKeepsake,
 }: ArchiveGameSceneProps) {
   const { scene } = useThree();
 
@@ -1698,8 +1880,20 @@ export default function ArchiveGameScene({
           destinations={destinations}
           heightAt={terrainHeightAt}
         />
+        <QuaterniusGroundCover
+          playerPosition={playerPosition}
+          destinations={destinations}
+          heightAt={terrainHeightAt}
+          waterLevel={WATER_LEVEL}
+        />
       </Suspense>
       <DynamicWeather playerPosition={playerPosition} />
+      <WorldKeepsakes
+        enabled={entered}
+        playerPosition={playerPosition}
+        collected={collectedKeepsakes}
+        onCollect={onCollectKeepsake}
+      />
       <Suspense fallback={null}>
         <Physics gravity={[0, -14, 0]} timeStep="vary">
           <InfiniteTerrain playerPosition={playerPosition} />

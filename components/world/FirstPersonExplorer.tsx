@@ -113,6 +113,8 @@ export default function FirstPersonExplorer({
     rigidBody.setTranslation({ x, y, z }, true);
     rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
     playerPosition.current.set(x, y, z);
+    if (typeof travelRequest.yaw === 'number') yaw.current = travelRequest.yaw;
+    pitch.current = 0;
     appliedTravelId.current = travelRequest.id;
     nearest.current = null;
     nearestKey.current = null;
@@ -128,6 +130,8 @@ export default function FirstPersonExplorer({
       rigidBody.setTranslation({ x, y, z }, true);
       rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
       playerPosition.current.set(x, y, z);
+      if (typeof detail.yaw === 'number') yaw.current = detail.yaw;
+      pitch.current = 0;
       appliedTravelId.current = detail.id;
       nearest.current = null;
       nearestKey.current = null;
@@ -153,6 +157,8 @@ export default function FirstPersonExplorer({
       rigidBody.setTranslation({ x: travelX, y: travelY, z: travelZ }, true);
       rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
       playerPosition.current.set(travelX, travelY, travelZ);
+      if (typeof travelRequest.yaw === 'number') yaw.current = travelRequest.yaw;
+      pitch.current = 0;
       appliedTravelId.current = travelRequest.id;
       nearest.current = null;
       nearestKey.current = null;
@@ -205,7 +211,7 @@ export default function FirstPersonExplorer({
     }
 
     let candidate: GameDestination | null = null;
-    let candidateDistance = 8.5;
+    let candidateDistance = 13;
     for (const destination of destinations) {
       const distance = Math.hypot(
         translation.x - destination.position[0],

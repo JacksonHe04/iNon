@@ -35,12 +35,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import type { ReadmeData } from '@/types';
-import type { BlockConfig, BlockType, LayoutConfig } from '@/types/layout';
+import type { BlockType, LayoutConfig } from '@/types/layout';
 import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
 import { getBlockTitle } from '@/lib/blocks/registry';
-import BlockRenderer from '@/components/blocks/BlockRenderer';
 import BlockCanvasEngine from '@/components/blocks/BlockCanvasEngine';
 import ArchiveGameScene, {
+  WORLD_KEEPSAKE_COUNT,
   type GameDestination,
   type GameTelemetry,
   type GameTravelRequest,
@@ -62,7 +62,7 @@ const LANDMARKS: GameDestination[] = [
   { blockType: 'timeline', position: [-112, 0, -62], number: '03', subtitle: '旧车站 · 地点与年份', siteKind: 'station' },
   { blockType: 'education', position: [96, 0, -122], number: '04', subtitle: '山地观测塔 · 学习与自然', siteKind: 'watchtower' },
   { blockType: 'work', position: [-158, 0, -148], number: '05', subtitle: '河谷锯木场 · 工作与批注', siteKind: 'sawmill' },
-  { blockType: 'music', position: [146, 0, -176], number: '06', subtitle: '流动唱片车 · 声音与节拍', siteKind: 'wagon' },
+  { blockType: 'music', position: [146, 0, -176], number: '06', subtitle: '唱片林地 · 声音与节拍', siteKind: 'record' },
   { blockType: 'movies', position: [-206, 0, 116], number: '07', subtitle: '露天放映场 · 影片与导演', siteKind: 'cinema' },
   { blockType: 'books', position: [214, 0, 132], number: '08', subtitle: '林间书屋 · 页边痕迹', siteKind: 'cabin' },
   { blockType: 'messages', position: [18, 0, -258], number: '09', subtitle: '边地邮局 · 来信与回声', siteKind: 'post' },
@@ -765,6 +765,7 @@ function WorldInventory({
   data,
   discovered,
   rations,
+  keepsakes,
   onOpen,
   onClose,
   onUseRation,
@@ -772,6 +773,7 @@ function WorldInventory({
   data: ReadmeData;
   discovered: Set<BlockType>;
   rations: number;
+  keepsakes: number;
   onOpen: (type: BlockType) => void;
   onClose: () => void;
   onUseRation: () => void;
@@ -829,6 +831,10 @@ function WorldInventory({
           <span>收录藏品</span>
           <strong>{collections.reduce((total, collection) => total + collection.count, 0)}</strong>
         </div>
+        <div>
+          <span>拾得旧纸片</span>
+          <strong>{keepsakes} / {WORLD_KEEPSAKE_COUNT}</strong>
+        </div>
       </div>
       <div className="archive-world-inventory__grid">
         {collections.map((collection, index) => (
@@ -852,7 +858,6 @@ function WorldInventory({
 
 export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) {
   const [entered, setEntered] = useState(false);
-  const [selectedType, setSelectedType] = useState<BlockType | null>(null);
   const [codexOpen, setCodexOpen] = useState(false);
   const [diagnostics, setDiagnostics] = useState('WebGL initialising');
   const [nearbyDestination, setNearbyDestination] = useState<GameDestination | null>(null);
@@ -861,6 +866,8 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const [realm, setRealm] = useState<ArchiveRealm | null>(null);
   const [discoveredTypes, setDiscoveredTypes] = useState<BlockType[]>([]);
   const [rations, setRations] = useState(3);
+  const [collectedKeepsakes, setCollectedKeepsakes] = useState<string[]>([]);
+  const [lastKeepsake, setLastKeepsake] = useState<string | null>(null);
   const [inventoryLoaded, setInventoryLoaded] = useState(false);
   const [telemetry, setTelemetry] = useState<GameTelemetry>({
     x: 0,
@@ -879,15 +886,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const transitionVeil = useRef<HTMLDivElement>(null);
   const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
   const discoveryStorageKey = `inon-world-discovery-${data.basic.name}`;
-  const selectedBlock = useMemo<BlockConfig | null>(() => {
-    if (!selectedType) return null;
-    return (
-      config.blocks.find((block) => block.blockType === selectedType) ??
-      DEFAULT_LAYOUT_CONFIG.blocks.find((block) => block.blockType === selectedType) ??
-      null
-    );
-  }, [config.blocks, selectedType]);
-
+  const keepsakeStorageKey = `inon-world-keepsakes-${data.basic.name}`;
   useGSAP(
     () => {
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -906,19 +905,37 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     try {
       const saved = window.localStorage.getItem(discoveryStorageKey);
       if (saved) setDiscoveredTypes(JSON.parse(saved) as BlockType[]);
+      const savedKeepsakes = window.localStorage.getItem(keepsakeStorageKey);
+      if (savedKeepsakes) setCollectedKeepsakes(JSON.parse(savedKeepsakes) as string[]);
     } catch {
       // A blocked storage backend should not prevent exploration.
     }
     setInventoryLoaded(true);
-  }, [discoveryStorageKey]);
+  }, [discoveryStorageKey, keepsakeStorageKey]);
 
   useEffect(() => {
     if (!inventoryLoaded) return;
     window.localStorage.setItem(discoveryStorageKey, JSON.stringify(discoveredTypes));
   }, [discoveredTypes, discoveryStorageKey, inventoryLoaded]);
 
+  useEffect(() => {
+    if (!inventoryLoaded) return;
+    window.localStorage.setItem(keepsakeStorageKey, JSON.stringify(collectedKeepsakes));
+  }, [collectedKeepsakes, inventoryLoaded, keepsakeStorageKey]);
+
+  useEffect(() => {
+    if (!lastKeepsake) return;
+    const timeout = window.setTimeout(() => setLastKeepsake(null), 2400);
+    return () => window.clearTimeout(timeout);
+  }, [lastKeepsake]);
+
   const markDiscovered = (type: BlockType) => {
     setDiscoveredTypes((current) => current.includes(type) ? current : [...current, type]);
+  };
+
+  const collectKeepsake = (id: string) => {
+    setCollectedKeepsakes((current) => current.includes(id) ? current : [...current, id]);
+    setLastKeepsake(id);
   };
 
   const enterWorld = () => {
@@ -937,12 +954,12 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
 
   useEffect(() => {
     const toggleInventory = (event: KeyboardEvent) => {
-      if (event.code !== 'KeyB' || !entered || selectedType || codexOpen) return;
+      if (event.code !== 'KeyB' || !entered || realm || codexOpen) return;
       setInventoryOpen((open) => !open);
     };
     window.addEventListener('keydown', toggleInventory);
     return () => window.removeEventListener('keydown', toggleInventory);
-  }, [codexOpen, entered, selectedType]);
+  }, [codexOpen, entered, realm]);
 
   const transitionToRealm = (nextRealm: ArchiveRealm | null) => {
     releasePointerLock();
@@ -957,7 +974,6 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
       .set(veil, { display: 'grid', autoAlpha: 0 })
       .to(veil, { autoAlpha: 1, duration: 0.52 })
       .call(() => {
-        setSelectedType(null);
         setRealm(nextRealm);
       })
       .to(veil, { autoAlpha: 0, duration: 0.72, delay: 0.16 })
@@ -966,27 +982,27 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
 
   const openLandmark = (type: BlockType) => {
     markDiscovered(type);
-    if (type === 'music' || type === 'movies' || type === 'books') {
-      transitionToRealm(type);
-      return;
-    }
-    releasePointerLock();
-    setSelectedType(type);
+    transitionToRealm(type as ArchiveRealm);
   };
 
   const travelTo = (destination: GameDestination) => {
     markDiscovered(destination.blockType);
-    setSelectedType(null);
     setCodexOpen(false);
     setInventoryOpen(false);
     setNearbyDestination(null);
+    const [siteX, , siteZ] = destination.position;
+    const distanceFromOrigin = Math.hypot(siteX, siteZ);
+    const inwardX = distanceFromOrigin > 0.001 ? -siteX / distanceFromOrigin : 0;
+    const inwardZ = distanceFromOrigin > 0.001 ? -siteZ / distanceFromOrigin : 1;
+    const arrivalDistance = destination.siteKind === 'cinema' ? 11.5 : 9.5;
+    const arrivalX = siteX + inwardX * arrivalDistance;
+    const arrivalZ = siteZ + inwardZ * arrivalDistance;
+    const lookX = siteX - arrivalX;
+    const lookZ = siteZ - arrivalZ;
     const request: GameTravelRequest = {
       id: Date.now(),
-      position: [
-        destination.position[0],
-        destination.position[1],
-        destination.position[2] + 6,
-      ],
+      position: [arrivalX, destination.position[1], arrivalZ],
+      yaw: Math.atan2(-lookX, -lookZ),
     };
     setTravelRequest(request);
     window.dispatchEvent(new CustomEvent('archive-world:travel', { detail: request }));
@@ -1007,7 +1023,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           }}
         >
           <ArchiveGameScene
-            entered={entered && !selectedBlock && !codexOpen && !inventoryOpen && !realm}
+            entered={entered && !codexOpen && !inventoryOpen && !realm}
             destinations={LANDMARKS}
             playerPosition={playerPosition}
             travelRequest={travelRequest}
@@ -1015,6 +1031,8 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             onNearby={setNearbyDestination}
             onTelemetry={setTelemetry}
             onDiagnostics={setDiagnostics}
+            collectedKeepsakes={collectedKeepsakes}
+            onCollectKeepsake={collectKeepsake}
           />
         </Canvas>
       </div>
@@ -1054,7 +1072,13 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             </div>
             <div className="archive-world-gamebar__mission">
               <span>当前探索</span>
-              <strong>{nearbyDestination ? nearbyDestination.subtitle : '沿河谷寻找散落的档案场域'}</strong>
+              <strong>
+                {nearbyDestination
+                  ? nearbyDestination.subtitle
+                  : collectedKeepsakes.length === WORLD_KEEPSAKE_COUNT
+                    ? '纸片已经齐全，继续寻找尚未抵达的场域'
+                    : `寻找林中旧纸片 · ${collectedKeepsakes.length} / ${WORLD_KEEPSAKE_COUNT}`}
+              </strong>
             </div>
             <nav aria-label="世界菜单">
               <button onClick={() => setInventoryOpen(true)}>背包 <kbd>B</kbd></button>
@@ -1126,6 +1150,13 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             </div>
             <p>ALT {telemetry.y.toFixed(1)} m · SPD {telemetry.speed.toFixed(1)}</p>
           </div>
+          {lastKeepsake && (
+            <div className="archive-world-keepsake-toast" role="status">
+              <span>FIELD PAGE RECOVERED</span>
+              <strong>拾得一张旧纸片</strong>
+              <small>{collectedKeepsakes.length} / {WORLD_KEEPSAKE_COUNT}</small>
+            </div>
+          )}
         </WorldOverlay>
       )}
 
@@ -1134,6 +1165,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           data={data}
           discovered={new Set(discoveredTypes)}
           rations={rations}
+          keepsakes={collectedKeepsakes.length}
           onClose={() => setInventoryOpen(false)}
           onUseRation={() => {
             if (rations <= 0) return;
@@ -1145,25 +1177,6 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             openLandmark(type);
           }}
         />
-      )}
-
-      {selectedBlock && (
-        <aside
-          className="archive-world-dossier"
-          data-block-type={selectedBlock.blockType}
-          aria-label={`${getBlockTitle(selectedBlock.blockType)}档案`}
-        >
-          <header>
-            <div>
-              <p className="archive-kicker">Recovered from the field</p>
-              <h2>{getBlockTitle(selectedBlock.blockType)}</h2>
-            </div>
-            <button onClick={() => setSelectedType(null)}>关闭 ×</button>
-          </header>
-          <div className="archive-world-dossier__content">
-            <BlockRenderer block={selectedBlock} data={data} />
-          </div>
-        </aside>
       )}
 
       {realm && (
