@@ -119,7 +119,19 @@ function smoothstep(edge0: number, edge1: number, value: number) {
   return amount * amount * (3 - 2 * amount);
 }
 
-export function terrainHeightAt(x: number, z: number) {
+const FIELD_SITE_PLATEAUS = [
+  [-18, 13],
+  [54, -34],
+  [-112, -62],
+  [96, -122],
+  [-158, -148],
+  [146, -176],
+  [-206, 116],
+  [214, 132],
+  [18, -258],
+] as const;
+
+function rawTerrainHeightAt(x: number, z: number) {
   const villageDistance = Math.hypot(x, z + 3);
   const wilderness = smoothstep(16, 44, villageDistance);
   const broad =
@@ -138,6 +150,21 @@ export function terrainHeightAt(x: number, z: number) {
   const rollingGround = 0.4 + broad + ridges + mountainMass - riverCut;
   const dryGround = Math.max(-0.42, rollingGround);
   return (dryGround * (1 - riverInfluence) + rollingGround * riverInfluence) * wilderness;
+}
+
+export function terrainHeightAt(x: number, z: number) {
+  let height = rawTerrainHeightAt(x, z);
+
+  for (const [siteX, siteZ] of FIELD_SITE_PLATEAUS) {
+    const distance = Math.hypot(x - siteX, z - siteZ);
+    if (distance >= 16) continue;
+
+    const siteHeight = rawTerrainHeightAt(siteX, siteZ);
+    const flattening = 1 - smoothstep(7, 16, distance);
+    height += (siteHeight - height) * flattening;
+  }
+
+  return height;
 }
 
 function terrainKindAt(x: number, z: number, height: number): GameTelemetry['terrain'] {
@@ -1127,19 +1154,27 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
     return (
       <group>
         <mesh position={[0, 0.22, 0]} receiveShadow><boxGeometry args={[13, 0.44, 4.8]} /><meshStandardMaterial color="#555244" roughness={1} /></mesh>
-        {[-4.6, -1.45, 1.7].map((x, index) => (
-          <mesh key={x} position={[x, 2.15, -1.35]} rotation-z={(index - 1) * 0.018} castShadow>
-            <cylinderGeometry args={[0.14, 0.22, 4.3, 8]} />
-            <meshStandardMaterial color="#49382c" roughness={1} />
-          </mesh>
-        ))}
-        <mesh position={[-1.5, 4.24, -1.35]} rotation-z={-0.08} castShadow>
-          <boxGeometry args={[7.8, 0.22, 3.15]} />
-          <meshStandardMaterial color="#354238" roughness={1} />
+        <mesh position={[-4.35, 2.45, -1.25]} rotation-z={-0.035} castShadow>
+          <cylinderGeometry args={[0.13, 0.22, 4.9, 8]} />
+          <meshStandardMaterial color="#3f392f" roughness={1} />
+        </mesh>
+        <mesh position={[-4.35, 3.45, -1.25]} rotation-z={Math.PI / 2} castShadow>
+          <boxGeometry args={[2.45, 0.15, 0.18]} />
+          <meshStandardMaterial color="#39443a" roughness={1} />
+        </mesh>
+        <mesh position={[-3.2, 3.44, -1.26]} rotation-y={Math.PI / 2}>
+          <circleGeometry args={[0.36, 24]} />
+          <meshStandardMaterial color="#a7664e" emissive="#6a2f26" emissiveIntensity={0.35} roughness={0.8} />
+        </mesh>
+        <mesh position={[-5.5, 3.44, -1.26]} rotation-y={Math.PI / 2}>
+          <circleGeometry args={[0.36, 24]} />
+          <meshStandardMaterial color="#6b785f" roughness={0.8} />
         </mesh>
         <MedievalAsset name="Prop_Crate" position={[3.9, 0.45, -0.45]} scale={1.5} />
-        <mesh position={[-0.1, 0.76, 1.2]} castShadow><boxGeometry args={[4.3, 0.32, 0.7]} /><meshStandardMaterial color="#5b422f" roughness={1} /></mesh>
+        <mesh position={[-0.1, 0.76, 1.2]} rotation-z={-0.018} castShadow><boxGeometry args={[4.3, 0.32, 0.7]} /><meshStandardMaterial color="#5b422f" roughness={1} /></mesh>
+        <mesh position={[1.4, 1.1, -1.85]} rotation={[0.12, -0.2, 0.04]} castShadow><boxGeometry args={[3.1, 1.5, 0.16]} /><meshStandardMaterial color="#77725e" roughness={1} /></mesh>
         {[-2.1, 2.1].map((rail) => <mesh key={rail} position={[rail, 0.1, 8]}><boxGeometry args={[0.12, 0.12, 28]} /><meshStandardMaterial color="#31352f" metalness={0.5} /></mesh>)}
+        {[-4, 0, 4, 8, 12, 16, 20].map((z) => <mesh key={`tie-${z}`} position={[0, 0.04, z]}><boxGeometry args={[5.2, 0.12, 0.24]} /><meshStandardMaterial color="#4a382d" roughness={1} /></mesh>)}
       </group>
     );
   }
@@ -1164,10 +1199,16 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'sawmill') {
     return (
       <group>
-        <mesh position={[0, 3.6, 0]} rotation-z={0.04} castShadow><boxGeometry args={[11, 0.35, 7]} /><meshStandardMaterial color="#344035" roughness={1} /></mesh>
-        {[-4.5, 4.5].flatMap((x) => [-2.5, 2.5].map((z) => <mesh key={`${x}:${z}`} position={[x, 1.8, z]}><cylinderGeometry args={[0.2, 0.27, 3.7, 8]} /><meshStandardMaterial color="#493426" /></mesh>))}
-        {[-2.2, 0, 2.2].map((z) => <mesh key={z} position={[5.4, 0.55, z]} rotation-z={Math.PI / 2} castShadow><cylinderGeometry args={[0.48, 0.55, 5.5, 10]} /><meshStandardMaterial color="#61462f" roughness={1} /></mesh>)}
+        {[-2.2, 0, 2.2].map((z, index) => <mesh key={z} position={[4.3 + index * 0.15, 0.55, z]} rotation-z={Math.PI / 2} castShadow><cylinderGeometry args={[0.48, 0.55, 5.5 - index * 0.45, 10]} /><meshStandardMaterial color="#61462f" roughness={1} /></mesh>)}
+        {[-3.4, 3.4].map((x) => <mesh key={x} position={[x, 1.35, 0]} castShadow><boxGeometry args={[0.24, 2.7, 0.3]} /><meshStandardMaterial color="#493426" roughness={1} /></mesh>)}
+        <mesh position={[0, 2.58, 0]} rotation-z={0.045} castShadow><boxGeometry args={[7.2, 0.24, 0.3]} /><meshStandardMaterial color="#493426" roughness={1} /></mesh>
+        <mesh position={[0, 0.78, 0]} castShadow><boxGeometry args={[7.4, 0.3, 1.4]} /><meshStandardMaterial color="#73543a" roughness={1} /></mesh>
         <mesh position={[0, 1.65, 0]} rotation-y={Math.PI / 2}><cylinderGeometry args={[1.35, 1.35, 0.18, 26]} /><meshStandardMaterial color="#77796e" metalness={0.58} roughness={0.5} /></mesh>
+        {Array.from({ length: 14 }, (_, index) => {
+          const angle = (index / 14) * Math.PI * 2;
+          return <mesh key={`saw-${index}`} position={[Math.cos(angle) * 1.48, 1.65 + Math.sin(angle) * 1.48, 0]} rotation-z={angle}><boxGeometry args={[0.34, 0.52, 0.12]} /><meshStandardMaterial color="#77796e" metalness={0.58} roughness={0.5} /></mesh>;
+        })}
+        <MedievalAsset name="Prop_Crate" position={[-4.7, 0.15, -2.1]} rotation={[0, -0.3, 0]} />
       </group>
     );
   }
@@ -1217,26 +1258,17 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'workshop') {
     return (
       <group>
-        {[-3.4, 3.4].flatMap((x) => [-2.2, 2.2].map((z) => (
-          <mesh key={`${x}:${z}`} position={[x, 1.7, z]} castShadow>
-            <cylinderGeometry args={[0.13, 0.2, 3.4, 7]} />
-            <meshStandardMaterial color="#493729" roughness={1} />
-          </mesh>
-        )))}
-        <mesh position={[0, 3.35, 0]} rotation-z={-0.055} castShadow>
-          <boxGeometry args={[8, 0.18, 5.5]} />
-          <meshStandardMaterial color="#63705a" roughness={1} />
-        </mesh>
-        <mesh position={[0, 0.75, 0.2]} castShadow>
-          <boxGeometry args={[5.4, 0.3, 1.8]} />
-          <meshStandardMaterial color="#694a31" roughness={1} />
-        </mesh>
-        {[-2.1, 0, 2.1].map((x) => (
-          <mesh key={x} position={[x, 1.15, -1.2]} rotation-z={Math.PI / 2} castShadow>
-            <cylinderGeometry args={[0.25, 0.35, 2.5, 9]} />
-            <meshStandardMaterial color="#765237" roughness={1} />
-          </mesh>
+        {[[-2.65, 0.15, 0.18], [0.2, -0.5, -0.08], [2.8, 0.65, 0.12]].map(([x, z, rotation], index) => (
+          <group key={`draft-table-${index}`} position={[x, 0, z]} rotation-y={rotation}>
+            <mesh position={[0, 0.88, 0]} rotation-x={-0.12} castShadow><boxGeometry args={[2.4, 0.2, 1.55]} /><meshStandardMaterial color="#694a31" roughness={1} /></mesh>
+            {[-0.85, 0.85].map((leg) => <mesh key={leg} position={[leg, 0.43, 0]} rotation-z={leg < 0 ? -0.08 : 0.08}><boxGeometry args={[0.16, 0.9, 1.15]} /><meshStandardMaterial color="#4c382a" roughness={1} /></mesh>)}
+            <mesh position={[0, 1.01, 0]} rotation-x={-Math.PI / 2 - 0.12}><planeGeometry args={[1.9, 1.08]} /><meshStandardMaterial color={index % 2 ? '#b2a981' : '#c5b98b'} roughness={1} /></mesh>
+          </group>
         ))}
+        <mesh position={[-3.5, 1.65, -2.3]} rotation={[0.04, 0.25, -0.025]} castShadow><boxGeometry args={[3.5, 2.8, 0.18]} /><meshStandardMaterial color="#59624d" roughness={1} /></mesh>
+        {[[-4.15, 1.82], [-3.1, 1.22], [-3.7, 0.58]].map(([x, y], index) => <mesh key={`pinned-${index}`} position={[x, y, -2.41]} rotation-z={(index - 1) * 0.09}><planeGeometry args={[0.85 + index * 0.16, 0.58]} /><meshStandardMaterial color={index === 1 ? '#8f9a73' : '#c2b587'} roughness={1} /></mesh>)}
+        <MedievalAsset name="Prop_Crate" position={[4.2, 0.12, -1.6]} rotation={[0, 0.32, 0]} />
+        <MedievalAsset name="Prop_Crate" position={[4.6, 0.12, -0.3]} rotation={[0, -0.18, 0]} scale={0.76} />
       </group>
     );
   }
@@ -1296,12 +1328,12 @@ function DestinationSite({
 }
 
 function SiteColliders({ kind }: { kind: GameDestination['siteKind'] }) {
-  if (kind === 'station') return <><CuboidCollider args={[6.5, 0.22, 2.4]} position={[0, 0.22, 0]} /><CuboidCollider args={[3.9, 0.12, 1.55]} position={[-1.5, 4.24, -1.35]} /></>;
+  if (kind === 'station') return <><CuboidCollider args={[6.5, 0.22, 2.4]} position={[0, 0.22, 0]} /><CuboidCollider args={[0.24, 2.45, 0.24]} position={[-4.35, 2.45, -1.25]} /></>;
   if (kind === 'watchtower') return <><CuboidCollider args={[0.28, 2.35, 0.28]} position={[-1.75, 2.35, -0.85]} /><CuboidCollider args={[0.28, 2.35, 0.28]} position={[2.05, 2.35, 0.45]} /><CuboidCollider args={[0.28, 2.35, 0.28]} position={[0.75, 2.35, -2.05]} /><CuboidCollider args={[2.75, 0.15, 2.1]} position={[0.25, 4.72, -0.2]} /></>;
-  if (kind === 'sawmill') return <><CuboidCollider args={[5.5, 0.18, 3.5]} position={[0, 3.6, 0]} /><CuboidCollider args={[0.7, 1.1, 3.3]} position={[5.4, 0.8, 0]} /></>;
+  if (kind === 'sawmill') return <><CuboidCollider args={[3.7, 0.15, 0.7]} position={[0, 0.78, 0]} /><CuboidCollider args={[0.7, 1.1, 3.3]} position={[4.4, 0.8, 0]} /></>;
   if (kind === 'cinema') return <><CuboidCollider args={[4.9, 2.75, 0.2]} position={[0, 3.4, -1]} /><CuboidCollider args={[1.7, 0.45, 0.5]} position={[0, 0.45, 4]} /></>;
   if (kind === 'cabin') return <CuboidCollider args={[2.2, 3.2, 3.2]} position={[0, 3.2, 0]} />;
-  if (kind === 'workshop') return <CuboidCollider args={[2.8, 0.45, 1.1]} position={[0, 0.75, 0.2]} />;
+  if (kind === 'workshop') return <><CuboidCollider args={[4.3, 0.58, 1.25]} position={[0, 0.58, 0.2]} /><CuboidCollider args={[1.8, 1.4, 0.15]} position={[-3.5, 1.4, -2.3]} /></>;
   if (kind === 'record') return <CuboidCollider args={[3.7, 1.7, 0.85]} position={[0, 1.7, 0]} />;
   if (kind === 'post') return <CuboidCollider args={[1.1, 0.75, 0.75]} position={[0, 0.9, 0]} />;
   if (kind === 'camp') return <><CuboidCollider args={[2.4, 0.05, 1.8]} position={[0, 1.3, 0]} rotation={[-0.55, 0, 0]} /><CuboidCollider args={[0.13, 1.28, 0.13]} position={[-2.05, 1.28, -1.45]} /><CuboidCollider args={[0.13, 1.28, 0.13]} position={[2.05, 1.28, -1.45]} /></>;
