@@ -106,6 +106,18 @@ const WORLD_INFRASTRUCTURE_CLEARINGS = [
   [RIVER_BRIDGE_POSITION[0], RIVER_BRIDGE_POSITION[2], 18],
 ] as const;
 
+const SITE_ROTATION_OFFSETS: Record<GameDestination['siteKind'], number> = {
+  camp: -0.36,
+  workshop: 0.24,
+  station: -0.18,
+  watchtower: 0.46,
+  sawmill: -0.28,
+  record: 0.34,
+  cinema: -0.2,
+  cabin: 0.78,
+  post: -0.32,
+};
+
 const WORLD_TRAIL_GLSL = WORLD_TRAIL_SEGMENTS.map(
   ({ start, end, halfWidth }) =>
     `distance = min(distance, segmentDistance(point, vec2(${start[0].toFixed(1)}, ${start[1].toFixed(1)}), vec2(${end[0].toFixed(1)}, ${end[1].toFixed(1)})) / ${halfWidth.toFixed(2)});`,
@@ -1039,88 +1051,6 @@ function WorldKeepsakes({
   );
 }
 
-function ArchiveLodge() {
-  const { scene } = useGLTF('/archive-world/archive-lodge.glb?v=2');
-  const clone = useMemo(() => scene.clone(true), [scene]);
-
-  useEffect(() => {
-    clone.traverse((object) => {
-      if ('castShadow' in object) object.castShadow = true;
-      if ('receiveShadow' in object) object.receiveShadow = true;
-    });
-  }, [clone]);
-
-  return <primitive object={clone} position={[0, 0, -8]} />;
-}
-
-function LodgeApproach() {
-  return (
-    <group>
-      <mesh position={[0, 0.045, 7]} rotation={[-Math.PI / 2, 0, -0.025]} receiveShadow>
-        <planeGeometry args={[3.4, 27]} />
-        <meshStandardMaterial color="#77694f" roughness={1} transparent opacity={0.64} />
-      </mesh>
-      {[-1.8, 1.8].map((x) => (
-        <mesh key={x} position={[x, 0.18, -2]} rotation-x={Math.PI / 2} castShadow>
-          <cylinderGeometry args={[0.12, 0.16, 7.5, 7]} />
-          <meshStandardMaterial color="#463326" roughness={1} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function TrailheadCamp() {
-  return (
-    <group position={[0, 0, -8]}>
-      <group position={[-4.5, 0, -0.4]} rotation-y={0.18}>
-        {[-2.2, 2.2].flatMap((x) => [-1.5, 1.5].map((z) => (
-          <mesh key={`${x}:${z}`} position={[x, 1.65, z]}><cylinderGeometry args={[0.08, 0.12, 3.3, 7]} /><meshStandardMaterial color="#493528" /></mesh>
-        )))}
-        <mesh position={[0, 3.25, 0]} rotation-z={-0.04} castShadow><boxGeometry args={[5.4, 0.12, 3.8]} /><meshStandardMaterial color="#85795d" roughness={1} /></mesh>
-        <mesh position={[-1.2, 0.55, 0.5]} castShadow><boxGeometry args={[1.45, 1.1, 1.2]} /><meshStandardMaterial color="#4d3a2b" roughness={1} /></mesh>
-        <mesh position={[0.5, 0.38, 0.8]} castShadow><boxGeometry args={[1.1, 0.75, 0.9]} /><meshStandardMaterial color="#66513a" roughness={1} /></mesh>
-      </group>
-      {[0, Math.PI / 2, Math.PI / 4].map((rotation) => (
-        <mesh key={rotation} position={[0, 0.2, 2]} rotation={[0, rotation, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[0.12, 0.16, 1.7, 7]} />
-          <meshStandardMaterial color="#34271f" roughness={1} />
-        </mesh>
-      ))}
-      <pointLight position={[0, 1, 2]} intensity={9} distance={14} color="#d69b50" />
-      <mesh position={[0, 0.17, 2]} rotation-x={-Math.PI / 2}>
-        <ringGeometry args={[0.72, 1, 14]} />
-        <meshStandardMaterial color="#5c5e53" roughness={1} />
-      </mesh>
-    </group>
-  );
-}
-
-function OutdoorCrates() {
-  const { scene } = useGLTF('/archive-world/polyhaven/CheeseBox_01/CheeseBox_01_1k.gltf');
-  const crates = useMemo(
-    () => [
-      { position: [-5.6, 0.02, -7.1] as [number, number, number], rotation: -0.25, scale: 4.4 },
-      { position: [-3.8, 0.02, -6.6] as [number, number, number], rotation: 0.42, scale: 3.8 },
-      { position: [2.2, 0.02, -6.8] as [number, number, number], rotation: -0.54, scale: 3.3 },
-    ],
-    [],
-  );
-  return (
-    <group>
-      {crates.map((crate, index) => (
-        <primitive
-          key={index}
-          object={scene.clone(true)}
-          position={crate.position}
-          rotation={[0, crate.rotation, 0]}
-          scale={crate.scale}
-        />
-      ))}
-    </group>
-  );
-}
-
 const MEDIEVAL_ASSET_ROOT = '/archive-world/quaternius-medieval';
 const FANTASY_PROP_ROOT = '/archive-world/quaternius-props';
 
@@ -1240,73 +1170,30 @@ function RiverFootbridge() {
 
 function ArchiveBookCottage() {
   return (
-    <group>
-      <MedievalAsset name="Wall_Plaster_Door_Round" position={[-1, 0, 3]} />
-      <MedievalAsset name="Wall_Plaster_Window_Wide_Round" position={[1, 0, 3]} />
-      <MedievalAsset name="Door_1_Round" position={[-1.52, 0, 3.05]} />
-      <MedievalAsset name="Window_Wide_Round1" position={[1, 0, 3.06]} />
-      <MedievalAsset name="WindowShutters_Wide_Round_Open" position={[1, 0, 3.05]} />
-      {[-1, 1].map((x) => <MedievalAsset key={`rear-${x}`} name="Wall_Plaster_Straight" position={[x, 0, -3]} rotation={[0, Math.PI, 0]} />)}
-      {[-2, 0, 2].map((z) => <MedievalAsset key={`left-${z}`} name="Wall_Plaster_Straight" position={[-2, 0, z]} rotation={[0, Math.PI / 2, 0]} />)}
-      {[-2, 0, 2].map((z) => <MedievalAsset key={`right-${z}`} name="Wall_Plaster_Straight" position={[2, 0, z]} rotation={[0, -Math.PI / 2, 0]} />)}
-      <MedievalAsset name="Roof_RoundTiles_4x6" position={[0, 3, 0]} />
-      <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, 3]} />
-      <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, -3]} rotation={[0, Math.PI, 0]} />
-      <MedievalAsset name="Prop_Chimney" position={[-1.35, 3.8, -0.8]} scale={0.82} />
-      <MedievalAsset name="Stairs_Exterior_Straight" position={[-1, 0, 4]} rotation={[0, Math.PI, 0]} />
-      <MedievalAsset name="Prop_Vine1" position={[1.8, 2.3, 3.13]} />
-      <pointLight position={[1, 2, 3.8]} intensity={7} distance={10} color="#c5a15d" />
-    </group>
-  );
-}
-
-function TrailToDestination({ destination }: { destination: GameDestination }) {
-  const [x, , z] = destination.position;
-  const y = terrainHeightAt(x, z);
-
-  return (
-    <mesh
-      position={[x, y + 0.035, z + 8]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      receiveShadow
-    >
-      <planeGeometry args={[2.3, 18]} />
-      <meshStandardMaterial color="#6f634c" roughness={1} transparent opacity={0.44} />
-    </mesh>
-  );
-}
-
-function TimberCabin({ postOffice = false }: { postOffice?: boolean }) {
-  return (
-    <group>
-      <mesh position={[0, 2.45, 0]} castShadow receiveShadow>
-        <boxGeometry args={[6.4, 4.4, 5.2]} />
-        <meshStandardMaterial color={postOffice ? '#7b735c' : '#66745f'} roughness={0.96} />
-      </mesh>
-      {[-2.35, 0, 2.35].map((beam) => (
-        <mesh key={beam} position={[beam, 2.55, 2.66]} castShadow>
-          <boxGeometry args={[0.25, 4.7, 0.2]} />
-          <meshStandardMaterial color="#3f3024" roughness={1} />
-        </mesh>
-      ))}
-      <mesh position={[-1.7, 4.95, 0]} rotation-z={-0.62} castShadow>
-        <boxGeometry args={[4.7, 0.34, 6.4]} />
-        <meshStandardMaterial color="#26362c" roughness={1} />
-      </mesh>
-      <mesh position={[1.7, 4.95, 0]} rotation-z={0.62} castShadow>
-        <boxGeometry args={[4.7, 0.34, 6.4]} />
-        <meshStandardMaterial color="#26362c" roughness={1} />
-      </mesh>
-      <mesh position={[0, 1.65, 2.67]} castShadow>
-        <boxGeometry args={[1.3, 2.9, 0.2]} />
-        <meshStandardMaterial color="#34261d" roughness={1} />
-      </mesh>
-      {[-1.9, 1.9].map((windowX) => (
-        <mesh key={windowX} position={[windowX, 2.7, 2.68]}>
-          <boxGeometry args={[1.25, 1.35, 0.15]} />
-          <meshStandardMaterial color="#d5b66d" emissive="#b8904c" emissiveIntensity={0.55} />
-        </mesh>
-      ))}
+    <group name="single-crooked-reading-cottage">
+      <group position={[-1.45, 0, 0.25]} rotation-y={0.2} scale={[1.18, 0.78, 1]}>
+        <MedievalAsset name="Wall_Plaster_Door_Round" position={[-1, 0, 3]} />
+        <MedievalAsset name="Wall_Plaster_Window_Wide_Round" position={[1, 0, 3]} />
+        <MedievalAsset name="Door_1_Round" position={[-1.52, 0, 3.05]} />
+        <MedievalAsset name="Window_Wide_Round1" position={[1, 0, 3.06]} />
+        <MedievalAsset name="WindowShutters_Wide_Round_Open" position={[1, 0, 3.05]} />
+        {[-1, 1].map((x) => <MedievalAsset key={`rear-${x}`} name="Wall_Plaster_Straight" position={[x, 0, -3]} rotation={[0, Math.PI, 0]} />)}
+        {[-2, 2].map((z) => <MedievalAsset key={`left-${z}`} name="Wall_Plaster_Straight" position={[-2, 0, z]} rotation={[0, Math.PI / 2, 0]} />)}
+        <MedievalAsset name="Wall_Plaster_Window_Wide_Round" position={[-2, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
+        <MedievalAsset name="Window_Wide_Round1" position={[-2.05, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
+        <MedievalAsset name="WindowShutters_Wide_Round_Open" position={[-2.06, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
+        {[-2, 0, 2].map((z) => <MedievalAsset key={`right-${z}`} name="Wall_Plaster_Straight" position={[2, 0, z]} rotation={[0, -Math.PI / 2, 0]} />)}
+        <MedievalAsset name="Roof_RoundTiles_4x6" position={[0, 3, 0]} rotation={[0, 0, 0.025]} />
+        <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, 3]} rotation={[0, 0, 0.025]} />
+        <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, -3]} rotation={[0, Math.PI, -0.025]} />
+        <MedievalAsset name="Prop_Chimney" position={[-1.35, 3.8, -0.8]} scale={0.82} />
+        <MedievalAsset name="Prop_Vine1" position={[1.8, 2.3, 3.13]} />
+        <pointLight position={[1, 2, 3.8]} intensity={7} distance={10} color="#c5a15d" />
+      </group>
+      <FantasyProp name="Workbench" position={[3.3, 0, 1.15]} rotation={[0, -0.48, 0]} scale={[1.18, 1, 1]} />
+      <FantasyProp name="Scroll_2" position={[3.15, 0.98, 1.05]} rotation={[0, 0.62, 0]} scale={3.4} />
+      <FantasyProp name="Bench" position={[3.85, 0, 3]} rotation={[0, -0.72, 0]} scale={0.92} />
+      <FantasyProp name="Barrel" position={[-4.45, 0, -1.25]} rotation={[0, 0.35, 0]} scale={0.85} />
     </group>
   );
 }
@@ -1567,35 +1454,42 @@ function TimberRailwayPlatform() {
 
 function OpenSurveyTripod() {
   const legs = [
-    { start: [-2.45, 0, -1.25] as [number, number, number], end: [0, 5.4, 0.05] as [number, number, number] },
-    { start: [2.25, 0, 0.8] as [number, number, number], end: [0, 5.4, 0.05] as [number, number, number] },
-    { start: [0.7, 0, -2.55] as [number, number, number], end: [0, 5.4, 0.05] as [number, number, number] },
+    { start: [-1.35, 0, -0.78] as [number, number, number], end: [0, 2.62, 0] as [number, number, number] },
+    { start: [1.25, 0, 0.68] as [number, number, number], end: [0, 2.62, 0] as [number, number, number] },
+    { start: [0.38, 0, -1.42] as [number, number, number], end: [0, 2.62, 0] as [number, number, number] },
   ];
 
   return (
-    <group name="open-survey-tripod">
+    <group name="field-survey-instrument" rotation-y={-0.34}>
       {legs.map((leg, index) => (
-        <TimberBeamBetween key={index} start={leg.start} end={leg.end} radius={0.2} />
+        <TimberBeamBetween key={index} start={leg.start} end={leg.end} radius={0.11} />
       ))}
-      <mesh position={[0, 5.37, 0.05]} rotation-z={0.08} castShadow>
-        <torusGeometry args={[0.5, 0.09, 8, 28]} />
-        <meshStandardMaterial color="#93875f" metalness={0.38} roughness={0.62} />
+      <mesh position={[0, 2.62, 0]} rotation-y={0.12} castShadow>
+        <boxGeometry args={[0.72, 0.22, 0.52]} />
+        <meshStandardMaterial color="#5e665a" metalness={0.34} roughness={0.66} />
       </mesh>
-      <mesh position={[0.08, 4.42, 0]} rotation={[0.16, 0.72, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.17, 0.23, 2.35, 12]} />
-        <meshStandardMaterial color="#667061" metalness={0.44} roughness={0.64} />
+      <mesh position={[0.08, 2.88, 0]} rotation={[0, 0.92, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.13, 0.19, 1.75, 12]} />
+        <meshStandardMaterial color="#687164" metalness={0.46} roughness={0.58} />
       </mesh>
-      <mesh position={[0.72, 4.64, -0.65]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.36, 0.07, 8, 24]} />
-        <meshStandardMaterial color="#b0a269" metalness={0.35} roughness={0.68} />
+      <mesh position={[0.7, 2.88, -0.55]} rotation={[0, 0.92, Math.PI / 2]}>
+        <cylinderGeometry args={[0.2, 0.2, 0.08, 18]} />
+        <meshStandardMaterial color="#a19262" metalness={0.38} roughness={0.62} />
       </mesh>
-      <mesh position={[0, 0.24, 0]} receiveShadow>
-        <cylinderGeometry args={[1.2, 1.45, 0.48, 9]} />
-        <meshStandardMaterial color="#3e4a40" roughness={1} />
+      <mesh position={[-0.64, 2.88, 0.56]} rotation={[0, 0.92, Math.PI / 2]}>
+        <cylinderGeometry args={[0.11, 0.16, 0.12, 16]} />
+        <meshStandardMaterial color="#373f39" metalness={0.28} roughness={0.72} />
       </mesh>
-      <FantasyProp name="Workbench_Drawers" position={[-3.15, 0, 1.75]} rotation={[0, 0.24, 0]} scale={[1.1, 1, 0.92]} />
-      <FantasyProp name="Scroll_1" position={[-3.05, 0.96, 1.72]} rotation={[0, -0.28, 0]} scale={3.4} />
-      <MedievalAsset name="Prop_Crate" position={[2.75, 0.12, -1.7]} rotation={[0, 0.42, 0]} scale={0.82} />
+      {legs.map((leg, index) => (
+        <mesh key={`foot-${index}`} position={[leg.start[0], 0.08, leg.start[2]]} rotation-y={index * 0.58} receiveShadow>
+          <dodecahedronGeometry args={[0.22 + index * 0.025, 0]} />
+          <meshStandardMaterial color="#525a50" roughness={1} />
+        </mesh>
+      ))}
+      <FantasyProp name="Workbench_Drawers" position={[-2.7, 0, 1.45]} rotation={[0, 0.48, 0]} scale={[1.08, 1, 0.9]} />
+      <FantasyProp name="Scroll_1" position={[-2.54, 0.96, 1.3]} rotation={[0, 0.12, 0]} scale={3.4} />
+      <MedievalAsset name="Prop_Crate" position={[2.2, 0.12, -1.25]} rotation={[0, 0.62, 0]} scale={0.72} />
+      <FantasyProp name="Bag" position={[1.55, 0, 1.45]} rotation={[0, -0.5, 0]} scale={0.74} />
     </group>
   );
 }
@@ -1812,34 +1706,45 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
     );
   }
   if (kind === 'post') {
+    const postLinePosts = [
+      { position: [-3.4, 1.8, -0.6] as [number, number, number], height: 3.6, lean: -0.05 },
+      { position: [3.3, 1.55, -0.25] as [number, number, number], height: 3.1, lean: -0.08 },
+    ];
+    const hangingLetters = [
+      [-2.55, 3.18, -0.36, -0.13],
+      [-1.35, 2.91, -0.08, 0.08],
+      [-0.28, 2.73, 0.2, -0.05],
+      [1.25, 2.74, 0.03, 0.1],
+      [2.55, 2.78, -0.18, -0.08],
+    ] as const;
     return (
       <group>
-        {[-3.2, 3.2].map((x) => (
-          <mesh key={x} position={[x, 2.7, 0]} castShadow>
-            <cylinderGeometry args={[0.13, 0.2, 5.4, 8]} />
+        {postLinePosts.map((post) => (
+          <mesh key={post.position[0]} position={post.position} rotation-z={post.lean} castShadow>
+            <cylinderGeometry args={[0.12, 0.2, post.height, 8]} />
             <meshStandardMaterial color="#493529" roughness={1} />
           </mesh>
         ))}
-        <mesh position={[0, 4.7, 0]} rotation-z={Math.PI / 2} castShadow>
-          <cylinderGeometry args={[0.08, 0.08, 7, 8]} />
-          <meshStandardMaterial color="#3a3128" roughness={1} />
-        </mesh>
-        {[-2.4, -1.2, 0, 1.2, 2.4].map((x, index) => (
-          <mesh key={x} position={[x, 4.18 - (index % 2) * 0.18, 0]} rotation-z={(index - 2) * 0.08} castShadow>
-            <planeGeometry args={[0.65, 0.44]} />
+        <TimberBeamBetween start={[-3.4, 3.35, -0.6]} end={[-0.15, 2.7, 0.22]} radius={0.025} color="#79664d" />
+        <TimberBeamBetween start={[-0.15, 2.7, 0.22]} end={[3.3, 2.78, -0.25]} radius={0.025} color="#79664d" />
+        {hangingLetters.map(([x, y, z, rotation], index) => (
+          <mesh key={x} position={[x, y, z]} rotation={[0, (index - 2) * 0.035, rotation]} castShadow>
+            <planeGeometry args={[index === 2 ? 0.78 : 0.65, index === 2 ? 0.52 : 0.44]} />
             <meshStandardMaterial color={index % 2 ? '#b7ad87' : '#d0c498'} side={DoubleSide} roughness={1} />
           </mesh>
         ))}
-        <FantasyProp name="Workbench" position={[0, 0, 0]} scale={[1.22, 1, 1]} />
-        <FantasyProp name="Workbench_Drawers" position={[0, 0, 0]} scale={[1.22, 1, 1]} />
-        <FantasyProp name="Scroll_1" position={[-0.38, 0.96, -0.05]} rotation={[0, -0.18, 0]} scale={3.6} />
-        <FantasyProp name="Scroll_2" position={[0.48, 0.97, 0.12]} rotation={[0, 0.35, 0]} scale={2.9} />
-        <mesh position={[0.72, 1.02, -0.22]} rotation-x={Math.PI / 2}>
+        <group position={[-0.65, 0, 0.72]} rotation-y={0.28}>
+          <FantasyProp name="Workbench" scale={[1.22, 1, 1]} />
+          <FantasyProp name="Workbench_Drawers" scale={[1.22, 1, 1]} />
+          <FantasyProp name="Scroll_1" position={[-0.38, 0.96, -0.05]} rotation={[0, -0.18, 0]} scale={3.6} />
+          <FantasyProp name="Scroll_2" position={[0.48, 0.97, 0.12]} rotation={[0, 0.35, 0]} scale={2.9} />
+        </group>
+        <mesh position={[0.05, 1.02, 0.52]} rotation-x={Math.PI / 2}>
           <torusGeometry args={[0.16, 0.035, 7, 18]} />
           <meshStandardMaterial color="#70493a" roughness={1} />
         </mesh>
-        <FantasyProp name="Bag" position={[1.7, 0.02, 0.8]} rotation={[0, -0.3, 0]} scale={0.9} />
-        <FantasyProp name="Barrel" position={[-1.85, 0.02, -0.65]} rotation={[0, 0.2, 0]} scale={0.95} />
+        <FantasyProp name="Bag" position={[1.28, 0.02, 1.15]} rotation={[0, -0.3, 0]} scale={0.9} />
+        <FantasyProp name="Barrel" position={[-2.45, 0.02, -0.35]} rotation={[0, 0.2, 0]} scale={0.95} />
       </group>
     );
   }
@@ -1855,7 +1760,7 @@ function DestinationSite({
 }) {
   const [x, , z] = destination.position;
   const groundHeight = terrainHeightAt(x, z);
-  const rotation = Math.atan2(-x, -z);
+  const rotation = Math.atan2(-x, -z) + SITE_ROTATION_OFFSETS[destination.siteKind];
 
   return (
     <RigidBody type="fixed" colliders={false} position={[x, groundHeight, z]} rotation={[0, rotation, 0]}>
@@ -1874,13 +1779,13 @@ function DestinationSite({
 
 function SiteColliders({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'station') return <><CuboidCollider args={[6.5, 0.22, 2.4]} position={[0, 0.22, 0]} /><CuboidCollider args={[0.24, 2.45, 0.24]} position={[-4.35, 2.45, -1.25]} /></>;
-  if (kind === 'watchtower') return <><CuboidCollider args={[0.3, 2.45, 0.3]} position={[-1.15, 2.45, -0.58]} rotation={[0, 0, -0.42]} /><CuboidCollider args={[0.3, 2.45, 0.3]} position={[1.05, 2.45, 0.42]} rotation={[0, 0, 0.4]} /><CuboidCollider args={[0.3, 2.45, 0.3]} position={[0.35, 2.45, -1.2]} rotation={[0.2, 0, 0.14]} /><CuboidCollider args={[1.35, 0.25, 1.35]} position={[0, 0.25, 0]} /></>;
+  if (kind === 'watchtower') return <><CuboidCollider args={[0.16, 1.35, 0.16]} position={[-0.65, 1.35, -0.39]} rotation={[0, 0, -0.42]} /><CuboidCollider args={[0.16, 1.35, 0.16]} position={[0.62, 1.35, 0.34]} rotation={[0, 0, 0.4]} /><CuboidCollider args={[0.16, 1.35, 0.16]} position={[0.19, 1.35, -0.71]} rotation={[0.18, 0, 0.14]} /></>;
   if (kind === 'sawmill') return <><CuboidCollider args={[3.7, 0.15, 0.7]} position={[0, 0.78, 0]} /><CuboidCollider args={[0.7, 1.1, 3.3]} position={[4.4, 0.8, 0]} /></>;
   if (kind === 'cinema') return <><CuboidCollider args={[0.22, 3, 0.22]} position={[-4.98, 3, -1]} /><CuboidCollider args={[0.22, 3, 0.22]} position={[4.98, 3, -1]} />{[-3.4, 0, 3.4].map((x) => <CuboidCollider key={x} args={[1.5, 0.4, 0.45]} position={[x, 0.4, 4]} />)}<CuboidCollider args={[0.62, 0.82, 0.75]} position={[1.65, 0.82, 6.35]} /></>;
-  if (kind === 'cabin') return <CuboidCollider args={[2.2, 3.2, 3.2]} position={[0, 3.2, 0]} />;
+  if (kind === 'cabin') return <CuboidCollider args={[2.6, 1.7, 3.1]} position={[-1.45, 1.7, 0.25]} rotation={[0, 0.2, 0]} />;
   if (kind === 'workshop') return <>{[[-2.65, 0.15], [0.2, -0.5], [2.8, 0.65]].map(([x, z]) => <CuboidCollider key={`${x}:${z}`} args={[1.25, 0.55, 0.75]} position={[x, 0.55, z]} />)}{[-4.75, -0.48, 3.35].map((x) => <CuboidCollider key={`line-post-${x}`} args={[0.14, 1.75, 0.14]} position={[x, 1.75, -2.22]} />)}</>;
   if (kind === 'record') return <CuboidCollider args={[3.7, 1.7, 0.85]} position={[0, 1.7, 0]} />;
-  if (kind === 'post') return <CuboidCollider args={[1.45, 0.58, 0.78]} position={[0, 0.58, 0]} />;
+  if (kind === 'post') return <CuboidCollider args={[1.45, 0.58, 0.78]} position={[-0.65, 0.58, 0.72]} rotation={[0, 0.28, 0]} />;
   if (kind === 'camp') return <><CuboidCollider args={[0.72, 0.58, 0.62]} position={[-1.8, 0.58, -0.9]} /><CuboidCollider args={[1.15, 0.12, 0.46]} position={[1.85, 0.12, -1]} /></>;
   return <CuboidCollider args={[2.2, 1.1, 1.9]} position={[0, 1.1, 0]} />;
 }
@@ -1948,17 +1853,11 @@ function WorldLandmarks({
 }) {
   return (
     <group>
-      <RigidBody type="fixed" colliders={false}>
-        <CuboidCollider args={[3.2, 1.7, 2.2]} position={[-4.5, 1.7, -8.4]} />
-        <TrailheadCamp />
-      </RigidBody>
-      <Suspense fallback={null}><OutdoorCrates /></Suspense>
       {destinations.map((destination) => (
         <group key={destination.blockType}>
           <DestinationSite destination={destination} onOpen={onOpen} />
         </group>
       ))}
-      <pointLight position={[0, 7, -2]} intensity={10} distance={28} color="#d1ad64" />
     </group>
   );
 }
@@ -2502,5 +2401,3 @@ export default function ArchiveGameScene({
     </>
   );
 }
-
-useGLTF.preload('/archive-world/archive-lodge.glb?v=2');

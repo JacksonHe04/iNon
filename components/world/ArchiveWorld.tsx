@@ -68,14 +68,14 @@ interface WorldWaypoint {
 
 const LANDMARKS: GameDestination[] = [
   { blockType: 'bio', position: [-18, 0, 13], number: '01', subtitle: '旅行营地 · 身份与此刻', siteKind: 'camp' },
-  { blockType: 'projects', position: [54, 0, -34], number: '02', subtitle: '木工作坊 · 正在生长的事物', siteKind: 'workshop' },
+  { blockType: 'projects', position: [54, 0, -34], number: '02', subtitle: '露天图纸场 · 正在生长的事物', siteKind: 'workshop' },
   { blockType: 'timeline', position: [-112, 0, -62], number: '03', subtitle: '旧车站 · 地点与年份', siteKind: 'station' },
-  { blockType: 'education', position: [96, 0, -122], number: '04', subtitle: '山地观测塔 · 学习与自然', siteKind: 'watchtower' },
+  { blockType: 'education', position: [96, 0, -122], number: '04', subtitle: '山地测绘点 · 学习与自然', siteKind: 'watchtower' },
   { blockType: 'work', position: [-158, 0, -148], number: '05', subtitle: '河谷锯木场 · 工作与批注', siteKind: 'sawmill' },
   { blockType: 'music', position: [146, 0, -176], number: '06', subtitle: '唱片林地 · 声音与节拍', siteKind: 'record' },
   { blockType: 'movies', position: [-206, 0, 116], number: '07', subtitle: '露天放映场 · 影片与导演', siteKind: 'cinema' },
   { blockType: 'books', position: [214, 0, 132], number: '08', subtitle: '林间书屋 · 页边痕迹', siteKind: 'cabin' },
-  { blockType: 'messages', position: [18, 0, -258], number: '09', subtitle: '边地邮局 · 来信与回声', siteKind: 'post' },
+  { blockType: 'messages', position: [18, 0, -258], number: '09', subtitle: '边地邮路 · 来信与回声', siteKind: 'post' },
 ];
 
 const WORLD_WAYPOINTS: WorldWaypoint[] = [
