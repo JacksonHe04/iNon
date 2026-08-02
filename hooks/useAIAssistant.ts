@@ -1,6 +1,7 @@
 import { useState, type KeyboardEvent } from 'react';
 import type { ReadmeData } from '@/types';
 import { getAuthorNickname } from '@/lib/utils';
+import type { WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
 
 export type ChatMessage = {
   role: 'user' | 'assistant';
@@ -10,9 +11,10 @@ export type ChatMessage = {
 interface UseAIAssistantProps {
   data: ReadmeData;
   persona?: 'owner' | 'companion';
+  worldContext?: WorldDialogueContext;
 }
 
-export function useAIAssistant({ data, persona = 'owner' }: UseAIAssistantProps) {
+export function useAIAssistant({ data, persona = 'owner', worldContext }: UseAIAssistantProps) {
   const nickname = getAuthorNickname(data.basic.name);
   const [aiState, setAIState] = useState<'closed' | 'docked' | 'floating'>('closed');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -48,11 +50,14 @@ export function useAIAssistant({ data, persona = 'owner' }: UseAIAssistantProps)
     setIsStreaming(true);
     setErrorMessage('');
 
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 45000);
     try {
       const response = await fetch('/api/assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: nextMessages, persona }),
+        body: JSON.stringify({ messages: nextMessages, persona, worldContext }),
+        signal: controller.signal,
       });
 
       if (!response.ok || !response.body) {
@@ -76,9 +81,13 @@ export function useAIAssistant({ data, persona = 'owner' }: UseAIAssistantProps)
           return updated;
         });
       }
+      if (!assistantReply.trim()) throw new Error('EMPTY_ASSISTANT_RESPONSE');
     } catch (error) {
       console.error('AI assistant error:', error);
-      setErrorMessage(`${persona === 'companion' ? '苔苔' : `小${nickname}`}暂时离线，请稍后重试。`);
+      const timedOut = error instanceof DOMException && error.name === 'AbortError';
+      setErrorMessage(timedOut
+        ? '风里的信号太弱了，这次没有等到回音。请稍后再试。'
+        : `${persona === 'companion' ? '苔苔' : `小${nickname}`}暂时离线，请稍后重试。`);
       setMessages((prev) => {
         if (!prev.length) return prev;
         const updated = [...prev];
@@ -86,12 +95,15 @@ export function useAIAssistant({ data, persona = 'owner' }: UseAIAssistantProps)
         if (updated[lastIndex].role === 'assistant') {
           updated[lastIndex] = {
             ...updated[lastIndex],
-            content: '抱歉，我现在无法连接大脑，请稍后再试。',
+            content: timedOut
+              ? '我听见了你的问题，但这次林间电台没有接回信号。'
+              : '这次没有收到完整回信，请稍后再试。',
           };
         }
         return updated;
       });
     } finally {
+      window.clearTimeout(timeout);
       setIsStreaming(false);
     }
   };

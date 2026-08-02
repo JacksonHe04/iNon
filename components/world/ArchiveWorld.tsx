@@ -33,6 +33,8 @@ import {
   type HomeRecordId,
 } from '@/components/world/archiveHomeRecords';
 import { buildArchiveKeepsakes } from '@/components/world/archiveKeepsakes';
+import { buildWorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
+import type { WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -53,6 +55,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const [dialoguePersona, setDialoguePersona] = useState<'owner' | 'companion'>('owner');
   const [selectedHomeRecord, setSelectedHomeRecord] = useState<HomeRecordId | null>(null);
   const playerPosition = useRef(new Vector3(...WORLD_PLAYER_SPAWN));
+  const dialogueContext = useRef<WorldDialogueContext | null>(null);
   const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
   const keepsakeStorageKey = `inon-world-keepsakes-${data.basic.name}`;
   const allKeepsakes = useMemo(() => buildArchiveKeepsakes(data), [data]);
@@ -60,6 +63,12 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const recoveredKeepsakes = allKeepsakes.filter((record) => collectedKeepsakes.includes(record.id));
   const lastRecoveredKeepsake = allKeepsakes.find((record) => record.id === lastKeepsake);
   const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
+  const worldDialogueContext = buildWorldDialogueContext({
+    telemetry,
+    rations,
+    companionNearby,
+    collectedKeepsakeIds: collectedKeepsakes,
+  });
 
   useEffect(() => {
     try {
@@ -110,7 +119,10 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     releasePointerLock();
     setInventoryOpen(false);
     setSelectedHomeRecord(null);
-    if (nextMode === 'dialogue') setDialoguePersona(persona);
+    if (nextMode === 'dialogue') {
+      dialogueContext.current = worldDialogueContext;
+      setDialoguePersona(persona);
+    }
     setMode(nextMode);
   };
 
@@ -188,7 +200,13 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
       )}
 
       {mode === 'archive' && <ArchiveCodexPanel data={data} layoutConfig={config} />}
-      {mode === 'dialogue' && <ArchiveDialoguePanel data={data} persona={dialoguePersona} />}
+      {mode === 'dialogue' && (
+        <ArchiveDialoguePanel
+          data={data}
+          persona={dialoguePersona}
+          worldContext={dialogueContext.current ?? worldDialogueContext}
+        />
+      )}
 
       {mode === 'world' && selectedHomeRecord && (
         <ArchiveHomeRecordPanel

@@ -5,51 +5,11 @@ import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
 import { WORLD_WAYPOINTS, type WorldWaypoint } from '@/components/world/archiveWorldConfig';
 import WorldMinimap from '@/components/world/WorldMinimap';
 import { ARCHIVE_SPECIES_COUNT } from '@/components/world/archiveSpeciesCatalog';
-import {
-  WORLD_MOUNTAIN_SUMMIT_POSITION,
-  WORLD_TIDAL_COVE_POSITION,
-} from '@/components/world/archiveWorldConstants';
-import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
-import { worldBiomeAt, type WorldBiome } from '@/components/world/archiveWorldBiomes';
 import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
-
-const BIOME_LABELS: Record<WorldBiome, string> = {
-  coast: '灰绿海岸',
-  wetland: '河谷湿地',
-  meadow: '林径草甸',
-  forest: '深林',
-  alpine: '雪线',
-};
+import { worldLocationLabel, worldMotionLabel } from '@/components/world/archiveWorldTelemetry';
 
 function dispatchKey(type: 'keydown' | 'keyup', code: string) {
   window.dispatchEvent(new KeyboardEvent(type, { code }));
-}
-
-function terrainLabel(telemetry: GameTelemetry, insideHome: boolean) {
-  if (insideHome) return '主屋室内';
-  if (Math.hypot(
-    telemetry.x - WORLD_MOUNTAIN_SUMMIT_POSITION[0],
-    telemetry.z - WORLD_MOUNTAIN_SUMMIT_POSITION[2],
-  ) < 22) return '雪线营地';
-  if (Math.hypot(
-    telemetry.x - WORLD_TIDAL_COVE_POSITION[0],
-    telemetry.z - WORLD_TIDAL_COVE_POSITION[2],
-  ) < 28) return '潮汐湾';
-  const height = terrainHeightAt(telemetry.x, telemetry.z);
-  return BIOME_LABELS[worldBiomeAt(telemetry.x, telemetry.z, height)];
-}
-
-function motionLabel(telemetry: GameTelemetry) {
-  if (telemetry.flying) return telemetry.speed > 0 ? '自由飞行' : '空中悬停';
-  if (telemetry.mounted) {
-    if (telemetry.speed > 24) return '马背奔驰';
-    if (telemetry.speed > 0) return '马背行进';
-    return '马背驻足';
-  }
-  if (telemetry.inWater) return '涉水';
-  if (telemetry.speed > 16) return '疾跑';
-  if (telemetry.speed > 0) return '行进';
-  return '驻足';
 }
 
 export default function WorldHud({
@@ -181,8 +141,8 @@ export default function WorldHud({
 
       <div className="archive-world-status" aria-label="玩家状态">
         <div className="archive-world-status__compass">
-          <span>{terrainLabel(telemetry, insideHome)} · 生态 {ARCHIVE_SPECIES_COUNT} 种</span>
-          <strong>{motionLabel(telemetry)}</strong>
+          <span>{worldLocationLabel(telemetry)} · 生态 {ARCHIVE_SPECIES_COUNT} 种</span>
+          <strong>{worldMotionLabel(telemetry)}</strong>
         </div>
         <div className="archive-world-status__bar">
           <label><span>体力</span><b>{Math.round(telemetry.stamina)}</b></label>

@@ -4,6 +4,8 @@ import { useEffect, useRef, type FormEvent } from 'react';
 import type { ReadmeData } from '@/types';
 import { getAuthorNickname } from '@/lib/utils';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
+import type { WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
+import styles from '@/components/world/ArchiveDialoguePanel.module.css';
 
 const OWNER_SUGGESTIONS = ['最近在做什么？', '推荐一张喜欢的唱片', '讲讲这里的收藏', '为什么建造这个世界？'];
 const COMPANION_SUGGESTIONS = ['今天森林里发生了什么？', '带我去你喜欢的地方', '你为什么跟着我？', '讲讲主人的收藏'];
@@ -11,14 +13,19 @@ const COMPANION_SUGGESTIONS = ['今天森林里发生了什么？', '带我去�
 export default function ArchiveDialoguePanel({
   data,
   persona = 'owner',
+  worldContext,
 }: {
   data: ReadmeData;
   persona?: 'owner' | 'companion';
+  worldContext: WorldDialogueContext;
 }) {
   const nickname = getAuthorNickname(data.basic.name);
   const companion = persona === 'companion';
   const speaker = companion ? '苔苔' : `小${nickname}`;
   const suggestions = companion ? COMPANION_SUGGESTIONS : OWNER_SUGGESTIONS;
+  const companionHeading = worldContext.location === '主屋室内'
+    ? '在主屋地毯旁，与苔苔说话'
+    : `在${worldContext.location}停下，与苔苔说话`;
   const scroll = useRef<HTMLDivElement>(null);
   const {
     messages,
@@ -27,7 +34,7 @@ export default function ArchiveDialoguePanel({
     isStreaming,
     errorMessage,
     handleSend,
-  } = useAIAssistant({ data, persona });
+  } = useAIAssistant({ data, persona, worldContext });
 
   useEffect(() => {
     scroll.current?.scrollTo({ top: scroll.current.scrollHeight, behavior: 'smooth' });
@@ -42,9 +49,22 @@ export default function ArchiveDialoguePanel({
     <section className="archive-world-dialogue" aria-label={`与${speaker}对话`}>
       <header>
         <p>FIELD RADIO / LIVE CORRESPONDENCE</p>
-        <h1>{companion ? '蹲在林径旁，与苔苔说话' : `与小${nickname}在壁炉旁交谈`}</h1>
+        <h1>{companion ? companionHeading : `与小${nickname}在壁炉旁交谈`}</h1>
         <span>{isStreaming ? '正在组织语言……' : '收音稳定 · 可随时提问'}</span>
       </header>
+
+      <aside className={styles.context} aria-label="进入对话前的世界状态">
+        <div>
+          <span>LAST FIELD POSITION / 世界仍在身后运行</span>
+          <strong>{worldContext.location}</strong>
+        </div>
+        <p>
+          {worldContext.motion} · X {worldContext.x} / Z {worldContext.z} · ALT {worldContext.y.toFixed(1)} M · 朝向 {worldContext.heading}°
+        </p>
+        <small>
+          体力 {worldContext.stamina} · 口粮 {worldContext.rations} · 田野札记 {worldContext.collectedKeepsakeIds.length} / 18 · {worldContext.companionNearby ? '苔苔就在身边' : '苔苔正在循着气味赶来'}
+        </small>
+      </aside>
 
       <div ref={scroll} className="archive-world-dialogue__messages" aria-live="polite">
         {messages.length === 0 && (
@@ -81,7 +101,7 @@ export default function ArchiveDialoguePanel({
               event.preventDefault();
               if (!isStreaming) void handleSend();
             }}
-            placeholder="例如：最近哪张唱片陪你最久？"
+            placeholder={companion ? '例如：从这里出发，下一站去哪里？' : '例如：最近哪张唱片陪你最久？'}
           />
           <button type="submit" disabled={isStreaming || !aiInput.trim()}>
             {isStreaming ? '书写中' : '寄出'}
