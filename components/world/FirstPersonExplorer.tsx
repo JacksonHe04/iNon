@@ -15,7 +15,6 @@ import type {
   GameTravelRequest,
   FirstPersonExplorerProps,
 } from '@/components/world/archiveGameTypes';
-
 export default function FirstPersonExplorer({
   enabled,
   destinations,
@@ -57,7 +56,6 @@ export default function FirstPersonExplorer({
   const eye = useMemo(() => new Vector3(), []);
   const lookDirection = useMemo(() => new Vector3(), []);
   const lookTarget = useMemo(() => new Vector3(), []);
-
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
       keys.current.add(event.code);
@@ -98,7 +96,6 @@ export default function FirstPersonExplorer({
       window.removeEventListener('keyup', up);
     };
   }, [heightAt, onOpen]);
-
   useExplorerPointerLook({ enabled, canvas: gl.domElement, yaw, pitch });
 
   useEffect(() => {
@@ -172,7 +169,7 @@ export default function FirstPersonExplorer({
     const isFlying = flyingRef.current;
     const inWater = !isFlying
       && groundHeight <= waterLevel + 0.18
-      && translation.y < waterLevel + 1.8;
+      && translation.y < waterLevel + 1.25;
     const wantsToSprint = keys.current.has('ShiftLeft') || keys.current.has('ShiftRight');
     forward.set(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
     right.set(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
@@ -207,12 +204,29 @@ export default function FirstPersonExplorer({
         mountedHorse.current.rotation.y += yawDelta * Math.min(1, delta * 8);
       }
     }
+    const movementScale = moving ? 1 / Math.max(speed, 0.001) : 0;
+    const shoreProbeHeight = moving
+      ? heightAt(
+        translation.x + direction.x * movementScale * 1.35,
+        translation.z + direction.z * movementScale * 1.35,
+      )
+      : groundHeight;
+    const swimTargetY = Math.max(
+      waterLevel - (keys.current.has('Space') ? 0.08 : 0.34),
+      groundHeight + 0.06, shoreProbeHeight + 0.1,
+    );
+    const buoyancySpeed = Math.max(
+      -3.2,
+      Math.min(3.8, (swimTargetY - translation.y) * 5 - velocity.y * 0.82),
+    );
     const verticalSpeed = isFlying
       ? (keys.current.has('Space') ? 13 : 0)
         - (keys.current.has('ControlLeft') || keys.current.has('ControlRight') || keys.current.has('KeyC') ? 13 : 0)
+      : inWater
+      ? buoyancySpeed
       : velocity.y;
     rigidBody.setLinvel({ x: direction.x, y: verticalSpeed, z: direction.z }, true);
-    if (!isFlying && keys.current.has('Space') && Math.abs(velocity.y) < 0.09) {
+    if (!isFlying && !inWater && keys.current.has('Space') && Math.abs(velocity.y) < 0.09) {
       rigidBody.setLinvel({ x: direction.x, y: isMounted ? 7.2 : 6.4, z: direction.z }, true);
     }
 

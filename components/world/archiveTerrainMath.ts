@@ -60,8 +60,28 @@ function rawTerrainHeightAt(x: number, z: number) {
   return continentalGround * (1 - oceanInfluence) + oceanFloor * oceanInfluence;
 }
 
+function shapeTidalCove(height: number, x: number, z: number) {
+  const shelfDistance = Math.hypot((x + 27) * 0.86, (z + 98) * 0.68);
+  const shelfMask = 1 - smoothstep(9, 24, shelfDistance);
+  const landMask = smoothstep(-40, -31, x);
+  const shelfHeight = 0.32 + Math.sin(z * 0.45) * 0.06;
+  let shaped = height + Math.max(0, shelfHeight - height) * shelfMask * landMask;
+
+  const launchWidth = 1 - smoothstep(1.8, 4.2, Math.abs(z + 98));
+  const launchLength = smoothstep(-58, -55, x) * (1 - smoothstep(-39, -36, x));
+  const launchProgress = smoothstep(-56, -39, x);
+  const launchHeight = WATER_LEVEL - 0.72 + launchProgress * 2.29;
+  shaped += Math.max(0, launchHeight - shaped) * launchWidth * launchLength;
+
+  const poolDistance = Math.hypot((x + 28) * 1.08, z + 86);
+  const poolMask = (1 - smoothstep(2.6, 6.2, poolDistance)) * landMask;
+  const poolFloor = WATER_LEVEL - 0.3;
+  shaped += (Math.min(shaped, poolFloor) - shaped) * poolMask;
+  return shaped;
+}
+
 export function terrainHeightAt(x: number, z: number) {
-  let height = rawTerrainHeightAt(x, z);
+  let height = shapeTidalCove(rawTerrainHeightAt(x, z), x, z);
   const [summitX, , summitZ] = WORLD_MOUNTAIN_SUMMIT_POSITION;
   const summitDistance = Math.hypot(x - summitX, z - summitZ);
   if (summitDistance < 20) {

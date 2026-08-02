@@ -5,7 +5,10 @@ import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
 import { WORLD_WAYPOINTS, type WorldWaypoint } from '@/components/world/archiveWorldConfig';
 import WorldMinimap from '@/components/world/WorldMinimap';
 import { ARCHIVE_SPECIES_COUNT } from '@/components/world/archiveSpeciesCatalog';
-import { WORLD_MOUNTAIN_SUMMIT_POSITION } from '@/components/world/archiveWorldConstants';
+import {
+  WORLD_MOUNTAIN_SUMMIT_POSITION,
+  WORLD_TIDAL_COVE_POSITION,
+} from '@/components/world/archiveWorldConstants';
 import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
 
 function dispatchKey(type: 'keydown' | 'keyup', code: string) {
@@ -18,6 +21,10 @@ function terrainLabel(telemetry: GameTelemetry, insideHome: boolean) {
     telemetry.x - WORLD_MOUNTAIN_SUMMIT_POSITION[0],
     telemetry.z - WORLD_MOUNTAIN_SUMMIT_POSITION[2],
   ) < 22) return '雪线营地';
+  if (Math.hypot(
+    telemetry.x - WORLD_TIDAL_COVE_POSITION[0],
+    telemetry.z - WORLD_TIDAL_COVE_POSITION[2],
+  ) < 28) return '潮汐湾';
   if (telemetry.terrain === 'coast') return '灰绿海岸';
   if (telemetry.terrain === 'river') return '河谷水域';
   if (telemetry.terrain === 'mountain') return '山脊';

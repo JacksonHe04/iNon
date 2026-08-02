@@ -70,6 +70,10 @@ export const terrainFragment = /* glsl */ `
     float shoreline = -31.0 + sin(vWorld.z * 0.015) * 9.0 + sin(vWorld.z * 0.043) * 4.0;
     float shoreBand = 1.0 - smoothstep(4.0, 18.0, abs(vWorld.x - shoreline));
     ground = mix(ground, uShore, shoreBand * 0.48);
+    float coveDistance = length((vWorld.xz - vec2(-27.0, -98.0)) * vec2(0.82, 0.62));
+    float coveMask = 1.0 - smoothstep(10.0, 29.0, coveDistance);
+    vec3 wetCove = mix(vec3(0.055, 0.145, 0.10), uShore, 0.16 + vGrain * 0.06);
+    ground = mix(ground, wetCove, coveMask * 0.84 * (1.0 - pathMask * 0.72));
     gl_FragColor = vec4(ground, 1.0);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
@@ -98,8 +102,12 @@ export const waterFragment = /* glsl */ `
   varying vec3 vWorld;
   void main() {
     float ripple = 0.5 + 0.5 * sin(vWorld.x * 0.11 + vWorld.z * 0.08 + uTime * 0.32);
-    vec3 color = mix(vec3(0.075, 0.18, 0.15), vec3(0.28, 0.42, 0.34), 0.25 + ripple * 0.24 + vWave * 1.8);
-    gl_FragColor = vec4(color, 0.62);
+    vec3 color = mix(vec3(0.045, 0.13, 0.11), vec3(0.20, 0.34, 0.27), 0.25 + ripple * 0.24 + vWave * 1.8);
+    float shoreline = -31.0 + sin(vWorld.z * 0.015) * 9.0 + sin(vWorld.z * 0.043) * 4.0;
+    float shoreFoam = 1.0 - smoothstep(0.8, 4.8, abs(vWorld.x - shoreline));
+    float brokenFoam = 0.45 + 0.55 * sin(vWorld.z * 0.42 + ripple * 3.0);
+    color = mix(color, vec3(0.55, 0.58, 0.43), shoreFoam * brokenFoam * 0.24);
+    gl_FragColor = vec4(color, 0.72);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
   }

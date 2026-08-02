@@ -29,7 +29,7 @@ function ButterflyFish({ index, playerPosition }: { index: number; playerPositio
       source={gltf.scene}
       animations={gltf.animations}
       animationName="Swimming_Normal"
-      scale={0.38 + (index % 3) * 0.035}
+      scale={0.16 + (index % 3) * 0.018}
       animationSpeed={0.8 + (index % 4) * 0.08}
       materialTone={0.7}
       update={update}
@@ -54,7 +54,7 @@ function ShoreCrab({ index, playerPosition }: { index: number; playerPosition: M
       source={gltf.scene}
       animations={gltf.animations}
       animationName="Walk"
-      scale={0.42 + (index % 2) * 0.06}
+      scale={0.17 + (index % 2) * 0.025}
       animationSpeed={0.72 + index * 0.05}
       materialTone={0.72}
       update={update}

@@ -42,7 +42,7 @@ export const WORLD_WAYPOINTS: WorldWaypoint[] = [
     label: '潮汐湾',
     number: 'C',
     position: WORLD_TIDAL_COVE_POSITION,
-    arrival: WORLD_TIDAL_COVE_POSITION,
+    arrival: [-22, 0, WORLD_TIDAL_COVE_POSITION[2]],
     yaw: Math.PI / 2,
   },
   {
