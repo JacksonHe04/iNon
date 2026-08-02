@@ -125,3 +125,30 @@
   .archive-world-field-notes > div { grid-template-columns: 1fr; }
   .archive-world-field-notes article:nth-child(n) { min-height: 0; margin-top: 0; }
 }
+
+.archive-world-flight-controls {
+  position: absolute;
+  bottom: 24px;
+  left: 182px;
+  display: grid;
+  gap: 6px;
+  pointer-events: auto;
+  transform: rotate(.7deg);
+}
+
+.archive-world-flight-controls button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgb(235 226 198 / 48%);
+  color: #eee6cf;
+  background: linear-gradient(rgb(31 52 39 / 86%), rgb(26 44 33 / 94%));
+  box-shadow: 3px 3px 0 rgb(13 25 17 / 28%);
+  font: 1rem var(--font-geist-mono);
+  touch-action: none;
+}
+
+.archive-world-flight-controls button:active {
+  color: #293a2f;
+  background: #d2c38f;
+  transform: translate(2px, 2px);
+}

@@ -19,6 +19,7 @@ function terrainLabel(telemetry: GameTelemetry) {
 }
 
 function motionLabel(telemetry: GameTelemetry) {
+  if (telemetry.flying) return telemetry.speed > 0 ? '自由飞行' : '空中悬停';
   if (telemetry.mounted) {
     if (telemetry.speed > 24) return '马背奔驰';
     if (telemetry.speed > 0) return '马背行进';
@@ -65,6 +66,8 @@ export default function WorldHud({
           <strong>
             {companionNearby
               ? '苔苔在等你说话'
+              : telemetry.flying
+              ? '飞行模式 · 空格上升 · Ctrl 下降'
               : telemetry.canMount
               ? '林径马匹就在身旁 · F 骑乘'
               : telemetry.mounted
@@ -73,6 +76,10 @@ export default function WorldHud({
           </strong>
         </div>
         <nav aria-label="世界操作">
+          <button onClick={() => {
+            dispatchKey('keydown', 'KeyV');
+            dispatchKey('keyup', 'KeyV');
+          }}>飞行 {telemetry.flying ? 'ON' : 'OFF'} <kbd>V</kbd></button>
           <button onClick={onToggleSound}>声景 {soundEnabled ? 'ON' : 'OFF'} <kbd>M</kbd></button>
           <button onClick={onOpenInventory}>背包 <kbd>B</kbd></button>
         </nav>
@@ -83,7 +90,11 @@ export default function WorldHud({
           <span>FIELD / LIVE</span>
           <strong>绿迹开放世界</strong>
         </div>
-        <p>{telemetry.mounted ? 'WASD 骑行 · Shift 奔驰 · F 下马 · 空格跃起' : 'WASD 移动 · Shift 疾跑 · 拖动镜头 · 空格跳跃'}</p>
+        <p>{telemetry.flying
+          ? 'WASD 飞行 · Shift 加速 · Space 上升 · Ctrl / C 下降 · V 落地'
+          : telemetry.mounted
+            ? 'WASD 骑行 · Shift 奔驰 · F 下马 · 空格跃起'
+            : 'WASD 移动 · Shift 疾跑 · 拖动镜头 · 空格跳跃'}</p>
       </div>
 
       <WorldMinimap telemetry={telemetry} waypoints={WORLD_WAYPOINTS} onTravel={onTravel} />
@@ -130,6 +141,23 @@ export default function WorldHud({
           </button>
         ))}
       </div>
+
+      {telemetry.flying && (
+        <div className="archive-world-flight-controls" aria-label="飞行高度控制">
+          <button
+            aria-label="上升"
+            onPointerDown={() => dispatchKey('keydown', 'Space')}
+            onPointerUp={() => dispatchKey('keyup', 'Space')}
+            onPointerCancel={() => dispatchKey('keyup', 'Space')}
+          >↑</button>
+          <button
+            aria-label="下降"
+            onPointerDown={() => dispatchKey('keydown', 'ControlLeft')}
+            onPointerUp={() => dispatchKey('keyup', 'ControlLeft')}
+            onPointerCancel={() => dispatchKey('keyup', 'ControlLeft')}
+          >↓</button>
+        </div>
+      )}
 
       <div className="archive-world-status" aria-label="玩家状态">
         <div className="archive-world-status__compass">

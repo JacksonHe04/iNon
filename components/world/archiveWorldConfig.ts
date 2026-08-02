@@ -63,6 +63,7 @@ export const INITIAL_WORLD_TELEMETRY = {
   stamina: 100,
   inWater: false,
   mounted: false,
+  flying: false,
   canMount: false,
   terrain: 'village' as const,
 };

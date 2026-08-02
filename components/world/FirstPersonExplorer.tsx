@@ -6,6 +6,7 @@ import { type RapierRigidBody } from '@react-three/rapier';
 import { Group, Vector3 } from 'three';
 import { ARCHIVE_HORSE_SPAWN, horseWaitingPosition, type HorseMotion } from '@/components/world/ArchiveHorse';
 import ExplorerRigs from '@/components/world/ExplorerRigs';
+import useExplorerPointerLook from '@/components/world/useExplorerPointerLook';
 import { terrainKindAt } from '@/components/world/archiveTerrainMath';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 import type {
@@ -29,12 +30,11 @@ export default function FirstPersonExplorer({
 }: FirstPersonExplorerProps) {
   const body = useRef<RapierRigidBody>(null);
   const keys = useRef(new Set<string>());
-  const dragging = useRef(false);
-  const previous = useRef({ x: 0, y: 0 });
   const yaw = useRef(0);
   const pitch = useRef(0);
   const stamina = useRef(100);
   const mountedRef = useRef(false);
+  const flyingRef = useRef(false);
   const canMount = useRef(false);
   const mountedHorse = useRef<Group>(null);
   const horseYaw = useRef(-0.8);
@@ -62,7 +62,14 @@ export default function FirstPersonExplorer({
     const down = (event: KeyboardEvent) => {
       keys.current.add(event.code);
       if (event.code === 'KeyE' && nearest.current) onOpen(nearest.current.blockType);
+      if (event.code === 'KeyV' && !event.repeat && !mountedRef.current) {
+        const next = !flyingRef.current;
+        flyingRef.current = next;
+        body.current?.setGravityScale(next ? 0 : 1, true);
+        if (next) body.current?.setLinvel({ x: 0, y: 0, z: 0 }, true);
+      }
       if (event.code !== 'KeyF' || event.repeat) return;
+      if (flyingRef.current) return;
       if (mountedRef.current) {
         const translation = body.current?.translation();
         if (translation) {
@@ -92,38 +99,7 @@ export default function FirstPersonExplorer({
     };
   }, [heightAt, onOpen]);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const canvas = gl.domElement;
-    const start = (event: PointerEvent) => {
-      dragging.current = true;
-      previous.current = { x: event.clientX, y: event.clientY };
-      canvas.setPointerCapture?.(event.pointerId);
-    };
-    const move = (event: PointerEvent) => {
-      if (!dragging.current) return;
-      const dx = event.clientX - previous.current.x;
-      const dy = event.clientY - previous.current.y;
-      previous.current = { x: event.clientX, y: event.clientY };
-      // Conventional FPS look: drag right turns right, drag down looks down.
-      yaw.current -= dx * 0.0038;
-      pitch.current = Math.max(-1.18, Math.min(1.18, pitch.current - dy * 0.0032));
-    };
-    const end = (event: PointerEvent) => {
-      dragging.current = false;
-      canvas.releasePointerCapture?.(event.pointerId);
-    };
-    canvas.addEventListener('pointerdown', start);
-    canvas.addEventListener('pointermove', move);
-    canvas.addEventListener('pointerup', end);
-    canvas.addEventListener('pointercancel', end);
-    return () => {
-      canvas.removeEventListener('pointerdown', start);
-      canvas.removeEventListener('pointermove', move);
-      canvas.removeEventListener('pointerup', end);
-      canvas.removeEventListener('pointercancel', end);
-    };
-  }, [enabled, gl]);
+  useExplorerPointerLook({ enabled, canvas: gl.domElement, yaw, pitch });
 
   useEffect(() => {
     const travel = (event: Event) => {
@@ -193,7 +169,10 @@ export default function FirstPersonExplorer({
 
     const velocity = rigidBody.linvel();
     const groundHeight = heightAt(translation.x, translation.z);
-    const inWater = groundHeight <= waterLevel + 0.18;
+    const isFlying = flyingRef.current;
+    const inWater = !isFlying
+      && groundHeight <= waterLevel + 0.18
+      && translation.y < waterLevel + 1.8;
     const wantsToSprint = keys.current.has('ShiftLeft') || keys.current.has('ShiftRight');
     forward.set(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
     right.set(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
@@ -204,12 +183,14 @@ export default function FirstPersonExplorer({
     if (keys.current.has('KeyA') || keys.current.has('ArrowLeft')) direction.sub(right);
 
     const moving = direction.lengthSq() > 0;
-    const sprinting = wantsToSprint && moving && stamina.current > 2 && !inWater;
+    const sprinting = wantsToSprint && moving && (isFlying || stamina.current > 2) && !inWater;
     stamina.current = Math.max(
       0,
-      Math.min(100, stamina.current + (sprinting ? (isMounted ? -14 : -22) : 17) * delta),
+      Math.min(100, stamina.current + (sprinting && !isFlying ? (isMounted ? -14 : -22) : 17) * delta),
     );
-    const speed = inWater
+    const speed = isFlying
+      ? sprinting ? 30 : 17
+      : inWater
       ? isMounted ? 5.8 : 4.8
       : isMounted
         ? sprinting ? 34 : 18
@@ -226,12 +207,16 @@ export default function FirstPersonExplorer({
         mountedHorse.current.rotation.y += yawDelta * Math.min(1, delta * 8);
       }
     }
-    rigidBody.setLinvel({ x: direction.x, y: velocity.y, z: direction.z }, true);
-    if (keys.current.has('Space') && Math.abs(velocity.y) < 0.09) {
+    const verticalSpeed = isFlying
+      ? (keys.current.has('Space') ? 13 : 0)
+        - (keys.current.has('ControlLeft') || keys.current.has('ControlRight') || keys.current.has('KeyC') ? 13 : 0)
+      : velocity.y;
+    rigidBody.setLinvel({ x: direction.x, y: verticalSpeed, z: direction.z }, true);
+    if (!isFlying && keys.current.has('Space') && Math.abs(velocity.y) < 0.09) {
       rigidBody.setLinvel({ x: direction.x, y: isMounted ? 7.2 : 6.4, z: direction.z }, true);
     }
 
-    if (translation.y < groundHeight - 5) {
+    if (!isFlying && translation.y < groundHeight - 5) {
       rigidBody.setTranslation(
         { x: translation.x, y: groundHeight + 0.12, z: translation.z },
         true,
@@ -258,7 +243,7 @@ export default function FirstPersonExplorer({
       onNearby(candidate);
     }
 
-    canMount.current = !isMounted && Math.hypot(
+    canMount.current = !isMounted && !isFlying && Math.hypot(
       translation.x - horsePosition[0],
       translation.z - horsePosition[2],
     ) < 4.6;
@@ -271,10 +256,13 @@ export default function FirstPersonExplorer({
         y: translation.y,
         z: translation.z,
         heading: ((-yaw.current * 180) / Math.PI + 360) % 360,
-        speed: Math.hypot(direction.x, direction.z),
+        speed: isFlying
+          ? Math.hypot(direction.x, verticalSpeed, direction.z)
+          : Math.hypot(direction.x, direction.z),
         stamina: stamina.current,
         inWater,
         mounted: isMounted,
+        flying: isFlying,
         canMount: canMount.current,
         terrain,
       });

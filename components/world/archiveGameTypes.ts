@@ -20,6 +20,7 @@ export interface GameTelemetry {
   stamina: number;
   inWater: boolean;
   mounted: boolean;
+  flying: boolean;
   canMount: boolean;
   terrain: 'village' | 'forest' | 'mountain' | 'river' | 'coast';
 }
