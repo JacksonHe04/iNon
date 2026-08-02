@@ -230,11 +230,10 @@ export default function FirstPersonExplorer({
       rigidBody.setLinvel({ x: direction.x, y: isMounted ? 7.2 : 6.4, z: direction.z }, true);
     }
 
-    if (!isFlying && translation.y < groundHeight - 5) {
-      rigidBody.setTranslation(
-        { x: translation.x, y: groundHeight + 0.12, z: translation.z },
-        true,
-      );
+    const floorLimit = isFlying ? groundHeight + 1.1 : groundHeight - 5;
+    if (translation.y < floorLimit) {
+      const recoveryY = isFlying ? floorLimit : groundHeight + 0.12;
+      rigidBody.setTranslation({ x: translation.x, y: recoveryY, z: translation.z }, true);
       rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
     }
 

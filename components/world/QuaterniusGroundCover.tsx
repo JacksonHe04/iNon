@@ -37,11 +37,25 @@ export default function QuaterniusGroundCover({
   const fern = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Fern_1.gltf`);
   const grass = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Grass_Common_Short.gltf`);
   const mushroom = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Mushroom_Common.gltf`);
+  const clover1 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Clover_1.gltf`);
+  const clover2 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Clover_2.gltf`);
+  const flower3 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Flower_3_Group.gltf`);
+  const flower4 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Flower_4_Group.gltf`);
+  const tallGrass = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Grass_Common_Tall.gltf`);
+  const wispyGrass = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Grass_Wispy_Tall.gltf`);
+  const plant1 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Plant_1_Big.gltf`);
+  const plant7 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Plant_7_Big.gltf`);
   const assets = useMemo(
-    () => [rock1, rock2, rock3, bush, fern, grass, mushroom].map(
+    () => [
+      rock1, rock2, rock3, bush, fern, grass, mushroom,
+      clover1, clover2, flower3, flower4, tallGrass, wispyGrass, plant1, plant7,
+    ].map(
         (asset) => collectQuaterniusParts(asset.scene),
       ),
-    [rock1, rock2, rock3, bush, fern, grass, mushroom],
+    [
+      rock1, rock2, rock3, bush, fern, grass, mushroom,
+      clover1, clover2, flower3, flower4, tallGrass, wispyGrass, plant1, plant7,
+    ],
   );
   const meshes = useRef<Array<Array<InstancedMesh | null>>>([]);
   const placementsRef = useRef<Array<WorldPlacement[]>>([]);

@@ -9,7 +9,17 @@ import {
   WORLD_MOUNTAIN_SUMMIT_POSITION,
   WORLD_TIDAL_COVE_POSITION,
 } from '@/components/world/archiveWorldConstants';
+import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
+import { worldBiomeAt, type WorldBiome } from '@/components/world/archiveWorldBiomes';
 import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
+
+const BIOME_LABELS: Record<WorldBiome, string> = {
+  coast: '灰绿海岸',
+  wetland: '河谷湿地',
+  meadow: '林径草甸',
+  forest: '深林',
+  alpine: '雪线',
+};
 
 function dispatchKey(type: 'keydown' | 'keyup', code: string) {
   window.dispatchEvent(new KeyboardEvent(type, { code }));
@@ -25,11 +35,8 @@ function terrainLabel(telemetry: GameTelemetry, insideHome: boolean) {
     telemetry.x - WORLD_TIDAL_COVE_POSITION[0],
     telemetry.z - WORLD_TIDAL_COVE_POSITION[2],
   ) < 28) return '潮汐湾';
-  if (telemetry.terrain === 'coast') return '灰绿海岸';
-  if (telemetry.terrain === 'river') return '河谷水域';
-  if (telemetry.terrain === 'mountain') return '山脊';
-  if (telemetry.terrain === 'forest') return '森林';
-  return '主屋林隙';
+  const height = terrainHeightAt(telemetry.x, telemetry.z);
+  return BIOME_LABELS[worldBiomeAt(telemetry.x, telemetry.z, height)];
 }
 
 function motionLabel(telemetry: GameTelemetry) {

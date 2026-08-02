@@ -29,6 +29,36 @@ export interface AnimalConfig {
   phase: number;
 }
 
+export type AnimalHabitat = 'coast' | 'wetland' | 'meadow' | 'forest' | 'alpine';
+
+const ANIMAL_HABITATS: Record<AnimalSpecies, readonly AnimalHabitat[]> = {
+  alpaca: ['meadow'],
+  bull: ['meadow'],
+  bunny: ['coast', 'wetland', 'meadow', 'forest'],
+  chicken: ['wetland', 'meadow'],
+  cow: ['meadow'],
+  deer: ['coast', 'wetland', 'meadow', 'forest', 'alpine'],
+  donkey: ['coast', 'meadow'],
+  fox: ['coast', 'forest', 'alpine'],
+  frog: ['wetland'],
+  husky: ['coast', 'forest'],
+  llama: ['meadow'],
+  panda: ['forest'],
+  pig: ['wetland', 'meadow'],
+  pug: ['coast', 'meadow'],
+  rat: ['coast', 'wetland', 'forest'],
+  sheep: ['meadow'],
+  snake: ['forest'],
+  spider: ['forest'],
+  stag: ['forest', 'alpine'],
+  wolf: ['forest', 'alpine'],
+  zebra: ['meadow'],
+};
+
+export function animalAppearsInHabitat(species: AnimalSpecies, habitat: AnimalHabitat) {
+  return ANIMAL_HABITATS[species].includes(habitat);
+}
+
 export const ANIMAL_FILES: Record<AnimalSpecies, string> = {
   alpaca: 'Alpaca.glb',
   bull: 'Bull.glb',

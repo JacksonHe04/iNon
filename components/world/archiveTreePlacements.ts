@@ -4,6 +4,7 @@ import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 import { coordinateSeed, seededRandom } from '@/components/world/archiveTerrainMath';
 import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
 import type { WorldPlacement } from '@/components/world/archiveWorldOcclusion';
+import { biomeKeepsTree, treeVariantFor, worldBiomeAt } from '@/components/world/archiveWorldBiomes';
 
 export const TREE_CHUNK_SIZE = 38;
 export const TREE_RENDER_RADIUS = 3;
@@ -59,8 +60,9 @@ export function treePlacementsAround({
           || y < -0.78;
         if (blocked || y > 27 || (y > 20 && random() > 0.34)) continue;
 
-        let variant = Math.floor(random() * TREE_VARIANT_COUNT);
-        if (y > 13) variant = 3 + Math.floor(random() * 3);
+        const biome = worldBiomeAt(x, z, y);
+        if (!biomeKeepsTree(biome, random())) continue;
+        const variant = treeVariantFor(biome, random(), random());
         if (placements[variant].length >= TREE_MAX_PER_VARIANT) continue;
         const alpineScale = y > 16 ? 0.74 : 1;
         const heightScale = rawHeightScale * alpineScale;

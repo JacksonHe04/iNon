@@ -15,8 +15,10 @@ import {
   ANIMAL_BEHAVIOUR,
   ANIMAL_FILES,
   WORLD_ANIMALS,
+  animalAppearsInHabitat,
   type AnimalConfig,
 } from '@/components/world/archiveAnimalConfig';
+import { worldBiomeAt } from '@/components/world/archiveWorldBiomes';
 
 const ANIMAL_ROOT = '/archive-world/quaternius-animals';
 const WATER_LEVEL = -1.05;
@@ -113,7 +115,10 @@ function AnimatedAnimal({
     }
 
     const player = playerPosition.current;
-    group.visible = heightAt(player.x, player.z) < 12 || ALPINE_SPECIES.has(config.species);
+    const playerHeight = heightAt(player.x, player.z);
+    const playerBiome = worldBiomeAt(player.x, player.z, playerHeight);
+    group.visible = animalAppearsInHabitat(config.species, playerBiome)
+      && (playerHeight < 12 || ALPINE_SPECIES.has(config.species));
     if (!group.visible) return;
     mixer.update(delta);
     const distanceToPlayer = Math.hypot(group.position.x - player.x, group.position.z - player.z);
