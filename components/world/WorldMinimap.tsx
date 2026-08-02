@@ -5,6 +5,7 @@ import type { GameTelemetry } from '@/components/world/ArchiveGameScene';
 import type { WorldWaypoint } from '@/components/world/archiveWorldConfig';
 import { coastlineXAt, riverCenterAt } from '@/components/world/archiveTerrainMath';
 import { WORLD_MOUNTAIN_SUMMIT_POSITION } from '@/components/world/archiveWorldConstants';
+import { WORLD_TRAIL_SEGMENTS } from '@/components/world/archiveWorldTrails';
 
 const MAP_CENTER = 90;
 const MAP_RADIUS = 72;
@@ -62,6 +63,11 @@ export default function WorldMinimap({
     }).join(' ');
     return `${coast} L-20 200 L-20 -20 Z`;
   }, [centerX, centerZ]);
+  const trailPaths = useMemo(() => WORLD_TRAIL_SEGMENTS.map((segment) => {
+    const [startX, startY] = projectRaw(segment.start[0], segment.start[1], centerX, centerZ);
+    const [endX, endY] = projectRaw(segment.end[0], segment.end[1], centerX, centerZ);
+    return `M${startX.toFixed(1)} ${startY.toFixed(1)} L${endX.toFixed(1)} ${endY.toFixed(1)}`;
+  }), [centerX, centerZ]);
 
   return (
     <div className="archive-world-minimap" aria-label="世界小地图，点击地点可传送">
@@ -86,6 +92,14 @@ export default function WorldMinimap({
         <path d={coastPath.split(' L6')[0]} fill="none" stroke="#d6c99f" strokeWidth="1.4" strokeOpacity=".5" />
         <path d={riverPath} fill="none" stroke="#285b53" strokeWidth="8" strokeOpacity=".74" />
         <path d={riverPath} fill="none" stroke="#a9c1a5" strokeWidth="1" strokeOpacity=".42" />
+        <g clipPath="url(#archive-map-clip)" fill="none" strokeLinecap="round">
+          {trailPaths.map((path, index) => (
+            <g key={`${path}-${index}`}>
+              <path d={path} stroke="#1d2d23" strokeWidth="3.8" strokeOpacity=".72" />
+              <path d={path} stroke="#c2af7e" strokeWidth="1.25" strokeOpacity=".8" />
+            </g>
+          ))}
+        </g>
         {mountainDistance <= MAP_WORLD_RADIUS && (
           <g
             transform={`translate(${mountainX} ${mountainY}) rotate(-24)`}

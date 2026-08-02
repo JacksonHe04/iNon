@@ -5,6 +5,7 @@ export const WORLD_KEEPSAKE_COUNT = 18;
 export const RIVER_BRIDGE_POSITION = [59, 2.5, -160] as const;
 export const WORLD_HOME_POSITION = [-11, 0, 3] as const;
 export const WORLD_PLAYER_SPAWN = [-13, 1.45, 28] as const;
+export const WORLD_HOME_ENTRY_POSITION = [-13, 9] as const;
 export const WORLD_MOUNTAIN_SUMMIT_POSITION = [105, 0, -58] as const;
 export const WORLD_TIDAL_COVE_POSITION = [-27, 0, -98] as const;
 

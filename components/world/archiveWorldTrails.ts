@@ -1,3 +1,8 @@
+import {
+  WORLD_HOME_ENTRY_POSITION,
+  WORLD_PLAYER_SPAWN,
+} from '@/components/world/archiveWorldConstants';
+
 export interface WorldTrailSegment {
   start: readonly [number, number];
   end: readonly [number, number];
@@ -14,6 +19,16 @@ const MOUNTAIN_TRAIL_SEGMENTS: readonly WorldTrailSegment[] = [
 ];
 
 export const WORLD_TRAIL_SEGMENTS: readonly WorldTrailSegment[] = [
+  {
+    start: WORLD_HOME_ENTRY_POSITION,
+    end: [WORLD_PLAYER_SPAWN[0], WORLD_PLAYER_SPAWN[2]],
+    halfWidth: 1.25,
+  },
+  {
+    start: [WORLD_PLAYER_SPAWN[0], WORLD_PLAYER_SPAWN[2]],
+    end: [0, 22],
+    halfWidth: 1.65,
+  },
   { start: [0, 22], end: [-18, 13], halfWidth: 2.15 },
   { start: [-18, 13], end: [18, 0], halfWidth: 1.9 },
   { start: [18, 0], end: [54, -34], halfWidth: 2.15 },
