@@ -16,6 +16,7 @@ import ArchiveForestColliders from '@/components/world/ArchiveForestColliders';
 import { FallingPaperSnow, WorldKeepsakes } from '@/components/world/ArchiveAtmosphere';
 import { InfiniteTerrain, InfiniteWater, MountainPanorama } from '@/components/world/ArchiveTerrain';
 import { CoastalArchiveHome, RiverFootbridge } from '@/components/world/ArchiveWorldStructures';
+import ArchiveHomeGrounds from '@/components/world/ArchiveHomeGrounds';
 import {
   WATER_LEVEL,
   WORLD_INFRASTRUCTURE_CLEARINGS,
@@ -145,6 +146,7 @@ export default function ArchiveGameScene({
           <ArchiveForestColliders playerPosition={playerPosition} destinations={destinations} />
           <Suspense fallback={null}>
             <RiverFootbridge />
+            <ArchiveHomeGrounds />
             <CoastalArchiveHome
               playerPosition={playerPosition}
               onInspect={onInspectHomeRecord}

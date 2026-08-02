@@ -8,6 +8,7 @@ import { collectQuaterniusParts } from '@/components/world/QuaterniusForest';
 export const MEDIEVAL_ROOT = '/archive-world/quaternius-medieval';
 export const PROP_ROOT = '/archive-world/quaternius-props';
 export const FURNITURE_ROOT = '/archive-world/quaternius-furniture';
+export const HOME_GROUNDS_ROOT = '/archive-world/poly-pizza-home';
 
 export function TintedGltfAsset({
   src,
