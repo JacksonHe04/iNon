@@ -61,8 +61,10 @@ function AnimatedAnimal({
     const map = new Map<string, ReturnType<typeof mixer.clipAction>>();
     gltf.animations.forEach((clip) => {
       const action = mixer.clipAction(clip);
+      const semanticName = clip.name.split('|').at(-1) ?? clip.name;
       map.set(clip.name, action);
-      map.set(clip.name.split('|').at(-1) ?? clip.name, action);
+      map.set(semanticName, action);
+      map.set(semanticName.replace(/^[A-Za-z]+_/, ''), action);
     });
     return map;
   }, [gltf.animations, mixer]);
@@ -212,16 +214,17 @@ export default function ArchiveWildlife({
   return (
     <group name="archive-world-wildlife">
       {animalsEnabled && (
-        <Suspense fallback={null}>
+        <>
           {WORLD_ANIMALS.map((config) => (
-            <AnimatedAnimal
-              key={config.id}
-              config={config}
-              playerPosition={playerPosition}
-              heightAt={heightAt}
-            />
+            <Suspense key={config.id} fallback={null}>
+              <AnimatedAnimal
+                config={config}
+                playerPosition={playerPosition}
+                heightAt={heightAt}
+              />
+            </Suspense>
           ))}
-        </Suspense>
+        </>
       )}
     </group>
   );

@@ -5,6 +5,7 @@ import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
 import { WORLD_WAYPOINTS, type WorldWaypoint } from '@/components/world/archiveWorldConfig';
 import WorldMinimap from '@/components/world/WorldMinimap';
 import { WORLD_HOME_POSITION } from '@/components/world/ArchiveGameScene';
+import { ARCHIVE_SPECIES_COUNT } from '@/components/world/archiveSpeciesCatalog';
 
 function dispatchKey(type: 'keydown' | 'keyup', code: string) {
   window.dispatchEvent(new KeyboardEvent(type, { code }));
@@ -161,7 +162,7 @@ export default function WorldHud({
 
       <div className="archive-world-status" aria-label="玩家状态">
         <div className="archive-world-status__compass">
-          <span>{terrainLabel(telemetry)}</span>
+          <span>{terrainLabel(telemetry)} · 生态 {ARCHIVE_SPECIES_COUNT} 种</span>
           <strong>{motionLabel(telemetry)}</strong>
         </div>
         <div className="archive-world-status__bar">

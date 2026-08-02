@@ -10,9 +10,13 @@ export type AnimalSpecies =
   | 'frog'
   | 'husky'
   | 'llama'
+  | 'panda'
   | 'pig'
   | 'pug'
+  | 'rat'
   | 'sheep'
+  | 'snake'
+  | 'spider'
   | 'stag'
   | 'wolf'
   | 'zebra';
@@ -37,9 +41,13 @@ export const ANIMAL_FILES: Record<AnimalSpecies, string> = {
   frog: 'Frog.glb',
   husky: 'Husky.glb',
   llama: 'Llama.glb',
+  panda: 'Panda.glb',
   pig: 'Pig.glb',
   pug: 'Pug.glb',
+  rat: 'Rat.glb',
   sheep: 'Sheep.glb',
+  snake: 'Snake.glb',
+  spider: 'Spider.glb',
   stag: 'Stag.glb',
   wolf: 'Wolf.glb',
   zebra: 'Zebra.glb',
@@ -62,9 +70,13 @@ export const ANIMAL_BEHAVIOUR: Record<AnimalSpecies, {
   frog: { fleeDistance: 5, roamingSpeed: 0.58, fleeingSpeed: 3.8, materialTone: 0.74 },
   husky: { fleeDistance: 7, roamingSpeed: 1.18, fleeingSpeed: 6.4, materialTone: 0.76 },
   llama: { fleeDistance: 9, roamingSpeed: 0.88, fleeingSpeed: 5.3, materialTone: 0.78 },
+  panda: { fleeDistance: 11, roamingSpeed: 0.76, fleeingSpeed: 4.8, materialTone: 0.78 },
   pig: { fleeDistance: 8, roamingSpeed: 0.72, fleeingSpeed: 4.6, materialTone: 0.78 },
   pug: { fleeDistance: 6, roamingSpeed: 1.06, fleeingSpeed: 5.6, materialTone: 0.82 },
+  rat: { fleeDistance: 5, roamingSpeed: 0.84, fleeingSpeed: 4.5, materialTone: 0.72 },
   sheep: { fleeDistance: 10, roamingSpeed: 0.78, fleeingSpeed: 5.1, materialTone: 0.82 },
+  snake: { fleeDistance: 6, roamingSpeed: 0.62, fleeingSpeed: 4.2, materialTone: 0.7 },
+  spider: { fleeDistance: 5, roamingSpeed: 0.66, fleeingSpeed: 4.1, materialTone: 0.68 },
   stag: { fleeDistance: 14, roamingSpeed: 1.02, fleeingSpeed: 7.4, materialTone: 0.72 },
   wolf: { fleeDistance: 8, roamingSpeed: 1.2, fleeingSpeed: 6.6, materialTone: 0.68 },
   zebra: { fleeDistance: 13, roamingSpeed: 1.04, fleeingSpeed: 7.2, materialTone: 0.72 },
@@ -78,9 +90,13 @@ export const WORLD_ANIMALS: readonly AnimalConfig[] = [
   { id: 'frog-riverbank', species: 'frog', offset: [66, -30], scale: 0.38, phase: 3.4 },
   { id: 'husky-trail', species: 'husky', offset: [-54, 28], scale: 0.66, phase: 3.7 },
   { id: 'llama-west', species: 'llama', offset: [-45, -34], scale: 0.78, phase: 4.1 },
+  { id: 'panda-bamboo', species: 'panda', offset: [82, -10], scale: 0.72, phase: 2.6 },
   { id: 'pig-orchard', species: 'pig', offset: [24, 44], scale: 0.72, phase: 1.4 },
   { id: 'pug-footpath', species: 'pug', offset: [-36, 56], scale: 0.58, phase: 5.7 },
+  { id: 'rat-hedgerow', species: 'rat', offset: [20, 68], scale: 0.24, phase: 4.5 },
   { id: 'sheep-meadow', species: 'sheep', offset: [58, 18], scale: 0.72, phase: 2.8 },
+  { id: 'snake-heath', species: 'snake', offset: [-62, -15], scale: 0.36, phase: 5.6 },
+  { id: 'spider-rocks', species: 'spider', offset: [-28, -58], scale: 0.2, phase: 1.2 },
   { id: 'zebra-grassland', species: 'zebra', offset: [72, 42], scale: 0.78, phase: 0.9 },
   { id: 'doe-near', species: 'deer', offset: [63, -43], scale: 0.78, phase: 0.3 },
   { id: 'doe-far', species: 'deer', offset: [71, -49], scale: 0.72, phase: 1.7 },

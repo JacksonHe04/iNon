@@ -1,11 +1,50 @@
 'use client';
 
-import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
+import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Group, Mesh, Vector3 } from 'three';
+import AnimatedAnimalScene from '@/components/world/AnimatedAnimalScene';
 
 const BEE_COUNT = 14;
+
+function AnimatedWasp({
+  index,
+  playerPosition,
+  heightAt,
+}: {
+  index: number;
+  playerPosition: MutableRefObject<Vector3>;
+  heightAt: (x: number, z: number) => number;
+}) {
+  const gltf = useGLTF('/archive-world/quaternius-animals/Wasp.glb');
+  const anchor = useRef(new Vector3(playerPosition.current.x, 0, playerPosition.current.z));
+  const phase = index * 2.71;
+  const update = useCallback((group: Group, elapsed: number) => {
+    const player = playerPosition.current;
+    if (Math.hypot(player.x - anchor.current.x, player.z - anchor.current.z) > 58) {
+      anchor.current.set(player.x, 0, player.z);
+    }
+    const angle = elapsed * (0.24 + index * 0.018) + phase;
+    const radius = 18 + index * 4.2;
+    const x = anchor.current.x + Math.cos(angle) * radius;
+    const z = anchor.current.z + Math.sin(angle * 1.2) * radius;
+    group.position.set(x, heightAt(x, z) + 2.2 + Math.sin(angle * 3) * 0.65, z);
+    group.rotation.y = -angle + Math.PI / 2;
+    group.rotation.z = Math.sin(angle * 4) * 0.11;
+  }, [heightAt, index, phase, playerPosition]);
+  return (
+    <AnimatedAnimalScene
+      source={gltf.scene}
+      animations={gltf.animations}
+      animationName="Wasp_Flying"
+      scale={0.12 + (index % 2) * 0.018}
+      animationSpeed={0.9 + index * 0.04}
+      materialTone={0.72}
+      update={update}
+    />
+  );
+}
 
 export default function ArchivePollinators({
   enabled,
@@ -52,16 +91,23 @@ export default function ArchivePollinators({
 
   if (!enabled) return null;
   return (
-    <group name="archive-world-quaternius-bee-swarm">
-      {bees.map((bee, index) => (
-        <group
-          key={index}
-          ref={(group) => { groups.current[index] = group; }}
-          scale={1 + (index % 3) * 0.12}
-        >
-          <primitive object={bee} />
-        </group>
-      ))}
+    <group name="archive-world-quaternius-pollinators">
+      <group name="bee-swarm">
+        {bees.map((bee, index) => (
+          <group
+            key={index}
+            ref={(group) => { groups.current[index] = group; }}
+            scale={1 + (index % 3) * 0.12}
+          >
+            <primitive object={bee} />
+          </group>
+        ))}
+      </group>
+      <group name="wasp-flight">
+        {Array.from({ length: 6 }, (_, index) => (
+          <AnimatedWasp key={index} index={index} playerPosition={playerPosition} heightAt={heightAt} />
+        ))}
+      </group>
     </group>
   );
 }

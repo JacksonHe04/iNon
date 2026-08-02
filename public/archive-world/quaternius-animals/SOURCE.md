@@ -48,3 +48,17 @@ Pizza under CC0 1.0 Universal:
 The bunny, frog, and chicken retain their original skeletons and animation
 clips. The bee is an authored static model whose free-flight path is controlled
 by the same player-relative infinite-world anchoring used by other wildlife.
+
+## Animated Enemies and Panda
+
+Snake, wasp, rat, and spider come from Quaternius' CC0 **Animated Enemies**
+bundle. Panda is a separate animated Quaternius CC0 model. All are original GLB
+files with authored skeletons and clips.
+
+- Bundle: https://poly.pizza/bundle/Animated-Enemies-a53OJwHrhh
+- Snake: https://poly.pizza/m/x9x0viZs8V
+- Wasp: https://poly.pizza/m/3aQgc75sUR
+- Rat: https://poly.pizza/m/iltq5bVNaV
+- Spider: https://poly.pizza/m/yRYJiAJyiM
+- Panda: https://poly.pizza/m/q1uJ28Hs8T
+- License: CC0 1.0 Universal
