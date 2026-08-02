@@ -37,6 +37,7 @@ import { buildWorldDialogueContext } from '@/components/world/archiveWorldTeleme
 import type { WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
 import { useArchiveFieldRoute } from '@/hooks/useArchiveFieldRoute';
 import type { CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
+import { useArchiveResting } from '@/hooks/useArchiveResting';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -49,7 +50,6 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [travelRequest, setTravelRequest] = useState<GameTravelRequest | null>(null);
   const [telemetry, setTelemetry] = useState<GameTelemetry>(INITIAL_WORLD_TELEMETRY);
-  const [rations, setRations] = useState(3);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [collectedKeepsakes, setCollectedKeepsakes] = useState<string[]>([]);
   const [lastKeepsake, setLastKeepsake] = useState<string | null>(null);
@@ -76,9 +76,14 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   });
   const lastRecoveredKeepsake = allKeepsakes.find((record) => record.id === lastKeepsake);
   const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
+  const resting = useArchiveResting({
+    owner: data.basic.name,
+    telemetry,
+    enabled: worldEnabled,
+  });
   const worldDialogueContext = buildWorldDialogueContext({
     telemetry,
-    rations,
+    rations: resting.rations,
     companionNearby,
     collectedKeepsakeIds: collectedKeepsakes,
   });
@@ -210,6 +215,8 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           fieldRouteStage={fieldRoute.stage}
           fieldRouteStageIndex={fieldRoute.stageIndex}
           recentFieldRouteStage={fieldRoute.recentStage}
+          restSite={resting.restSite}
+          onRest={resting.rest}
           onToggleSound={() => setSoundEnabled((enabled) => !enabled)}
           onOpenInventory={() => {
             releasePointerLock();
@@ -239,16 +246,12 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
 
       {inventoryOpen && (
         <WorldSatchel
-          rations={rations}
+          rations={resting.rations}
           keepsakes={recoveredKeepsakes}
           fieldRouteStageIndex={fieldRoute.stageIndex}
           onClose={() => setInventoryOpen(false)}
           onRestartRoute={fieldRoute.restart}
-          onUseRation={() => {
-            if (rations <= 0) return;
-            setRations((current) => Math.max(0, current - 1));
-            window.dispatchEvent(new Event('archive-world:restore-stamina'));
-          }}
+          onUseRation={resting.useRation}
         />
       )}
 
@@ -257,6 +260,18 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           <span>FIELD PAGE RECOVERED</span>
           <strong>{lastRecoveredKeepsake?.text ?? '拾得一卷田野札记'}</strong>
           <small>{lastRecoveredKeepsake?.kind ?? 'FIELD NOTE'} · {collectedKeepsakes.length}</small>
+        </div>
+      )}
+
+      {resting.feedback && mode === 'world' && (
+        <div className="archive-world-keepsake-toast is-rest" role="status">
+          <span>{resting.feedback.site.folio}</span>
+          <strong>{resting.feedback.status === 'rested' ? '体力已经恢复' : '背包里没有足够口粮'}</strong>
+          <small>
+            {resting.feedback.status === 'rested'
+              ? `${resting.feedback.site.title} · ${resting.feedback.site.rationCost ? '口粮 -1' : '家园补给'}`
+              : '返回主屋补给，或在背包中检查物资'}
+          </small>
         </div>
       )}
     </section>

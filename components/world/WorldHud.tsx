@@ -10,6 +10,7 @@ import { worldLocationLabel, worldMotionLabel } from '@/components/world/archive
 import WorldFieldRoute from '@/components/world/WorldFieldRoute';
 import type { FieldRouteStage } from '@/components/world/archiveFieldRoute';
 import type { CompanionBehavior, CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
+import type { WorldRestSite } from '@/components/world/archiveWorldRest';
 
 const COMPANION_BEHAVIOR_LABELS: Record<CompanionBehavior, string> = {
   resting: '在身边休息',
@@ -33,9 +34,11 @@ export default function WorldHud({
   fieldRouteStage,
   fieldRouteStageIndex,
   recentFieldRouteStage,
+  restSite,
   onOpenInventory,
   onToggleSound,
   onTalkToCompanion,
+  onRest,
   onTravel,
 }: {
   owner: string;
@@ -47,9 +50,11 @@ export default function WorldHud({
   fieldRouteStage: FieldRouteStage | null;
   fieldRouteStageIndex: number;
   recentFieldRouteStage: FieldRouteStage | null;
+  restSite: WorldRestSite | null;
   onOpenInventory: () => void;
   onToggleSound: () => void;
   onTalkToCompanion: () => void;
+  onRest: () => void;
   onTravel: (waypoint: WorldWaypoint) => void;
 }) {
   const insideHome = isInsideArchiveHome(telemetry.x, telemetry.z);
@@ -115,23 +120,34 @@ export default function WorldHud({
         </div>
       )}
 
-      {companionNearby ? (
-        <button className="archive-world-interact" onClick={onTalkToCompanion}>
-          <kbd>E</kbd>
-          蹲下与苔苔交谈
-        </button>
-      ) : telemetry.canMount ? (
-        <button
-          className="archive-world-interact"
-          onClick={() => {
-            dispatchKey('keydown', 'KeyF');
-            dispatchKey('keyup', 'KeyF');
-          }}
-        >
-          <kbd>F</kbd>
-          骑乘林径马匹
-        </button>
-      ) : null}
+      {(companionNearby || telemetry.canMount || restSite) && (
+        <div className="archive-world-interactions" aria-label="附近交互">
+          {companionNearby && (
+            <button className="archive-world-interact" onClick={onTalkToCompanion}>
+              <kbd>E</kbd>
+              蹲下与苔苔交谈
+            </button>
+          )}
+          {telemetry.canMount && (
+            <button
+              className="archive-world-interact"
+              onClick={() => {
+                dispatchKey('keydown', 'KeyF');
+                dispatchKey('keyup', 'KeyF');
+              }}
+            >
+              <kbd>F</kbd>
+              骑乘林径马匹
+            </button>
+          )}
+          {restSite && (
+            <button className="archive-world-interact" onClick={onRest}>
+              <kbd>R</kbd>
+              {restSite.prompt}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="archive-world-mobile-controls" aria-label="移动控制">
         {[

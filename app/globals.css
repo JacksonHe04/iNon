@@ -1943,10 +1943,20 @@ body:has(.archive-world) .archive-world-loading {
   line-height: 1.5;
 }
 
-.archive-world-interact {
+.archive-world-interactions {
   position: absolute;
   bottom: 28px;
   left: 50%;
+  display: flex;
+  gap: 8px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.archive-world-interact {
+  position: static;
+  bottom: auto;
+  left: auto;
   display: flex;
   min-height: 46px;
   align-items: center;
@@ -1958,10 +1968,12 @@ body:has(.archive-world) .archive-world-loading {
   box-shadow: 0 10px 32px rgba(15, 25, 18, 0.3);
   font-family: var(--font-serif), Georgia, serif;
   font-size: 12px;
-  transform: translateX(-50%);
+  transform: none;
   backdrop-filter: blur(10px);
   pointer-events: auto;
 }
+
+.archive-world-keepsake-toast.is-rest { right: 258px; }
 
 .archive-world-interact kbd {
   display: grid;
@@ -2621,9 +2633,10 @@ body:has(.archive-world) .archive-world-loading {
     padding: 8px;
   }
 
-  .archive-world-interact {
+  .archive-world-interactions {
     bottom: 112px;
     max-width: calc(100vw - 28px);
+    flex-direction: column;
     white-space: nowrap;
   }
 
