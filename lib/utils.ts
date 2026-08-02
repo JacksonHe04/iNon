@@ -168,7 +168,7 @@ export function getAuthorNickname(name: string): string {
   if (!name) return '作者';
   const trimmed = name.trim();
   const separated = trimmed.split(/[｜|•·—-]/)[0].trim();
-  const withPhraseBoundary = separated.split(/\s+的\s+/)[0].trim();
+  const withPhraseBoundary = separated.split(/\s*的\s*/)[0].trim();
   const withWhitespace = withPhraseBoundary.split(/\s+/)[0].trim();
   return withWhitespace || trimmed || '作者';
 }
