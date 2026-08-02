@@ -55,7 +55,7 @@ export const WORLD_WAYPOINTS: WorldWaypoint[] = [
 ];
 
 export const INITIAL_WORLD_TELEMETRY = {
-  x: -11,
+  x: WORLD_PLAYER_SPAWN[0],
   y: 1.45,
   z: WORLD_PLAYER_SPAWN[2],
   heading: 0,

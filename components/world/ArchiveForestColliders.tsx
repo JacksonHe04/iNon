@@ -5,7 +5,10 @@ import { useFrame } from '@react-three/fiber';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
 import type { Vector3 } from 'three';
 import type { GameDestination } from '@/components/world/archiveGameTypes';
-import { WORLD_INFRASTRUCTURE_CLEARINGS } from '@/components/world/archiveWorldConstants';
+import {
+  WORLD_INFRASTRUCTURE_CLEARINGS,
+  WORLD_PLAYER_SPAWN,
+} from '@/components/world/archiveWorldConstants';
 import { coordinateSeed, seededRandom, terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
 
@@ -34,7 +37,10 @@ function collidersAround(centerX: number, centerZ: number, destinations: GameDes
         const nearInfrastructure = WORLD_INFRASTRUCTURE_CLEARINGS.some(
           ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
         );
-        const nearSpawn = Math.hypot(x + 11, z - 22) < 9;
+        const nearSpawn = Math.hypot(
+          x - WORLD_PLAYER_SPAWN[0],
+          z - WORLD_PLAYER_SPAWN[2],
+        ) < 9;
         const ground = terrainHeightAt(x, z);
         random();
         random();

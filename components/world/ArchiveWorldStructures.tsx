@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef, type MutableRefObject } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
-import { Matrix4 } from 'three';
+import { Group, Matrix4, Vector3 } from 'three';
 import ArchiveHomeInterior from '@/components/world/ArchiveHomeInterior';
 import { InstancedAsset, MEDIEVAL_ROOT, MedievalAsset, PROP_ROOT, PropAsset } from '@/components/world/ArchiveAsset';
 import { RIVER_BRIDGE_POSITION, WORLD_HOME_POSITION } from '@/components/world/archiveWorldConstants';
@@ -32,7 +33,36 @@ export function RiverFootbridge() {
   );
 }
 
-function ArchiveHomeModel({ onInspect }: { onInspect: (record: HomeRecordId) => void }) {
+function ArchiveHomeDoor({ playerPosition }: { playerPosition: MutableRefObject<Vector3> }) {
+  const hinge = useRef<Group>(null);
+  const doorWorldPosition = useMemo(() => new Vector3(
+    WORLD_HOME_POSITION[0] - 2.45,
+    0,
+    WORLD_HOME_POSITION[2] + 5.05,
+  ), []);
+  useFrame((_, delta) => {
+    if (!hinge.current) return;
+    const distance = Math.hypot(
+      playerPosition.current.x - doorWorldPosition.x,
+      playerPosition.current.z - doorWorldPosition.z,
+    );
+    const target = distance < 6.2 ? 1.48 : 0;
+    hinge.current.rotation.y += (target - hinge.current.rotation.y) * Math.min(1, delta * 3.6);
+  });
+  return (
+    <group ref={hinge} position={[-1.55, 0.01, 3.06]}>
+      <MedievalAsset name="Door_1_Round" tint="#7d846c" />
+    </group>
+  );
+}
+
+function ArchiveHomeModel({
+  onInspect,
+  playerPosition,
+}: {
+  onInspect: (record: HomeRecordId) => void;
+  playerPosition: MutableRefObject<Vector3>;
+}) {
   return (
     <group name="single-coastal-archive-home" rotation-y={-0.07} scale={[2.05, 1.48, 1.72]}>
       <MedievalAsset name="Wall_Plaster_Door_Round" position={[-1, 0, 3]} />
@@ -50,12 +80,19 @@ function ArchiveHomeModel({ onInspect }: { onInspect: (record: HomeRecordId) => 
       <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, -3]} rotation={[0, Math.PI, 0]} />
       <MedievalAsset name="Prop_Chimney" position={[-1.35, 3.8, -0.8]} scale={0.82} />
       <MedievalAsset name="Prop_Vine1" position={[1.8, 2.3, 3.13]} />
+      <ArchiveHomeDoor playerPosition={playerPosition} />
       <ArchiveHomeInterior onInspect={onInspect} />
     </group>
   );
 }
 
-export function CoastalArchiveHome({ onInspect }: { onInspect: (record: HomeRecordId) => void }) {
+export function CoastalArchiveHome({
+  onInspect,
+  playerPosition,
+}: {
+  onInspect: (record: HomeRecordId) => void;
+  playerPosition: MutableRefObject<Vector3>;
+}) {
   const [x, , z] = WORLD_HOME_POSITION;
   return (
     <RigidBody type="fixed" colliders={false} position={[x, terrainHeightAt(x, z), z]} rotation={[0, -0.08, 0]}>
@@ -63,7 +100,7 @@ export function CoastalArchiveHome({ onInspect }: { onInspect: (record: HomeReco
       <CuboidCollider args={[0.24, 2.25, 5]} position={[-4.18, 2.25, 0]} />
       <CuboidCollider args={[0.24, 2.25, 5]} position={[4.18, 2.25, 0]} />
       <CuboidCollider args={[2.05, 2.25, 0.24]} position={[2.15, 2.25, 5.05]} />
-      <ArchiveHomeModel onInspect={onInspect} />
+      <ArchiveHomeModel onInspect={onInspect} playerPosition={playerPosition} />
     </RigidBody>
   );
 }

@@ -16,6 +16,7 @@ import {
 } from 'three';
 import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
 import { nearCameraVisibility, type WorldPlacement } from '@/components/world/archiveWorldOcclusion';
+import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 import type { GameDestination } from '@/components/world/ArchiveGameScene';
 
 export const QUATERNIUS_NATURE_ROOT = '/archive-world/quaternius-nature';
@@ -128,7 +129,10 @@ export default function QuaterniusForest({
             const infrastructureClearance = clearings.some(
               ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
             );
-            const spawnClearance = Math.hypot(x + 11, z - 22) < 9;
+            const spawnClearance = Math.hypot(
+              x - WORLD_PLAYER_SPAWN[0],
+              z - WORLD_PLAYER_SPAWN[2],
+            ) < 9;
             const groundHeight = heightAt(x, z);
             if (roadClearance || siteClearance || infrastructureClearance || spawnClearance || groundHeight < -0.78) continue;
             if (groundHeight > 27 || (groundHeight > 20 && random() > 0.34)) continue;

@@ -7,6 +7,7 @@ import { DynamicDrawUsage, InstancedMesh, Matrix4, Object3D, Vector3 } from 'thr
 import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
 import type { GameDestination } from '@/components/world/ArchiveGameScene';
 import { nearCameraVisibility, type WorldPlacement } from '@/components/world/archiveWorldOcclusion';
+import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 import {
   QUATERNIUS_NATURE_ROOT,
   collectQuaterniusParts,
@@ -98,7 +99,10 @@ export default function QuaterniusGroundCover({
             const infrastructureClearance = clearings.some(
               ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
             );
-            const spawnClearance = Math.hypot(x, z + 2) < 7.5;
+            const spawnClearance = Math.hypot(
+              x - WORLD_PLAYER_SPAWN[0],
+              z - WORLD_PLAYER_SPAWN[2],
+            ) < 7.5;
             if (pathClearance || siteClearance || infrastructureClearance || spawnClearance || y <= waterLevel + 0.16) continue;
             if (y > 16) variant = Math.floor(random() * 3);
             if (y > 29 && random() > 0.56) continue;

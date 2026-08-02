@@ -145,7 +145,10 @@ export default function ArchiveGameScene({
           <ArchiveForestColliders playerPosition={playerPosition} destinations={destinations} />
           <Suspense fallback={null}>
             <RiverFootbridge />
-            <CoastalArchiveHome onInspect={onInspectHomeRecord} />
+            <CoastalArchiveHome
+              playerPosition={playerPosition}
+              onInspect={onInspectHomeRecord}
+            />
           </Suspense>
           <FirstPersonExplorer
             enabled={entered}
