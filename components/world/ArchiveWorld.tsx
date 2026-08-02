@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import {
   ACESFilmicToneMapping,
@@ -28,6 +28,7 @@ import {
 } from '@/components/world/archiveWorldConfig';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 import type { HomeRecordId } from '@/components/world/archiveHomeRecords';
+import { buildArchiveKeepsakes } from '@/components/world/archiveKeepsakes';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -49,6 +50,9 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const playerPosition = useRef(new Vector3(...WORLD_PLAYER_SPAWN));
   const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
   const keepsakeStorageKey = `inon-world-keepsakes-${data.basic.name}`;
+  const allKeepsakes = useMemo(() => buildArchiveKeepsakes(data), [data]);
+  const recoveredKeepsakes = allKeepsakes.filter((record) => collectedKeepsakes.includes(record.id));
+  const lastRecoveredKeepsake = allKeepsakes.find((record) => record.id === lastKeepsake);
   const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
 
   useEffect(() => {
@@ -153,7 +157,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
         <WorldHud
           owner={data.basic.name}
           telemetry={telemetry}
-          keepsakes={collectedKeepsakes.length}
+          keepsakes={recoveredKeepsakes.length}
           companionNearby={companionNearby}
           onOpenInventory={() => {
             releasePointerLock();
@@ -178,7 +182,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
       {inventoryOpen && (
         <WorldSatchel
           rations={rations}
-          keepsakes={collectedKeepsakes.length}
+          keepsakes={recoveredKeepsakes}
           onClose={() => setInventoryOpen(false)}
           onUseRation={() => {
             if (rations <= 0) return;
@@ -191,8 +195,8 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
       {lastKeepsake && mode === 'world' && (
         <div className="archive-world-keepsake-toast" role="status">
           <span>FIELD PAGE RECOVERED</span>
-          <strong>拾得一张旧纸片</strong>
-          <small>{collectedKeepsakes.length}</small>
+          <strong>{lastRecoveredKeepsake?.text ?? '拾得一卷田野札记'}</strong>
+          <small>{lastRecoveredKeepsake?.kind ?? 'FIELD NOTE'} · {collectedKeepsakes.length}</small>
         </div>
       )}
     </section>

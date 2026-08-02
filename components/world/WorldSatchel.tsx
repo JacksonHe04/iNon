@@ -1,6 +1,7 @@
 'use client';
 
 import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
+import type { ArchiveKeepsake } from '@/components/world/archiveKeepsakes';
 
 export default function WorldSatchel({
   rations,
@@ -9,7 +10,7 @@ export default function WorldSatchel({
   onClose,
 }: {
   rations: number;
-  keepsakes: number;
+  keepsakes: ArchiveKeepsake[];
   onUseRation: () => void;
   onClose: () => void;
 }) {
@@ -33,7 +34,7 @@ export default function WorldSatchel({
         </div>
         <div>
           <span>拾得旧纸片</span>
-          <strong>{keepsakes} / {WORLD_KEEPSAKE_COUNT}</strong>
+          <strong>{keepsakes.length} / {WORLD_KEEPSAKE_COUNT}</strong>
           <small>纸片会留在背包，主屋收藏不会。</small>
         </div>
         <div>
@@ -47,6 +48,25 @@ export default function WorldSatchel({
           <small>留给林径马匹的苹果。</small>
         </div>
       </div>
+      <section className="archive-world-field-notes" aria-label="已拾得的田野札记">
+        <header>
+          <span>RECOVERED WRITINGS</span>
+          <strong>田野札记</strong>
+        </header>
+        {keepsakes.length ? (
+          <div>
+            {keepsakes.map((keepsake) => (
+              <article key={keepsake.id}>
+                <span>{keepsake.folio} · {keepsake.kind}</span>
+                <blockquote>{keepsake.text}</blockquote>
+                <small>{keepsake.note}</small>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p>还没有拾到卷轴。它们在海岸、森林、河谷与雪线等待。</p>
+        )}
+      </section>
     </aside>
   );
 }

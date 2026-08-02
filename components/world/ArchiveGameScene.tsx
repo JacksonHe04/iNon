@@ -123,12 +123,14 @@ export default function ArchiveGameScene({
       </Suspense>
       <InfiniteWater playerPosition={playerPosition} />
       <FallingPaperSnow playerPosition={playerPosition} />
-      <WorldKeepsakes
-        enabled={entered}
-        playerPosition={playerPosition}
-        collected={collectedKeepsakes}
-        onCollect={onCollectKeepsake}
-      />
+      <Suspense fallback={null}>
+        <WorldKeepsakes
+          enabled={entered}
+          playerPosition={playerPosition}
+          collected={collectedKeepsakes}
+          onCollect={onCollectKeepsake}
+        />
+      </Suspense>
       <Suspense fallback={null}>
         <Physics gravity={[0, -14, 0]} timeStep="vary">
           <InfiniteTerrain playerPosition={playerPosition} />

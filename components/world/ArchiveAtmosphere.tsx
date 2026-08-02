@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
+import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
   Color,
@@ -8,10 +9,13 @@ import {
   DynamicDrawUsage,
   Group,
   InstancedMesh,
+  Matrix4,
   Object3D,
   ShaderMaterial,
   type Vector3,
 } from 'three';
+import { PROP_ROOT } from '@/components/world/ArchiveAsset';
+import { collectQuaterniusParts } from '@/components/world/QuaterniusForest';
 import { WORLD_KEEPSAKES, WORLD_KEEPSAKE_COUNT } from '@/components/world/archiveWorldConstants';
 import { seededRandom, terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import { weatherFragment, weatherVertex } from '@/components/world/archiveWorldShaders';
@@ -84,23 +88,34 @@ export function WorldKeepsakes({
   collected: string[];
   onCollect: (id: string) => void;
 }) {
-  const mesh = useRef<InstancedMesh>(null);
+  const scroll = useGLTF(`${PROP_ROOT}/Scroll_2.gltf`);
+  const parts = useMemo(() => collectQuaterniusParts(scroll.scene), [scroll.scene]);
+  const meshes = useRef<Array<InstancedMesh | null>>([]);
   const dummy = useMemo(() => new Object3D(), []);
+  const placement = useMemo(() => new Matrix4(), []);
   const collectedSet = useMemo(() => new Set(collected), [collected]);
   const announced = useRef(new Set<string>());
 
   useEffect(() => {
-    if (!mesh.current) return;
     WORLD_KEEPSAKES.forEach(([id, x, z], index) => {
       const hidden = collectedSet.has(id);
-      dummy.position.set(hidden ? 0 : x, hidden ? -200 : terrainHeightAt(x, z) + 1.1, hidden ? 0 : z);
-      dummy.rotation.set(-0.18, index * 0.83, (index % 5 - 2) * 0.08);
-      dummy.scale.setScalar(hidden ? 0.001 : 0.42);
+      dummy.position.set(hidden ? 0 : x, hidden ? -200 : terrainHeightAt(x, z) + 0.22, hidden ? 0 : z);
+      dummy.rotation.set(0, index * 0.83, (index % 5 - 2) * 0.04);
+      dummy.scale.setScalar(hidden ? 0.001 : 0.86);
       dummy.updateMatrix();
-      mesh.current?.setMatrixAt(index, dummy.matrix);
+      parts.forEach((part, partIndex) => {
+        const target = meshes.current[partIndex];
+        if (!target) return;
+        placement.multiplyMatrices(dummy.matrix, part.localMatrix);
+        target.setMatrixAt(index, placement);
+      });
     });
-    mesh.current.instanceMatrix.needsUpdate = true;
-  }, [collectedSet, dummy]);
+    meshes.current.forEach((target) => {
+      if (!target) return;
+      target.instanceMatrix.needsUpdate = true;
+      target.computeBoundingSphere();
+    });
+  }, [collectedSet, dummy, parts, placement]);
 
   useFrame(() => {
     if (!enabled) return;
@@ -113,9 +128,16 @@ export function WorldKeepsakes({
   });
 
   return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, WORLD_KEEPSAKE_COUNT]} name="collectible-field-pages">
-      <planeGeometry args={[1, 0.72]} />
-      <meshStandardMaterial color="#d8cca2" emissive="#8b7746" emissiveIntensity={0.72} roughness={0.92} side={DoubleSide} />
-    </instancedMesh>
+    <group name="collectible-quaternius-field-scrolls">
+      {parts.map((part, index) => (
+        <instancedMesh
+          key={index}
+          ref={(target) => { meshes.current[index] = target; }}
+          args={[part.geometry, part.material, WORLD_KEEPSAKE_COUNT]}
+          castShadow
+          receiveShadow
+        />
+      ))}
+    </group>
   );
 }
