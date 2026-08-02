@@ -41,6 +41,7 @@ import { getBlockTitle } from '@/lib/blocks/registry';
 import BlockCanvasEngine from '@/components/blocks/BlockCanvasEngine';
 import ArchiveGameScene, {
   RIVER_BRIDGE_POSITION,
+  WORLD_HOME_POSITION,
   WORLD_KEEPSAKE_COUNT,
   type GameDestination,
   type GameTelemetry,
@@ -66,19 +67,17 @@ interface WorldWaypoint {
   yaw: number;
 }
 
-const LANDMARKS: GameDestination[] = [
-  { blockType: 'bio', position: [-18, 0, 13], number: '01', subtitle: '旅行营地 · 身份与此刻', siteKind: 'camp' },
-  { blockType: 'projects', position: [54, 0, -34], number: '02', subtitle: '露天图纸场 · 正在生长的事物', siteKind: 'workshop' },
-  { blockType: 'timeline', position: [-112, 0, -62], number: '03', subtitle: '旧车站 · 地点与年份', siteKind: 'station' },
-  { blockType: 'education', position: [96, 0, -122], number: '04', subtitle: '山地测绘点 · 学习与自然', siteKind: 'watchtower' },
-  { blockType: 'work', position: [-158, 0, -148], number: '05', subtitle: '河谷锯木场 · 工作与批注', siteKind: 'sawmill' },
-  { blockType: 'music', position: [146, 0, -176], number: '06', subtitle: '唱片林地 · 声音与节拍', siteKind: 'record' },
-  { blockType: 'movies', position: [-206, 0, 116], number: '07', subtitle: '露天放映场 · 影片与导演', siteKind: 'cinema' },
-  { blockType: 'books', position: [214, 0, 132], number: '08', subtitle: '林间书屋 · 页边痕迹', siteKind: 'cabin' },
-  { blockType: 'messages', position: [18, 0, -258], number: '09', subtitle: '边地邮路 · 来信与回声', siteKind: 'post' },
-];
+const LANDMARKS: GameDestination[] = [];
 
 const WORLD_WAYPOINTS: WorldWaypoint[] = [
+  {
+    id: 'coastal-home',
+    label: '临海主屋',
+    number: 'H',
+    position: WORLD_HOME_POSITION,
+    arrival: [-11, 0, 20],
+    yaw: 0,
+  },
   {
     id: 'river-footbridge',
     label: '旧木桥',
@@ -916,7 +915,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const [lastKeepsake, setLastKeepsake] = useState<string | null>(null);
   const [inventoryLoaded, setInventoryLoaded] = useState(false);
   const [telemetry, setTelemetry] = useState<GameTelemetry>({
-    x: 0,
+    x: -11,
     y: 1.45,
     z: 22,
     heading: 0,
@@ -927,7 +926,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     canMount: false,
     terrain: 'village',
   });
-  const playerPosition = useRef(new Vector3(0, 1.45, 22));
+  const playerPosition = useRef(new Vector3(-11, 1.45, 22));
   const intro = useRef<HTMLDivElement>(null);
   const transitionVeil = useRef<HTMLDivElement>(null);
   const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
@@ -1218,7 +1217,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           </div>
           <div className="archive-world-status" aria-label="玩家状态">
             <div className="archive-world-status__compass">
-              <span>{telemetry.terrain === 'river' ? '河谷' : telemetry.terrain === 'mountain' ? '山地' : telemetry.terrain === 'forest' ? '森林' : '村落'}</span>
+              <span>{telemetry.terrain === 'river' ? '河谷' : telemetry.terrain === 'mountain' ? '山地' : telemetry.terrain === 'forest' ? '森林' : '林间空地'}</span>
               <strong>{telemetry.mounted ? telemetry.speed > 24 ? '奔驰中' : telemetry.speed > 0 ? '骑行中' : '马背驻足' : telemetry.inWater ? '涉水中' : telemetry.speed > 16 ? '疾跑中' : telemetry.speed > 0 ? '行进中' : '驻足'}</strong>
             </div>
             <div className="archive-world-status__bar">

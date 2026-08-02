@@ -101,9 +101,11 @@ const TERRAIN_SEGMENTS = 22;
 const HORSE_POSITION = new Vector3(3.4, 0, 19);
 export const WORLD_KEEPSAKE_COUNT = 18;
 export const RIVER_BRIDGE_POSITION = [59, 2.5, -160] as const;
+export const WORLD_HOME_POSITION = [-11, 0, 3] as const;
 
 const WORLD_INFRASTRUCTURE_CLEARINGS = [
   [RIVER_BRIDGE_POSITION[0], RIVER_BRIDGE_POSITION[2], 18],
+  [WORLD_HOME_POSITION[0], WORLD_HOME_POSITION[2], 17],
 ] as const;
 
 const SITE_ROTATION_OFFSETS: Record<GameDestination['siteKind'], number> = {
@@ -150,15 +152,7 @@ function smoothstep(edge0: number, edge1: number, value: number) {
 }
 
 const FIELD_SITE_PLATEAUS = [
-  [-18, 13],
-  [54, -34],
-  [-112, -62],
-  [96, -122],
-  [-158, -148],
-  [146, -176],
-  [-206, 116],
-  [214, 132],
-  [18, -258],
+  [WORLD_HOME_POSITION[0], WORLD_HOME_POSITION[2]],
 ] as const;
 
 function rawTerrainHeightAt(x: number, z: number) {
@@ -205,7 +199,6 @@ function terrainKindAt(x: number, z: number, height: number): GameTelemetry['ter
 }
 
 const terrainVertex = /* glsl */ `
-  uniform float uTime;
   varying vec3 vWorld;
   varying float vGrain;
 
@@ -216,7 +209,7 @@ const terrainVertex = /* glsl */ `
   void main() {
     vec4 world = modelMatrix * vec4(position, 1.0);
     vWorld = world.xyz;
-    vGrain = hash(floor(world.xz * 1.8) + floor(uTime * 4.0));
+    vGrain = hash(floor(world.xz * 1.8));
     gl_Position = projectionMatrix * viewMatrix * world;
   }
 `;
@@ -276,7 +269,7 @@ const terrainFragment = /* glsl */ `
   }
 
   void main() {
-    float waves = sin(vWorld.x * 0.035 + uTime * 0.04) * cos(vWorld.z * 0.04);
+    float waves = sin(vWorld.x * 0.035) * cos(vWorld.z * 0.04);
     float trailDistance = worldTrailDistance(vWorld.xz);
     float pathMask = 1.0 - smoothstep(0.72, 1.22, trailDistance);
     float pathCore = 1.0 - smoothstep(0.22, 0.76, trailDistance);
@@ -304,7 +297,7 @@ const weatherVertex = /* glsl */ `
     origin.x += sin(uTime * 0.24 + phase) * 0.8;
     origin.y = mod(origin.y - uTime * (0.7 + fract(phase) * 0.8) + 18.0, 20.0) - 2.0;
     origin.z += cos(uTime * 0.19 + phase) * 0.55;
-    vPulse = 0.42 + 0.58 * sin(uTime * 5.7 + phase * 4.0);
+    vPulse = 0.72 + 0.28 * sin(phase * 4.0);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(origin + localVertex, 1.0);
   }
 `;
@@ -1173,11 +1166,10 @@ function RiverFootbridge() {
 
 function ArchiveBookCottage() {
   return (
-    <group name="single-crooked-reading-cottage">
-      <group position={[-1.45, 0, 0.25]} rotation-y={0.2} scale={[1.18, 0.78, 1]}>
+    <group name="single-coastal-archive-home">
+      <group rotation-y={-0.07} scale={[2.05, 1.48, 1.72]}>
         <MedievalAsset name="Wall_Plaster_Door_Round" position={[-1, 0, 3]} />
         <MedievalAsset name="Wall_Plaster_Window_Wide_Round" position={[1, 0, 3]} />
-        <MedievalAsset name="Door_1_Round" position={[-1.52, 0, 3.05]} />
         <MedievalAsset name="Window_Wide_Round1" position={[1, 0, 3.06]} />
         <MedievalAsset name="WindowShutters_Wide_Round_Open" position={[1, 0, 3.05]} />
         {[-1, 1].map((x) => <MedievalAsset key={`rear-${x}`} name="Wall_Plaster_Straight" position={[x, 0, -3]} rotation={[0, Math.PI, 0]} />)}
@@ -1185,19 +1177,48 @@ function ArchiveBookCottage() {
         <MedievalAsset name="Wall_Plaster_Window_Wide_Round" position={[-2, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
         <MedievalAsset name="Window_Wide_Round1" position={[-2.05, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
         <MedievalAsset name="WindowShutters_Wide_Round_Open" position={[-2.06, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
-        {[-2, 0, 2].map((z) => <MedievalAsset key={`right-${z}`} name="Wall_Plaster_Straight" position={[2, 0, z]} rotation={[0, -Math.PI / 2, 0]} />)}
+        {[-2, 2].map((z) => <MedievalAsset key={`right-${z}`} name="Wall_Plaster_Straight" position={[2, 0, z]} rotation={[0, -Math.PI / 2, 0]} />)}
+        <MedievalAsset name="Wall_Plaster_Window_Wide_Round" position={[2, 0, 0]} rotation={[0, -Math.PI / 2, 0]} />
+        <MedievalAsset name="Window_Wide_Round1" position={[2.05, 0, 0]} rotation={[0, -Math.PI / 2, 0]} />
+        <MedievalAsset name="WindowShutters_Wide_Round_Open" position={[2.06, 0, 0]} rotation={[0, -Math.PI / 2, 0]} />
+        {[-1, 1].flatMap((x) => [-2, 0, 2].map((z) => (
+          <MedievalAsset key={`floor-${x}-${z}`} name="Floor_WoodDark" position={[x, 0.03, z]} />
+        )))}
         <MedievalAsset name="Roof_RoundTiles_4x6" position={[0, 3, 0]} rotation={[0, 0, 0.025]} />
         <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, 3]} rotation={[0, 0, 0.025]} />
         <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, -3]} rotation={[0, Math.PI, -0.025]} />
         <MedievalAsset name="Prop_Chimney" position={[-1.35, 3.8, -0.8]} scale={0.82} />
         <MedievalAsset name="Prop_Vine1" position={[1.8, 2.3, 3.13]} />
-        <pointLight position={[1, 2, 3.8]} intensity={7} distance={10} color="#c5a15d" />
+        <FantasyProp name="Workbench" position={[0.55, 0.05, -1.95]} rotation={[0, Math.PI, 0]} scale={0.82} />
+        <FantasyProp name="Workbench_Drawers" position={[0.55, 0.05, -1.95]} rotation={[0, Math.PI, 0]} scale={0.82} />
+        <FantasyProp name="Scroll_1" position={[0.15, 0.84, -1.86]} rotation={[0, -0.34, 0]} scale={2.7} />
+        <FantasyProp name="Scroll_2" position={[0.82, 0.84, -1.78]} rotation={[0, 0.46, 0]} scale={2.25} />
+        <FantasyProp name="Bench" position={[-0.7, 0.03, 0.75]} rotation={[0, Math.PI / 2 + 0.08, 0]} scale={0.72} />
+        <FantasyProp name="Bag" position={[-1.25, 0.03, -1.78]} rotation={[0, 0.42, 0]} scale={0.62} />
+        <MedievalAsset name="Prop_Crate" position={[1.3, 0.05, 1.7]} rotation={[0, -0.26, 0]} scale={0.6} />
+        <FantasyProp name="Lantern_Wall" position={[1.82, 1.58, -0.75]} rotation={[0, -Math.PI / 2, 0]} scale={0.72} />
+        <pointLight position={[0.7, 1.7, 0.5]} intensity={5.4} distance={13} color="#c5a15d" />
       </group>
-      <FantasyProp name="Workbench" position={[3.3, 0, 1.15]} rotation={[0, -0.48, 0]} scale={[1.18, 1, 1]} />
-      <FantasyProp name="Scroll_2" position={[3.15, 0.98, 1.05]} rotation={[0, 0.62, 0]} scale={3.4} />
-      <FantasyProp name="Bench" position={[3.85, 0, 3]} rotation={[0, -0.72, 0]} scale={0.92} />
-      <FantasyProp name="Barrel" position={[-4.45, 0, -1.25]} rotation={[0, 0.35, 0]} scale={0.85} />
+      <FantasyProp name="Bench" position={[5.05, 0.05, 4.05]} rotation={[0, -0.62, 0]} scale={0.92} />
+      <FantasyProp name="Barrel" position={[-5.1, 0.05, -1.7]} rotation={[0, 0.35, 0]} scale={0.85} />
+      <FantasyProp name="Bucket_Wooden_1" position={[-4.5, 0.05, -2.6]} rotation={[0, -0.28, 0]} scale={0.95} />
+      <MedievalAsset name="Prop_Vine1" position={[-4.12, 2.25, 2.1]} rotation={[0, Math.PI / 2, 0]} scale={1.2} />
     </group>
+  );
+}
+
+function CoastalArchiveHome() {
+  const [x, , z] = WORLD_HOME_POSITION;
+  const ground = terrainHeightAt(x, z);
+
+  return (
+    <RigidBody type="fixed" colliders={false} position={[x, ground, z]} rotation={[0, -0.08, 0]}>
+      <CuboidCollider args={[4.35, 2.25, 0.24]} position={[0, 2.25, -5.05]} />
+      <CuboidCollider args={[0.24, 2.25, 5]} position={[-4.18, 2.25, 0]} />
+      <CuboidCollider args={[0.24, 2.25, 5]} position={[4.18, 2.25, 0]} />
+      <CuboidCollider args={[2.05, 2.25, 0.24]} position={[2.15, 2.25, 5.05]} />
+      <ArchiveBookCottage />
+    </RigidBody>
   );
 }
 
@@ -1267,7 +1288,7 @@ function FieldCampfire({ position }: { position: [number, number, number] }) {
       flame.lookAt(camera.position);
       uniforms[index].uTime.value = clock.elapsedTime;
     });
-    if (glow.current) glow.current.intensity = 7.4 + pulse * 2.8;
+    if (glow.current) glow.current.intensity = 8.4;
   });
 
   return (
@@ -2383,7 +2404,7 @@ export default function ArchiveGameScene({
           <InfiniteTerrain playerPosition={playerPosition} />
           <InfiniteForestColliders playerPosition={playerPosition} destinations={destinations} />
           <RiverFootbridge />
-          <WorldLandmarks destinations={destinations} onOpen={onOpen} />
+          <CoastalArchiveHome />
           <FirstPersonExplorer
             enabled={entered}
             destinations={destinations}

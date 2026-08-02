@@ -37,7 +37,7 @@ export default function FirstPersonExplorer({
   destinations,
   playerPosition,
   travelRequest,
-  spawn = [0, 1.45, 22],
+  spawn = [-11, 1.45, 22],
   heightAt,
   waterLevel,
   onOpen,

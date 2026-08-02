@@ -13,7 +13,7 @@ import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 
 export type HorseMotion = 'Idle' | 'Walk' | 'Gallop';
 
-export const ARCHIVE_HORSE_SPAWN = [3.4, 19] as const;
+export const ARCHIVE_HORSE_SPAWN = [-2.5, 15] as const;
 
 export default function ArchiveHorse({
   motion,
