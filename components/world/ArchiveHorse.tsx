@@ -9,7 +9,7 @@ import {
   Mesh,
   MeshStandardMaterial,
 } from 'three';
-import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
+import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
 
 export type HorseMotion = 'Idle' | 'Walk' | 'Gallop';
 
@@ -40,7 +40,7 @@ export default function ArchiveHorse({
 }) {
   const gltf = useGLTF('/archive-world/quaternius-animals/Horse.glb');
   const root = useRef<Group>(null);
-  const scene = useMemo(() => cloneSkeleton(gltf.scene), [gltf.scene]);
+  const scene = useMemo(() => cloneAnimatedAsset(gltf.scene), [gltf.scene]);
   const mixer = useMemo(() => new AnimationMixer(scene), [scene]);
   const currentMotion = useRef<HorseMotion>('Idle');
   const actions = useMemo(

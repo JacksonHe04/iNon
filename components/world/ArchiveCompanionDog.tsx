@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { AnimationMixer, Group, Mesh, MeshStandardMaterial, Vector3 } from 'three';
-import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
+import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
 
 const DOG_URL = '/archive-world/quaternius-animals/ShibaInu.glb';
 export const COMPANION_NAME = '苔苔';
@@ -22,7 +22,7 @@ export default function ArchiveCompanionDog({
 }) {
   const gltf = useGLTF(DOG_URL);
   const root = useRef<Group>(null);
-  const scene = useMemo(() => cloneSkeleton(gltf.scene), [gltf.scene]);
+  const scene = useMemo(() => cloneAnimatedAsset(gltf.scene), [gltf.scene]);
   const mixer = useMemo(() => new AnimationMixer(scene), [scene]);
   const actions = useMemo(
     () => new Map(gltf.animations.map((clip) => [clip.name, mixer.clipAction(clip)])),

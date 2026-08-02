@@ -10,7 +10,7 @@ import {
   MeshStandardMaterial,
   Object3D,
 } from 'three';
-import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
+import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
 
 export default function AnimatedAnimalScene({
   source,
@@ -30,7 +30,7 @@ export default function AnimatedAnimalScene({
   update: (group: Group, elapsed: number, delta: number) => void;
 }) {
   const root = useRef<Group>(null);
-  const scene = useMemo(() => cloneSkeleton(source), [source]);
+  const scene = useMemo(() => cloneAnimatedAsset(source), [source]);
   const mixer = useMemo(() => new AnimationMixer(scene), [scene]);
 
   useEffect(() => {

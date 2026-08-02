@@ -48,11 +48,25 @@ function Diagnostics({ onReport }: { onReport: (message: string) => void }) {
     frames.current += 1;
     if (frames.current !== 120 && frames.current % 420 !== 0) return;
     const context = gl.getContext();
+    const renderList = gl.renderLists.get(scene, 0);
+    const rootCounts = new Map<string, number>();
+    [...renderList.opaque, ...renderList.transmissive, ...renderList.transparent].forEach(({ object }) => {
+      let root = object;
+      while (root.parent && root.parent !== scene) root = root.parent;
+      const label = root.name || root.type;
+      rootCounts.set(label, (rootCounts.get(label) ?? 0) + 1);
+    });
+    const busiestRoots = [...rootCounts.entries()]
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 4)
+      .map(([label, count]) => `${label}:${count}`)
+      .join(',');
     onReport([
       context.isContextLost() ? 'WebGL context lost' : 'WebGL live',
       `${gl.info.render.calls} draw calls`,
       `${gl.info.render.triangles} triangles`,
       `${scene.children.length} scene nodes`,
+      `main ${busiestRoots}`,
       `camera ${camera.position.toArray().map((value) => value.toFixed(1)).join('/')}`,
     ].join(' · '));
   });

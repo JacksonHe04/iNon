@@ -10,7 +10,6 @@ import {
   MeshStandardMaterial,
   Vector3,
 } from 'three';
-import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 import {
   ANIMAL_BEHAVIOUR,
   ANIMAL_FILES,
@@ -18,23 +17,15 @@ import {
   animalAppearsInHabitat,
   type AnimalConfig,
 } from '@/components/world/archiveAnimalConfig';
+import {
+  findWalkableAnimalGround,
+  isWalkableAnimalGround,
+} from '@/components/world/archiveAnimalTerrain';
 import { worldBiomeAt } from '@/components/world/archiveWorldBiomes';
+import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
 
 const ANIMAL_ROOT = '/archive-world/quaternius-animals';
-const WATER_LEVEL = -1.05;
 const ALPINE_SPECIES = new Set<AnimalConfig['species']>(['deer', 'fox', 'stag', 'wolf']);
-
-function safeGroundPosition(
-  heightAt: (x: number, z: number) => number,
-  x: number,
-  z: number,
-  fallbackX: number,
-  fallbackZ: number,
-) {
-  const proposedHeight = heightAt(x, z);
-  if (proposedHeight > WATER_LEVEL + 0.38) return new Vector3(x, proposedHeight, z);
-  return new Vector3(fallbackX, heightAt(fallbackX, fallbackZ), fallbackZ);
-}
 
 function AnimatedAnimal({
   config,
@@ -49,7 +40,7 @@ function AnimatedAnimal({
   const url = `${ANIMAL_ROOT}/${ANIMAL_FILES[config.species]}`;
   const gltf = useGLTF(url);
   const root = useRef<Group>(null);
-  const scene = useMemo(() => cloneSkeleton(gltf.scene), [gltf.scene]);
+  const scene = useMemo(() => cloneAnimatedAsset(gltf.scene), [gltf.scene]);
   const mixer = useMemo(() => new AnimationMixer(scene), [scene]);
   const home = useRef(new Vector3(config.offset[0], 0, config.offset[1]));
   const target = useRef(new Vector3(config.offset[0] + 4, 0, config.offset[1] - 3));
@@ -59,6 +50,7 @@ function AnimatedAnimal({
   const wasPlaced = useRef(false);
   const movementDirection = useRef(new Vector3());
   const fleeDirection = useRef(new Vector3());
+  const hasWalkableGround = useRef(true);
 
   const actions = useMemo(() => {
     const map = new Map<string, ReturnType<typeof mixer.clipAction>>();
@@ -100,16 +92,19 @@ function AnimatedAnimal({
     if (!group) return;
 
     if (!wasPlaced.current) {
-      const start = safeGroundPosition(
+      const start = findWalkableAnimalGround({
         heightAt,
-        config.offset[0],
-        config.offset[1],
-        config.offset[0] + 9,
-        config.offset[1] + 7,
-      );
-      group.position.copy(start);
-      home.current.copy(start);
-      target.current.copy(start);
+        species: config.species,
+        x: config.offset[0],
+        z: config.offset[1],
+        phase: config.phase,
+      });
+      hasWalkableGround.current = Boolean(start);
+      if (start) {
+        group.position.set(start.x, start.y, start.z);
+        home.current.copy(group.position);
+        target.current.copy(group.position);
+      }
       wasPlaced.current = true;
       nextDecisionAt.current = clock.elapsedTime + 1 + config.phase;
     }
@@ -117,23 +112,27 @@ function AnimatedAnimal({
     const player = playerPosition.current;
     const playerHeight = heightAt(player.x, player.z);
     const playerBiome = worldBiomeAt(player.x, player.z, playerHeight);
-    group.visible = animalAppearsInHabitat(config.species, playerBiome)
+    group.visible = hasWalkableGround.current
+      && animalAppearsInHabitat(config.species, playerBiome)
       && (playerHeight < 12 || ALPINE_SPECIES.has(config.species));
     if (!group.visible) return;
     mixer.update(delta);
     const distanceToPlayer = Math.hypot(group.position.x - player.x, group.position.z - player.z);
 
     if (distanceToPlayer > 118) {
-      const reanchored = safeGroundPosition(
+      const reanchored = findWalkableAnimalGround({
         heightAt,
-        player.x + config.offset[0],
-        player.z + config.offset[1],
-        player.x - config.offset[0] * 0.72,
-        player.z - config.offset[1] * 0.72,
-      );
-      group.position.copy(reanchored);
-      home.current.copy(reanchored);
-      target.current.copy(reanchored);
+        species: config.species,
+        x: player.x + config.offset[0],
+        z: player.z + config.offset[1],
+        phase: config.phase + decision.current,
+      });
+      hasWalkableGround.current = Boolean(reanchored);
+      if (reanchored) {
+        group.position.set(reanchored.x, reanchored.y, reanchored.z);
+        home.current.copy(group.position);
+        target.current.copy(group.position);
+      }
       nextDecisionAt.current = clock.elapsedTime + 1.4 + config.phase * 0.2;
     }
 
@@ -154,9 +153,8 @@ function AnimatedAnimal({
       const radius = 4.5 + ((decision.current * 7 + Math.floor(config.phase * 10)) % 9);
       const proposedX = home.current.x + Math.cos(angle) * radius;
       const proposedZ = home.current.z + Math.sin(angle) * radius;
-      const proposedHeight = heightAt(proposedX, proposedZ);
-      if (proposedHeight > WATER_LEVEL + 0.38) {
-        target.current.set(proposedX, proposedHeight, proposedZ);
+      if (isWalkableAnimalGround(heightAt, config.species, proposedX, proposedZ)) {
+        target.current.set(proposedX, heightAt(proposedX, proposedZ), proposedZ);
       } else {
         target.current.set(home.current.x - Math.cos(angle) * radius, 0, home.current.z - Math.sin(angle) * radius);
       }
@@ -190,7 +188,7 @@ function AnimatedAnimal({
       const nextX = group.position.x + direction.x * speed * delta;
       const nextZ = group.position.z + direction.z * speed * delta;
       const nextY = heightAt(nextX, nextZ);
-      if (nextY > WATER_LEVEL + 0.3) {
+      if (isWalkableAnimalGround(heightAt, config.species, nextX, nextZ)) {
         group.position.set(nextX, nextY, nextZ);
       } else {
         target.current.copy(home.current);
