@@ -81,6 +81,10 @@ const PATH_SMALL_3 = transforms([
 ]);
 const PATH_THRESHOLD = transforms([[-2.2, 6.3, 0.03, 0.86]]);
 const PATH_GATE = transforms([[-2, 25.8, -0.05, 0.82]]);
+const PATH_OUTSIDE = transforms([
+  [-2, 29, 0.08, 0.78], [0, 31, -0.12, 0.74], [3, 32.5, 0.16, 0.8],
+  [6, 33.5, -0.08, 0.76], [9, 34.5, 0.12, 0.8], [12, 35, -0.14, 0.74],
+]);
 
 function natureAsset(file: string, placements: import('three').Matrix4[]) {
   return <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/${file}.gltf`} transforms={placements} />;
@@ -103,6 +107,7 @@ export default function ArchiveHomeEcology() {
       {natureAsset('RockPath_Round_Small_3', PATH_SMALL_3)}
       {natureAsset('RockPath_Round_Thin', PATH_THRESHOLD)}
       {natureAsset('RockPath_Round_Wide', PATH_GATE)}
+      {natureAsset('RockPath_Round_Small_2', PATH_OUTSIDE)}
     </group>
   );
 }

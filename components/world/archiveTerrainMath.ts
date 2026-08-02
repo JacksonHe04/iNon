@@ -4,7 +4,7 @@ import {
   WORLD_HOME_POSITION,
   WORLD_MOUNTAIN_SUMMIT_POSITION,
 } from '@/components/world/archiveWorldConstants';
-import { mountainTrailGradeAt } from '@/components/world/archiveWorldTrails';
+import { homeApproachGradeAt, mountainTrailGradeAt } from '@/components/world/archiveWorldTrails';
 
 function smoothstep(edge0: number, edge1: number, value: number) {
   const amount = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
@@ -52,6 +52,13 @@ function rawTerrainHeightAt(x: number, z: number) {
     const trailBlend = 1 - smoothstep(4, 26, mountainTrail.distance);
     const carvedHeight = continentalGround
       + (mountainTrail.height - continentalGround) * trailBlend;
+    continentalGround = Math.min(continentalGround, carvedHeight);
+  }
+  const homeApproach = homeApproachGradeAt(x, z);
+  if (homeApproach && homeApproach.distance < 14) {
+    const trailBlend = 1 - smoothstep(2.6, 14, homeApproach.distance);
+    const carvedHeight = continentalGround
+      + (homeApproach.height - continentalGround) * trailBlend;
     continentalGround = Math.min(continentalGround, carvedHeight);
   }
   const shoreline = coastlineXAt(z);
