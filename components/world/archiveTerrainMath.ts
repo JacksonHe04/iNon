@@ -6,6 +6,10 @@ function smoothstep(edge0: number, edge1: number, value: number) {
   return amount * amount * (3 - 2 * amount);
 }
 
+export function riverCenterAt(z: number) {
+  return 78 + Math.sin(z * 0.018) * 38 + Math.sin(z * 0.004) * 16;
+}
+
 function rawTerrainHeightAt(x: number, z: number) {
   const homeDistance = Math.hypot(x - WORLD_HOME_POSITION[0], z - WORLD_HOME_POSITION[2]);
   const wilderness = smoothstep(18, 46, homeDistance);
@@ -18,7 +22,7 @@ function rawTerrainHeightAt(x: number, z: number) {
     Math.max(0, Math.sin(x * 0.011 + 0.7) + Math.cos(z * 0.008 - 0.4) - 0.58),
     2,
   ) * 7.5;
-  const riverCenter = 78 + Math.sin(z * 0.018) * 38 + Math.sin(z * 0.004) * 16;
+  const riverCenter = riverCenterAt(z);
   const riverInfluence = 1 - smoothstep(3.5, 17, Math.abs(x - riverCenter));
   const rollingGround = 0.4 + broad + ridges + mountainMass - riverInfluence * 7.2;
   const dryGround = Math.max(-0.42, rollingGround);

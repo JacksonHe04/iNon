@@ -73,7 +73,7 @@ export const waterFragment = /* glsl */ `
   void main() {
     float ripple = 0.5 + 0.5 * sin(vWorld.x * 0.11 + vWorld.z * 0.08 + uTime * 0.32);
     vec3 color = mix(vec3(0.075, 0.18, 0.15), vec3(0.28, 0.42, 0.34), 0.25 + ripple * 0.24 + vWave * 1.8);
-    gl_FragColor = vec4(color, 0.82);
+    gl_FragColor = vec4(color, 0.62);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
   }

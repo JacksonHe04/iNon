@@ -10,6 +10,7 @@ import QuaterniusGroundCover from '@/components/world/QuaterniusGroundCover';
 import ArchiveWildlife from '@/components/world/ArchiveWildlife';
 import ArchiveBirdFlock from '@/components/world/ArchiveBirdFlock';
 import ArchiveCompanionDog from '@/components/world/ArchiveCompanionDog';
+import ArchiveAquaticLife from '@/components/world/ArchiveAquaticLife';
 import ArchiveForestColliders from '@/components/world/ArchiveForestColliders';
 import { FallingPaperSnow, WorldKeepsakes } from '@/components/world/ArchiveAtmosphere';
 import { InfiniteTerrain, InfiniteWater, MountainPanorama } from '@/components/world/ArchiveTerrain';
@@ -114,6 +115,7 @@ export default function ArchiveGameScene({
           heightAt={terrainHeightAt}
           onProximity={onCompanionProximity}
         />
+        <ArchiveAquaticLife enabled={entered} playerPosition={playerPosition} />
       </Suspense>
       <InfiniteWater playerPosition={playerPosition} />
       <FallingPaperSnow playerPosition={playerPosition} />
