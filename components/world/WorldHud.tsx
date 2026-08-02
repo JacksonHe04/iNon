@@ -4,6 +4,7 @@ import type { GameTelemetry } from '@/components/world/ArchiveGameScene';
 import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
 import { WORLD_WAYPOINTS, type WorldWaypoint } from '@/components/world/archiveWorldConfig';
 import WorldMinimap from '@/components/world/WorldMinimap';
+import { WORLD_HOME_POSITION } from '@/components/world/ArchiveGameScene';
 
 function dispatchKey(type: 'keydown' | 'keyup', code: string) {
   window.dispatchEvent(new KeyboardEvent(type, { code }));
@@ -46,6 +47,8 @@ export default function WorldHud({
   onTalkToCompanion: () => void;
   onTravel: (waypoint: WorldWaypoint) => void;
 }) {
+  const insideHome = Math.abs(telemetry.x - WORLD_HOME_POSITION[0]) < 4.4
+    && Math.abs(telemetry.z - WORLD_HOME_POSITION[2]) < 5.4;
   return (
     <div className="archive-world-overlay">
       <header className="archive-world-gamebar">
@@ -79,6 +82,13 @@ export default function WorldHud({
       </div>
 
       <WorldMinimap telemetry={telemetry} waypoints={WORLD_WAYPOINTS} onTravel={onTravel} />
+
+      {insideHome && (
+        <div className="archive-world-home-hint">
+          <span>LIVED-IN ARCHIVE</span>
+          <strong>点击床、书桌、书柜与旧木箱读取记录</strong>
+        </div>
+      )}
 
       {companionNearby ? (
         <button className="archive-world-interact" onClick={onTalkToCompanion}>

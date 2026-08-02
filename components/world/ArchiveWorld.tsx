@@ -16,6 +16,7 @@ import ArchiveGameScene, {
 } from '@/components/world/ArchiveGameScene';
 import ArchiveCodexPanel from '@/components/world/ArchiveCodexPanel';
 import ArchiveDialoguePanel from '@/components/world/ArchiveDialoguePanel';
+import ArchiveHomeRecordPanel from '@/components/world/ArchiveHomeRecordPanel';
 import WorldHud from '@/components/world/WorldHud';
 import WorldModeSwitch from '@/components/world/WorldModeSwitch';
 import WorldSatchel from '@/components/world/WorldSatchel';
@@ -26,6 +27,7 @@ import {
   type WorldWaypoint,
 } from '@/components/world/archiveWorldConfig';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
+import type { HomeRecordId } from '@/components/world/archiveHomeRecords';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -43,10 +45,11 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const [lastKeepsake, setLastKeepsake] = useState<string | null>(null);
   const [companionNearby, setCompanionNearby] = useState(false);
   const [dialoguePersona, setDialoguePersona] = useState<'owner' | 'companion'>('owner');
+  const [selectedHomeRecord, setSelectedHomeRecord] = useState<HomeRecordId | null>(null);
   const playerPosition = useRef(new Vector3(...WORLD_PLAYER_SPAWN));
   const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
   const keepsakeStorageKey = `inon-world-keepsakes-${data.basic.name}`;
-  const worldEnabled = mode === 'world' && !inventoryOpen;
+  const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
 
   useEffect(() => {
     try {
@@ -87,6 +90,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const changeMode = (nextMode: ArchiveWorldMode, persona: 'owner' | 'companion' = 'owner') => {
     releasePointerLock();
     setInventoryOpen(false);
+    setSelectedHomeRecord(null);
     if (nextMode === 'dialogue') setDialoguePersona(persona);
     setMode(nextMode);
   };
@@ -132,6 +136,10 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             onCompanionProximity={setCompanionNearby}
             collectedKeepsakes={collectedKeepsakes}
             onCollectKeepsake={collectKeepsake}
+            onInspectHomeRecord={(record) => {
+              releasePointerLock();
+              setSelectedHomeRecord(record);
+            }}
           />
         </Canvas>
       </div>
@@ -141,7 +149,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
       <div className="archive-world__vignette" aria-hidden="true" />
       <WorldModeSwitch mode={mode} onChange={changeMode} />
 
-      {mode === 'world' && (
+      {mode === 'world' && !selectedHomeRecord && (
         <WorldHud
           owner={data.basic.name}
           telemetry={telemetry}
@@ -158,6 +166,14 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
 
       {mode === 'archive' && <ArchiveCodexPanel data={data} layoutConfig={config} />}
       {mode === 'dialogue' && <ArchiveDialoguePanel data={data} persona={dialoguePersona} />}
+
+      {mode === 'world' && selectedHomeRecord && (
+        <ArchiveHomeRecordPanel
+          data={data}
+          recordId={selectedHomeRecord}
+          onClose={() => setSelectedHomeRecord(null)}
+        />
+      )}
 
       {inventoryOpen && (
         <WorldSatchel

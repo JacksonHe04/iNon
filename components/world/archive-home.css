@@ -1,0 +1,100 @@
+.archive-home-record {
+  position: absolute;
+  z-index: 16;
+  inset: 5.25rem 4.25rem 2.4rem auto;
+  width: min(42rem, calc(100vw - 2rem));
+  overflow: auto;
+  padding: 3.2rem 3.5rem 2rem;
+  color: #232a20;
+  background:
+    linear-gradient(112deg, rgb(230 222 194 / 96%), rgb(196 201 166 / 94%)),
+    repeating-linear-gradient(0deg, transparent 0 5px, rgb(35 48 36 / 5%) 6px);
+  border: 1px solid rgb(32 48 35 / 48%);
+  box-shadow: -1.8rem 2rem 0 rgb(38 51 40 / 34%), 0 1.5rem 5rem rgb(13 24 17 / 52%);
+  transform: rotate(-0.45deg);
+  font-family: var(--font-noto-serif-sc);
+}
+
+.archive-world-home-hint {
+  position: absolute;
+  z-index: 9;
+  top: 5rem;
+  left: 50%;
+  display: grid;
+  gap: .2rem;
+  border-left: 2px solid #c9b16b;
+  padding: .65rem 1rem;
+  color: #e8dfc4;
+  background: linear-gradient(90deg, rgb(29 48 35 / 82%), rgb(29 48 35 / 18%));
+  transform: translateX(-50%) rotate(-.35deg);
+  pointer-events: none;
+}
+
+.archive-world-home-hint span { color: #c9b16b; font: .55rem var(--font-geist-mono); letter-spacing: .16em; }
+.archive-world-home-hint strong { font-size: .74rem; font-weight: 400; }
+
+.archive-home-record::before {
+  content: "FIELD COPY";
+  position: absolute;
+  right: 6.2rem;
+  top: 1.8rem;
+  padding: .35rem .75rem;
+  color: rgb(87 66 44 / 70%);
+  border: 2px solid rgb(114 76 48 / 42%);
+  transform: rotate(7deg);
+  letter-spacing: .18em;
+  font: 600 .62rem var(--font-geist-mono);
+}
+
+.archive-home-record__close {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  float: right;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  color: #d8ddc4;
+  background: #263b2e;
+  border: 0;
+  cursor: pointer;
+}
+
+.archive-home-record__close svg { width: 1rem; }
+.archive-home-record header { max-width: 31rem; border-bottom: 1px solid rgb(42 58 43 / 38%); padding-bottom: 1.25rem; }
+.archive-home-record header > span { font: 600 .66rem var(--font-geist-mono); letter-spacing: .2em; color: #5f674f; }
+.archive-home-record h2 { margin: .7rem 0 .25rem; font-size: clamp(2rem, 4vw, 3.7rem); font-weight: 500; line-height: .98; letter-spacing: -.05em; }
+.archive-home-record header p { margin: .8rem 0 0; color: #52604c; font-style: italic; }
+.archive-home-record blockquote { width: 70%; margin: 1.45rem 0 1.6rem 24%; color: #5b513d; font-style: italic; line-height: 1.75; transform: rotate(.7deg); }
+.archive-home-record__entries { display: grid; grid-template-columns: 1.08fr .92fr; align-items: start; gap: .85rem 1.2rem; }
+
+.archive-home-record__entries > * {
+  position: relative;
+  display: block;
+  min-width: 0;
+  padding: 1.15rem 1rem 1rem;
+  color: inherit;
+  text-decoration: none;
+  border-top: 1px solid rgb(41 59 43 / 42%);
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.archive-home-record__entries > :nth-child(3n + 2) { margin-top: 2.6rem; transform: translateX(-.25rem) rotate(.7deg); }
+.archive-home-record__entries > :nth-child(3n) { transform: translateX(.65rem) rotate(-.45deg); }
+.archive-home-record__entries > :hover { background: rgb(57 75 55 / 10%); transform: translate(-.18rem, -.18rem) rotate(0); }
+.archive-home-record__entries img { width: 5.2rem; aspect-ratio: 1; float: left; margin: 0 .85rem .65rem 0; object-fit: cover; filter: sepia(.2) saturate(.72) contrast(.92); }
+.archive-home-record__entries span { display: block; margin-bottom: .35rem; color: #68705a; font: 600 .58rem var(--font-geist-mono); letter-spacing: .08em; text-transform: uppercase; }
+.archive-home-record__entries h3 { margin: 0; font-size: 1.08rem; font-weight: 600; line-height: 1.2; }
+.archive-home-record__entries p { margin: .48rem 0 0; color: #4e5143; font-size: .76rem; line-height: 1.6; }
+.archive-home-record__entries small { display: block; clear: both; padding-top: .65rem; color: #5a644f; font: .56rem var(--font-geist-mono); }
+.archive-home-record__entries svg { position: absolute; right: .65rem; top: .75rem; width: .85rem; color: #496049; }
+.archive-home-record__empty { margin: 3rem 0; font-style: italic; }
+.archive-home-record > footer { clear: both; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgb(42 58 43 / 25%); color: #68705a; font: .6rem var(--font-geist-mono); letter-spacing: .1em; }
+
+@media (max-width: 720px) {
+  .archive-home-record { inset: 5rem 1rem 1rem; width: auto; padding: 2.6rem 1.3rem 1.5rem; }
+  .archive-home-record blockquote { width: 88%; margin-left: 10%; }
+  .archive-home-record__entries { grid-template-columns: 1fr; }
+  .archive-home-record__entries > :nth-child(n) { margin-top: 0; transform: none; }
+}

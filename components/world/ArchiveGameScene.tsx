@@ -65,6 +65,7 @@ export default function ArchiveGameScene({
   onCompanionProximity,
   collectedKeepsakes,
   onCollectKeepsake,
+  onInspectHomeRecord,
 }: ArchiveGameSceneProps) {
   const { scene } = useThree();
 
@@ -132,7 +133,7 @@ export default function ArchiveGameScene({
           <InfiniteTerrain playerPosition={playerPosition} />
           <ArchiveForestColliders playerPosition={playerPosition} destinations={destinations} />
           <RiverFootbridge />
-          <CoastalArchiveHome />
+          <CoastalArchiveHome onInspect={onInspectHomeRecord} />
           <FirstPersonExplorer
             enabled={entered}
             destinations={destinations}
