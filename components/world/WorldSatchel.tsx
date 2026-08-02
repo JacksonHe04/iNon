@@ -2,6 +2,10 @@
 
 import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
 import type { ArchiveKeepsake } from '@/components/world/archiveKeepsakes';
+import { ARCHIVE_SPECIES, ARCHIVE_SPECIES_COUNT } from '@/components/world/archiveSpeciesCatalog';
+import styles from '@/components/world/WorldSatchel.module.css';
+
+const FIELD_HABITATS = ['家园', '林地', '草原', '河谷', '海岸', '天空'] as const;
 
 export default function WorldSatchel({
   rations,
@@ -48,7 +52,26 @@ export default function WorldSatchel({
           <small>留给林径马匹的苹果。</small>
         </div>
       </div>
-      <section className="archive-world-field-notes" aria-label="已拾得的田野札记">
+      <details className={styles.fieldGuide}>
+        <summary>
+          <span>FIELD GUIDE / VERIFIED</span>
+          <strong>动物观察册</strong>
+          <b>{ARCHIVE_SPECIES_COUNT} 种生态记录 ＋</b>
+        </summary>
+        <div>
+          {FIELD_HABITATS.map((habitat, index) => {
+            const species = ARCHIVE_SPECIES.filter((record) => record.habitat === habitat);
+            return (
+              <section key={habitat}>
+                <span>{String(index + 1).padStart(2, '0')} / {habitat}</span>
+                <strong>{species.length}</strong>
+                <p>{species.map((record) => record.label).join(' · ')}</p>
+              </section>
+            );
+          })}
+        </div>
+      </details>
+      <section className={`archive-world-field-notes ${styles.fieldNotes}`} aria-label="已拾得的田野札记">
         <header>
           <span>RECOVERED WRITINGS</span>
           <strong>田野札记</strong>
