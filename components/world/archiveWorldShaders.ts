@@ -1,4 +1,12 @@
 import { WORLD_TRAIL_SEGMENTS } from '@/components/world/archiveWorldTrails';
+import { WORLD_HOME_POSITION } from '@/components/world/archiveWorldConstants';
+import {
+  ARCHIVE_HOME_HALF_DEPTH,
+  ARCHIVE_HOME_HALF_WIDTH,
+  ARCHIVE_HOME_ROTATION,
+  ARCHIVE_HOME_SHELTER_MAX_Y,
+  ARCHIVE_HOME_SHELTER_MIN_Y,
+} from '@/components/world/archiveWorldZones';
 
 const trailDistanceStatements = WORLD_TRAIL_SEGMENTS.map(
   ({ start, end, halfWidth }) =>
@@ -99,6 +107,7 @@ export const waterFragment = /* glsl */ `
 export const weatherVertex = /* glsl */ `
   uniform float uTime;
   varying float vPulse;
+  varying vec3 vWeatherWorld;
   void main() {
     vec3 origin = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     vec3 localVertex = (instanceMatrix * vec4(position, 0.0)).xyz;
@@ -107,7 +116,9 @@ export const weatherVertex = /* glsl */ `
     origin.y = mod(origin.y - uTime * (0.7 + fract(phase) * 0.8) + 18.0, 20.0) - 2.0;
     origin.z += cos(uTime * 0.19 + phase) * 0.55;
     vPulse = 0.72 + 0.28 * sin(phase * 4.0);
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(origin + localVertex, 1.0);
+    vec4 world = modelMatrix * vec4(origin + localVertex, 1.0);
+    vWeatherWorld = world.xyz;
+    gl_Position = projectionMatrix * viewMatrix * world;
   }
 `;
 
@@ -115,7 +126,20 @@ export const weatherFragment = /* glsl */ `
   uniform vec3 uPaper;
   uniform vec3 uOchre;
   varying float vPulse;
+  varying vec3 vWeatherWorld;
   void main() {
+    vec2 homeOffset = vWeatherWorld.xz - vec2(${WORLD_HOME_POSITION[0].toFixed(1)}, ${WORLD_HOME_POSITION[2].toFixed(1)});
+    float homeCosine = cos(${ARCHIVE_HOME_ROTATION.toFixed(2)});
+    float homeSine = sin(${ARCHIVE_HOME_ROTATION.toFixed(2)});
+    vec2 homeLocal = vec2(
+      homeOffset.x * homeCosine + homeOffset.y * homeSine,
+      -homeOffset.x * homeSine + homeOffset.y * homeCosine
+    );
+    bool beneathRoof = vWeatherWorld.y > ${ARCHIVE_HOME_SHELTER_MIN_Y.toFixed(2)}
+      && vWeatherWorld.y < ${ARCHIVE_HOME_SHELTER_MAX_Y.toFixed(2)};
+    bool insideHome = abs(homeLocal.x) < ${ARCHIVE_HOME_HALF_WIDTH.toFixed(2)}
+      && abs(homeLocal.y) < ${ARCHIVE_HOME_HALF_DEPTH.toFixed(2)};
+    if (beneathRoof && insideHome) discard;
     vec3 color = mix(uPaper, uOchre, max(0.0, vPulse) * 0.18);
     gl_FragColor = vec4(color, 0.08 + max(0.0, vPulse) * 0.42);
   }

@@ -8,6 +8,7 @@ import ArchiveHomeInterior from '@/components/world/ArchiveHomeInterior';
 import { InstancedAsset, MEDIEVAL_ROOT, MedievalAsset, PROP_ROOT, PropAsset } from '@/components/world/ArchiveAsset';
 import { RIVER_BRIDGE_POSITION, WORLD_HOME_POSITION } from '@/components/world/archiveWorldConstants';
 import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
+import { ARCHIVE_HOME_ROTATION } from '@/components/world/archiveWorldZones';
 import type { HomeExhibit, HomeRecordId } from '@/components/world/archiveHomeRecords';
 
 export function RiverFootbridge() {
@@ -99,7 +100,7 @@ export function CoastalArchiveHome({
 }) {
   const [x, , z] = WORLD_HOME_POSITION;
   return (
-    <RigidBody type="fixed" colliders={false} position={[x, terrainHeightAt(x, z), z]} rotation={[0, -0.08, 0]}>
+    <RigidBody type="fixed" colliders={false} position={[x, terrainHeightAt(x, z), z]} rotation={[0, ARCHIVE_HOME_ROTATION, 0]}>
       <CuboidCollider args={[4.35, 2.25, 0.24]} position={[0, 2.25, -5.05]} />
       <CuboidCollider args={[0.24, 2.25, 5]} position={[-4.18, 2.25, 0]} />
       <CuboidCollider args={[0.24, 2.25, 5]} position={[4.18, 2.25, 0]} />

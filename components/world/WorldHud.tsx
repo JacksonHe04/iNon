@@ -4,14 +4,15 @@ import type { GameTelemetry } from '@/components/world/ArchiveGameScene';
 import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
 import { WORLD_WAYPOINTS, type WorldWaypoint } from '@/components/world/archiveWorldConfig';
 import WorldMinimap from '@/components/world/WorldMinimap';
-import { WORLD_HOME_POSITION } from '@/components/world/ArchiveGameScene';
 import { ARCHIVE_SPECIES_COUNT } from '@/components/world/archiveSpeciesCatalog';
+import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
 
 function dispatchKey(type: 'keydown' | 'keyup', code: string) {
   window.dispatchEvent(new KeyboardEvent(type, { code }));
 }
 
-function terrainLabel(telemetry: GameTelemetry) {
+function terrainLabel(telemetry: GameTelemetry, insideHome: boolean) {
+  if (insideHome) return '主屋室内';
   if (telemetry.terrain === 'coast') return '灰绿海岸';
   if (telemetry.terrain === 'river') return '河谷水域';
   if (telemetry.terrain === 'mountain') return '山脊';
@@ -53,8 +54,7 @@ export default function WorldHud({
   onTalkToCompanion: () => void;
   onTravel: (waypoint: WorldWaypoint) => void;
 }) {
-  const insideHome = Math.abs(telemetry.x - WORLD_HOME_POSITION[0]) < 4.4
-    && Math.abs(telemetry.z - WORLD_HOME_POSITION[2]) < 5.4;
+  const insideHome = isInsideArchiveHome(telemetry.x, telemetry.z);
   return (
     <div className="archive-world-overlay">
       <header className="archive-world-gamebar">
@@ -162,7 +162,7 @@ export default function WorldHud({
 
       <div className="archive-world-status" aria-label="玩家状态">
         <div className="archive-world-status__compass">
-          <span>{terrainLabel(telemetry)} · 生态 {ARCHIVE_SPECIES_COUNT} 种</span>
+          <span>{terrainLabel(telemetry, insideHome)} · 生态 {ARCHIVE_SPECIES_COUNT} 种</span>
           <strong>{motionLabel(telemetry)}</strong>
         </div>
         <div className="archive-world-status__bar">

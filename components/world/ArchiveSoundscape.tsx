@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import type { GameTelemetry } from '@/components/world/archiveGameTypes';
 import { coastlineXAt, riverCenterAt } from '@/components/world/archiveTerrainMath';
+import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
 
 const FOREST_TRACK = '/archive-world/ambient-audio/forest-ambience-source.ogg';
 const WATER_TRACK = '/archive-world/ambient-audio/water-ambience-source.mp3';
@@ -32,10 +33,11 @@ export default function ArchiveSoundscape({
       proximity(shoreDistance, 54),
       proximity(riverDistance, 20) * 0.72,
     );
+    const outdoorMix = isInsideArchiveHome(telemetry.x, telemetry.z) ? 0.3 : 1;
     targets.current = shouldPlay
       ? {
-          forest: 0.14 + (1 - waterPresence) * 0.12,
-          water: Math.min(0.42, waterPresence * 0.34 + (telemetry.inWater ? 0.08 : 0)),
+          forest: (0.14 + (1 - waterPresence) * 0.12) * outdoorMix,
+          water: Math.min(0.42, waterPresence * 0.34 + (telemetry.inWater ? 0.08 : 0)) * outdoorMix,
         }
       : { forest: 0, water: 0 };
   }, [shouldPlay, telemetry.inWater, telemetry.x, telemetry.z]);
