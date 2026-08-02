@@ -1619,8 +1619,6 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
     return (
       <group>
         {[-2.2, 0, 2.2].map((z, index) => <mesh key={z} position={[4.3 + index * 0.15, 0.55, z]} rotation-z={Math.PI / 2} castShadow><cylinderGeometry args={[0.48, 0.55, 5.5 - index * 0.45, 10]} /><meshStandardMaterial color="#61462f" roughness={1} /></mesh>)}
-        {[-3.4, 3.4].map((x) => <mesh key={x} position={[x, 1.35, 0]} castShadow><boxGeometry args={[0.24, 2.7, 0.3]} /><meshStandardMaterial color="#493426" roughness={1} /></mesh>)}
-        <mesh position={[0, 2.58, 0]} rotation-z={0.045} castShadow><boxGeometry args={[7.2, 0.24, 0.3]} /><meshStandardMaterial color="#493426" roughness={1} /></mesh>
         <FantasyProp name="Workbench" position={[0, 0, 0]} scale={[1.85, 1.45, 1.3]} />
         <mesh position={[0, 1.65, 0]} rotation-y={Math.PI / 2}><cylinderGeometry args={[1.35, 1.35, 0.18, 26]} /><meshStandardMaterial color="#77796e" metalness={0.58} roughness={0.5} /></mesh>
         {Array.from({ length: 14 }, (_, index) => {
@@ -1635,35 +1633,33 @@ function SiteStructure({ kind }: { kind: GameDestination['siteKind'] }) {
     );
   }
   if (kind === 'record') {
+    const fieldRecords = [
+      { position: [-2.35, 1.08, 0.35] as [number, number, number], rotation: [0.08, 0.38, -0.14] as [number, number, number], radius: 1.02, label: '#6d775c' },
+      { position: [-0.05, 1.2, -0.32] as [number, number, number], rotation: [-0.04, -0.18, 0.1] as [number, number, number], radius: 1.1, label: '#b6a260' },
+      { position: [2.15, 1.02, 0.46] as [number, number, number], rotation: [0.12, -0.46, -0.08] as [number, number, number], radius: 0.94, label: '#788065' },
+    ];
     return (
       <group>
-        {[-2.7, 0, 2.55].map((x, index) => (
-          <group key={x} position={[x, 1.6 + index * 0.28, index === 1 ? -0.6 : 0.35]} rotation-y={(index - 1) * 0.28}>
-            <mesh rotation-y={Math.PI / 2} castShadow>
-              <torusGeometry args={[1.38 - index * 0.12, 0.1, 8, 42]} />
+        {fieldRecords.map((record, index) => (
+          <group key={index} position={record.position} rotation={record.rotation}>
+            <mesh castShadow>
+              <torusGeometry args={[record.radius, 0.085, 8, 42]} />
               <meshStandardMaterial color="#242923" roughness={0.78} />
             </mesh>
-            <mesh rotation-y={Math.PI / 2}>
-              <circleGeometry args={[1.28 - index * 0.12, 42]} />
+            <mesh position={[0, 0, -0.012]}>
+              <circleGeometry args={[record.radius - 0.08, 42]} />
               <meshStandardMaterial color={index === 1 ? '#1d241e' : '#292d26'} roughness={0.72} />
             </mesh>
-            <mesh position={[0, 0, 0.025]} rotation-y={Math.PI / 2}>
+            <mesh position={[0, 0, 0.025]}>
               <circleGeometry args={[0.22, 24]} />
-              <meshStandardMaterial color={index === 1 ? '#b6a260' : '#6d775c'} roughness={0.95} />
+              <meshStandardMaterial color={record.label} roughness={0.95} />
             </mesh>
           </group>
         ))}
-        {[-2.7, 0, 2.55].map((x, index) => (
-          <mesh key={`spindle-${x}`} position={[x, 0.72, index === 1 ? -0.6 : 0.35]} castShadow>
-            <cylinderGeometry args={[0.1, 0.16, 1.45, 8]} />
-            <meshStandardMaterial color="#4a382b" roughness={1} />
-          </mesh>
-        ))}
-        <mesh position={[0, 0.38, -1.9]} rotation-z={-0.025} castShadow>
-          <boxGeometry args={[7.2, 0.42, 1.1]} />
-          <meshStandardMaterial color="#59654f" roughness={1} />
-        </mesh>
-        <MedievalAsset name="Prop_Wagon" position={[0, 0, -3.15]} rotation={[0, Math.PI / 2, 0]} scale={0.78} />
+        <MedievalAsset name="Prop_Wagon" position={[0.35, 0, -2.65]} rotation={[0, Math.PI / 2 - 0.18, 0]} scale={0.78} />
+        <MedievalAsset name="Prop_Crate" position={[-3.35, 0.12, -1.2]} rotation={[0, 0.3, 0]} scale={0.82} />
+        <MedievalAsset name="Prop_Crate" position={[3.05, 0.12, -1.55]} rotation={[0, -0.42, 0]} scale={0.68} />
+        <FantasyProp name="Bag" position={[2.75, 0.02, 1.3]} rotation={[0, -0.5, 0]} scale={0.72} />
       </group>
     );
   }
@@ -1784,7 +1780,7 @@ function SiteColliders({ kind }: { kind: GameDestination['siteKind'] }) {
   if (kind === 'cinema') return <><CuboidCollider args={[0.22, 3, 0.22]} position={[-4.98, 3, -1]} /><CuboidCollider args={[0.22, 3, 0.22]} position={[4.98, 3, -1]} />{[-3.4, 0, 3.4].map((x) => <CuboidCollider key={x} args={[1.5, 0.4, 0.45]} position={[x, 0.4, 4]} />)}<CuboidCollider args={[0.62, 0.82, 0.75]} position={[1.65, 0.82, 6.35]} /></>;
   if (kind === 'cabin') return <CuboidCollider args={[2.6, 1.7, 3.1]} position={[-1.45, 1.7, 0.25]} rotation={[0, 0.2, 0]} />;
   if (kind === 'workshop') return <>{[[-2.65, 0.15], [0.2, -0.5], [2.8, 0.65]].map(([x, z]) => <CuboidCollider key={`${x}:${z}`} args={[1.25, 0.55, 0.75]} position={[x, 0.55, z]} />)}{[-4.75, -0.48, 3.35].map((x) => <CuboidCollider key={`line-post-${x}`} args={[0.14, 1.75, 0.14]} position={[x, 1.75, -2.22]} />)}</>;
-  if (kind === 'record') return <CuboidCollider args={[3.7, 1.7, 0.85]} position={[0, 1.7, 0]} />;
+  if (kind === 'record') return <CuboidCollider args={[2.35, 0.82, 1.15]} position={[0.35, 0.82, -2.65]} rotation={[0, Math.PI / 2 - 0.18, 0]} />;
   if (kind === 'post') return <CuboidCollider args={[1.45, 0.58, 0.78]} position={[-0.65, 0.58, 0.72]} rotation={[0, 0.28, 0]} />;
   if (kind === 'camp') return <><CuboidCollider args={[0.72, 0.58, 0.62]} position={[-1.8, 0.58, -0.9]} /><CuboidCollider args={[1.15, 0.12, 0.46]} position={[1.85, 0.12, -1]} /></>;
   return <CuboidCollider args={[2.2, 1.1, 1.9]} position={[0, 1.1, 0]} />;
