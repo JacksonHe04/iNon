@@ -5,15 +5,9 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
   AnimationMixer,
-  BufferAttribute,
-  BufferGeometry,
-  DoubleSide,
-  DynamicDrawUsage,
   Group,
-  InstancedMesh,
   Mesh,
   MeshStandardMaterial,
-  Object3D,
   Vector3,
 } from 'three';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
@@ -205,92 +199,6 @@ function AnimatedAnimal({
   );
 }
 
-function wingGeometry(direction: -1 | 1) {
-  const geometry = new BufferGeometry();
-  geometry.setAttribute(
-    'position',
-    new BufferAttribute(
-      new Float32Array([
-        0, 0, 0.1,
-        direction * 0.84, 0, -0.14,
-        direction * 0.56, 0, 0.3,
-      ]),
-      3,
-    ),
-  );
-  geometry.setIndex([0, 1, 2]);
-  geometry.computeVertexNormals();
-  return geometry;
-}
-
-function MigratingBirds({ playerPosition, count = 28 }: { playerPosition: MutableRefObject<Vector3>; count?: number }) {
-  const left = useRef<InstancedMesh>(null);
-  const right = useRef<InstancedMesh>(null);
-  const leftWing = useMemo(() => wingGeometry(-1), []);
-  const rightWing = useMemo(() => wingGeometry(1), []);
-  const dummy = useMemo(() => new Object3D(), []);
-  const flock = useMemo(
-    () => Array.from({ length: count }, (_, index) => ({
-      radius: 24 + ((index * 17) % 58),
-      altitude: 12 + ((index * 11) % 22),
-      speed: 0.025 + (index % 7) * 0.0036,
-      phase: index * 2.399,
-      wingSpeed: 5.4 + (index % 5) * 0.72,
-      scale: 0.52 + (index % 4) * 0.11,
-    })),
-    [count],
-  );
-
-  useEffect(() => {
-    left.current?.instanceMatrix.setUsage(DynamicDrawUsage);
-    right.current?.instanceMatrix.setUsage(DynamicDrawUsage);
-    return () => {
-      leftWing.dispose();
-      rightWing.dispose();
-    };
-  }, [leftWing, rightWing]);
-
-  useFrame(({ clock }) => {
-    if (!left.current || !right.current) return;
-    const time = clock.elapsedTime;
-    const centerX = Math.round(playerPosition.current.x / 120) * 120;
-    const centerZ = Math.round(playerPosition.current.z / 120) * 120;
-
-    flock.forEach((bird, index) => {
-      const angle = time * bird.speed + bird.phase;
-      const x = centerX + Math.cos(angle) * bird.radius + Math.sin(angle * 2.1) * 7;
-      const z = centerZ + Math.sin(angle) * bird.radius * 0.66;
-      const y = playerPosition.current.y + bird.altitude + Math.sin(time * 0.18 + bird.phase) * 3.2;
-      const yaw = -angle + Math.PI * 0.5;
-      const flap = Math.sin(time * bird.wingSpeed + bird.phase) * 0.52;
-
-      dummy.position.set(x, y, z);
-      dummy.rotation.set(0, yaw, flap);
-      dummy.scale.setScalar(bird.scale);
-      dummy.updateMatrix();
-      left.current?.setMatrixAt(index, dummy.matrix);
-
-      dummy.rotation.set(0, yaw, -flap);
-      dummy.updateMatrix();
-      right.current?.setMatrixAt(index, dummy.matrix);
-    });
-
-    left.current.instanceMatrix.needsUpdate = true;
-    right.current.instanceMatrix.needsUpdate = true;
-  });
-
-  return (
-    <group name="migrating-bird-flocks">
-      <instancedMesh ref={left} args={[leftWing, undefined, count]} frustumCulled={false}>
-        <meshStandardMaterial color="#263a2e" roughness={1} side={DoubleSide} />
-      </instancedMesh>
-      <instancedMesh ref={right} args={[rightWing, undefined, count]} frustumCulled={false}>
-        <meshStandardMaterial color="#263a2e" roughness={1} side={DoubleSide} />
-      </instancedMesh>
-    </group>
-  );
-}
-
 export default function ArchiveWildlife({
   playerPosition,
   heightAt,
@@ -302,7 +210,6 @@ export default function ArchiveWildlife({
 }) {
   return (
     <group name="archive-world-wildlife">
-      <MigratingBirds playerPosition={playerPosition} />
       {animalsEnabled && (
         <Suspense fallback={null}>
           {ANIMALS.map((config) => (
