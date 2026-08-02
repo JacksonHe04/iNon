@@ -1,13 +1,18 @@
 'use client';
 
-import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import {
   CapsuleCollider,
+  CuboidCollider,
   RigidBody,
   type RapierRigidBody,
 } from '@react-three/rapier';
-import { Vector3 } from 'three';
+import { Group, Vector3 } from 'three';
+import ArchiveHorse, {
+  ARCHIVE_HORSE_SPAWN,
+  type HorseMotion,
+} from '@/components/world/ArchiveHorse';
 import type {
   GameDestination,
   GameTelemetry,
@@ -46,6 +51,18 @@ export default function FirstPersonExplorer({
   const yaw = useRef(0);
   const pitch = useRef(0);
   const stamina = useRef(100);
+  const mountedRef = useRef(false);
+  const canMount = useRef(false);
+  const mountedHorse = useRef<Group>(null);
+  const horseYaw = useRef(-0.8);
+  const mountMotion = useRef<HorseMotion>('Idle');
+  const waitingMotion = useRef<HorseMotion>('Idle');
+  const [mounted, setMounted] = useState(false);
+  const [horsePosition, setHorsePosition] = useState<[number, number, number]>(() => [
+    ARCHIVE_HORSE_SPAWN[0],
+    heightAt(ARCHIVE_HORSE_SPAWN[0], ARCHIVE_HORSE_SPAWN[1]),
+    ARCHIVE_HORSE_SPAWN[1],
+  ]);
   const nearest = useRef<GameDestination | null>(null);
   const nearestKey = useRef<string | null>(null);
   const telemetryFrame = useRef(0);
@@ -62,6 +79,26 @@ export default function FirstPersonExplorer({
     const down = (event: KeyboardEvent) => {
       keys.current.add(event.code);
       if (event.code === 'KeyE' && nearest.current) onOpen(nearest.current.blockType);
+      if (event.code !== 'KeyF' || event.repeat) return;
+      if (mountedRef.current) {
+        const translation = body.current?.translation();
+        if (translation) {
+          const sideX = Math.cos(yaw.current) * 2.35;
+          const sideZ = -Math.sin(yaw.current) * 2.35;
+          const nextX = translation.x + sideX;
+          const nextZ = translation.z + sideZ;
+          setHorsePosition([nextX, heightAt(nextX, nextZ), nextZ]);
+          horseYaw.current = mountedHorse.current?.rotation.y
+            ?? Math.atan2(-Math.sin(yaw.current), -Math.cos(yaw.current));
+        }
+        mountedRef.current = false;
+        mountMotion.current = 'Idle';
+        setMounted(false);
+      } else if (canMount.current) {
+        mountedRef.current = true;
+        horseYaw.current = Math.atan2(-Math.sin(yaw.current), -Math.cos(yaw.current));
+        setMounted(true);
+      }
     };
     const up = (event: KeyboardEvent) => keys.current.delete(event.code);
     window.addEventListener('keydown', down);
@@ -70,7 +107,7 @@ export default function FirstPersonExplorer({
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
     };
-  }, [onOpen]);
+  }, [heightAt, onOpen]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -113,6 +150,11 @@ export default function FirstPersonExplorer({
     rigidBody.setTranslation({ x, y, z }, true);
     rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
     playerPosition.current.set(x, y, z);
+    if (!mountedRef.current) {
+      const horseX = x + 3.2;
+      const horseZ = z + 1.8;
+      setHorsePosition([horseX, heightAt(horseX, horseZ), horseZ]);
+    }
     if (typeof travelRequest.yaw === 'number') yaw.current = travelRequest.yaw;
     pitch.current = 0;
     appliedTravelId.current = travelRequest.id;
@@ -131,6 +173,11 @@ export default function FirstPersonExplorer({
       rigidBody.setTranslation({ x, y, z }, true);
       rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
       playerPosition.current.set(x, y, z);
+      if (!mountedRef.current) {
+        const horseX = x + 3.2;
+        const horseZ = z + 1.8;
+        setHorsePosition([horseX, heightAt(horseX, horseZ), horseZ]);
+      }
       if (typeof detail.yaw === 'number') yaw.current = detail.yaw;
       pitch.current = 0;
       appliedTravelId.current = detail.id;
@@ -159,6 +206,11 @@ export default function FirstPersonExplorer({
       rigidBody.setTranslation({ x: travelX, y: travelY, z: travelZ }, true);
       rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
       playerPosition.current.set(travelX, travelY, travelZ);
+      if (!mountedRef.current) {
+        const horseX = travelX + 3.2;
+        const horseZ = travelZ + 1.8;
+        setHorsePosition([horseX, heightAt(horseX, horseZ), horseZ]);
+      }
       if (typeof travelRequest.yaw === 'number') yaw.current = travelRequest.yaw;
       pitch.current = 0;
       appliedTravelId.current = travelRequest.id;
@@ -168,8 +220,9 @@ export default function FirstPersonExplorer({
     }
     const translation = rigidBody.translation();
     playerPosition.current.set(translation.x, translation.y, translation.z);
+    const isMounted = mountedRef.current;
 
-    eye.set(translation.x, translation.y + 1.62, translation.z);
+    eye.set(translation.x, translation.y + (isMounted ? 3.12 : 1.62), translation.z);
     lookDirection.set(
       -Math.sin(yaw.current) * Math.cos(pitch.current),
       Math.sin(pitch.current),
@@ -196,13 +249,28 @@ export default function FirstPersonExplorer({
     const sprinting = wantsToSprint && moving && stamina.current > 2 && !inWater;
     stamina.current = Math.max(
       0,
-      Math.min(100, stamina.current + (sprinting ? -22 : 17) * delta),
+      Math.min(100, stamina.current + (sprinting ? (isMounted ? -14 : -22) : 17) * delta),
     );
-    const speed = inWater ? 4.8 : sprinting ? 22 : 12;
+    const speed = inWater
+      ? isMounted ? 5.8 : 4.8
+      : isMounted
+        ? sprinting ? 34 : 18
+        : sprinting ? 22 : 12;
     if (moving) direction.normalize().multiplyScalar(speed);
+    if (isMounted) {
+      mountMotion.current = moving ? (sprinting ? 'Gallop' : 'Walk') : 'Idle';
+      if (moving && mountedHorse.current) {
+        const desiredYaw = Math.atan2(direction.x, direction.z);
+        const yawDelta = Math.atan2(
+          Math.sin(desiredYaw - mountedHorse.current.rotation.y),
+          Math.cos(desiredYaw - mountedHorse.current.rotation.y),
+        );
+        mountedHorse.current.rotation.y += yawDelta * Math.min(1, delta * 8);
+      }
+    }
     rigidBody.setLinvel({ x: direction.x, y: velocity.y, z: direction.z }, true);
     if (keys.current.has('Space') && Math.abs(velocity.y) < 0.09) {
-      rigidBody.setLinvel({ x: direction.x, y: 6.4, z: direction.z }, true);
+      rigidBody.setLinvel({ x: direction.x, y: isMounted ? 7.2 : 6.4, z: direction.z }, true);
     }
 
     if (translation.y < groundHeight - 5) {
@@ -232,6 +300,11 @@ export default function FirstPersonExplorer({
       onNearby(candidate);
     }
 
+    canMount.current = !isMounted && Math.hypot(
+      translation.x - horsePosition[0],
+      translation.z - horsePosition[2],
+    ) < 4.6;
+
     telemetryFrame.current += 1;
     if (telemetryFrame.current % 6 === 0) {
       const terrain: GameTelemetry['terrain'] = inWater
@@ -249,25 +322,42 @@ export default function FirstPersonExplorer({
         speed: Math.hypot(direction.x, direction.z),
         stamina: stamina.current,
         inWater,
-        mounted: false,
-        canMount: false,
+        mounted: isMounted,
+        canMount: canMount.current,
         terrain,
       });
     }
   });
 
   return (
-    <RigidBody
-      ref={body}
-      position={spawn}
-      colliders={false}
-      enabledRotations={[false, false, false]}
-      linearDamping={9}
-      friction={1.05}
-      canSleep={false}
-      ccd
-    >
-      <CapsuleCollider args={[0.52, 0.34]} position={[0, 0.84, 0]} />
-    </RigidBody>
+    <>
+      {enabled && !mounted && (
+        <RigidBody type="fixed" colliders={false} position={horsePosition} rotation={[0, horseYaw.current, 0]}>
+          <CuboidCollider args={[0.62, 1.18, 1.45]} position={[0, 1.18, 0]} />
+          <ArchiveHorse motion={waitingMotion} />
+        </RigidBody>
+      )}
+      <RigidBody
+        ref={body}
+        position={spawn}
+        colliders={false}
+        enabledRotations={[false, false, false]}
+        linearDamping={9}
+        friction={1.05}
+        canSleep={false}
+        ccd
+      >
+        <CapsuleCollider
+          key={mounted ? 'mounted' : 'foot'}
+          args={mounted ? [0.82, 0.48] : [0.52, 0.34]}
+          position={[0, mounted ? 1.18 : 0.84, 0]}
+        />
+        {enabled && mounted && (
+          <group ref={mountedHorse} rotation-y={horseYaw.current}>
+            <ArchiveHorse motion={mountMotion} />
+          </group>
+        )}
+      </RigidBody>
+    </>
   );
 }

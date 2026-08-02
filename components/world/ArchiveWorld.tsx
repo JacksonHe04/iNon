@@ -1134,9 +1134,13 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
               <strong>
                 {nearbyDestination
                   ? nearbyDestination.subtitle
-                  : collectedKeepsakes.length === WORLD_KEEPSAKE_COUNT
-                    ? '纸片已经齐全，继续寻找尚未抵达的场域'
-                    : `寻找林中旧纸片 · ${collectedKeepsakes.length} / ${WORLD_KEEPSAKE_COUNT}`}
+                  : telemetry.canMount
+                    ? '林径马匹就在身旁 · F 骑乘'
+                    : telemetry.mounted
+                      ? '骑乘穿越林地 · F 下马'
+                      : collectedKeepsakes.length === WORLD_KEEPSAKE_COUNT
+                        ? '纸片已经齐全，继续寻找尚未抵达的场域'
+                        : `寻找林中旧纸片 · ${collectedKeepsakes.length} / ${WORLD_KEEPSAKE_COUNT}`}
               </strong>
             </div>
             <nav aria-label="世界菜单">
@@ -1165,7 +1169,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
               <span>FIELD / LIVE</span>
               <strong>绿迹档案世界</strong>
             </div>
-            <p>第一人称探索 · 拖动镜头 · WASD 移动 · Shift 疾跑 · 点击地图传送 · 空格跳跃</p>
+            <p>{telemetry.mounted ? '骑乘中 · WASD 移动 · Shift 奔驰 · F 下马 · 空格跃起' : '第一人称探索 · 拖动镜头 · WASD 移动 · Shift 疾跑 · 点击地图传送 · 空格跳跃'}</p>
           </div>
           <WorldMinimap
             telemetry={telemetry}
@@ -1181,6 +1185,18 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             >
               <kbd>E</kbd>
               进入{getBlockTitle(nearbyDestination.blockType)}场域
+            </button>
+          )}
+          {telemetry.canMount && !nearbyDestination && (
+            <button
+              className="archive-world-interact"
+              onClick={() => {
+                window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyF' }));
+                window.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyF' }));
+              }}
+            >
+              <kbd>F</kbd>
+              骑乘林径马匹
             </button>
           )}
           <div className="archive-world-mobile-controls" aria-label="移动控制">
@@ -1203,7 +1219,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           <div className="archive-world-status" aria-label="玩家状态">
             <div className="archive-world-status__compass">
               <span>{telemetry.terrain === 'river' ? '河谷' : telemetry.terrain === 'mountain' ? '山地' : telemetry.terrain === 'forest' ? '森林' : '村落'}</span>
-              <strong>{telemetry.inWater ? '涉水中' : telemetry.speed > 16 ? '疾跑中' : telemetry.speed > 0 ? '行进中' : '驻足'}</strong>
+              <strong>{telemetry.mounted ? telemetry.speed > 24 ? '奔驰中' : telemetry.speed > 0 ? '骑行中' : '马背驻足' : telemetry.inWater ? '涉水中' : telemetry.speed > 16 ? '疾跑中' : telemetry.speed > 0 ? '行进中' : '驻足'}</strong>
             </div>
             <div className="archive-world-status__bar">
               <label><span>体力</span><b>{Math.round(telemetry.stamina)}</b></label>
