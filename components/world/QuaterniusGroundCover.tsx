@@ -15,8 +15,8 @@ import {
 
 const CHUNK_SIZE = 28;
 const CHUNK_RADIUS = 2;
-const ITEMS_PER_CHUNK = 20;
-const MAX_PER_VARIANT = 120;
+const ITEMS_PER_CHUNK = 30;
+const MAX_PER_VARIANT = 240;
 
 export default function QuaterniusGroundCover({
   playerPosition,
@@ -34,14 +34,15 @@ export default function QuaterniusGroundCover({
   const rock1 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Rock_Medium_1.gltf`);
   const rock2 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Rock_Medium_2.gltf`);
   const rock3 = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Rock_Medium_3.gltf`);
+  const bush = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Bush_Common.gltf`);
   const fern = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Fern_1.gltf`);
   const grass = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Grass_Common_Short.gltf`);
   const mushroom = useGLTF(`${QUATERNIUS_NATURE_ROOT}/Mushroom_Common.gltf`);
   const assets = useMemo(
-    () => [rock1, rock2, rock3, fern, grass, mushroom].map(
+    () => [rock1, rock2, rock3, bush, fern, grass, mushroom].map(
         (asset) => collectQuaterniusParts(asset.scene),
       ),
-    [rock1, rock2, rock3, fern, grass, mushroom],
+    [rock1, rock2, rock3, bush, fern, grass, mushroom],
   );
   const meshes = useRef<Array<Array<InstancedMesh | null>>>([]);
   const lastChunk = useRef('');
@@ -78,29 +79,33 @@ export default function QuaterniusGroundCover({
               ? 1
               : variantRoll < 0.102
                 ? 2
-                : variantRoll < 0.42
+                : variantRoll < 0.23
                   ? 3
-                  : variantRoll < 0.94
+                  : variantRoll < 0.52
                     ? 4
-                    : 5;
+                    : variantRoll < 0.95
+                      ? 5
+                      : 6;
           const pathClearance = isInsideWorldTrail(x, z, 0.75);
           const siteClearance = destinations.some(
-            (site) => Math.hypot(x - site.position[0], z - site.position[2]) < 7,
+            (site) => Math.hypot(x - site.position[0], z - site.position[2]) < 5.5,
           );
           const infrastructureClearance = clearings.some(
             ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
           );
-          const spawnClearance = Math.hypot(x, z + 2) < 10;
+          const spawnClearance = Math.hypot(x, z + 2) < 7.5;
           if (pathClearance || siteClearance || infrastructureClearance || spawnClearance || y <= waterLevel + 0.16) continue;
           if (placements[variant].length >= MAX_PER_VARIANT) continue;
 
           const rawScale = random();
           const scale = variant <= 2
             ? 0.24 + rawScale * 0.42
-            : variant === 5
+            : variant === 3
+              ? 0.42 + rawScale * 0.38
+              : variant === 6
                 ? 0.28 + rawScale * 0.26
                 : 0.36 + rawScale * 0.46;
-          dummy.position.set(x, y + (variant === 5 ? 0.015 : 0), z);
+          dummy.position.set(x, y + (variant === 6 ? 0.015 : 0), z);
           dummy.rotation.set(
             variant <= 2 ? (random() - 0.5) * 0.18 : 0,
             random() * Math.PI * 2,
@@ -146,7 +151,7 @@ export default function QuaterniusGroundCover({
                 meshes.current[variantIndex][partIndex] = mesh;
               }}
               args={[part.geometry, part.material, MAX_PER_VARIANT]}
-              castShadow={variantIndex <= 3}
+              castShadow={variantIndex <= 4}
               receiveShadow
             />
           ))}
