@@ -2,7 +2,8 @@
 
 import { useMemo } from 'react';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
-import { Euler, Matrix4, Quaternion, Vector3 } from 'three';
+import { Matrix4 } from 'three';
+import ArchiveHomeEcology from '@/components/world/ArchiveHomeEcology';
 import {
   HOME_GROUNDS_ROOT,
   InstancedAsset,
@@ -12,40 +13,30 @@ import {
   TintedGltfAsset,
 } from '@/components/world/ArchiveAsset';
 import { QUATERNIUS_NATURE_ROOT } from '@/components/world/QuaterniusForest';
-import { WORLD_HOME_POSITION } from '@/components/world/archiveWorldConstants';
-import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
-
-const [HOME_X, , HOME_Z] = WORLD_HOME_POSITION;
-const HOME_GROUND_Y = terrainHeightAt(HOME_X, HOME_Z);
-
-function localGroundY(x: number, z: number) {
-  return terrainHeightAt(HOME_X + x, HOME_Z + z) - HOME_GROUND_Y;
-}
-
-function transform(x: number, z: number, rotationY = 0, scale = 1) {
-  return new Matrix4().compose(
-    new Vector3(x, localGroundY(x, z), z),
-    new Quaternion().setFromEuler(new Euler(0, rotationY, 0)),
-    new Vector3(scale, scale, scale),
-  );
-}
+import {
+  ARCHIVE_HOME_GROUND_Y,
+  ARCHIVE_HOME_X,
+  ARCHIVE_HOME_Z,
+  archiveHomeGroundTransform,
+  archiveHomeLocalGroundY,
+} from '@/components/world/archiveHomeGroundMath';
 
 function makeFenceTransforms() {
   const placements: Matrix4[] = [];
   for (let x = -14; x <= 16; x += 2) {
-    placements.push(transform(x, -11, 0, 1.04));
-    if (x < -4 || x > 2) placements.push(transform(x, 26, Math.PI, 1.04));
+    placements.push(archiveHomeGroundTransform(x, -11, 0, 1.04));
+    if (x < -4 || x > 2) placements.push(archiveHomeGroundTransform(x, 26, Math.PI, 1.04));
   }
   for (let z = -9; z <= 24; z += 2) {
-    placements.push(transform(-16, z, Math.PI / 2, 1.04));
-    placements.push(transform(17, z, -Math.PI / 2, 1.04));
+    placements.push(archiveHomeGroundTransform(-16, z, Math.PI / 2, 1.04));
+    placements.push(archiveHomeGroundTransform(17, z, -Math.PI / 2, 1.04));
   }
   return placements;
 }
 
 function GardenPatch({ position, rotation = 0 }: { position: [number, number]; rotation?: number }) {
   const [x, z] = position;
-  const y = localGroundY(x, z);
+  const y = archiveHomeLocalGroundY(x, z);
   return (
     <group position={[x, y, z]} rotation-y={rotation}>
       <TintedGltfAsset
@@ -59,21 +50,14 @@ function GardenPatch({ position, rotation = 0 }: { position: [number, number]; r
 }
 
 function GardenPlanting() {
-  const shrubs = useMemo(() => [
-    transform(4, -6, 0.2, 0.78),
-    transform(7, -6, -0.5, 0.88),
-    transform(10, -5.5, 0.8, 0.72),
-    transform(12.5, -3.5, -0.3, 0.82),
-  ], []);
   const ferns = useMemo(() => [
-    transform(4.5, -3.6, 0.2, 0.86),
-    transform(7.7, -3.8, -0.5, 1.05),
-    transform(11, -2.4, 0.8, 0.9),
-    transform(12.8, -0.3, -0.3, 1.08),
+    archiveHomeGroundTransform(4.5, -3.6, 0.2, 0.86),
+    archiveHomeGroundTransform(7.7, -3.8, -0.5, 1.05),
+    archiveHomeGroundTransform(11, -2.4, 0.8, 0.9),
+    archiveHomeGroundTransform(12.8, -0.3, -0.3, 1.08),
   ], []);
   return (
     <group name="archive-home-garden">
-      <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/Bush_Common.gltf`} transforms={shrubs} />
       <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/Fern_1.gltf`} transforms={ferns} />
       <GardenPatch position={[4.1, -8.2]} rotation={0.12} />
       <GardenPatch position={[8.5, -8]} rotation={-0.08} />
@@ -86,9 +70,9 @@ function GardenPlanting() {
 function FireCircle() {
   const x = -10.5;
   const z = 14.5;
-  const y = localGroundY(x, z);
-  const firstLogY = localGroundY(x - 3.4, z + 0.8) - y + 0.32;
-  const secondLogY = localGroundY(x - 2.7, z + 2.6) - y + 0.29;
+  const y = archiveHomeLocalGroundY(x, z);
+  const firstLogY = archiveHomeLocalGroundY(x - 3.4, z + 0.8) - y + 0.32;
+  const secondLogY = archiveHomeLocalGroundY(x - 2.7, z + 2.6) - y + 0.29;
   return (
     <group name="archive-home-fire-circle" position={[x, y, z]}>
       <TintedGltfAsset src={`${HOME_GROUNDS_ROOT}/Campfire.glb`} tint="#d0ba83" scale={0.38} />
@@ -115,7 +99,7 @@ function FireCircle() {
 function FadedPool() {
   const x = 9;
   const z = 10.5;
-  const y = localGroundY(x, z) - 0.55;
+  const y = archiveHomeLocalGroundY(x, z) - 0.55;
   return (
     <group name="archive-home-swimming-pool" position={[x, y, z]} rotation-y={-0.08}>
       <TintedGltfAsset
@@ -137,7 +121,7 @@ export default function ArchiveHomeGrounds() {
     <RigidBody
       type="fixed"
       colliders={false}
-      position={[HOME_X, HOME_GROUND_Y, HOME_Z]}
+      position={[ARCHIVE_HOME_X, ARCHIVE_HOME_GROUND_Y, ARCHIVE_HOME_Z]}
       name="single-coastal-home-grounds"
     >
       <InstancedAsset src={`${MEDIEVAL_ROOT}/Prop_WoodenFence_Extension1.gltf`} transforms={fences} />
@@ -147,6 +131,7 @@ export default function ArchiveHomeGrounds() {
       <CuboidCollider args={[5.6, 0.8, 0.24]} position={[-10.4, 0.8, 26]} />
       <CuboidCollider args={[6.4, 0.8, 0.24]} position={[10.6, 0.8, 26]} />
       <GardenPlanting />
+      <ArchiveHomeEcology />
       <FadedPool />
       <FireCircle />
       <PropAsset name="Barrel" position={[-14.1, 0.1, -6.7]} scale={0.92} />
