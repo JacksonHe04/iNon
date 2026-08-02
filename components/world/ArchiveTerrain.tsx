@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { RigidBody, TrimeshCollider } from '@react-three/rapier';
@@ -70,9 +70,7 @@ function terrainTilesAround(chunkX: number, chunkZ: number) {
   return tiles;
 }
 
-export function InfiniteTerrain({ playerPosition }: { playerPosition: MutableRefObject<Vector3> }) {
-  const [chunk, setChunk] = useState({ x: 0, z: 0 });
-  const chunkRef = useRef(chunk);
+function TerrainSurfaceMaterial() {
   const groundTexture = useTexture('/archive-world/forest-floor-albedo-v2.webp');
   const rockTexture = useTexture('/archive-world/polyhaven-mountain/rocky_terrain_03_diff_1k.jpg');
   const snowTexture = useTexture('/archive-world/polyhaven-mountain/snow_02_diff_1k.jpg');
@@ -93,6 +91,12 @@ export function InfiniteTerrain({ playerPosition }: { playerPosition: MutableRef
     uPath: { value: new Color('#9a8b67') },
     uShore: { value: new Color('#9b9377') },
   }), [groundTexture, rockTexture, snowTexture]);
+  return <shaderMaterial uniforms={uniforms} vertexShader={terrainVertex} fragmentShader={terrainFragment} />;
+}
+
+export function InfiniteTerrain({ playerPosition }: { playerPosition: MutableRefObject<Vector3> }) {
+  const [chunk, setChunk] = useState({ x: 0, z: 0 });
+  const chunkRef = useRef(chunk);
   const tiles = useMemo(() => terrainTilesAround(chunk.x, chunk.z), [chunk.x, chunk.z]);
 
   useFrame(() => {
@@ -108,7 +112,9 @@ export function InfiniteTerrain({ playerPosition }: { playerPosition: MutableRef
     <RigidBody key={tile.key} type="fixed" colliders={false} position={[tile.centerX, 0, tile.centerZ]}>
       <TrimeshCollider args={[tile.vertices, tile.indices]} friction={1.15} />
       <mesh receiveShadow geometry={tile.geometry}>
-        <shaderMaterial uniforms={uniforms} vertexShader={terrainVertex} fragmentShader={terrainFragment} />
+        <Suspense fallback={<meshStandardMaterial color="#526852" roughness={1} metalness={0} />}>
+          <TerrainSurfaceMaterial />
+        </Suspense>
       </mesh>
     </RigidBody>
   ));

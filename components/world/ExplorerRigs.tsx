@@ -1,6 +1,6 @@
 'use client';
 
-import type { MutableRefObject, RefObject } from 'react';
+import { Suspense, type MutableRefObject, type RefObject } from 'react';
 import { CapsuleCollider, CuboidCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier';
 import type { Group } from 'three';
 import ArchiveHorse, { type HorseMotion } from '@/components/world/ArchiveHorse';
@@ -31,7 +31,9 @@ export default function ExplorerRigs({
       {enabled && !mounted && (
         <RigidBody type="fixed" colliders={false} position={horsePosition} rotation={[0, horseYaw.current, 0]}>
           <CuboidCollider args={[0.62, 1.18, 1.45]} position={[0, 1.18, 0]} />
-          <ArchiveHorse motion={waitingMotion} />
+          <Suspense fallback={null}>
+            <ArchiveHorse motion={waitingMotion} />
+          </Suspense>
         </RigidBody>
       )}
       <RigidBody
@@ -51,7 +53,9 @@ export default function ExplorerRigs({
         />
         {enabled && mounted && (
           <group ref={mountedHorse} rotation-y={horseYaw.current}>
-            <ArchiveHorse motion={mountMotion} />
+            <Suspense fallback={null}>
+              <ArchiveHorse motion={mountMotion} />
+            </Suspense>
           </group>
         )}
       </RigidBody>

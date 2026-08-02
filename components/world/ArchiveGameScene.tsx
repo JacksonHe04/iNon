@@ -97,6 +97,8 @@ export default function ArchiveGameScene({
       <Diagnostics onReport={onDiagnostics} />
       <Suspense fallback={null}>
         <MountainPanorama playerPosition={playerPosition} />
+      </Suspense>
+      <Suspense fallback={null}>
         <QuaterniusForest
           playerPosition={playerPosition}
           destinations={destinations}
@@ -110,6 +112,8 @@ export default function ArchiveGameScene({
           heightAt={terrainHeightAt}
           waterLevel={WATER_LEVEL}
         />
+      </Suspense>
+      <Suspense fallback={null}>
         <ArchiveWildlife playerPosition={playerPosition} heightAt={terrainHeightAt} animalsEnabled={entered} />
         <ArchiveBirdFlock playerPosition={playerPosition} heightAt={terrainHeightAt} />
         <ArchiveCompanionDog
@@ -118,6 +122,8 @@ export default function ArchiveGameScene({
           heightAt={terrainHeightAt}
           onProximity={onCompanionProximity}
         />
+      </Suspense>
+      <Suspense fallback={null}>
         <ArchiveAquaticLife enabled={entered} playerPosition={playerPosition} />
         <ArchiveOceanLife enabled={entered} playerPosition={playerPosition} />
       </Suspense>
@@ -133,10 +139,14 @@ export default function ArchiveGameScene({
       </Suspense>
       <Suspense fallback={null}>
         <Physics gravity={[0, -14, 0]} timeStep="vary">
-          <InfiniteTerrain playerPosition={playerPosition} />
+          <Suspense fallback={null}>
+            <InfiniteTerrain playerPosition={playerPosition} />
+          </Suspense>
           <ArchiveForestColliders playerPosition={playerPosition} destinations={destinations} />
-          <RiverFootbridge />
-          <CoastalArchiveHome onInspect={onInspectHomeRecord} />
+          <Suspense fallback={null}>
+            <RiverFootbridge />
+            <CoastalArchiveHome onInspect={onInspectHomeRecord} />
+          </Suspense>
           <FirstPersonExplorer
             enabled={entered}
             destinations={destinations}
