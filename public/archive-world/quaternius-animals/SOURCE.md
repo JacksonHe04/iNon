@@ -1,7 +1,8 @@
 # Quaternius Ultimate Animated Animal Pack
 
-The deer, fox, horse, Shiba Inu, stag, wolf, alpaca, and donkey models in this directory come from the **Ultimate Animated
-Animal Pack** by Quaternius.
+The alpaca, bull, cow, deer, donkey, fox, horse, Husky, Shiba Inu, stag, and
+wolf models in this directory come from the **Ultimate Animated Animal Pack**
+by Quaternius.
 
 - Source: https://quaternius.com/packs/ultimateanimatedanimals.html
 - License: CC0 1.0 Universal
