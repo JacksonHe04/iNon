@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import {
   ACESFilmicToneMapping,
@@ -38,6 +38,7 @@ import type { WorldDialogueContext } from '@/components/world/archiveWorldTeleme
 import { useArchiveFieldRoute } from '@/hooks/useArchiveFieldRoute';
 import type { CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
 import { useArchiveResting } from '@/hooks/useArchiveResting';
+import { useArchiveWorldClock } from '@/hooks/useArchiveWorldClock';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -76,16 +77,20 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   });
   const lastRecoveredKeepsake = allKeepsakes.find((record) => record.id === lastKeepsake);
   const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
+  const worldClock = useArchiveWorldClock({ owner: data.basic.name, running: worldEnabled });
+  const advanceAfterRest = useCallback(() => worldClock.advance(360), [worldClock.advance]);
   const resting = useArchiveResting({
     owner: data.basic.name,
     telemetry,
     enabled: worldEnabled,
+    onRested: advanceAfterRest,
   });
   const worldDialogueContext = buildWorldDialogueContext({
     telemetry,
     rations: resting.rations,
     companionNearby,
     collectedKeepsakeIds: collectedKeepsakes,
+    worldTime: worldClock,
   });
 
   useEffect(() => {
@@ -175,6 +180,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
         >
           <ArchiveGameScene
             entered={worldEnabled}
+            worldTime={worldClock}
             destinations={OUTDOOR_DESTINATIONS}
             playerPosition={playerPosition}
             travelRequest={travelRequest}
@@ -216,6 +222,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           fieldRouteStageIndex={fieldRoute.stageIndex}
           recentFieldRouteStage={fieldRoute.recentStage}
           restSite={resting.restSite}
+          worldTime={worldClock}
           onRest={resting.rest}
           onToggleSound={() => setSoundEnabled((enabled) => !enabled)}
           onOpenInventory={() => {
@@ -269,7 +276,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           <strong>{resting.feedback.status === 'rested' ? '体力已经恢复' : '背包里没有足够口粮'}</strong>
           <small>
             {resting.feedback.status === 'rested'
-              ? `${resting.feedback.site.title} · ${resting.feedback.site.rationCost ? '口粮 -1' : '家园补给'}`
+              ? `${resting.feedback.site.title} · ${resting.feedback.site.rationCost ? '口粮 -1' : '家园补给'} · 时间 +6H`
               : '返回主屋补给，或在背包中检查物资'}
           </small>
         </div>

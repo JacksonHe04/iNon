@@ -3,6 +3,7 @@ import type { Vector3 } from 'three';
 import type { BlockType } from '@/types/layout';
 import type { HomeExhibit, HomeRecordId } from '@/components/world/archiveHomeRecords';
 import type { CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
+import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
 
 export interface GameDestination {
   blockType: BlockType;
@@ -34,6 +35,7 @@ export interface GameTravelRequest {
 
 export interface ArchiveGameSceneProps {
   entered: boolean;
+  worldTime: WorldTimeSnapshot;
   destinations: GameDestination[];
   playerPosition: MutableRefObject<Vector3>;
   travelRequest: GameTravelRequest | null;

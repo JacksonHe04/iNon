@@ -13,11 +13,14 @@ import {
   RepeatWrapping,
   ShaderMaterial,
   SRGBColorSpace,
+  MeshBasicMaterial,
   type Vector3,
 } from 'three';
 import { TERRAIN_CHUNK_SIZE, TERRAIN_SEGMENTS, WATER_LEVEL } from '@/components/world/archiveWorldConstants';
 import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import { terrainFragment, terrainVertex, waterFragment, waterVertex } from '@/components/world/archiveWorldShaders';
+import { useWorldLightTarget } from '@/components/world/ArchiveWorldLighting';
+import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
 
 interface TerrainTile {
   key: string;
@@ -120,9 +123,17 @@ export function InfiniteTerrain({ playerPosition }: { playerPosition: MutableRef
   ));
 }
 
-export function MountainPanorama({ playerPosition }: { playerPosition: MutableRefObject<Vector3> }) {
+export function MountainPanorama({
+  playerPosition,
+  worldTime,
+}: {
+  playerPosition: MutableRefObject<Vector3>;
+  worldTime: WorldTimeSnapshot;
+}) {
   const texture = useTexture('/archive-world/verdant-mountain-panorama-v2.webp');
   const group = useRef<Group>(null);
+  const material = useRef<MeshBasicMaterial>(null);
+  const lightTarget = useWorldLightTarget(worldTime);
   texture.colorSpace = SRGBColorSpace;
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
@@ -130,12 +141,13 @@ export function MountainPanorama({ playerPosition }: { playerPosition: MutableRe
   useFrame(() => {
     if (!group.current) return;
     group.current.position.set(playerPosition.current.x, 18, playerPosition.current.z);
+    material.current?.color.lerp(lightTarget.panorama, 0.025);
   });
   return (
     <group ref={group}>
       <mesh rotation-y={Math.PI * 0.58}>
         <sphereGeometry args={[255, 64, 32]} />
-        <meshBasicMaterial map={texture} side={BackSide} fog={false} toneMapped={false} />
+        <meshBasicMaterial ref={material} map={texture} side={BackSide} fog={false} toneMapped={false} />
       </mesh>
     </group>
   );

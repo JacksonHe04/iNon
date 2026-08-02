@@ -11,6 +11,7 @@ import WorldFieldRoute from '@/components/world/WorldFieldRoute';
 import type { FieldRouteStage } from '@/components/world/archiveFieldRoute';
 import type { CompanionBehavior, CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
 import type { WorldRestSite } from '@/components/world/archiveWorldRest';
+import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
 
 const COMPANION_BEHAVIOR_LABELS: Record<CompanionBehavior, string> = {
   resting: '在身边休息',
@@ -35,6 +36,7 @@ export default function WorldHud({
   fieldRouteStageIndex,
   recentFieldRouteStage,
   restSite,
+  worldTime,
   onOpenInventory,
   onToggleSound,
   onTalkToCompanion,
@@ -51,6 +53,7 @@ export default function WorldHud({
   fieldRouteStageIndex: number;
   recentFieldRouteStage: FieldRouteStage | null;
   restSite: WorldRestSite | null;
+  worldTime: WorldTimeSnapshot;
   onOpenInventory: () => void;
   onToggleSound: () => void;
   onTalkToCompanion: () => void;
@@ -186,7 +189,7 @@ export default function WorldHud({
 
       <div className="archive-world-status" aria-label="玩家状态">
         <div className="archive-world-status__compass">
-          <span>{worldLocationLabel(telemetry)} · 生态 {ARCHIVE_SPECIES_COUNT} 种</span>
+          <span>{worldLocationLabel(telemetry)} · {worldTime.phaseLabel} {worldTime.clockLabel}</span>
           <strong>{worldMotionLabel(telemetry)}</strong>
         </div>
         <div className="archive-world-status__bar">
@@ -197,7 +200,7 @@ export default function WorldHud({
           <label><span>状态</span><b>100</b></label>
           <i><em style={{ width: '100%' }} /></i>
         </div>
-        <p>ALT {telemetry.y.toFixed(1)} M · SPD {telemetry.speed.toFixed(1)}</p>
+        <p>DAY {worldTime.day} · 生态 {ARCHIVE_SPECIES_COUNT} 种 · ALT {telemetry.y.toFixed(1)} M · SPD {telemetry.speed.toFixed(1)}</p>
         <p>苔苔 · {COMPANION_BEHAVIOR_LABELS[companionTelemetry.behavior]} · {companionDistance} M</p>
       </div>
     </div>

@@ -1,9 +1,8 @@
 'use client';
 
-import { Suspense, useEffect, useRef } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { Suspense, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
-import { Fog } from 'three';
 import FirstPersonExplorer from '@/components/world/FirstPersonExplorer';
 import QuaterniusForest from '@/components/world/QuaterniusForest';
 import QuaterniusGroundCover from '@/components/world/QuaterniusGroundCover';
@@ -26,6 +25,7 @@ import {
 } from '@/components/world/archiveWorldConstants';
 import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import type { ArchiveGameSceneProps } from '@/components/world/archiveGameTypes';
+import ArchiveWorldLighting from '@/components/world/ArchiveWorldLighting';
 
 export type {
   ArchiveGameSceneProps,
@@ -75,6 +75,7 @@ function Diagnostics({ onReport }: { onReport: (message: string) => void }) {
 
 export default function ArchiveGameScene({
   entered,
+  worldTime,
   destinations,
   playerPosition,
   travelRequest,
@@ -89,35 +90,12 @@ export default function ArchiveGameScene({
   onInspectHomeRecord,
   homeExhibits,
 }: ArchiveGameSceneProps) {
-  const { scene } = useThree();
-
-  useEffect(() => {
-    scene.fog = new Fog('#667565', 24, 215);
-    return () => {
-      scene.fog = null;
-    };
-  }, [scene]);
-
   return (
     <>
-      <color attach="background" args={['#919d8b']} />
-      <ambientLight intensity={0.85} color="#d8d2b8" />
-      <hemisphereLight args={['#cbd0bd', '#24392c', 1.3]} />
-      <directionalLight
-        castShadow
-        position={[-32, 42, 22]}
-        intensity={2.6}
-        color="#e2d4aa"
-        shadow-mapSize={[2048, 2048]}
-        shadow-camera-far={150}
-        shadow-camera-left={-75}
-        shadow-camera-right={75}
-        shadow-camera-top={75}
-        shadow-camera-bottom={-75}
-      />
+      <ArchiveWorldLighting worldTime={worldTime} />
       <Diagnostics onReport={onDiagnostics} />
       <Suspense fallback={null}>
-        <MountainPanorama playerPosition={playerPosition} />
+        <MountainPanorama playerPosition={playerPosition} worldTime={worldTime} />
       </Suspense>
       <Suspense fallback={null}>
         <QuaterniusForest

@@ -6,6 +6,7 @@ import {
 import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import { worldBiomeAt, type WorldBiome } from '@/components/world/archiveWorldBiomes';
 import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
+import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
 
 const BIOME_LABELS: Record<WorldBiome, string> = {
   coast: '灰绿海岸',
@@ -21,7 +22,6 @@ export const WORLD_LOCATION_LABELS = [
 export const WORLD_MOTION_LABELS = [
   '自由飞行', '空中悬停', '马背奔驰', '马背行进', '马背驻足', '涉水', '疾跑', '行进', '驻足',
 ] as const;
-
 export interface WorldDialogueContext {
   location: string;
   motion: string;
@@ -31,6 +31,9 @@ export interface WorldDialogueContext {
   heading: number;
   stamina: number;
   rations: number;
+  day: number;
+  clockLabel: string;
+  phaseLabel: string;
   companionNearby: boolean;
   collectedKeepsakeIds: string[];
 }
@@ -67,11 +70,13 @@ export function buildWorldDialogueContext({
   rations,
   companionNearby,
   collectedKeepsakeIds,
+  worldTime,
 }: {
   telemetry: GameTelemetry;
   rations: number;
   companionNearby: boolean;
   collectedKeepsakeIds: string[];
+  worldTime: WorldTimeSnapshot;
 }): WorldDialogueContext {
   return {
     location: worldLocationLabel(telemetry),
@@ -82,6 +87,9 @@ export function buildWorldDialogueContext({
     heading: Math.round(telemetry.heading),
     stamina: Math.round(telemetry.stamina),
     rations,
+    day: worldTime.day,
+    clockLabel: worldTime.clockLabel,
+    phaseLabel: worldTime.phaseLabel,
     companionNearby,
     collectedKeepsakeIds,
   };
