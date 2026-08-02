@@ -1,7 +1,7 @@
 import type { MutableRefObject } from 'react';
 import type { Vector3 } from 'three';
 import type { BlockType } from '@/types/layout';
-import type { HomeRecordId } from '@/components/world/archiveHomeRecords';
+import type { HomeExhibit, HomeRecordId } from '@/components/world/archiveHomeRecords';
 
 export interface GameDestination {
   blockType: BlockType;
@@ -44,6 +44,7 @@ export interface ArchiveGameSceneProps {
   collectedKeepsakes: string[];
   onCollectKeepsake: (id: string) => void;
   onInspectHomeRecord: (record: HomeRecordId) => void;
+  homeExhibits: HomeExhibit[];
 }
 
 export interface FirstPersonExplorerProps {

@@ -28,7 +28,10 @@ import {
   type WorldWaypoint,
 } from '@/components/world/archiveWorldConfig';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
-import type { HomeRecordId } from '@/components/world/archiveHomeRecords';
+import {
+  buildHomeExhibits,
+  type HomeRecordId,
+} from '@/components/world/archiveHomeRecords';
 import { buildArchiveKeepsakes } from '@/components/world/archiveKeepsakes';
 
 interface ArchiveWorldProps {
@@ -53,6 +56,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
   const keepsakeStorageKey = `inon-world-keepsakes-${data.basic.name}`;
   const allKeepsakes = useMemo(() => buildArchiveKeepsakes(data), [data]);
+  const homeExhibits = useMemo(() => buildHomeExhibits(data), [data]);
   const recoveredKeepsakes = allKeepsakes.filter((record) => collectedKeepsakes.includes(record.id));
   const lastRecoveredKeepsake = allKeepsakes.find((record) => record.id === lastKeepsake);
   const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
@@ -155,6 +159,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
               releasePointerLock();
               setSelectedHomeRecord(record);
             }}
+            homeExhibits={homeExhibits}
           />
         </Canvas>
       </div>

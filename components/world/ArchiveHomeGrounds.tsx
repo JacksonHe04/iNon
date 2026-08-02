@@ -1,9 +1,8 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useMemo } from 'react';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
-import { Euler, Matrix4, PointLight, Quaternion, Vector3 } from 'three';
+import { Euler, Matrix4, Quaternion, Vector3 } from 'three';
 import {
   HOME_GROUNDS_ROOT,
   InstancedAsset,
@@ -85,11 +84,6 @@ function GardenPlanting() {
 }
 
 function FireCircle() {
-  const light = useRef<PointLight>(null);
-  useFrame(({ clock }) => {
-    if (!light.current) return;
-    light.current.intensity = 16 + Math.sin(clock.elapsedTime * 7.1) * 2.2;
-  });
   const x = -10.5;
   const z = 14.5;
   const y = localGroundY(x, z);
@@ -98,7 +92,7 @@ function FireCircle() {
   return (
     <group name="archive-home-fire-circle" position={[x, y, z]}>
       <TintedGltfAsset src={`${HOME_GROUNDS_ROOT}/Campfire.glb`} tint="#d0ba83" scale={0.38} />
-      <pointLight ref={light} position={[0, 2.1, 0]} color="#d59a52" distance={16} decay={2} castShadow />
+      <pointLight position={[0, 2.1, 0]} color="#d59a52" intensity={14} distance={16} decay={2} />
       <TintedGltfAsset
         src={`${HOME_GROUNDS_ROOT}/LogPile.glb`}
         position={[-3.4, firstLogY, 0.8]}

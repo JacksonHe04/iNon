@@ -72,6 +72,7 @@ export default function ArchiveGameScene({
   collectedKeepsakes,
   onCollectKeepsake,
   onInspectHomeRecord,
+  homeExhibits,
 }: ArchiveGameSceneProps) {
   const { scene } = useThree();
 
@@ -157,6 +158,7 @@ export default function ArchiveGameScene({
             <CoastalArchiveHome
               playerPosition={playerPosition}
               onInspect={onInspectHomeRecord}
+              exhibits={homeExhibits}
             />
           </Suspense>
           <FirstPersonExplorer

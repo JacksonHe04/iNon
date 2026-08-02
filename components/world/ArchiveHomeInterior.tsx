@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { Suspense, useEffect, useState, type ReactNode } from 'react';
+import { Image } from '@react-three/drei';
+import { DoubleSide } from 'three';
 import { FurnitureAsset, MedievalAsset, PropAsset } from '@/components/world/ArchiveAsset';
-import type { HomeRecordId } from '@/components/world/archiveHomeRecords';
+import type { HomeExhibit, HomeRecordId } from '@/components/world/archiveHomeRecords';
 
 function InteractiveFurniture({
   record,
@@ -35,7 +37,117 @@ function InteractiveFurniture({
   );
 }
 
-export default function ArchiveHomeInterior({ onInspect }: { onInspect: (record: HomeRecordId) => void }) {
+function ExhibitImage({
+  exhibit,
+  position,
+  rotation = [0, 0, 0],
+  scale,
+  onInspect,
+}: {
+  exhibit: HomeExhibit;
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  scale: [number, number];
+  onInspect: (record: HomeRecordId) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  useEffect(() => {
+    if (!hovered) return;
+    document.body.style.cursor = 'pointer';
+    return () => { document.body.style.cursor = ''; };
+  }, [hovered]);
+  return (
+    <group
+      name={`database-exhibit-${exhibit.kind}-${exhibit.title}`}
+      position={position}
+      rotation={rotation}
+      scale={hovered ? 1.035 : 1}
+      onClick={(event) => {
+        event.stopPropagation();
+        onInspect(exhibit.recordId);
+      }}
+      onPointerOver={(event) => {
+        event.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={() => setHovered(false)}
+    >
+      <Image
+        url={exhibit.imageUrl}
+        scale={scale}
+        grayscale={0.18}
+        color="#c9c9ad"
+        toneMapped={false}
+        side={DoubleSide}
+      />
+    </group>
+  );
+}
+
+function HomeDataExhibits({
+  exhibits,
+  onInspect,
+}: {
+  exhibits: HomeExhibit[];
+  onInspect: (record: HomeRecordId) => void;
+}) {
+  const music = exhibits.filter((exhibit) => exhibit.kind === 'music');
+  const film = exhibits.find((exhibit) => exhibit.kind === 'film');
+  const book = exhibits.find((exhibit) => exhibit.kind === 'book');
+  const musicLayout = [
+    { position: [-0.72, 1.72, -2.64], rotation: [0, 0, -0.035], scale: [0.48, 0.48] },
+    { position: [-0.14, 1.66, -2.63], rotation: [0, 0, 0.028], scale: [0.46, 0.46] },
+    { position: [1.18, 0.78, 1.56], rotation: [0, -0.04, 0.04], scale: [0.48, 0.48] },
+  ] as const;
+  return (
+    <group name="database-content-visible-inside-home">
+      {music.map((exhibit, index) => {
+        const layout = musicLayout[index] ?? musicLayout[2];
+        return (
+          <Suspense key={exhibit.id} fallback={null}>
+            <ExhibitImage
+              exhibit={exhibit}
+              position={[...layout.position]}
+              rotation={[...layout.rotation]}
+              scale={[...layout.scale]}
+              onInspect={onInspect}
+            />
+          </Suspense>
+        );
+      })}
+      {film && (
+        <Suspense fallback={null}>
+          <ExhibitImage
+            exhibit={film}
+            position={[-1.38, 0.92, 1.34]}
+            rotation={[0, 0.12, -0.035]}
+            scale={[0.42, 0.62]}
+            onInspect={onInspect}
+          />
+        </Suspense>
+      )}
+      {book && (
+        <Suspense fallback={null}>
+          <ExhibitImage
+            exhibit={book}
+            position={[1.34, 1.18, -2.17]}
+            rotation={[0, 0, 0.025]}
+            scale={[0.4, 0.56]}
+            onInspect={onInspect}
+          />
+        </Suspense>
+      )}
+    </group>
+  );
+}
+
+export default function ArchiveHomeInterior({
+  exhibits,
+  onInspect,
+}: {
+  exhibits: HomeExhibit[];
+  onInspect: (record: HomeRecordId) => void;
+}) {
   return (
     <group name="lived-in-archive-interior">
       <InteractiveFurniture record="bedside" label="bed-and-nightstand" onInspect={onInspect}>
@@ -74,6 +186,7 @@ export default function ArchiveHomeInterior({ onInspect }: { onInspect: (record:
       </InteractiveFurniture>
 
       <PropAsset name="Bucket_Metal" position={[-1.72, 0.04, 0.72]} rotation={[0, 0.16, 0]} scale={0.34} />
+      <HomeDataExhibits exhibits={exhibits} onInspect={onInspect} />
       <PropAsset name="Lantern_Wall" position={[1.82, 1.58, -0.75]} rotation={[0, -Math.PI / 2, 0]} scale={0.72} />
       <pointLight position={[0.6, 1.7, 0.45]} intensity={48} distance={15} decay={1.6} color="#cda867" />
       <pointLight position={[-1.1, 1.15, -1.8]} intensity={22} distance={7} decay={1.5} color="#e0b66d" />

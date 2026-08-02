@@ -2,6 +2,15 @@ import type { ReadmeData } from '@/types';
 
 export type HomeRecordId = 'desk' | 'bookcase' | 'record-box' | 'bedside' | 'letters';
 
+export interface HomeExhibit {
+  id: string;
+  kind: 'music' | 'film' | 'book';
+  recordId: HomeRecordId;
+  title: string;
+  creator: string;
+  imageUrl: string;
+}
+
 export interface HomeRecordEntry {
   title: string;
   meta: string;
@@ -18,6 +27,31 @@ export interface HomeRecord {
   subtitle: string;
   annotation: string;
   entries: HomeRecordEntry[];
+}
+
+export function buildHomeExhibits(data: ReadmeData): HomeExhibit[] {
+  const collect = (
+    items: ReadmeData['library']['music']['works'],
+    kind: HomeExhibit['kind'],
+    recordId: HomeRecordId,
+    limit: number,
+  ) => items
+    .filter((item): item is typeof item & { imageUrl: string } => Boolean(item.imageUrl))
+    .slice(0, limit)
+    .map((item) => ({
+      id: `${kind}:${item.id}`,
+      kind,
+      recordId,
+      title: item.name,
+      creator: item.creator,
+      imageUrl: item.imageUrl,
+    }));
+
+  return [
+    ...collect(data.library.music.works, 'music', 'record-box', 3),
+    ...collect(data.library.film.works, 'film', 'record-box', 1),
+    ...collect(data.library.book.works, 'book', 'bookcase', 1),
+  ];
 }
 
 export function buildHomeRecord(data: ReadmeData, id: HomeRecordId): HomeRecord {
