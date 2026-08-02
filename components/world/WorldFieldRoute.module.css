@@ -1,0 +1,79 @@
+.route {
+  position: absolute;
+  top: 76px;
+  right: 20px;
+  width: min(360px, calc(100vw - 470px));
+  border-top: 1px solid rgb(222 210 170 / 42%);
+  border-bottom: 1px solid rgb(222 210 170 / 24%);
+  padding: 10px 12px 11px;
+  color: #ece4ca;
+  background: linear-gradient(90deg, rgb(25 44 32 / 88%), rgb(48 65 47 / 78%));
+  box-shadow: -9px 9px 0 rgb(10 23 15 / 18%);
+  backdrop-filter: blur(8px);
+}
+
+.route header,
+.route > div { display: flex; align-items: center; }
+.route header { justify-content: space-between; }
+.route header span,
+.route header b {
+  color: #c8b36e;
+  font: 7px/1.4 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.13em;
+}
+
+.route > div { gap: 11px; margin-top: 7px; }
+.route i {
+  display: grid;
+  flex: 0 0 31px;
+  height: 31px;
+  place-items: center;
+  border: 1px solid rgb(211 195 141 / 38%);
+  border-radius: 50%;
+  color: #d1bd79;
+  font: normal 16px/1 var(--font-serif), Georgia, serif;
+}
+
+.route i em { display: block; font-style: normal; transition: transform 180ms ease-out; }
+.route section { min-width: 0; flex: 1; }
+.route section strong,
+.complete strong { font: 500 15px/1.25 var(--font-serif), Georgia, serif; }
+.route p { margin: 3px 0 0; color: rgb(237 228 202 / 58%); font: 9px/1.45 var(--font-serif), Georgia, serif; }
+.route output { color: #d8c789; font: 20px/1 var(--font-serif), Georgia, serif; }
+.route output small { margin-left: 2px; font: 7px/1 var(--font-mono), monospace; }
+.complete { display: grid; gap: 4px; width: min(340px, calc(100vw - 470px)); }
+.complete > span { color: #c8b36e; font: 7px/1.4 var(--font-mono), monospace; letter-spacing: 0.13em; }
+
+.toast {
+  position: absolute;
+  top: 162px;
+  right: 20px;
+  display: grid;
+  width: 260px;
+  gap: 3px;
+  border-left: 3px solid #c5ad67;
+  padding: 11px 14px;
+  color: #eee6cd;
+  background: rgb(24 43 31 / 92%);
+  box-shadow: -8px 9px 0 rgb(10 22 14 / 22%);
+  animation: route-arrive 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.toast span,
+.toast small { color: #c8b36e; font: 7px/1.4 var(--font-mono), monospace; letter-spacing: 0.12em; }
+.toast strong { font: 500 15px/1.3 var(--font-serif), Georgia, serif; }
+.toast small { color: rgb(237 228 202 / 52%); }
+
+@keyframes route-arrive {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 900px) {
+  .route { top: 218px; right: 12px; width: 190px; }
+  .route p { display: none; }
+  .route section strong { font-size: 11px; }
+  .route output { font-size: 15px; }
+  .complete { width: 190px; }
+  .toast { top: 306px; right: 12px; width: 190px; }
+}

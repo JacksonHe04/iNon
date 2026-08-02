@@ -35,6 +35,7 @@ import {
 import { buildArchiveKeepsakes } from '@/components/world/archiveKeepsakes';
 import { buildWorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
 import type { WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
+import { useArchiveFieldRoute } from '@/hooks/useArchiveFieldRoute';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -61,6 +62,11 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const allKeepsakes = useMemo(() => buildArchiveKeepsakes(data), [data]);
   const homeExhibits = useMemo(() => buildHomeExhibits(data), [data]);
   const recoveredKeepsakes = allKeepsakes.filter((record) => collectedKeepsakes.includes(record.id));
+  const fieldRoute = useArchiveFieldRoute({
+    owner: data.basic.name,
+    telemetry,
+    keepsakeCount: recoveredKeepsakes.length,
+  });
   const lastRecoveredKeepsake = allKeepsakes.find((record) => record.id === lastKeepsake);
   const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
   const worldDialogueContext = buildWorldDialogueContext({
@@ -189,6 +195,9 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           keepsakes={recoveredKeepsakes.length}
           soundEnabled={soundEnabled}
           companionNearby={companionNearby}
+          fieldRouteStage={fieldRoute.stage}
+          fieldRouteStageIndex={fieldRoute.stageIndex}
+          recentFieldRouteStage={fieldRoute.recentStage}
           onToggleSound={() => setSoundEnabled((enabled) => !enabled)}
           onOpenInventory={() => {
             releasePointerLock();
@@ -220,7 +229,9 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
         <WorldSatchel
           rations={rations}
           keepsakes={recoveredKeepsakes}
+          fieldRouteStageIndex={fieldRoute.stageIndex}
           onClose={() => setInventoryOpen(false)}
+          onRestartRoute={fieldRoute.restart}
           onUseRation={() => {
             if (rations <= 0) return;
             setRations((current) => Math.max(0, current - 1));

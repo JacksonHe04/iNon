@@ -7,6 +7,8 @@ import WorldMinimap from '@/components/world/WorldMinimap';
 import { ARCHIVE_SPECIES_COUNT } from '@/components/world/archiveSpeciesCatalog';
 import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
 import { worldLocationLabel, worldMotionLabel } from '@/components/world/archiveWorldTelemetry';
+import WorldFieldRoute from '@/components/world/WorldFieldRoute';
+import type { FieldRouteStage } from '@/components/world/archiveFieldRoute';
 
 function dispatchKey(type: 'keydown' | 'keyup', code: string) {
   window.dispatchEvent(new KeyboardEvent(type, { code }));
@@ -18,6 +20,9 @@ export default function WorldHud({
   keepsakes,
   soundEnabled,
   companionNearby,
+  fieldRouteStage,
+  fieldRouteStageIndex,
+  recentFieldRouteStage,
   onOpenInventory,
   onToggleSound,
   onTalkToCompanion,
@@ -28,6 +33,9 @@ export default function WorldHud({
   keepsakes: number;
   soundEnabled: boolean;
   companionNearby: boolean;
+  fieldRouteStage: FieldRouteStage | null;
+  fieldRouteStageIndex: number;
+  recentFieldRouteStage: FieldRouteStage | null;
   onOpenInventory: () => void;
   onToggleSound: () => void;
   onTalkToCompanion: () => void;
@@ -78,6 +86,12 @@ export default function WorldHud({
       </div>
 
       <WorldMinimap telemetry={telemetry} waypoints={WORLD_WAYPOINTS} onTravel={onTravel} />
+      <WorldFieldRoute
+        telemetry={telemetry}
+        stage={fieldRouteStage}
+        stageIndex={fieldRouteStageIndex}
+        recentStage={recentFieldRouteStage}
+      />
 
       {insideHome && (
         <div className="archive-world-home-hint">

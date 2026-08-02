@@ -4,6 +4,27 @@
   border-bottom: 1px solid rgb(222 210 173 / 28%);
 }
 
+.routeJournal {
+  margin-top: 28px;
+  border: 1px solid rgb(222 210 173 / 24%);
+  padding: 18px;
+  background: rgb(25 44 32 / 48%);
+}
+
+.routeJournal summary { display: grid; grid-template-columns: 1fr auto; cursor: pointer; list-style: none; }
+.routeJournal summary::-webkit-details-marker { display: none; }
+.routeJournal summary span { color: #c2ae70; font: 7px/1.4 var(--font-mono), monospace; letter-spacing: .14em; }
+.routeJournal summary strong { grid-row: 2; font: 500 27px/1.2 var(--font-serif), Georgia, serif; }
+.routeJournal summary b { grid-row: 1 / span 2; grid-column: 2; align-self: center; color: #d3c388; font: 400 15px var(--font-serif), Georgia, serif; }
+.routeJournal ol { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; margin: 18px 0 0; padding: 1px; list-style: none; background: rgb(220 209 174 / 15%); }
+.routeJournal li { min-height: 76px; padding: 12px; opacity: .42; background: rgb(24 42 31 / 96%); }
+.routeJournal li span { display: block; color: #c2ae70; font: 7px/1.4 var(--font-mono), monospace; letter-spacing: .1em; }
+.routeJournal li strong { display: block; margin-top: 8px; font: 500 11px/1.4 var(--font-serif), Georgia, serif; }
+.routeJournal li.done { opacity: .74; }
+.routeJournal li.done strong { text-decoration: line-through; text-decoration-color: rgb(197 174 105 / 60%); }
+.routeJournal li.current { opacity: 1; background: #536650; transform: translateY(-5px); }
+.routeJournal > button { margin-top: 14px; border: 0; border-bottom: 1px solid rgb(211 194 141 / 48%); padding: 3px 0; color: rgb(237 229 204 / 60%); background: transparent; font: 9px var(--font-serif), Georgia, serif; }
+
 .fieldGuide summary {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -115,4 +136,6 @@
 @media (max-width: 768px) {
   .fieldGuide > div,
   .fieldNotes > div { grid-template-columns: 1fr; }
+  .routeJournal ol { grid-template-columns: 1fr; }
+  .routeJournal li { min-height: 0; }
 }

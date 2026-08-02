@@ -4,18 +4,23 @@ import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
 import type { ArchiveKeepsake } from '@/components/world/archiveKeepsakes';
 import { ARCHIVE_SPECIES, ARCHIVE_SPECIES_COUNT } from '@/components/world/archiveSpeciesCatalog';
 import styles from '@/components/world/WorldSatchel.module.css';
+import { FIELD_ROUTE_STAGES } from '@/components/world/archiveFieldRoute';
 
 const FIELD_HABITATS = ['家园', '林地', '草原', '河谷', '海岸', '天空'] as const;
 
 export default function WorldSatchel({
   rations,
   keepsakes,
+  fieldRouteStageIndex,
   onUseRation,
+  onRestartRoute,
   onClose,
 }: {
   rations: number;
   keepsakes: ArchiveKeepsake[];
+  fieldRouteStageIndex: number;
   onUseRation: () => void;
+  onRestartRoute: () => void;
   onClose: () => void;
 }) {
   return (
@@ -52,6 +57,25 @@ export default function WorldSatchel({
           <small>留给林径马匹的苹果。</small>
         </div>
       </div>
+      <details className={styles.routeJournal} open>
+        <summary>
+          <span>FIELD ROUTE / JOURNEY</span>
+          <strong>田野路线</strong>
+          <b>{Math.min(fieldRouteStageIndex, FIELD_ROUTE_STAGES.length)} / {FIELD_ROUTE_STAGES.length}</b>
+        </summary>
+        <ol>
+          {FIELD_ROUTE_STAGES.map((stage, index) => (
+            <li
+              key={stage.id}
+              className={index < fieldRouteStageIndex ? styles.done : index === fieldRouteStageIndex ? styles.current : ''}
+            >
+              <span>{stage.folio}</span>
+              <strong>{stage.title}</strong>
+            </li>
+          ))}
+        </ol>
+        <button type="button" onClick={onRestartRoute}>重新开始这段旅程</button>
+      </details>
       <details className={styles.fieldGuide}>
         <summary>
           <span>FIELD GUIDE / VERIFIED</span>
