@@ -57,10 +57,15 @@ function AnimatedAnimal({
   const movementDirection = useRef(new Vector3());
   const fleeDirection = useRef(new Vector3());
 
-  const actions = useMemo(
-    () => new Map(gltf.animations.map((clip) => [clip.name, mixer.clipAction(clip)])),
-    [gltf.animations, mixer],
-  );
+  const actions = useMemo(() => {
+    const map = new Map<string, ReturnType<typeof mixer.clipAction>>();
+    gltf.animations.forEach((clip) => {
+      const action = mixer.clipAction(clip);
+      map.set(clip.name, action);
+      map.set(clip.name.split('|').at(-1) ?? clip.name, action);
+    });
+    return map;
+  }, [gltf.animations, mixer]);
 
   useEffect(() => {
     scene.traverse((child) => {

@@ -6,8 +6,13 @@ export type AnimalSpecies =
   | 'donkey'
   | 'fox'
   | 'husky'
+  | 'llama'
+  | 'pig'
+  | 'pug'
+  | 'sheep'
   | 'stag'
-  | 'wolf';
+  | 'wolf'
+  | 'zebra';
 
 export interface AnimalConfig {
   id: string;
@@ -25,8 +30,13 @@ export const ANIMAL_FILES: Record<AnimalSpecies, string> = {
   donkey: 'Donkey.glb',
   fox: 'Fox.glb',
   husky: 'Husky.glb',
+  llama: 'Llama.glb',
+  pig: 'Pig.glb',
+  pug: 'Pug.glb',
+  sheep: 'Sheep.glb',
   stag: 'Stag.glb',
   wolf: 'Wolf.glb',
+  zebra: 'Zebra.glb',
 };
 
 export const ANIMAL_BEHAVIOUR: Record<AnimalSpecies, {
@@ -42,14 +52,24 @@ export const ANIMAL_BEHAVIOUR: Record<AnimalSpecies, {
   donkey: { fleeDistance: 8, roamingSpeed: 0.84, fleeingSpeed: 4.8, materialTone: 0.78 },
   fox: { fleeDistance: 9, roamingSpeed: 1.28, fleeingSpeed: 6.2, materialTone: 0.72 },
   husky: { fleeDistance: 7, roamingSpeed: 1.18, fleeingSpeed: 6.4, materialTone: 0.76 },
+  llama: { fleeDistance: 9, roamingSpeed: 0.88, fleeingSpeed: 5.3, materialTone: 0.78 },
+  pig: { fleeDistance: 8, roamingSpeed: 0.72, fleeingSpeed: 4.6, materialTone: 0.78 },
+  pug: { fleeDistance: 6, roamingSpeed: 1.06, fleeingSpeed: 5.6, materialTone: 0.82 },
+  sheep: { fleeDistance: 10, roamingSpeed: 0.78, fleeingSpeed: 5.1, materialTone: 0.82 },
   stag: { fleeDistance: 14, roamingSpeed: 1.02, fleeingSpeed: 7.4, materialTone: 0.72 },
   wolf: { fleeDistance: 8, roamingSpeed: 1.2, fleeingSpeed: 6.6, materialTone: 0.68 },
+  zebra: { fleeDistance: 13, roamingSpeed: 1.04, fleeingSpeed: 7.2, materialTone: 0.72 },
 };
 
 export const WORLD_ANIMALS: readonly AnimalConfig[] = [
   { id: 'bull-lowland', species: 'bull', offset: [38, -18], scale: 0.82, phase: 2.2 },
   { id: 'cow-lowland', species: 'cow', offset: [46, -12], scale: 0.8, phase: 5.3 },
   { id: 'husky-trail', species: 'husky', offset: [-54, 28], scale: 0.66, phase: 3.7 },
+  { id: 'llama-west', species: 'llama', offset: [-45, -34], scale: 0.78, phase: 4.1 },
+  { id: 'pig-orchard', species: 'pig', offset: [24, 44], scale: 0.72, phase: 1.4 },
+  { id: 'pug-footpath', species: 'pug', offset: [-36, 56], scale: 0.58, phase: 5.7 },
+  { id: 'sheep-meadow', species: 'sheep', offset: [58, 18], scale: 0.72, phase: 2.8 },
+  { id: 'zebra-grassland', species: 'zebra', offset: [72, 42], scale: 0.78, phase: 0.9 },
   { id: 'doe-near', species: 'deer', offset: [63, -43], scale: 0.78, phase: 0.3 },
   { id: 'doe-far', species: 'deer', offset: [71, -49], scale: 0.72, phase: 1.7 },
   { id: 'doe-young', species: 'deer', offset: [58, -51], scale: 0.6, phase: 3.1 },
