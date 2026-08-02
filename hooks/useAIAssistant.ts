@@ -9,9 +9,10 @@ export type ChatMessage = {
 
 interface UseAIAssistantProps {
   data: ReadmeData;
+  persona?: 'owner' | 'companion';
 }
 
-export function useAIAssistant({ data }: UseAIAssistantProps) {
+export function useAIAssistant({ data, persona = 'owner' }: UseAIAssistantProps) {
   const nickname = getAuthorNickname(data.basic.name);
   const [aiState, setAIState] = useState<'closed' | 'docked' | 'floating'>('closed');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -51,7 +52,7 @@ export function useAIAssistant({ data }: UseAIAssistantProps) {
       const response = await fetch('/api/assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: nextMessages }),
+        body: JSON.stringify({ messages: nextMessages, persona }),
       });
 
       if (!response.ok || !response.body) {
@@ -77,7 +78,7 @@ export function useAIAssistant({ data }: UseAIAssistantProps) {
       }
     } catch (error) {
       console.error('AI assistant error:', error);
-      setErrorMessage(`小${nickname}暂时离线，请稍后重试。`);
+      setErrorMessage(`${persona === 'companion' ? '苔苔' : `小${nickname}`}暂时离线，请稍后重试。`);
       setMessages((prev) => {
         if (!prev.length) return prev;
         const updated = [...prev];

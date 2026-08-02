@@ -32,13 +32,17 @@ export default function WorldHud({
   owner,
   telemetry,
   keepsakes,
+  companionNearby,
   onOpenInventory,
+  onTalkToCompanion,
   onTravel,
 }: {
   owner: string;
   telemetry: GameTelemetry;
   keepsakes: number;
+  companionNearby: boolean;
   onOpenInventory: () => void;
+  onTalkToCompanion: () => void;
   onTravel: (waypoint: WorldWaypoint) => void;
 }) {
   return (
@@ -51,7 +55,9 @@ export default function WorldHud({
         <div className="archive-world-gamebar__mission">
           <span>当前状态</span>
           <strong>
-            {telemetry.canMount
+            {companionNearby
+              ? '苔苔在等你说话'
+              : telemetry.canMount
               ? '林径马匹就在身旁 · F 骑乘'
               : telemetry.mounted
                 ? '沿海岸与山脊继续探索'
@@ -73,7 +79,12 @@ export default function WorldHud({
 
       <WorldMinimap telemetry={telemetry} waypoints={WORLD_WAYPOINTS} onTravel={onTravel} />
 
-      {telemetry.canMount && (
+      {companionNearby ? (
+        <button className="archive-world-interact" onClick={onTalkToCompanion}>
+          <kbd>E</kbd>
+          蹲下与苔苔交谈
+        </button>
+      ) : telemetry.canMount ? (
         <button
           className="archive-world-interact"
           onClick={() => {
@@ -84,7 +95,7 @@ export default function WorldHud({
           <kbd>F</kbd>
           骑乘林径马匹
         </button>
-      )}
+      ) : null}
 
       <div className="archive-world-mobile-controls" aria-label="移动控制">
         {[

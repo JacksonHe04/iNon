@@ -38,6 +38,7 @@ export interface ArchiveGameSceneProps {
   onNearby: (destination: GameDestination | null) => void;
   onTelemetry: (telemetry: GameTelemetry) => void;
   onDiagnostics: (message: string) => void;
+  onCompanionProximity: (nearby: boolean) => void;
   collectedKeepsakes: string[];
   onCollectKeepsake: (id: string) => void;
 }

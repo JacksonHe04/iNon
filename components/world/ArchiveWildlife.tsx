@@ -11,27 +11,15 @@ import {
   Vector3,
 } from 'three';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
+import {
+  ANIMAL_BEHAVIOUR,
+  ANIMAL_FILES,
+  WORLD_ANIMALS,
+  type AnimalConfig,
+} from '@/components/world/archiveAnimalConfig';
 
 const ANIMAL_ROOT = '/archive-world/quaternius-animals';
 const WATER_LEVEL = -1.05;
-
-type AnimalSpecies = 'deer' | 'fox';
-
-interface AnimalConfig {
-  id: string;
-  species: AnimalSpecies;
-  offset: readonly [number, number];
-  scale: number;
-  phase: number;
-}
-
-const ANIMALS: readonly AnimalConfig[] = [
-  { id: 'doe-near', species: 'deer', offset: [63, -43], scale: 0.78, phase: 0.3 },
-  { id: 'doe-far', species: 'deer', offset: [71, -49], scale: 0.72, phase: 1.7 },
-  { id: 'doe-young', species: 'deer', offset: [58, -51], scale: 0.6, phase: 3.1 },
-  { id: 'fox-ridge', species: 'fox', offset: [-31, 26], scale: 0.62, phase: 4.4 },
-  { id: 'fox-wood', species: 'fox', offset: [-39, 38], scale: 0.56, phase: 5.8 },
-] as const;
 
 function safeGroundPosition(
   heightAt: (x: number, z: number) => number,
@@ -54,7 +42,8 @@ function AnimatedAnimal({
   playerPosition: MutableRefObject<Vector3>;
   heightAt: (x: number, z: number) => number;
 }) {
-  const url = `${ANIMAL_ROOT}/${config.species === 'deer' ? 'Deer' : 'Fox'}.glb`;
+  const behaviour = ANIMAL_BEHAVIOUR[config.species];
+  const url = `${ANIMAL_ROOT}/${ANIMAL_FILES[config.species]}`;
   const gltf = useGLTF(url);
   const root = useRef<Group>(null);
   const scene = useMemo(() => cloneSkeleton(gltf.scene), [gltf.scene]);
@@ -82,10 +71,10 @@ function AnimatedAnimal({
         child.material = child.material.clone();
         child.material.roughness = 0.96;
         child.material.metalness = 0;
-        child.material.color.multiplyScalar(config.species === 'deer' ? 0.76 : 0.72);
+        child.material.color.multiplyScalar(behaviour.materialTone);
       }
     });
-  }, [config.species, scene]);
+  }, [behaviour.materialTone, scene]);
 
   useEffect(() => {
     const idle = actions.get('Idle') ?? actions.values().next().value;
@@ -133,7 +122,7 @@ function AnimatedAnimal({
       nextDecisionAt.current = clock.elapsedTime + 1.4 + config.phase * 0.2;
     }
 
-    const flee = distanceToPlayer < (config.species === 'deer' ? 12 : 9);
+    const flee = distanceToPlayer < behaviour.fleeDistance;
     if (flee) {
       const away = fleeDirection.current.set(
         group.position.x - player.x,
@@ -175,7 +164,7 @@ function AnimatedAnimal({
 
     if (moving && distanceToTarget > 0.01) {
       direction.normalize();
-      const speed = flee ? (config.species === 'deer' ? 7.1 : 6.2) : config.species === 'deer' ? 1.05 : 1.28;
+      const speed = flee ? behaviour.fleeingSpeed : behaviour.roamingSpeed;
       const nextX = group.position.x + direction.x * speed * delta;
       const nextZ = group.position.z + direction.z * speed * delta;
       const nextY = heightAt(nextX, nextZ);
@@ -212,7 +201,7 @@ export default function ArchiveWildlife({
     <group name="archive-world-wildlife">
       {animalsEnabled && (
         <Suspense fallback={null}>
-          {ANIMALS.map((config) => (
+          {WORLD_ANIMALS.map((config) => (
             <AnimatedAnimal
               key={config.id}
               config={config}

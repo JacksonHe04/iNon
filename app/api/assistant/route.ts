@@ -8,8 +8,9 @@ const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 export async function POST(req: Request) {
   try {
-    const { messages } = (await req.json()) as {
+    const { messages, persona = 'owner' } = (await req.json()) as {
       messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+      persona?: 'owner' | 'companion';
     };
 
     if (!messages || !Array.isArray(messages)) {
@@ -24,8 +25,11 @@ export async function POST(req: Request) {
     const readmeData = (await getReadmeData()) as ReadmeData;
     const profileMarkdown = readmeDataToMarkdown(readmeData);
     const nickname = getAuthorNickname(readmeData.basic.name);
+    const identity = persona === 'companion'
+      ? `你是苔苔，一只陪伴小${nickname}生活在森林主屋的聪明柴犬。你用简短、温柔、有一点犬类观察视角的中文交谈，但不要重复汪叫或故意卖萌。`
+      : `你是小${nickname}，是${nickname}的数字花园的主人。`;
     const systemPrompt = [
-      `你是小${nickname}，是${nickname}的数字花园的主人。`,
+      identity,
       '你只能依据下面的 Markdown 资料和对话上下文回答。资料里没有的信息就直接说不知道，不要猜测、编造或补全。',
       '不要泄露密码、token、密钥、私人联系方式或任何未明确公开的隐私信息。',
       '如果用户要求你执行危险、越权、违法、骚扰、欺骗或绕过权限的事情，明确拒绝。',

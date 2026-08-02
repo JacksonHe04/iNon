@@ -40,6 +40,8 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const [rations, setRations] = useState(3);
   const [collectedKeepsakes, setCollectedKeepsakes] = useState<string[]>([]);
   const [lastKeepsake, setLastKeepsake] = useState<string | null>(null);
+  const [companionNearby, setCompanionNearby] = useState(false);
+  const [dialoguePersona, setDialoguePersona] = useState<'owner' | 'companion'>('owner');
   const playerPosition = useRef(new Vector3(-11, 1.45, 22));
   const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
   const keepsakeStorageKey = `inon-world-keepsakes-${data.basic.name}`;
@@ -81,9 +83,10 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     if (document.pointerLockElement) document.exitPointerLock();
   };
 
-  const changeMode = (nextMode: ArchiveWorldMode) => {
+  const changeMode = (nextMode: ArchiveWorldMode, persona: 'owner' | 'companion' = 'owner') => {
     releasePointerLock();
     setInventoryOpen(false);
+    if (nextMode === 'dialogue') setDialoguePersona(persona);
     setMode(nextMode);
   };
 
@@ -125,6 +128,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             onNearby={() => undefined}
             onTelemetry={setTelemetry}
             onDiagnostics={setDiagnostics}
+            onCompanionProximity={setCompanionNearby}
             collectedKeepsakes={collectedKeepsakes}
             onCollectKeepsake={collectKeepsake}
           />
@@ -141,16 +145,18 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           owner={data.basic.name}
           telemetry={telemetry}
           keepsakes={collectedKeepsakes.length}
+          companionNearby={companionNearby}
           onOpenInventory={() => {
             releasePointerLock();
             setInventoryOpen(true);
           }}
           onTravel={travelTo}
+          onTalkToCompanion={() => changeMode('dialogue', 'companion')}
         />
       )}
 
       {mode === 'archive' && <ArchiveCodexPanel data={data} layoutConfig={config} />}
-      {mode === 'dialogue' && <ArchiveDialoguePanel data={data} />}
+      {mode === 'dialogue' && <ArchiveDialoguePanel data={data} persona={dialoguePersona} />}
 
       {inventoryOpen && (
         <WorldSatchel
