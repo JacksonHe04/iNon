@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import type { GameTelemetry } from '@/components/world/ArchiveGameScene';
 import type { WorldWaypoint } from '@/components/world/archiveWorldConfig';
+import { coastlineXAt, riverCenterAt } from '@/components/world/archiveTerrainMath';
 
 const MAP_CENTER = 90;
 const MAP_RADIUS = 72;
@@ -29,10 +30,18 @@ export default function WorldMinimap({
   const riverPath = useMemo(() => {
     return Array.from({ length: 49 }, (_, index) => {
       const z = -WORLD_EXTENT + (index / 48) * WORLD_EXTENT * 2;
-      const x = 78 + Math.sin(z * 0.018) * 38 + Math.sin(z * 0.004) * 16;
+      const x = riverCenterAt(z);
       const [mapX, mapY] = project(x, z);
       return `${index === 0 ? 'M' : 'L'}${mapX.toFixed(1)} ${mapY.toFixed(1)}`;
     }).join(' ');
+  }, []);
+  const coastPath = useMemo(() => {
+    const coast = Array.from({ length: 49 }, (_, index) => {
+      const z = -WORLD_EXTENT + (index / 48) * WORLD_EXTENT * 2;
+      const [mapX, mapY] = project(coastlineXAt(z), z);
+      return `${index === 0 ? 'M' : 'L'}${mapX.toFixed(1)} ${mapY.toFixed(1)}`;
+    }).join(' ');
+    return `${coast} L6 174 L6 6 Z`;
   }, []);
 
   return (
@@ -50,9 +59,12 @@ export default function WorldMinimap({
           <pattern id="archive-map-lines" width="12" height="12" patternUnits="userSpaceOnUse">
             <path d="M0 12 12 0" stroke="#e1d5ae" strokeOpacity=".08" strokeWidth=".6" />
           </pattern>
+          <clipPath id="archive-map-clip"><circle cx="90" cy="90" r="84" /></clipPath>
         </defs>
         <circle cx="90" cy="90" r="84" fill="url(#archive-map-ground)" stroke="#d5c58f" strokeOpacity=".55" />
         <circle cx="90" cy="90" r="84" fill="url(#archive-map-lines)" />
+        <path d={coastPath} fill="#173f3b" fillOpacity=".55" clipPath="url(#archive-map-clip)" />
+        <path d={coastPath.split(' L6')[0]} fill="none" stroke="#d6c99f" strokeWidth="1.4" strokeOpacity=".5" />
         <path d={riverPath} fill="none" stroke="#285b53" strokeWidth="8" strokeOpacity=".74" />
         <path d={riverPath} fill="none" stroke="#a9c1a5" strokeWidth="1" strokeOpacity=".42" />
         {[32, 58].map((radius) => (

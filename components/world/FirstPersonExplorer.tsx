@@ -4,9 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { type RapierRigidBody } from '@react-three/rapier';
 import { Group, Vector3 } from 'three';
-import { ARCHIVE_HORSE_SPAWN, type HorseMotion } from '@/components/world/ArchiveHorse';
+import { ARCHIVE_HORSE_SPAWN, horseWaitingPosition, type HorseMotion } from '@/components/world/ArchiveHorse';
 import ExplorerRigs from '@/components/world/ExplorerRigs';
 import { terrainKindAt } from '@/components/world/archiveTerrainMath';
+import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 import type {
   GameDestination,
   GameTelemetry,
@@ -19,7 +20,7 @@ export default function FirstPersonExplorer({
   destinations,
   playerPosition,
   travelRequest,
-  spawn = [-11, 1.45, 22],
+  spawn = [...WORLD_PLAYER_SPAWN],
   heightAt,
   waterLevel,
   onOpen,
@@ -135,9 +136,7 @@ export default function FirstPersonExplorer({
       rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
       playerPosition.current.set(x, y, z);
       if (!mountedRef.current) {
-        const horseX = x + 3.2;
-        const horseZ = z + 1.8;
-        setHorsePosition([horseX, heightAt(horseX, horseZ), horseZ]);
+        setHorsePosition(horseWaitingPosition(x, z, heightAt, waterLevel));
       }
       if (typeof detail.yaw === 'number') yaw.current = detail.yaw;
       pitch.current = 0;
@@ -168,9 +167,7 @@ export default function FirstPersonExplorer({
       rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
       playerPosition.current.set(travelX, travelY, travelZ);
       if (!mountedRef.current) {
-        const horseX = travelX + 3.2;
-        const horseZ = travelZ + 1.8;
-        setHorsePosition([horseX, heightAt(horseX, horseZ), horseZ]);
+        setHorsePosition(horseWaitingPosition(travelX, travelZ, heightAt, waterLevel));
       }
       if (typeof travelRequest.yaw === 'number') yaw.current = travelRequest.yaw;
       pitch.current = 0;

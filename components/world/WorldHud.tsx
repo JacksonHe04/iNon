@@ -10,6 +10,7 @@ function dispatchKey(type: 'keydown' | 'keyup', code: string) {
 }
 
 function terrainLabel(telemetry: GameTelemetry) {
+  if (telemetry.terrain === 'coast') return '灰绿海岸';
   if (telemetry.terrain === 'river') return '河谷水域';
   if (telemetry.terrain === 'mountain') return '山脊';
   if (telemetry.terrain === 'forest') return '森林';

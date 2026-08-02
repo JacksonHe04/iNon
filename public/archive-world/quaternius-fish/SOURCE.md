@@ -9,6 +9,6 @@ come from the **Animated Fish Pack** by Quaternius.
 - Original formats: FBX, OBJ, and Blend
 
 Only the animated FBX sources required by the world were extracted from the
-official pack. They were repacked as binary glTF with the system Assimp tool so
-the browser can use the project's shared `useGLTF` and skeletal-clone runtime.
+official pack. They are loaded directly with Three.js `FBXLoader` because an
+intermediate Assimp glTF conversion distorted the original skinning transforms.
 Geometry, materials, rigging, and the original swim animation are retained.

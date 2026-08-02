@@ -10,6 +10,10 @@ export function riverCenterAt(z: number) {
   return 78 + Math.sin(z * 0.018) * 38 + Math.sin(z * 0.004) * 16;
 }
 
+export function coastlineXAt(z: number) {
+  return -31 + Math.sin(z * 0.015) * 9 + Math.sin(z * 0.043) * 4;
+}
+
 function rawTerrainHeightAt(x: number, z: number) {
   const homeDistance = Math.hypot(x - WORLD_HOME_POSITION[0], z - WORLD_HOME_POSITION[2]);
   const wilderness = smoothstep(18, 46, homeDistance);
@@ -26,7 +30,11 @@ function rawTerrainHeightAt(x: number, z: number) {
   const riverInfluence = 1 - smoothstep(3.5, 17, Math.abs(x - riverCenter));
   const rollingGround = 0.4 + broad + ridges + mountainMass - riverInfluence * 7.2;
   const dryGround = Math.max(-0.42, rollingGround);
-  return (dryGround * (1 - riverInfluence) + rollingGround * riverInfluence) * wilderness;
+  const continentalGround = (dryGround * (1 - riverInfluence) + rollingGround * riverInfluence) * wilderness;
+  const shoreline = coastlineXAt(z);
+  const oceanInfluence = 1 - smoothstep(shoreline - 12, shoreline + 5, x);
+  const oceanFloor = -7.8 + Math.sin(x * 0.04 + z * 0.027) * 1.1;
+  return continentalGround * (1 - oceanInfluence) + oceanFloor * oceanInfluence;
 }
 
 export function terrainHeightAt(x: number, z: number) {
@@ -38,6 +46,7 @@ export function terrainHeightAt(x: number, z: number) {
 }
 
 export function terrainKindAt(x: number, z: number, height: number): GameTelemetry['terrain'] {
+  if (x < coastlineXAt(z) + 18) return 'coast';
   if (height <= WATER_LEVEL + 0.18) return 'river';
   if (Math.hypot(x - WORLD_HOME_POSITION[0], z - WORLD_HOME_POSITION[2]) < 58) return 'village';
   if (height > 4.5) return 'mountain';

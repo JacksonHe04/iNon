@@ -82,6 +82,7 @@ export function InfiniteTerrain({ playerPosition }: { playerPosition: MutableRef
     uMoss: { value: new Color('#62785c') },
     uForest: { value: new Color('#243d2d') },
     uPath: { value: new Color('#9a8b67') },
+    uShore: { value: new Color('#9b9377') },
   }), [groundTexture]);
   const tiles = useMemo(() => terrainTilesAround(chunk.x, chunk.z), [chunk.x, chunk.z]);
 

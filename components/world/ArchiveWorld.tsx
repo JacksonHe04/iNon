@@ -25,6 +25,7 @@ import {
   type ArchiveWorldMode,
   type WorldWaypoint,
 } from '@/components/world/archiveWorldConfig';
+import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -42,7 +43,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const [lastKeepsake, setLastKeepsake] = useState<string | null>(null);
   const [companionNearby, setCompanionNearby] = useState(false);
   const [dialoguePersona, setDialoguePersona] = useState<'owner' | 'companion'>('owner');
-  const playerPosition = useRef(new Vector3(-11, 1.45, 22));
+  const playerPosition = useRef(new Vector3(...WORLD_PLAYER_SPAWN));
   const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
   const keepsakeStorageKey = `inon-world-keepsakes-${data.basic.name}`;
   const worldEnabled = mode === 'world' && !inventoryOpen;
@@ -111,7 +112,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
         <Canvas
           shadows
           dpr={[1, 1.5]}
-          camera={{ position: [-11, 3, 22], fov: 52, near: 0.1, far: 600 }}
+          camera={{ position: [WORLD_PLAYER_SPAWN[0], 3, WORLD_PLAYER_SPAWN[2]], fov: 52, near: 0.1, far: 600 }}
           gl={{ antialias: false, powerPreference: 'high-performance', alpha: false }}
           onCreated={({ gl }) => {
             gl.toneMapping = ACESFilmicToneMapping;

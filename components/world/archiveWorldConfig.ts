@@ -3,6 +3,7 @@ import {
   WORLD_HOME_POSITION,
   type GameDestination,
 } from '@/components/world/ArchiveGameScene';
+import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 
 export type ArchiveWorldMode = 'world' | 'archive' | 'dialogue';
 
@@ -23,7 +24,7 @@ export const WORLD_WAYPOINTS: WorldWaypoint[] = [
     label: '临海主屋',
     number: 'H',
     position: WORLD_HOME_POSITION,
-    arrival: [-11, 0, 20],
+    arrival: [WORLD_PLAYER_SPAWN[0], 0, WORLD_PLAYER_SPAWN[2]],
     yaw: 0,
   },
   {
@@ -34,12 +35,20 @@ export const WORLD_WAYPOINTS: WorldWaypoint[] = [
     arrival: [RIVER_BRIDGE_POSITION[0] - 16, 0, RIVER_BRIDGE_POSITION[2]],
     yaw: -Math.PI / 2,
   },
+  {
+    id: 'tidal-cove',
+    label: '潮汐湾',
+    number: 'C',
+    position: [-92, 0, -12],
+    arrival: [-18, 0, -8],
+    yaw: Math.PI / 2,
+  },
 ];
 
 export const INITIAL_WORLD_TELEMETRY = {
   x: -11,
   y: 1.45,
-  z: 22,
+  z: WORLD_PLAYER_SPAWN[2],
   heading: 0,
   speed: 0,
   stamina: 100,

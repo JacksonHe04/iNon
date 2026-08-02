@@ -22,6 +22,7 @@ export const terrainFragment = /* glsl */ `
   uniform vec3 uMoss;
   uniform vec3 uForest;
   uniform vec3 uPath;
+  uniform vec3 uShore;
   varying vec3 vWorld;
   varying float vGrain;
   float segmentDistance(vec2 point, vec2 start, vec2 end) {
@@ -44,6 +45,9 @@ export const terrainFragment = /* glsl */ `
     ground = mix(ground, uPath, pathMask * (0.26 + pathCore * 0.16) * pathWear);
     vec3 forestFloor = texture2D(uGround, vWorld.xz * 0.035).rgb * vec3(0.50, 0.82, 0.54);
     ground = mix(ground, forestFloor, 0.52) + (vGrain - 0.5) * 0.055;
+    float shoreline = -31.0 + sin(vWorld.z * 0.015) * 9.0 + sin(vWorld.z * 0.043) * 4.0;
+    float shoreBand = 1.0 - smoothstep(4.0, 18.0, abs(vWorld.x - shoreline));
+    ground = mix(ground, uShore, shoreBand * 0.48);
     gl_FragColor = vec4(ground, 1.0);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>

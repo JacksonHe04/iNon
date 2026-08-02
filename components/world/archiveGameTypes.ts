@@ -20,7 +20,7 @@ export interface GameTelemetry {
   inWater: boolean;
   mounted: boolean;
   canMount: boolean;
-  terrain: 'village' | 'forest' | 'mountain' | 'river';
+  terrain: 'village' | 'forest' | 'mountain' | 'river' | 'coast';
 }
 
 export interface GameTravelRequest {

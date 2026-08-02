@@ -15,6 +15,22 @@ export type HorseMotion = 'Idle' | 'Walk' | 'Gallop';
 
 export const ARCHIVE_HORSE_SPAWN = [-2.5, 15] as const;
 
+export function horseWaitingPosition(
+  playerX: number,
+  playerZ: number,
+  heightAt: (x: number, z: number) => number,
+  waterLevel: number,
+): [number, number, number] {
+  const offsets = [[9, 6], [-9, 5], [6, -9], [-6, -9]] as const;
+  for (const [offsetX, offsetZ] of offsets) {
+    const x = playerX + offsetX;
+    const z = playerZ + offsetZ;
+    const y = heightAt(x, z);
+    if (y > waterLevel + 0.35) return [x, y, z];
+  }
+  return [playerX + 4, heightAt(playerX + 4, playerZ + 2), playerZ + 2];
+}
+
 export default function ArchiveHorse({
   motion,
   scale = 0.78,
