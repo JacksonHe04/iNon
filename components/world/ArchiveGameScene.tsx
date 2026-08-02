@@ -83,6 +83,7 @@ export default function ArchiveGameScene({
   onTelemetry,
   onDiagnostics,
   onCompanionProximity,
+  onCompanionTelemetry,
   collectedKeepsakes,
   onCollectKeepsake,
   onInspectHomeRecord,
@@ -142,6 +143,7 @@ export default function ArchiveGameScene({
           playerPosition={playerPosition}
           heightAt={terrainHeightAt}
           onProximity={onCompanionProximity}
+          onTelemetry={onCompanionTelemetry}
         />
       </Suspense>
       <Suspense fallback={null}>

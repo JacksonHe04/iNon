@@ -9,6 +9,15 @@ import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
 import { worldLocationLabel, worldMotionLabel } from '@/components/world/archiveWorldTelemetry';
 import WorldFieldRoute from '@/components/world/WorldFieldRoute';
 import type { FieldRouteStage } from '@/components/world/archiveFieldRoute';
+import type { CompanionBehavior, CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
+
+const COMPANION_BEHAVIOR_LABELS: Record<CompanionBehavior, string> = {
+  resting: '在身边休息',
+  following: '沿地形跟随',
+  'catching-up': '循着气味赶来',
+  'waiting-for-safe-ground': '在岸边等待',
+  'using-home-door': '正从主屋门口绕行',
+};
 
 function dispatchKey(type: 'keydown' | 'keyup', code: string) {
   window.dispatchEvent(new KeyboardEvent(type, { code }));
@@ -20,6 +29,7 @@ export default function WorldHud({
   keepsakes,
   soundEnabled,
   companionNearby,
+  companionTelemetry,
   fieldRouteStage,
   fieldRouteStageIndex,
   recentFieldRouteStage,
@@ -33,6 +43,7 @@ export default function WorldHud({
   keepsakes: number;
   soundEnabled: boolean;
   companionNearby: boolean;
+  companionTelemetry: CompanionTelemetry;
   fieldRouteStage: FieldRouteStage | null;
   fieldRouteStageIndex: number;
   recentFieldRouteStage: FieldRouteStage | null;
@@ -42,6 +53,10 @@ export default function WorldHud({
   onTravel: (waypoint: WorldWaypoint) => void;
 }) {
   const insideHome = isInsideArchiveHome(telemetry.x, telemetry.z);
+  const companionDistance = Math.round(Math.hypot(
+    telemetry.x - companionTelemetry.x,
+    telemetry.z - companionTelemetry.z,
+  ));
   return (
     <div className="archive-world-overlay">
       <header className="archive-world-gamebar">
@@ -167,6 +182,7 @@ export default function WorldHud({
           <i><em style={{ width: '100%' }} /></i>
         </div>
         <p>ALT {telemetry.y.toFixed(1)} M · SPD {telemetry.speed.toFixed(1)}</p>
+        <p>苔苔 · {COMPANION_BEHAVIOR_LABELS[companionTelemetry.behavior]} · {companionDistance} M</p>
       </div>
     </div>
   );

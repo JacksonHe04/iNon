@@ -2,6 +2,7 @@ import type { MutableRefObject } from 'react';
 import type { Vector3 } from 'three';
 import type { BlockType } from '@/types/layout';
 import type { HomeExhibit, HomeRecordId } from '@/components/world/archiveHomeRecords';
+import type { CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
 
 export interface GameDestination {
   blockType: BlockType;
@@ -41,6 +42,7 @@ export interface ArchiveGameSceneProps {
   onTelemetry: (telemetry: GameTelemetry) => void;
   onDiagnostics: (message: string) => void;
   onCompanionProximity: (nearby: boolean) => void;
+  onCompanionTelemetry: (telemetry: CompanionTelemetry) => void;
   collectedKeepsakes: string[];
   onCollectKeepsake: (id: string) => void;
   onInspectHomeRecord: (record: HomeRecordId) => void;

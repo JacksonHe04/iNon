@@ -5,20 +5,38 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { AnimationMixer, Group, Mesh, MeshStandardMaterial, Vector3 } from 'three';
 import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
+import {
+  chooseCompanionStep,
+  companionDoorTarget,
+  companionObstaclesAround,
+  safeCompanionCatchUp,
+  type CompanionObstacle,
+} from '@/components/world/archiveCompanionNavigation';
+import { isWalkableAnimalGround } from '@/components/world/archiveAnimalTerrain';
 
 const DOG_URL = '/archive-world/quaternius-animals/ShibaInu.glb';
 export const COMPANION_NAME = '苔苔';
+export type CompanionBehavior = 'resting' | 'following' | 'catching-up' | 'waiting-for-safe-ground' | 'using-home-door';
+export interface CompanionTelemetry {
+  x: number;
+  y: number;
+  z: number;
+  behavior: CompanionBehavior;
+}
+const ignoreCompanionTelemetry = () => undefined;
 
 export default function ArchiveCompanionDog({
   enabled,
   playerPosition,
   heightAt,
   onProximity,
+  onTelemetry = ignoreCompanionTelemetry,
 }: {
   enabled: boolean;
   playerPosition: MutableRefObject<Vector3>;
   heightAt: (x: number, z: number) => number;
   onProximity: (nearby: boolean) => void;
+  onTelemetry?: (telemetry: CompanionTelemetry) => void;
 }) {
   const gltf = useGLTF(DOG_URL);
   const root = useRef<Group>(null);
@@ -35,6 +53,9 @@ export default function ArchiveCompanionDog({
   const cameraDirection = useRef(new Vector3());
   const followTarget = useRef(new Vector3());
   const right = useRef(new Vector3());
+  const obstacles = useRef<CompanionObstacle[]>([]);
+  const obstacleCell = useRef('');
+  const telemetryFrame = useRef(0);
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -71,17 +92,18 @@ export default function ArchiveCompanionDog({
 
     const player = playerPosition.current;
     if (!wasPlaced.current) {
-      const x = player.x + 4.2;
-      const z = player.z + 2.6;
-      group.position.set(x, heightAt(x, z), z);
+      const ground = safeCompanionCatchUp(player.x, player.z, heightAt);
+      if (ground) group.position.set(ground.x, ground.y, ground.z);
       wasPlaced.current = true;
     }
 
-    const playerDistance = Math.hypot(group.position.x - player.x, group.position.z - player.z);
+    let behavior: CompanionBehavior = 'resting';
+    let playerDistance = Math.hypot(group.position.x - player.x, group.position.z - player.z);
     if (playerDistance > 58) {
-      const x = player.x + 4.4;
-      const z = player.z + 3.6;
-      group.position.set(x, heightAt(x, z), z);
+      const ground = safeCompanionCatchUp(player.x, player.z, heightAt);
+      if (ground) group.position.set(ground.x, ground.y, ground.z);
+      playerDistance = Math.hypot(group.position.x - player.x, group.position.z - player.z);
+      behavior = 'catching-up';
     }
 
     const nearby = enabled && playerDistance < 6.4;
@@ -98,15 +120,50 @@ export default function ArchiveCompanionDog({
     followTarget.current.copy(player)
       .addScaledVector(cameraDirection.current, -4.2)
       .addScaledVector(right.current, 2.1);
+    const doorTarget = companionDoorTarget(
+      group.position.x,
+      group.position.z,
+      player.x,
+      player.z,
+    );
+    if (doorTarget) {
+      followTarget.current.set(doorTarget.x, heightAt(doorTarget.x, doorTarget.z), doorTarget.z);
+      behavior = 'using-home-door';
+    }
     const targetDistance = Math.hypot(
       group.position.x - followTarget.current.x,
       group.position.z - followTarget.current.z,
     );
     const movingFast = targetDistance > 12;
     const moving = targetDistance > 1.25;
-    const nextAnimation = movingFast
+    const cell = `${Math.floor(group.position.x / 24)}:${Math.floor(group.position.z / 24)}`;
+    if (cell !== obstacleCell.current) {
+      obstacleCell.current = cell;
+      obstacles.current = companionObstaclesAround(group.position.x, group.position.z, heightAt);
+    }
+    const speed = movingFast ? 7.4 : 2.3;
+    const targetIsSafe = isWalkableAnimalGround(
+      heightAt,
+      'husky',
+      followTarget.current.x,
+      followTarget.current.z,
+    );
+    const nextGround = moving
+      ? chooseCompanionStep({
+        x: group.position.x,
+        z: group.position.z,
+        targetX: followTarget.current.x,
+        targetZ: followTarget.current.z,
+        step: Math.min(0.46, speed * delta),
+        heightAt,
+        obstacles: obstacles.current,
+      })
+      : null;
+    if (moving && (!nextGround || !targetIsSafe)) behavior = 'waiting-for-safe-ground';
+    else if (behavior === 'resting' && moving) behavior = movingFast ? 'catching-up' : 'following';
+    const nextAnimation = moving && nextGround && movingFast
       ? 'Gallop'
-      : moving
+      : moving && nextGround
         ? 'Walk'
         : Math.sin(clock.elapsedTime * 0.34) > 0.82
           ? 'Idle_2'
@@ -119,26 +176,31 @@ export default function ArchiveCompanionDog({
       currentAnimation.current = next?.getClip().name ?? nextAnimation;
     }
 
-    if (!moving) {
+    if (!moving || !nextGround) {
       group.position.y = heightAt(group.position.x, group.position.z);
-      return;
+    } else {
+      const travel = direction.current.set(
+        nextGround.x - group.position.x,
+        0,
+        nextGround.z - group.position.z,
+      ).normalize();
+      group.position.set(nextGround.x, nextGround.y, nextGround.z);
+      const desiredYaw = Math.atan2(travel.x, travel.z);
+      const yawDelta = Math.atan2(
+        Math.sin(desiredYaw - group.rotation.y),
+        Math.cos(desiredYaw - group.rotation.y),
+      );
+      group.rotation.y += yawDelta * Math.min(1, delta * 7);
     }
-
-    const travel = direction.current.set(
-      followTarget.current.x - group.position.x,
-      0,
-      followTarget.current.z - group.position.z,
-    ).normalize();
-    const speed = movingFast ? 7.4 : 2.3;
-    const nextX = group.position.x + travel.x * speed * delta;
-    const nextZ = group.position.z + travel.z * speed * delta;
-    group.position.set(nextX, heightAt(nextX, nextZ), nextZ);
-    const desiredYaw = Math.atan2(travel.x, travel.z);
-    const yawDelta = Math.atan2(
-      Math.sin(desiredYaw - group.rotation.y),
-      Math.cos(desiredYaw - group.rotation.y),
-    );
-    group.rotation.y += yawDelta * Math.min(1, delta * 7);
+    telemetryFrame.current += 1;
+    if (telemetryFrame.current % 12 === 0) {
+      onTelemetry({
+        x: group.position.x,
+        y: group.position.y,
+        z: group.position.z,
+        behavior,
+      });
+    }
   });
 
   return (

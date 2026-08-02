@@ -36,6 +36,7 @@ import { buildArchiveKeepsakes } from '@/components/world/archiveKeepsakes';
 import { buildWorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
 import type { WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
 import { useArchiveFieldRoute } from '@/hooks/useArchiveFieldRoute';
+import type { CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -53,6 +54,12 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const [collectedKeepsakes, setCollectedKeepsakes] = useState<string[]>([]);
   const [lastKeepsake, setLastKeepsake] = useState<string | null>(null);
   const [companionNearby, setCompanionNearby] = useState(false);
+  const [companionTelemetry, setCompanionTelemetry] = useState<CompanionTelemetry>({
+    x: WORLD_PLAYER_SPAWN[0] + 4,
+    y: WORLD_PLAYER_SPAWN[1],
+    z: WORLD_PLAYER_SPAWN[2] + 3,
+    behavior: 'resting',
+  });
   const [dialoguePersona, setDialoguePersona] = useState<'owner' | 'companion'>('owner');
   const [selectedHomeRecord, setSelectedHomeRecord] = useState<HomeRecordId | null>(null);
   const playerPosition = useRef(new Vector3(...WORLD_PLAYER_SPAWN));
@@ -171,6 +178,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             onTelemetry={setTelemetry}
             onDiagnostics={setDiagnostics}
             onCompanionProximity={setCompanionNearby}
+            onCompanionTelemetry={setCompanionTelemetry}
             collectedKeepsakes={collectedKeepsakes}
             onCollectKeepsake={collectKeepsake}
             onInspectHomeRecord={(record) => {
@@ -183,6 +191,9 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
       </div>
 
       <output className="sr-only" aria-label="3D 运行状态">{diagnostics}</output>
+      <output className="sr-only" aria-label="苔苔伙伴状态">
+        {companionTelemetry.behavior} · X {companionTelemetry.x.toFixed(1)} · Y {companionTelemetry.y.toFixed(1)} · Z {companionTelemetry.z.toFixed(1)}
+      </output>
       <div className="archive-world__grain" aria-hidden="true" />
       <div className="archive-world__vignette" aria-hidden="true" />
       <ArchiveSoundscape enabled={soundEnabled} active={mode === 'world'} telemetry={telemetry} />
@@ -195,6 +206,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           keepsakes={recoveredKeepsakes.length}
           soundEnabled={soundEnabled}
           companionNearby={companionNearby}
+          companionTelemetry={companionTelemetry}
           fieldRouteStage={fieldRoute.stage}
           fieldRouteStageIndex={fieldRoute.stageIndex}
           recentFieldRouteStage={fieldRoute.recentStage}
