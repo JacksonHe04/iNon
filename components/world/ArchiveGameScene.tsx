@@ -517,6 +517,9 @@ function MountainPanorama({ playerPosition }: { playerPosition: MutableRefObject
   const texture = useTexture('/archive-world/verdant-mountain-panorama-v2.webp');
   const group = useRef<Group>(null);
   texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.offset.y = -0.12;
 
   useFrame(() => {
     if (!group.current) return;
