@@ -12,6 +12,7 @@ import ArchiveBirdFlock from '@/components/world/ArchiveBirdFlock';
 import ArchiveCompanionDog from '@/components/world/ArchiveCompanionDog';
 import ArchiveAquaticLife from '@/components/world/ArchiveAquaticLife';
 import ArchiveOceanLife from '@/components/world/ArchiveOceanLife';
+import ArchivePollinators from '@/components/world/ArchivePollinators';
 import ArchiveForestColliders from '@/components/world/ArchiveForestColliders';
 import { FallingPaperSnow, WorldKeepsakes } from '@/components/world/ArchiveAtmosphere';
 import { InfiniteTerrain, InfiniteWater, MountainPanorama } from '@/components/world/ArchiveTerrain';
@@ -117,6 +118,7 @@ export default function ArchiveGameScene({
       <Suspense fallback={null}>
         <ArchiveWildlife playerPosition={playerPosition} heightAt={terrainHeightAt} animalsEnabled={entered} />
         <ArchiveBirdFlock playerPosition={playerPosition} heightAt={terrainHeightAt} />
+        <ArchivePollinators enabled={entered} playerPosition={playerPosition} heightAt={terrainHeightAt} />
         <ArchiveCompanionDog
           enabled={entered}
           playerPosition={playerPosition}

@@ -1,10 +1,13 @@
 export type AnimalSpecies =
   | 'alpaca'
   | 'bull'
+  | 'bunny'
+  | 'chicken'
   | 'cow'
   | 'deer'
   | 'donkey'
   | 'fox'
+  | 'frog'
   | 'husky'
   | 'llama'
   | 'pig'
@@ -25,10 +28,13 @@ export interface AnimalConfig {
 export const ANIMAL_FILES: Record<AnimalSpecies, string> = {
   alpaca: 'Alpaca.glb',
   bull: 'Bull.glb',
+  bunny: 'Bunny.glb',
+  chicken: 'Chicken.glb',
   cow: 'Cow.glb',
   deer: 'Deer.glb',
   donkey: 'Donkey.glb',
   fox: 'Fox.glb',
+  frog: 'Frog.glb',
   husky: 'Husky.glb',
   llama: 'Llama.glb',
   pig: 'Pig.glb',
@@ -47,10 +53,13 @@ export const ANIMAL_BEHAVIOUR: Record<AnimalSpecies, {
 }> = {
   alpaca: { fleeDistance: 10, roamingSpeed: 0.92, fleeingSpeed: 5.2, materialTone: 0.82 },
   bull: { fleeDistance: 15, roamingSpeed: 0.78, fleeingSpeed: 5.6, materialTone: 0.72 },
+  bunny: { fleeDistance: 8, roamingSpeed: 1.14, fleeingSpeed: 6.2, materialTone: 0.8 },
+  chicken: { fleeDistance: 7, roamingSpeed: 0.72, fleeingSpeed: 4.8, materialTone: 0.84 },
   cow: { fleeDistance: 10, roamingSpeed: 0.76, fleeingSpeed: 4.9, materialTone: 0.8 },
   deer: { fleeDistance: 12, roamingSpeed: 1.05, fleeingSpeed: 7.1, materialTone: 0.76 },
   donkey: { fleeDistance: 8, roamingSpeed: 0.84, fleeingSpeed: 4.8, materialTone: 0.78 },
   fox: { fleeDistance: 9, roamingSpeed: 1.28, fleeingSpeed: 6.2, materialTone: 0.72 },
+  frog: { fleeDistance: 5, roamingSpeed: 0.58, fleeingSpeed: 3.8, materialTone: 0.74 },
   husky: { fleeDistance: 7, roamingSpeed: 1.18, fleeingSpeed: 6.4, materialTone: 0.76 },
   llama: { fleeDistance: 9, roamingSpeed: 0.88, fleeingSpeed: 5.3, materialTone: 0.78 },
   pig: { fleeDistance: 8, roamingSpeed: 0.72, fleeingSpeed: 4.6, materialTone: 0.78 },
@@ -63,7 +72,10 @@ export const ANIMAL_BEHAVIOUR: Record<AnimalSpecies, {
 
 export const WORLD_ANIMALS: readonly AnimalConfig[] = [
   { id: 'bull-lowland', species: 'bull', offset: [38, -18], scale: 0.82, phase: 2.2 },
+  { id: 'bunny-clover', species: 'bunny', offset: [12, 55], scale: 0.5, phase: 4.8 },
+  { id: 'chicken-lane', species: 'chicken', offset: [14, 38], scale: 0.62, phase: 1.9 },
   { id: 'cow-lowland', species: 'cow', offset: [46, -12], scale: 0.8, phase: 5.3 },
+  { id: 'frog-riverbank', species: 'frog', offset: [66, -30], scale: 0.38, phase: 3.4 },
   { id: 'husky-trail', species: 'husky', offset: [-54, 28], scale: 0.66, phase: 3.7 },
   { id: 'llama-west', species: 'llama', offset: [-45, -34], scale: 0.78, phase: 4.1 },
   { id: 'pig-orchard', species: 'pig', offset: [24, 44], scale: 0.72, phase: 1.4 },

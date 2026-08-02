@@ -34,3 +34,17 @@ The bird model is Quaternius' CC0 bird distributed by Poly Pizza.
 - Source: https://poly.pizza/m/gYYC0gYMnw
 - License: CC0 1.0 Universal
 - Included here: the original GLB used by the instanced high-altitude flock.
+
+## Additional CC0 species by Quaternius
+
+The following original GLB models are published by Quaternius through Poly
+Pizza under CC0 1.0 Universal:
+
+- Bunny: https://poly.pizza/m/irZjWFARyl
+- Frog: https://poly.pizza/m/37wofOCOzG
+- Chicken: https://poly.pizza/m/Z3RCoCYss4
+- Bee: https://poly.pizza/m/HvfIku26CK
+
+The bunny, frog, and chicken retain their original skeletons and animation
+clips. The bee is an authored static model whose free-flight path is controlled
+by the same player-relative infinite-world anchoring used by other wildlife.

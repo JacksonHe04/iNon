@@ -157,7 +157,14 @@ function AnimatedAnimal({
     direction.y = 0;
     const distanceToTarget = direction.length();
     const moving = flee || distanceToTarget > 1.25;
-    const requestedAnimation = flee ? 'Gallop' : moving ? 'Walk' : decision.current % 2 === 0 ? 'Eating' : 'Idle';
+    const walkAnimation = actions.has('Walk') ? 'Walk' : actions.has('Run') ? 'Run' : 'Idle';
+    const fleeAnimation = actions.has('Gallop') ? 'Gallop' : actions.has('Run') ? 'Run' : walkAnimation;
+    const forageAnimation = actions.has('Eating') ? 'Eating' : actions.has('Idle_Peck') ? 'Idle_Peck' : 'Idle';
+    const requestedAnimation = flee
+      ? fleeAnimation
+      : moving
+        ? walkAnimation
+        : decision.current % 2 === 0 ? forageAnimation : 'Idle';
 
     if (requestedAnimation !== locomotion.current) {
       const next = actions.get(requestedAnimation) ?? actions.get('Idle');
