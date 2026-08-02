@@ -14,33 +14,20 @@ import {
   type BufferGeometry,
   type Material,
 } from 'three';
-import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
 import { nearCameraVisibility, type WorldPlacement } from '@/components/world/archiveWorldOcclusion';
-import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
-import type { GameDestination } from '@/components/world/ArchiveGameScene';
+import type { GameDestination } from '@/components/world/archiveGameTypes';
+import {
+  TREE_CHUNK_SIZE,
+  TREE_MAX_PER_VARIANT,
+  TREE_RENDER_RADIUS,
+  treePlacementsAround,
+} from '@/components/world/archiveTreePlacements';
 
 export const QUATERNIUS_NATURE_ROOT = '/archive-world/quaternius-nature';
-const CHUNK_SIZE = 38;
-const CHUNK_RADIUS = 3;
-const TREES_PER_CHUNK = 11;
-const MAX_INSTANCES_PER_VARIANT = 180;
-
 export interface QuaterniusAssetPart {
   geometry: BufferGeometry;
   material: Material | Material[];
   localMatrix: Matrix4;
-}
-
-export function seededRandom(seed: number) {
-  let state = seed >>> 0;
-  return () => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 4294967296;
-  };
-}
-
-export function coordinateSeed(x: number, z: number) {
-  return ((x * 73856093) ^ (z * 19349663) ^ 0x9e3779b9) >>> 0;
 }
 
 function fadedMaterial(material: Material) {
@@ -101,63 +88,25 @@ export default function QuaterniusForest({
   const placementsRef = useRef<Array<WorldPlacement[]>>([]);
   const lastChunk = useRef('');
   const visibilityFrame = useRef(0);
-  const dummy = useMemo(() => new Object3D(), []);
   const baseMatrix = useMemo(() => new Matrix4(), []);
   const finalMatrix = useMemo(() => new Matrix4(), []);
   const fadeScale = useMemo(() => new Vector3(), []);
 
   useFrame(() => {
-    const centerX = Math.floor(playerPosition.current.x / CHUNK_SIZE);
-    const centerZ = Math.floor(playerPosition.current.z / CHUNK_SIZE);
+    const centerX = Math.floor(playerPosition.current.x / TREE_CHUNK_SIZE);
+    const centerZ = Math.floor(playerPosition.current.z / TREE_CHUNK_SIZE);
     const chunkKey = `${centerX}:${centerZ}`;
     if (meshes.current.length !== partsByVariant.length) return;
     if (chunkKey !== lastChunk.current) {
       lastChunk.current = chunkKey;
-      const placements = partsByVariant.map(() => [] as WorldPlacement[]);
-      for (let chunkX = centerX - CHUNK_RADIUS; chunkX <= centerX + CHUNK_RADIUS; chunkX += 1) {
-        for (let chunkZ = centerZ - CHUNK_RADIUS; chunkZ <= centerZ + CHUNK_RADIUS; chunkZ += 1) {
-          const random = seededRandom(coordinateSeed(chunkX, chunkZ));
-          for (let tree = 0; tree < TREES_PER_CHUNK; tree += 1) {
-            const x = chunkX * CHUNK_SIZE + random() * CHUNK_SIZE;
-            const z = chunkZ * CHUNK_SIZE + random() * CHUNK_SIZE;
-            const heightScale = 0.78 + random() * 0.54;
-            const widthScale = heightScale * (0.88 + random() * 0.22);
-            const roadClearance = isInsideWorldTrail(x, z, 2.2);
-            const siteClearance = destinations.some(
-              (site) => Math.hypot(x - site.position[0], z - site.position[2]) < 12,
-            );
-            const infrastructureClearance = clearings.some(
-              ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
-            );
-            const spawnClearance = Math.hypot(
-              x - WORLD_PLAYER_SPAWN[0],
-              z - WORLD_PLAYER_SPAWN[2],
-            ) < 9;
-            const groundHeight = heightAt(x, z);
-            if (roadClearance || siteClearance || infrastructureClearance || spawnClearance || groundHeight < -0.78) continue;
-            if (groundHeight > 27 || (groundHeight > 20 && random() > 0.34)) continue;
-
-            let variant = Math.min(
-              partsByVariant.length - 1,
-              Math.floor(random() * partsByVariant.length),
-            );
-            if (groundHeight > 13) variant = 3 + Math.floor(random() * 3);
-            const rotation = random() * Math.PI * 2;
-            const tilt = (random() - 0.5) * 0.035;
-            if (placements[variant].length >= MAX_INSTANCES_PER_VARIANT) continue;
-            dummy.position.set(x, groundHeight, z);
-            dummy.rotation.set(0, rotation, tilt);
-            const alpineScale = groundHeight > 16 ? 0.74 : 1;
-            dummy.scale.set(
-              widthScale * alpineScale,
-              heightScale * alpineScale,
-              widthScale * alpineScale,
-            );
-            dummy.updateMatrix();
-            placements[variant].push({ matrix: dummy.matrix.clone(), x, z });
-          }
-        }
-      }
+      const placements = treePlacementsAround({
+        centerX,
+        centerZ,
+        radius: TREE_RENDER_RADIUS,
+        destinations,
+        clearings,
+        heightAt,
+      });
       placementsRef.current = placements;
     }
 
@@ -199,7 +148,7 @@ export default function QuaterniusForest({
                 meshes.current[variantIndex][partIndex] = mesh;
                 mesh?.instanceMatrix.setUsage(DynamicDrawUsage);
               }}
-              args={[part.geometry, part.material, MAX_INSTANCES_PER_VARIANT]}
+              args={[part.geometry, part.material, TREE_MAX_PER_VARIANT]}
               castShadow
               receiveShadow
             />

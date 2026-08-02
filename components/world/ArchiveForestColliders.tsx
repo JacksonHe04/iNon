@@ -2,62 +2,41 @@
 
 import { useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { CuboidCollider, RigidBody } from '@react-three/rapier';
+import { BallCollider, CylinderCollider, RigidBody } from '@react-three/rapier';
 import type { Vector3 } from 'three';
 import type { GameDestination } from '@/components/world/archiveGameTypes';
 import {
+  WATER_LEVEL,
   WORLD_INFRASTRUCTURE_CLEARINGS,
-  WORLD_PLAYER_SPAWN,
 } from '@/components/world/archiveWorldConstants';
-import { coordinateSeed, seededRandom, terrainHeightAt } from '@/components/world/archiveTerrainMath';
-import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
+import {
+  GROUND_CHUNK_SIZE,
+  GROUND_COLLIDER_RADIUS,
+  groundPlacementsAround,
+} from '@/components/world/archiveGroundPlacements';
+import {
+  TREE_CHUNK_SIZE,
+  TREE_COLLIDER_RADIUS,
+  treePlacementsAround,
+} from '@/components/world/archiveTreePlacements';
+import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 
-interface ForestCollider {
-  key: string;
-  x: number;
-  y: number;
-  z: number;
-  halfHeight: number;
-  halfWidth: number;
+const TRUNK_RADII = [0.34, 0.37, 0.33, 0.29, 0.32, 0.3, 0.41, 0.44] as const;
+
+interface NatureChunks {
+  treeX: number;
+  treeZ: number;
+  groundX: number;
+  groundZ: number;
 }
 
-function collidersAround(centerX: number, centerZ: number, destinations: GameDestination[]) {
-  const chunkSize = 38;
-  const colliders: ForestCollider[] = [];
-  for (let chunkX = centerX - 2; chunkX <= centerX + 2; chunkX += 1) {
-    for (let chunkZ = centerZ - 2; chunkZ <= centerZ + 2; chunkZ += 1) {
-      const random = seededRandom(coordinateSeed(chunkX, chunkZ));
-      for (let tree = 0; tree < 15; tree += 1) {
-        const x = chunkX * chunkSize + random() * chunkSize;
-        const z = chunkZ * chunkSize + random() * chunkSize;
-        const heightScale = 0.78 + random() * 0.54;
-        const widthScale = heightScale * (0.88 + random() * 0.22);
-        const nearTrail = isInsideWorldTrail(x, z, 1.75);
-        const nearDestination = destinations.some((site) => Math.hypot(x - site.position[0], z - site.position[2]) < 12);
-        const nearInfrastructure = WORLD_INFRASTRUCTURE_CLEARINGS.some(
-          ([clearX, clearZ, radius]) => Math.hypot(x - clearX, z - clearZ) < radius,
-        );
-        const nearSpawn = Math.hypot(
-          x - WORLD_PLAYER_SPAWN[0],
-          z - WORLD_PLAYER_SPAWN[2],
-        ) < 9;
-        const ground = terrainHeightAt(x, z);
-        random();
-        random();
-        if (nearTrail || nearDestination || nearInfrastructure || nearSpawn || ground < -0.78 || tree >= 11) continue;
-        const halfHeight = 3.2 * heightScale;
-        colliders.push({
-          key: `${chunkX}:${chunkZ}:${tree}`,
-          x,
-          y: ground + halfHeight,
-          z,
-          halfHeight,
-          halfWidth: Math.max(0.34, widthScale * 0.44),
-        });
-      }
-    }
-  }
-  return colliders;
+function chunksAt(position: Vector3): NatureChunks {
+  return {
+    treeX: Math.floor(position.x / TREE_CHUNK_SIZE),
+    treeZ: Math.floor(position.z / TREE_CHUNK_SIZE),
+    groundX: Math.floor(position.x / GROUND_CHUNK_SIZE),
+    groundZ: Math.floor(position.z / GROUND_CHUNK_SIZE),
+  };
 }
 
 export default function ArchiveForestColliders({
@@ -67,28 +46,68 @@ export default function ArchiveForestColliders({
   playerPosition: MutableRefObject<Vector3>;
   destinations: GameDestination[];
 }) {
-  const [chunk, setChunk] = useState({ x: 0, z: 0 });
-  const chunkRef = useRef(chunk);
-  const colliders = useMemo(() => collidersAround(chunk.x, chunk.z, destinations), [chunk.x, chunk.z, destinations]);
+  const [chunks, setChunks] = useState(() => chunksAt(playerPosition.current));
+  const chunksRef = useRef(chunks);
+  const treeColliders = useMemo(() => treePlacementsAround({
+    centerX: chunks.treeX,
+    centerZ: chunks.treeZ,
+    radius: TREE_COLLIDER_RADIUS,
+    destinations,
+    clearings: WORLD_INFRASTRUCTURE_CLEARINGS,
+    heightAt: terrainHeightAt,
+  }).flat(), [chunks.treeX, chunks.treeZ, destinations]);
+  const rockColliders = useMemo(() => groundPlacementsAround({
+    centerX: chunks.groundX,
+    centerZ: chunks.groundZ,
+    radius: GROUND_COLLIDER_RADIUS,
+    destinations,
+    clearings: WORLD_INFRASTRUCTURE_CLEARINGS,
+    heightAt: terrainHeightAt,
+    waterLevel: WATER_LEVEL,
+  }).slice(0, 3).flat().filter((rock) => rock.scale >= 0.38), [
+    chunks.groundX,
+    chunks.groundZ,
+    destinations,
+  ]);
 
   useFrame(() => {
-    const x = Math.floor(playerPosition.current.x / 38);
-    const z = Math.floor(playerPosition.current.z / 38);
-    if (x === chunkRef.current.x && z === chunkRef.current.z) return;
-    chunkRef.current = { x, z };
-    setChunk({ x, z });
+    const next = chunksAt(playerPosition.current);
+    const current = chunksRef.current;
+    if (
+      next.treeX === current.treeX
+      && next.treeZ === current.treeZ
+      && next.groundX === current.groundX
+      && next.groundZ === current.groundZ
+    ) return;
+    chunksRef.current = next;
+    setChunks(next);
   });
 
   return (
-    <RigidBody type="fixed" colliders={false}>
-      {colliders.map((collider) => (
-        <CuboidCollider
-          key={collider.key}
-          args={[collider.halfWidth, collider.halfHeight, collider.halfWidth]}
-          position={[collider.x, collider.y, collider.z]}
-          friction={1.2}
-        />
-      ))}
+    <RigidBody type="fixed" colliders={false} name="solid-streamed-nature">
+      {treeColliders.map((tree) => {
+        const halfHeight = tree.heightScale * 3.15;
+        const trunkRadius = Math.max(0.28, tree.widthScale * TRUNK_RADII[tree.variant]);
+        return (
+          <CylinderCollider
+            key={`tree:${tree.key}`}
+            args={[halfHeight, trunkRadius]}
+            position={[tree.x, tree.y + halfHeight - 0.05, tree.z]}
+            friction={1.2}
+          />
+        );
+      })}
+      {rockColliders.map((rock) => {
+        const radius = Math.max(0.3, rock.scale * 0.82);
+        return (
+          <BallCollider
+            key={`rock:${rock.key}`}
+            args={[radius]}
+            position={[rock.x, rock.y + radius * 0.58, rock.z]}
+            friction={1.35}
+          />
+        );
+      })}
     </RigidBody>
   );
 }
