@@ -34,16 +34,20 @@ export default function WorldHud({
   owner,
   telemetry,
   keepsakes,
+  soundEnabled,
   companionNearby,
   onOpenInventory,
+  onToggleSound,
   onTalkToCompanion,
   onTravel,
 }: {
   owner: string;
   telemetry: GameTelemetry;
   keepsakes: number;
+  soundEnabled: boolean;
   companionNearby: boolean;
   onOpenInventory: () => void;
+  onToggleSound: () => void;
   onTalkToCompanion: () => void;
   onTravel: (waypoint: WorldWaypoint) => void;
 }) {
@@ -69,6 +73,7 @@ export default function WorldHud({
           </strong>
         </div>
         <nav aria-label="世界操作">
+          <button onClick={onToggleSound}>声景 {soundEnabled ? 'ON' : 'OFF'} <kbd>M</kbd></button>
           <button onClick={onOpenInventory}>背包 <kbd>B</kbd></button>
         </nav>
       </header>

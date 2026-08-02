@@ -17,6 +17,7 @@ import ArchiveGameScene, {
 import ArchiveCodexPanel from '@/components/world/ArchiveCodexPanel';
 import ArchiveDialoguePanel from '@/components/world/ArchiveDialoguePanel';
 import ArchiveHomeRecordPanel from '@/components/world/ArchiveHomeRecordPanel';
+import ArchiveSoundscape from '@/components/world/ArchiveSoundscape';
 import WorldHud from '@/components/world/WorldHud';
 import WorldModeSwitch from '@/components/world/WorldModeSwitch';
 import WorldSatchel from '@/components/world/WorldSatchel';
@@ -42,6 +43,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const [travelRequest, setTravelRequest] = useState<GameTravelRequest | null>(null);
   const [telemetry, setTelemetry] = useState<GameTelemetry>(INITIAL_WORLD_TELEMETRY);
   const [rations, setRations] = useState(3);
+  const [soundEnabled, setSoundEnabled] = useState(false);
   const [collectedKeepsakes, setCollectedKeepsakes] = useState<string[]>([]);
   const [lastKeepsake, setLastKeepsake] = useState<string | null>(null);
   const [companionNearby, setCompanionNearby] = useState(false);
@@ -85,6 +87,15 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     };
     window.addEventListener('keydown', toggleInventory);
     return () => window.removeEventListener('keydown', toggleInventory);
+  }, [mode]);
+
+  useEffect(() => {
+    const toggleSound = (event: KeyboardEvent) => {
+      if (event.code !== 'KeyM' || event.repeat || mode !== 'world') return;
+      setSoundEnabled((enabled) => !enabled);
+    };
+    window.addEventListener('keydown', toggleSound);
+    return () => window.removeEventListener('keydown', toggleSound);
   }, [mode]);
 
   const releasePointerLock = () => {
@@ -151,6 +162,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
       <output className="sr-only" aria-label="3D 运行状态">{diagnostics}</output>
       <div className="archive-world__grain" aria-hidden="true" />
       <div className="archive-world__vignette" aria-hidden="true" />
+      <ArchiveSoundscape enabled={soundEnabled} active={mode === 'world'} telemetry={telemetry} />
       <WorldModeSwitch mode={mode} onChange={changeMode} />
 
       {mode === 'world' && !selectedHomeRecord && (
@@ -158,7 +170,9 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           owner={data.basic.name}
           telemetry={telemetry}
           keepsakes={recoveredKeepsakes.length}
+          soundEnabled={soundEnabled}
           companionNearby={companionNearby}
+          onToggleSound={() => setSoundEnabled((enabled) => !enabled)}
           onOpenInventory={() => {
             releasePointerLock();
             setInventoryOpen(true);
