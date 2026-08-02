@@ -19,6 +19,7 @@ import { FallingPaperSnow, WorldKeepsakes } from '@/components/world/ArchiveAtmo
 import { InfiniteTerrain, InfiniteWater, MountainPanorama } from '@/components/world/ArchiveTerrain';
 import { CoastalArchiveHome, RiverFootbridge } from '@/components/world/ArchiveWorldStructures';
 import ArchiveHomeGrounds from '@/components/world/ArchiveHomeGrounds';
+import ArchiveWildernessLandmarks from '@/components/world/ArchiveWildernessLandmarks';
 import {
   WATER_LEVEL,
   WORLD_INFRASTRUCTURE_CLEARINGS,
@@ -152,6 +153,7 @@ export default function ArchiveGameScene({
           <Suspense fallback={null}>
             <RiverFootbridge />
             <ArchiveHomeGrounds />
+            <ArchiveWildernessLandmarks />
             <CoastalArchiveHome
               playerPosition={playerPosition}
               onInspect={onInspectHomeRecord}

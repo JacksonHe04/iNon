@@ -20,6 +20,7 @@ import {
 
 const ANIMAL_ROOT = '/archive-world/quaternius-animals';
 const WATER_LEVEL = -1.05;
+const ALPINE_SPECIES = new Set<AnimalConfig['species']>(['deer', 'fox', 'stag', 'wolf']);
 
 function safeGroundPosition(
   heightAt: (x: number, z: number) => number,
@@ -95,7 +96,6 @@ function AnimatedAnimal({
   useFrame(({ clock }, delta) => {
     const group = root.current;
     if (!group) return;
-    mixer.update(delta);
 
     if (!wasPlaced.current) {
       const start = safeGroundPosition(
@@ -113,6 +113,9 @@ function AnimatedAnimal({
     }
 
     const player = playerPosition.current;
+    group.visible = heightAt(player.x, player.z) < 12 || ALPINE_SPECIES.has(config.species);
+    if (!group.visible) return;
+    mixer.update(delta);
     const distanceToPlayer = Math.hypot(group.position.x - player.x, group.position.z - player.z);
 
     if (distanceToPlayer > 118) {

@@ -22,6 +22,8 @@ function AnimatedWasp({
   const phase = index * 2.71;
   const update = useCallback((group: Group, elapsed: number) => {
     const player = playerPosition.current;
+    group.visible = heightAt(player.x, player.z) < 8;
+    if (!group.visible) return;
     if (Math.hypot(player.x - anchor.current.x, player.z - anchor.current.z) > 58) {
       anchor.current.set(player.x, 0, player.z);
     }
@@ -38,7 +40,7 @@ function AnimatedWasp({
       source={gltf.scene}
       animations={gltf.animations}
       animationName="Wasp_Flying"
-      scale={0.12 + (index % 2) * 0.018}
+      scale={0.065 + (index % 2) * 0.009}
       animationSpeed={0.9 + index * 0.04}
       materialTone={0.72}
       update={update}
@@ -77,6 +79,8 @@ export default function ArchivePollinators({
     }
     groups.current.forEach((group, index) => {
       if (!group) return;
+      group.visible = heightAt(player.x, player.z) < 8;
+      if (!group.visible) return;
       const phase = index * 2.399;
       const radius = 7 + (index % 5) * 5.1;
       const angle = clock.elapsedTime * (0.28 + (index % 3) * 0.06) + phase;
@@ -97,7 +101,7 @@ export default function ArchivePollinators({
           <group
             key={index}
             ref={(group) => { groups.current[index] = group; }}
-            scale={1 + (index % 3) * 0.12}
+            scale={0.32 + (index % 3) * 0.035}
           >
             <primitive object={bee} />
           </group>

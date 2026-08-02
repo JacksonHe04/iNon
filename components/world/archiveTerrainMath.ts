@@ -61,7 +61,13 @@ function rawTerrainHeightAt(x: number, z: number) {
 }
 
 export function terrainHeightAt(x: number, z: number) {
-  const height = rawTerrainHeightAt(x, z);
+  let height = rawTerrainHeightAt(x, z);
+  const [summitX, , summitZ] = WORLD_MOUNTAIN_SUMMIT_POSITION;
+  const summitDistance = Math.hypot(x - summitX, z - summitZ);
+  if (summitDistance < 14) {
+    const summitHeight = rawTerrainHeightAt(summitX, summitZ);
+    height += (summitHeight - height) * (1 - smoothstep(5, 14, summitDistance));
+  }
   const distance = Math.hypot(x - WORLD_HOME_POSITION[0], z - WORLD_HOME_POSITION[2]);
   if (distance >= 16) return height;
   const homeHeight = rawTerrainHeightAt(WORLD_HOME_POSITION[0], WORLD_HOME_POSITION[2]);
