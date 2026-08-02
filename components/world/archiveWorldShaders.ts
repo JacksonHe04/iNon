@@ -7,11 +7,13 @@ const trailDistanceStatements = WORLD_TRAIL_SEGMENTS.map(
 
 export const terrainVertex = /* glsl */ `
   varying vec3 vWorld;
+  varying vec3 vWorldNormal;
   varying float vGrain;
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
   void main() {
     vec4 world = modelMatrix * vec4(position, 1.0);
     vWorld = world.xyz;
+    vWorldNormal = normalize(mat3(modelMatrix) * normal);
     vGrain = hash(floor(world.xz * 1.8));
     gl_Position = projectionMatrix * viewMatrix * world;
   }
@@ -19,11 +21,14 @@ export const terrainVertex = /* glsl */ `
 
 export const terrainFragment = /* glsl */ `
   uniform sampler2D uGround;
+  uniform sampler2D uRock;
+  uniform sampler2D uSnow;
   uniform vec3 uMoss;
   uniform vec3 uForest;
   uniform vec3 uPath;
   uniform vec3 uShore;
   varying vec3 vWorld;
+  varying vec3 vWorldNormal;
   varying float vGrain;
   float segmentDistance(vec2 point, vec2 start, vec2 end) {
     vec2 segment = end - start;
@@ -45,6 +50,14 @@ export const terrainFragment = /* glsl */ `
     ground = mix(ground, uPath, pathMask * (0.26 + pathCore * 0.16) * pathWear);
     vec3 forestFloor = texture2D(uGround, vWorld.xz * 0.035).rgb * vec3(0.50, 0.82, 0.54);
     ground = mix(ground, forestFloor, 0.52) + (vGrain - 0.5) * 0.055;
+    float steepness = 1.0 - clamp(vWorldNormal.y, 0.0, 1.0);
+    vec3 alpineRock = texture2D(uRock, vWorld.xz * 0.018).rgb * vec3(0.72, 0.82, 0.72);
+    float rockMask = smoothstep(10.0, 24.0, vWorld.y) * (0.45 + steepness * 0.55);
+    ground = mix(ground, alpineRock, rockMask * 0.86);
+    vec3 alpineSnow = texture2D(uSnow, vWorld.xz * 0.032).rgb * vec3(0.78, 0.84, 0.76);
+    float snowLine = 25.0 + sin(vWorld.x * 0.08 + vWorld.z * 0.05) * 2.2;
+    float snowMask = smoothstep(snowLine - 2.0, snowLine + 4.0, vWorld.y) * (1.0 - steepness * 0.42);
+    ground = mix(ground, alpineSnow, clamp(snowMask, 0.0, 0.94));
     float shoreline = -31.0 + sin(vWorld.z * 0.015) * 9.0 + sin(vWorld.z * 0.043) * 4.0;
     float shoreBand = 1.0 - smoothstep(4.0, 18.0, abs(vWorld.x - shoreline));
     ground = mix(ground, uShore, shoreBand * 0.48);

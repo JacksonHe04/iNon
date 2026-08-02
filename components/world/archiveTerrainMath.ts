@@ -1,5 +1,10 @@
 import type { GameTelemetry } from '@/components/world/archiveGameTypes';
-import { WATER_LEVEL, WORLD_HOME_POSITION } from '@/components/world/archiveWorldConstants';
+import {
+  WATER_LEVEL,
+  WORLD_HOME_POSITION,
+  WORLD_MOUNTAIN_SUMMIT_POSITION,
+} from '@/components/world/archiveWorldConstants';
+import { mountainTrailGradeAt } from '@/components/world/archiveWorldTrails';
 
 function smoothstep(edge0: number, edge1: number, value: number) {
   const amount = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
@@ -26,11 +31,29 @@ function rawTerrainHeightAt(x: number, z: number) {
     Math.max(0, Math.sin(x * 0.011 + 0.7) + Math.cos(z * 0.008 - 0.4) - 0.58),
     2,
   ) * 7.5;
+  const [summitX, , summitZ] = WORLD_MOUNTAIN_SUMMIT_POSITION;
+  const summit = Math.exp(
+    -(((x - summitX) / 50) ** 2 + ((z - summitZ) / 45) ** 2),
+  ) * 26;
+  const rearPeak = Math.exp(
+    -(((x - 160) / 68) ** 2 + ((z + 78) / 58) ** 2),
+  ) * 32;
+  const foothill = Math.exp(
+    -(((x - 65) / 55) ** 2 + ((z + 36) / 45) ** 2),
+  ) * 11;
   const riverCenter = riverCenterAt(z);
   const riverInfluence = 1 - smoothstep(3.5, 17, Math.abs(x - riverCenter));
-  const rollingGround = 0.4 + broad + ridges + mountainMass - riverInfluence * 7.2;
+  const rollingGround = 0.4 + broad + ridges + mountainMass
+    + summit + rearPeak + foothill - riverInfluence * 7.2;
   const dryGround = Math.max(-0.42, rollingGround);
-  const continentalGround = (dryGround * (1 - riverInfluence) + rollingGround * riverInfluence) * wilderness;
+  let continentalGround = (dryGround * (1 - riverInfluence) + rollingGround * riverInfluence) * wilderness;
+  const mountainTrail = mountainTrailGradeAt(x, z);
+  if (mountainTrail && mountainTrail.distance < 26) {
+    const trailBlend = 1 - smoothstep(4, 26, mountainTrail.distance);
+    const carvedHeight = continentalGround
+      + (mountainTrail.height - continentalGround) * trailBlend;
+    continentalGround = Math.min(continentalGround, carvedHeight);
+  }
   const shoreline = coastlineXAt(z);
   const oceanInfluence = 1 - smoothstep(shoreline - 12, shoreline + 5, x);
   const oceanFloor = -7.8 + Math.sin(x * 0.04 + z * 0.027) * 1.1;
@@ -48,8 +71,8 @@ export function terrainHeightAt(x: number, z: number) {
 export function terrainKindAt(x: number, z: number, height: number): GameTelemetry['terrain'] {
   if (x < coastlineXAt(z) + 18) return 'coast';
   if (height <= WATER_LEVEL + 0.18) return 'river';
-  if (Math.hypot(x - WORLD_HOME_POSITION[0], z - WORLD_HOME_POSITION[2]) < 58) return 'village';
   if (height > 4.5) return 'mountain';
+  if (Math.hypot(x - WORLD_HOME_POSITION[0], z - WORLD_HOME_POSITION[2]) < 58) return 'village';
   return 'forest';
 }
 

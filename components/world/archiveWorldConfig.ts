@@ -1,6 +1,7 @@
 import {
   RIVER_BRIDGE_POSITION,
   WORLD_HOME_POSITION,
+  WORLD_MOUNTAIN_SUMMIT_POSITION,
   type GameDestination,
 } from '@/components/world/ArchiveGameScene';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
@@ -42,6 +43,14 @@ export const WORLD_WAYPOINTS: WorldWaypoint[] = [
     position: [-92, 0, -12],
     arrival: [-18, 0, -8],
     yaw: Math.PI / 2,
+  },
+  {
+    id: 'snow-ridge',
+    label: '雪线山脊',
+    number: 'M',
+    position: WORLD_MOUNTAIN_SUMMIT_POSITION,
+    arrival: [0, 0, 22],
+    yaw: -0.92,
   },
 ];
 

@@ -74,16 +74,25 @@ export function InfiniteTerrain({ playerPosition }: { playerPosition: MutableRef
   const [chunk, setChunk] = useState({ x: 0, z: 0 });
   const chunkRef = useRef(chunk);
   const groundTexture = useTexture('/archive-world/forest-floor-albedo-v2.webp');
+  const rockTexture = useTexture('/archive-world/polyhaven-mountain/rocky_terrain_03_diff_1k.jpg');
+  const snowTexture = useTexture('/archive-world/polyhaven-mountain/snow_02_diff_1k.jpg');
   groundTexture.wrapS = RepeatWrapping;
   groundTexture.wrapT = RepeatWrapping;
   groundTexture.colorSpace = SRGBColorSpace;
+  [rockTexture, snowTexture].forEach((texture) => {
+    texture.wrapS = RepeatWrapping;
+    texture.wrapT = RepeatWrapping;
+    texture.colorSpace = SRGBColorSpace;
+  });
   const uniforms = useMemo(() => ({
     uGround: { value: groundTexture },
+    uRock: { value: rockTexture },
+    uSnow: { value: snowTexture },
     uMoss: { value: new Color('#62785c') },
     uForest: { value: new Color('#243d2d') },
     uPath: { value: new Color('#9a8b67') },
     uShore: { value: new Color('#9b9377') },
-  }), [groundTexture]);
+  }), [groundTexture, rockTexture, snowTexture]);
   const tiles = useMemo(() => terrainTilesAround(chunk.x, chunk.z), [chunk.x, chunk.z]);
 
   useFrame(() => {

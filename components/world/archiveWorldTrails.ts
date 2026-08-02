@@ -2,7 +2,16 @@ export interface WorldTrailSegment {
   start: readonly [number, number];
   end: readonly [number, number];
   halfWidth: number;
+  grade?: readonly [number, number];
 }
+
+const MOUNTAIN_TRAIL_SEGMENTS: readonly WorldTrailSegment[] = [
+  { start: [0, 22], end: [24, 4], halfWidth: 1.8, grade: [0.8, 3] },
+  { start: [24, 4], end: [54, -34], halfWidth: 1.75, grade: [3, 10] },
+  { start: [54, -34], end: [76, -48], halfWidth: 1.65, grade: [10, 18] },
+  { start: [76, -48], end: [94, -55], halfWidth: 1.55, grade: [18, 30] },
+  { start: [94, -55], end: [105, -58], halfWidth: 1.35, grade: [30, 41] },
+];
 
 export const WORLD_TRAIL_SEGMENTS: readonly WorldTrailSegment[] = [
   { start: [0, 22], end: [-18, 13], halfWidth: 2.15 },
@@ -20,6 +29,7 @@ export const WORLD_TRAIL_SEGMENTS: readonly WorldTrailSegment[] = [
   { start: [-112, -62], end: [-152, 12], halfWidth: 1.35 },
   { start: [-152, 12], end: [-206, 116], halfWidth: 1.3 },
   { start: [54, -34], end: [105, 4], halfWidth: 1.5 },
+  ...MOUNTAIN_TRAIL_SEGMENTS,
   { start: [105, 4], end: [162, 72], halfWidth: 1.35 },
   { start: [162, 72], end: [214, 132], halfWidth: 1.25 },
 ] as const;
@@ -39,6 +49,34 @@ function distanceToSegment(
     Math.min(1, ((x - start[0]) * segmentX + (z - start[1]) * segmentZ) / lengthSquared),
   );
   return Math.hypot(x - (start[0] + segmentX * amount), z - (start[1] + segmentZ * amount));
+}
+
+function segmentAmount(
+  x: number,
+  z: number,
+  start: readonly [number, number],
+  end: readonly [number, number],
+) {
+  const segmentX = end[0] - start[0];
+  const segmentZ = end[1] - start[1];
+  const lengthSquared = segmentX * segmentX + segmentZ * segmentZ;
+  if (lengthSquared === 0) return 0;
+  return Math.max(
+    0,
+    Math.min(1, ((x - start[0]) * segmentX + (z - start[1]) * segmentZ) / lengthSquared),
+  );
+}
+
+export function mountainTrailGradeAt(x: number, z: number) {
+  let nearest: { distance: number; height: number } | null = null;
+  for (const segment of MOUNTAIN_TRAIL_SEGMENTS) {
+    if (!segment.grade) continue;
+    const distance = distanceToSegment(x, z, segment.start, segment.end);
+    const amount = segmentAmount(x, z, segment.start, segment.end);
+    const height = segment.grade[0] + (segment.grade[1] - segment.grade[0]) * amount;
+    if (!nearest || distance < nearest.distance) nearest = { distance, height };
+  }
+  return nearest;
 }
 
 export function normalizedWorldTrailDistanceAt(x: number, z: number) {

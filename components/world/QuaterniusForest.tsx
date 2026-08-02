@@ -126,17 +126,24 @@ export default function QuaterniusForest({
           const spawnClearance = Math.hypot(x + 11, z - 22) < 9;
           const groundHeight = heightAt(x, z);
           if (roadClearance || siteClearance || infrastructureClearance || spawnClearance || groundHeight < -0.78) continue;
+          if (groundHeight > 27 || (groundHeight > 20 && random() > 0.34)) continue;
 
-          const variant = Math.min(
+          let variant = Math.min(
             partsByVariant.length - 1,
             Math.floor(random() * partsByVariant.length),
           );
+          if (groundHeight > 13) variant = 3 + Math.floor(random() * 3);
           const rotation = random() * Math.PI * 2;
           const tilt = (random() - 0.5) * 0.035;
           if (placements[variant].length >= MAX_INSTANCES_PER_VARIANT) continue;
           dummy.position.set(x, groundHeight, z);
           dummy.rotation.set(0, rotation, tilt);
-          dummy.scale.set(widthScale, heightScale, widthScale);
+          const alpineScale = groundHeight > 16 ? 0.74 : 1;
+          dummy.scale.set(
+            widthScale * alpineScale,
+            heightScale * alpineScale,
+            widthScale * alpineScale,
+          );
           dummy.updateMatrix();
           placements[variant].push(dummy.matrix.clone());
         }

@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import type { GameTelemetry } from '@/components/world/ArchiveGameScene';
 import type { WorldWaypoint } from '@/components/world/archiveWorldConfig';
 import { coastlineXAt, riverCenterAt } from '@/components/world/archiveTerrainMath';
+import { WORLD_MOUNTAIN_SUMMIT_POSITION } from '@/components/world/archiveWorldConstants';
 
 const MAP_CENTER = 90;
 const MAP_RADIUS = 72;
@@ -27,6 +28,10 @@ export default function WorldMinimap({
   onTravel: (waypoint: WorldWaypoint) => void;
 }) {
   const [playerX, playerY] = project(telemetry.x, telemetry.z);
+  const [mountainX, mountainY] = project(
+    WORLD_MOUNTAIN_SUMMIT_POSITION[0],
+    WORLD_MOUNTAIN_SUMMIT_POSITION[2],
+  );
   const riverPath = useMemo(() => {
     return Array.from({ length: 49 }, (_, index) => {
       const z = -WORLD_EXTENT + (index / 48) * WORLD_EXTENT * 2;
@@ -67,6 +72,16 @@ export default function WorldMinimap({
         <path d={coastPath.split(' L6')[0]} fill="none" stroke="#d6c99f" strokeWidth="1.4" strokeOpacity=".5" />
         <path d={riverPath} fill="none" stroke="#285b53" strokeWidth="8" strokeOpacity=".74" />
         <path d={riverPath} fill="none" stroke="#a9c1a5" strokeWidth="1" strokeOpacity=".42" />
+        <g
+          transform={`translate(${mountainX} ${mountainY}) rotate(-24)`}
+          fill="none"
+          stroke="#e6dbc0"
+          strokeOpacity=".2"
+        >
+          <ellipse rx="20" ry="13" />
+          <ellipse rx="14" ry="9" />
+          <ellipse rx="8" ry="5" />
+        </g>
         {[32, 58].map((radius) => (
           <circle key={radius} cx="90" cy="90" r={radius} fill="none" stroke="#eadfbf" strokeOpacity=".12" strokeDasharray="3 5" />
         ))}

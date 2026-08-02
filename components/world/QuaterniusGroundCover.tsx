@@ -73,7 +73,7 @@ export default function QuaterniusGroundCover({
           const z = cluster.z + Math.sin(clusterAngle) * clusterRadius;
           const y = heightAt(x, z);
           const variantRoll = random();
-          const variant = variantRoll < 0.034
+          let variant = variantRoll < 0.034
             ? 0
             : variantRoll < 0.068
               ? 1
@@ -95,11 +95,13 @@ export default function QuaterniusGroundCover({
           );
           const spawnClearance = Math.hypot(x, z + 2) < 7.5;
           if (pathClearance || siteClearance || infrastructureClearance || spawnClearance || y <= waterLevel + 0.16) continue;
+          if (y > 16) variant = Math.floor(random() * 3);
+          if (y > 29 && random() > 0.56) continue;
           if (placements[variant].length >= MAX_PER_VARIANT) continue;
 
           const rawScale = random();
           const scale = variant <= 2
-            ? 0.24 + rawScale * 0.42
+            ? (y > 16 ? 0.48 : 0.24) + rawScale * (y > 16 ? 0.72 : 0.42)
             : variant === 3
               ? 0.42 + rawScale * 0.38
               : variant === 6

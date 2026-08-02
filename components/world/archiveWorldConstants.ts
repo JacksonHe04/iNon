@@ -1,10 +1,11 @@
 export const WATER_LEVEL = -1.05;
 export const TERRAIN_CHUNK_SIZE = 84;
-export const TERRAIN_SEGMENTS = 22;
+export const TERRAIN_SEGMENTS = 32;
 export const WORLD_KEEPSAKE_COUNT = 18;
 export const RIVER_BRIDGE_POSITION = [59, 2.5, -160] as const;
 export const WORLD_HOME_POSITION = [-11, 0, 3] as const;
 export const WORLD_PLAYER_SPAWN = [-11, 1.45, 28] as const;
+export const WORLD_MOUNTAIN_SUMMIT_POSITION = [105, 0, -58] as const;
 
 export const WORLD_INFRASTRUCTURE_CLEARINGS = [
   [RIVER_BRIDGE_POSITION[0], RIVER_BRIDGE_POSITION[2], 18],
@@ -19,7 +20,7 @@ export const WORLD_KEEPSAKES = [
   ['field-04', 39, -24],
   ['field-05', -31, -18],
   ['field-06', -82, -48],
-  ['field-07', 76, -88],
+  ['field-07', WORLD_MOUNTAIN_SUMMIT_POSITION[0], WORLD_MOUNTAIN_SUMMIT_POSITION[2]],
   ['field-08', -122, -112],
   ['field-09', 112, -142],
   ['field-10', 150, -162],
