@@ -6,11 +6,12 @@ export const RIVER_BRIDGE_POSITION = [59, 2.5, -160] as const;
 export const WORLD_HOME_POSITION = [-11, 0, 3] as const;
 export const WORLD_PLAYER_SPAWN = [-13, 1.45, 28] as const;
 export const WORLD_MOUNTAIN_SUMMIT_POSITION = [105, 0, -58] as const;
+export const WORLD_TIDAL_COVE_POSITION = [-27, 0, -98] as const;
 
 export const WORLD_INFRASTRUCTURE_CLEARINGS = [
   [RIVER_BRIDGE_POSITION[0], RIVER_BRIDGE_POSITION[2], 18],
   [WORLD_HOME_POSITION[0], WORLD_HOME_POSITION[2], 34],
-  [-18, -8, 25],
+  [WORLD_TIDAL_COVE_POSITION[0], WORLD_TIDAL_COVE_POSITION[2], 18],
 ] as const;
 
 export const WORLD_KEEPSAKES = [

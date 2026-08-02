@@ -2,6 +2,7 @@ import {
   RIVER_BRIDGE_POSITION,
   WORLD_HOME_POSITION,
   WORLD_MOUNTAIN_SUMMIT_POSITION,
+  WORLD_TIDAL_COVE_POSITION,
   type GameDestination,
 } from '@/components/world/ArchiveGameScene';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
@@ -40,8 +41,8 @@ export const WORLD_WAYPOINTS: WorldWaypoint[] = [
     id: 'tidal-cove',
     label: '潮汐湾',
     number: 'C',
-    position: [-92, 0, -12],
-    arrival: [-18, 0, -8],
+    position: WORLD_TIDAL_COVE_POSITION,
+    arrival: WORLD_TIDAL_COVE_POSITION,
     yaw: Math.PI / 2,
   },
   {
@@ -49,8 +50,8 @@ export const WORLD_WAYPOINTS: WorldWaypoint[] = [
     label: '雪线山脊',
     number: 'M',
     position: WORLD_MOUNTAIN_SUMMIT_POSITION,
-    arrival: [0, 0, 22],
-    yaw: -0.92,
+    arrival: WORLD_MOUNTAIN_SUMMIT_POSITION,
+    yaw: 2.05,
   },
 ];
 

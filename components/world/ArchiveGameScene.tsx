@@ -36,6 +36,7 @@ export {
   RIVER_BRIDGE_POSITION,
   WORLD_HOME_POSITION,
   WORLD_MOUNTAIN_SUMMIT_POSITION,
+  WORLD_TIDAL_COVE_POSITION,
   WORLD_KEEPSAKE_COUNT,
 } from '@/components/world/archiveWorldConstants';
 export { terrainHeightAt } from '@/components/world/archiveTerrainMath';
