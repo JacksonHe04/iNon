@@ -84,7 +84,7 @@ function ArchiveHomeModel({
       <MedievalAsset name="Prop_Chimney" position={[-1.35, 3.8, -0.8]} scale={0.82} />
       <MedievalAsset name="Prop_Vine1" position={[1.8, 2.3, 3.13]} />
       <ArchiveHomeDoor playerPosition={playerPosition} />
-      <ArchiveHomeInterior exhibits={exhibits} onInspect={onInspect} />
+      <ArchiveHomeInterior exhibits={exhibits} onInspect={onInspect} playerPosition={playerPosition} />
     </group>
   );
 }

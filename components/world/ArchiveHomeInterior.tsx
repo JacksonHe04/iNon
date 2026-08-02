@@ -1,10 +1,12 @@
 'use client';
 
-import { Suspense, useEffect, useState, type ReactNode } from 'react';
+import { Suspense, useEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { Image } from '@react-three/drei';
-import { DoubleSide } from 'three';
+import { useFrame } from '@react-three/fiber';
+import { DoubleSide, Group, Vector3 } from 'three';
 import { FurnitureAsset, MedievalAsset, PropAsset } from '@/components/world/ArchiveAsset';
 import type { HomeExhibit, HomeRecordId } from '@/components/world/archiveHomeRecords';
+import { WORLD_HOME_POSITION } from '@/components/world/archiveWorldConstants';
 
 function InteractiveFurniture({
   record,
@@ -144,12 +146,22 @@ function HomeDataExhibits({
 export default function ArchiveHomeInterior({
   exhibits,
   onInspect,
+  playerPosition,
 }: {
   exhibits: HomeExhibit[];
   onInspect: (record: HomeRecordId) => void;
+  playerPosition: MutableRefObject<Vector3>;
 }) {
+  const interior = useRef<Group>(null);
+  useFrame(() => {
+    if (!interior.current) return;
+    interior.current.visible = Math.hypot(
+      playerPosition.current.x - WORLD_HOME_POSITION[0],
+      playerPosition.current.z - WORLD_HOME_POSITION[2],
+    ) < 52;
+  });
   return (
-    <group name="lived-in-archive-interior">
+    <group ref={interior} name="lived-in-archive-interior">
       <InteractiveFurniture record="bedside" label="bed-and-nightstand" onInspect={onInspect}>
         <FurnitureAsset name="BedTwin" position={[-1.08, 0.06, -1.12]} rotation={[0, Math.PI / 2, 0]} scale={0.48} tint="#8e9b7d" />
         <FurnitureAsset name="NightStand" position={[-1.42, 0.05, -2.32]} rotation={[0, 0.08, 0]} scale={0.72} tint="#8b765a" />
