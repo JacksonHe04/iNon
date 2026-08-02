@@ -1,36 +1,18 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import {
-  CapsuleCollider,
-  CuboidCollider,
-  RigidBody,
-  type RapierRigidBody,
-} from '@react-three/rapier';
+import { type RapierRigidBody } from '@react-three/rapier';
 import { Group, Vector3 } from 'three';
-import ArchiveHorse, {
-  ARCHIVE_HORSE_SPAWN,
-  type HorseMotion,
-} from '@/components/world/ArchiveHorse';
+import { ARCHIVE_HORSE_SPAWN, type HorseMotion } from '@/components/world/ArchiveHorse';
+import ExplorerRigs from '@/components/world/ExplorerRigs';
+import { terrainKindAt } from '@/components/world/archiveTerrainMath';
 import type {
   GameDestination,
   GameTelemetry,
   GameTravelRequest,
-} from '@/components/world/ArchiveGameScene';
-
-interface FirstPersonExplorerProps {
-  enabled: boolean;
-  destinations: GameDestination[];
-  playerPosition: MutableRefObject<Vector3>;
-  travelRequest: GameTravelRequest | null;
-  spawn?: [number, number, number];
-  heightAt: (x: number, z: number) => number;
-  waterLevel: number;
-  onOpen: (type: GameDestination['blockType']) => void;
-  onNearby: (destination: GameDestination | null) => void;
-  onTelemetry: (telemetry: GameTelemetry) => void;
-}
+  FirstPersonExplorerProps,
+} from '@/components/world/archiveGameTypes';
 
 export default function FirstPersonExplorer({
   enabled,
@@ -141,27 +123,6 @@ export default function FirstPersonExplorer({
       canvas.removeEventListener('pointercancel', end);
     };
   }, [enabled, gl]);
-
-  useEffect(() => {
-    const rigidBody = body.current;
-    if (!rigidBody || !travelRequest) return;
-    const [x, , z] = travelRequest.position;
-    const y = heightAt(x, z) + 0.12;
-    rigidBody.setTranslation({ x, y, z }, true);
-    rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
-    playerPosition.current.set(x, y, z);
-    if (!mountedRef.current) {
-      const horseX = x + 3.2;
-      const horseZ = z + 1.8;
-      setHorsePosition([horseX, heightAt(horseX, horseZ), horseZ]);
-    }
-    if (typeof travelRequest.yaw === 'number') yaw.current = travelRequest.yaw;
-    pitch.current = 0;
-    appliedTravelId.current = travelRequest.id;
-    nearest.current = null;
-    nearestKey.current = null;
-    onNearby(null);
-  }, [heightAt, onNearby, playerPosition, travelRequest]);
 
   useEffect(() => {
     const travel = (event: Event) => {
@@ -307,13 +268,7 @@ export default function FirstPersonExplorer({
 
     telemetryFrame.current += 1;
     if (telemetryFrame.current % 6 === 0) {
-      const terrain: GameTelemetry['terrain'] = inWater
-        ? 'river'
-        : Math.hypot(translation.x, translation.z + 3) < 34
-          ? 'village'
-          : groundHeight > 4.5
-            ? 'mountain'
-            : 'forest';
+      const terrain = terrainKindAt(translation.x, translation.z, groundHeight);
       onTelemetry({
         x: translation.x,
         y: translation.y,
@@ -330,34 +285,16 @@ export default function FirstPersonExplorer({
   });
 
   return (
-    <>
-      {enabled && !mounted && (
-        <RigidBody type="fixed" colliders={false} position={horsePosition} rotation={[0, horseYaw.current, 0]}>
-          <CuboidCollider args={[0.62, 1.18, 1.45]} position={[0, 1.18, 0]} />
-          <ArchiveHorse motion={waitingMotion} />
-        </RigidBody>
-      )}
-      <RigidBody
-        ref={body}
-        position={spawn}
-        colliders={false}
-        enabledRotations={[false, false, false]}
-        linearDamping={9}
-        friction={1.05}
-        canSleep={false}
-        ccd
-      >
-        <CapsuleCollider
-          key={mounted ? 'mounted' : 'foot'}
-          args={mounted ? [0.82, 0.48] : [0.52, 0.34]}
-          position={[0, mounted ? 1.18 : 0.84, 0]}
-        />
-        {enabled && mounted && (
-          <group ref={mountedHorse} rotation-y={horseYaw.current}>
-            <ArchiveHorse motion={mountMotion} />
-          </group>
-        )}
-      </RigidBody>
-    </>
+    <ExplorerRigs
+      enabled={enabled}
+      mounted={mounted}
+      body={body}
+      mountedHorse={mountedHorse}
+      horsePosition={horsePosition}
+      horseYaw={horseYaw}
+      waitingMotion={waitingMotion}
+      mountMotion={mountMotion}
+      spawn={spawn}
+    />
   );
 }

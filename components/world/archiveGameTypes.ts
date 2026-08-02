@@ -41,3 +41,16 @@ export interface ArchiveGameSceneProps {
   collectedKeepsakes: string[];
   onCollectKeepsake: (id: string) => void;
 }
+
+export interface FirstPersonExplorerProps {
+  enabled: boolean;
+  destinations: GameDestination[];
+  playerPosition: MutableRefObject<Vector3>;
+  travelRequest: GameTravelRequest | null;
+  spawn?: [number, number, number];
+  heightAt: (x: number, z: number) => number;
+  waterLevel: number;
+  onOpen: (type: GameDestination['blockType']) => void;
+  onNearby: (destination: GameDestination | null) => void;
+  onTelemetry: (telemetry: GameTelemetry) => void;
+}
