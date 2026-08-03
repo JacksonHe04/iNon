@@ -13,6 +13,7 @@ export default function WorldSatchel({
   keepsakes,
   fieldRouteStageIndex,
   forageIngredients,
+  vitality,
   onUseRation,
   onRestartRoute,
   onClose,
@@ -21,6 +22,7 @@ export default function WorldSatchel({
   keepsakes: ArchiveKeepsake[];
   fieldRouteStageIndex: number;
   forageIngredients: number;
+  vitality: number;
   onUseRation: () => void;
   onRestartRoute: () => void;
   onClose: () => void;
@@ -41,7 +43,7 @@ export default function WorldSatchel({
         <div>
           <span>田野口粮</span>
           <strong>{rations}</strong>
-          <button onClick={onUseRation} disabled={rations <= 0}>食用并恢复体力</button>
+          <button onClick={onUseRation} disabled={rations <= 0}>食用并恢复体力、生命 +18（当前 {vitality}）</button>
         </div>
         <div>
           <span>拾得旧纸片</span>

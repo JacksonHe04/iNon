@@ -37,6 +37,7 @@ export interface ArchiveGameSceneProps {
   entered: boolean;
   worldTime: WorldTimeSnapshot;
   warmth: number;
+  vitality: number;
   destinations: GameDestination[];
   playerPosition: MutableRefObject<Vector3>;
   travelRequest: GameTravelRequest | null;
@@ -51,11 +52,13 @@ export interface ArchiveGameSceneProps {
   onInspectHomeRecord: (record: HomeRecordId) => void;
   homeExhibits: HomeExhibit[];
   forageCollectedIds: string[];
+  onFallImpact: (impactSpeed: number, mounted: boolean) => void;
 }
 
 export interface FirstPersonExplorerProps {
   enabled: boolean;
   warmth: number;
+  vitality: number;
   destinations: GameDestination[];
   playerPosition: MutableRefObject<Vector3>;
   travelRequest: GameTravelRequest | null;
@@ -65,4 +68,5 @@ export interface FirstPersonExplorerProps {
   onOpen: (type: GameDestination['blockType']) => void;
   onNearby: (destination: GameDestination | null) => void;
   onTelemetry: (telemetry: GameTelemetry) => void;
+  onFallImpact: (impactSpeed: number, mounted: boolean) => void;
 }

@@ -14,6 +14,7 @@ import type { WorldRestSite } from '@/components/world/archiveWorldRest';
 import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
 import { FORAGE_RECIPE_COST, type WorldForagePatch } from '@/components/world/archiveWorldForage';
 import type { WorldWarmthLabel } from '@/components/world/archiveWorldWarmth';
+import type { WorldVitalityLabel } from '@/components/world/archiveWorldVitality';
 
 const COMPANION_BEHAVIOR_LABELS: Record<CompanionBehavior, string> = {
   resting: '在身边休息',
@@ -25,6 +26,17 @@ const COMPANION_BEHAVIOR_LABELS: Record<CompanionBehavior, string> = {
 
 function dispatchKey(type: 'keydown' | 'keyup', code: string) {
   window.dispatchEvent(new KeyboardEvent(type, { code }));
+}
+
+const PULSE_RELEASES = new Map<string, number>();
+function pulseKey(code: string) {
+  const pending = PULSE_RELEASES.get(code);
+  if (pending) window.clearTimeout(pending);
+  dispatchKey('keydown', code);
+  PULSE_RELEASES.set(code, window.setTimeout(() => {
+    dispatchKey('keyup', code);
+    PULSE_RELEASES.delete(code);
+  }, 420));
 }
 
 export default function WorldHud({
@@ -42,6 +54,8 @@ export default function WorldHud({
   warmth,
   warmthLabel,
   warmthSource,
+  vitality,
+  vitalityLabel,
   foragePatch,
   forageIngredients,
   cookSite,
@@ -67,6 +81,8 @@ export default function WorldHud({
   warmth: number;
   warmthLabel: WorldWarmthLabel;
   warmthSource: string;
+  vitality: number;
+  vitalityLabel: WorldVitalityLabel;
   foragePatch: WorldForagePatch | null;
   forageIngredients: number;
   cookSite: WorldRestSite | null;
@@ -191,6 +207,7 @@ export default function WorldHud({
         ].map(([label, code]) => (
           <button
             key={code}
+            onClick={() => pulseKey(code)}
             onPointerDown={() => dispatchKey('keydown', code)}
             onPointerUp={() => dispatchKey('keyup', code)}
             onPointerCancel={() => dispatchKey('keyup', code)}
@@ -204,12 +221,14 @@ export default function WorldHud({
         <div className="archive-world-flight-controls" aria-label="飞行高度控制">
           <button
             aria-label="上升"
+            onClick={() => pulseKey('Space')}
             onPointerDown={() => dispatchKey('keydown', 'Space')}
             onPointerUp={() => dispatchKey('keyup', 'Space')}
             onPointerCancel={() => dispatchKey('keyup', 'Space')}
           >↑</button>
           <button
             aria-label="下降"
+            onClick={() => pulseKey('ControlLeft')}
             onPointerDown={() => dispatchKey('keydown', 'ControlLeft')}
             onPointerUp={() => dispatchKey('keyup', 'ControlLeft')}
             onPointerCancel={() => dispatchKey('keyup', 'ControlLeft')}
@@ -227,6 +246,10 @@ export default function WorldHud({
           <i><em style={{ width: `${telemetry.stamina}%` }} /></i>
         </div>
         <div className="archive-world-status__bar is-health">
+          <label><span>生命 · {vitalityLabel}</span><b>{Math.round(vitality)}</b></label>
+          <i><em style={{ width: `${vitality}%` }} /></i>
+        </div>
+        <div className="archive-world-status__bar is-warmth">
           <label><span>体温 · {warmthLabel}</span><b>{Math.round(warmth)}</b></label>
           <i><em style={{ width: `${warmth}%` }} /></i>
         </div>

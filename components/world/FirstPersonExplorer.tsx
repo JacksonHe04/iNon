@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { type RapierRigidBody } from '@react-three/rapier';
@@ -9,16 +8,13 @@ import ExplorerRigs from '@/components/world/ExplorerRigs';
 import useExplorerPointerLook from '@/components/world/useExplorerPointerLook';
 import { terrainKindAt } from '@/components/world/archiveTerrainMath';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
-import type {
-  GameDestination,
-  GameTelemetry,
-  GameTravelRequest,
-  FirstPersonExplorerProps,
-} from '@/components/world/archiveGameTypes';
-import { explorerMovementSpeed } from '@/components/world/archiveExplorerMotion';
+import type { GameDestination, GameTravelRequest, FirstPersonExplorerProps } from '@/components/world/archiveGameTypes';
+import { explorerMovementSpeed, flyingAltitude } from '@/components/world/archiveExplorerMotion';
+import { trackFallImpact } from '@/components/world/archiveWorldVitality';
 export default function FirstPersonExplorer({
   enabled,
   warmth,
+  vitality,
   destinations,
   playerPosition,
   travelRequest,
@@ -28,6 +24,7 @@ export default function FirstPersonExplorer({
   onOpen,
   onNearby,
   onTelemetry,
+  onFallImpact,
 }: FirstPersonExplorerProps) {
   const body = useRef<RapierRigidBody>(null);
   const keys = useRef(new Set<string>());
@@ -50,6 +47,7 @@ export default function FirstPersonExplorer({
   const nearest = useRef<GameDestination | null>(null);
   const nearestKey = useRef<string | null>(null);
   const telemetryFrame = useRef(0);
+  const fallImpact = useRef({ peakDownSpeed: 0, airborne: false });
   const appliedTravelId = useRef<number | null>(null);
   const { camera, gl } = useThree();
   const forward = useMemo(() => new Vector3(), []);
@@ -65,6 +63,7 @@ export default function FirstPersonExplorer({
       if (event.code === 'KeyV' && !event.repeat && !mountedRef.current) {
         const next = !flyingRef.current;
         flyingRef.current = next;
+        if (!next) ['Space', 'ControlLeft', 'ControlRight', 'KeyC'].forEach((code) => keys.current.delete(code));
         body.current?.setGravityScale(next ? 0 : 1, true);
         if (next) body.current?.setLinvel({ x: 0, y: 0, z: 0 }, true);
       }
@@ -116,6 +115,7 @@ export default function FirstPersonExplorer({
       if (typeof detail.yaw === 'number') yaw.current = detail.yaw;
       pitch.current = 0;
       appliedTravelId.current = detail.id;
+      fallImpact.current = { peakDownSpeed: 0, airborne: false };
       nearest.current = null;
       nearestKey.current = null;
       onNearby(null);
@@ -147,6 +147,7 @@ export default function FirstPersonExplorer({
       if (typeof travelRequest.yaw === 'number') yaw.current = travelRequest.yaw;
       pitch.current = 0;
       appliedTravelId.current = travelRequest.id;
+      fallImpact.current = { peakDownSpeed: 0, airborne: false };
       nearest.current = null;
       nearestKey.current = null;
       onNearby(null);
@@ -154,7 +155,6 @@ export default function FirstPersonExplorer({
     const translation = rigidBody.translation();
     playerPosition.current.set(translation.x, translation.y, translation.z);
     const isMounted = mountedRef.current;
-
     eye.set(translation.x, translation.y + (isMounted ? 3.12 : 1.62), translation.z);
     lookDirection.set(
       -Math.sin(yaw.current) * Math.cos(pitch.current),
@@ -164,7 +164,7 @@ export default function FirstPersonExplorer({
     lookTarget.copy(eye).add(lookDirection);
     camera.position.copy(eye);
     camera.lookAt(lookTarget);
-    if (!enabled) return;
+    if (!enabled) { keys.current.clear(); return; }
 
     const velocity = rigidBody.linvel();
     const groundHeight = heightAt(translation.x, translation.z);
@@ -172,6 +172,8 @@ export default function FirstPersonExplorer({
     const inWater = !isFlying
       && groundHeight <= waterLevel + 0.18
       && translation.y < waterLevel + 1.25;
+    const impact = trackFallImpact(fallImpact.current, velocity.y, isFlying || inWater);
+    if (impact) onFallImpact(impact, isMounted);
     const wantsToSprint = keys.current.has('ShiftLeft') || keys.current.has('ShiftRight');
     forward.set(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
     right.set(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
@@ -188,7 +190,7 @@ export default function FirstPersonExplorer({
       Math.min(100, stamina.current + (sprinting && !isFlying ? (isMounted ? -14 : -22) : 17) * delta),
     );
     const speed = explorerMovementSpeed({
-      flying: isFlying, sprinting, inWater, mounted: isMounted, warmth,
+      flying: isFlying, sprinting, inWater, mounted: isMounted, warmth, vitality,
     });
     if (moving) direction.normalize().multiplyScalar(speed);
     if (isMounted) {
@@ -223,15 +225,16 @@ export default function FirstPersonExplorer({
       : inWater
       ? buoyancySpeed
       : velocity.y;
-    rigidBody.setLinvel({ x: direction.x, y: verticalSpeed, z: direction.z }, true);
+    if (isFlying && verticalSpeed) rigidBody.setTranslation({
+      x: translation.x, y: flyingAltitude(translation.y, groundHeight, verticalSpeed, delta), z: translation.z,
+    }, true);
+    rigidBody.setLinvel({ x: direction.x, y: isFlying ? 0 : verticalSpeed, z: direction.z }, true);
     if (!isFlying && !inWater && keys.current.has('Space') && Math.abs(velocity.y) < 0.09) {
       rigidBody.setLinvel({ x: direction.x, y: isMounted ? 7.2 : 6.4, z: direction.z }, true);
     }
 
-    const floorLimit = isFlying ? groundHeight + 1.1 : groundHeight - 5;
-    if (translation.y < floorLimit) {
-      const recoveryY = isFlying ? floorLimit : groundHeight + 0.12;
-      rigidBody.setTranslation({ x: translation.x, y: recoveryY, z: translation.z }, true);
+    if (!isFlying && translation.y < groundHeight - 5) {
+      rigidBody.setTranslation({ x: translation.x, y: groundHeight + 0.12, z: translation.z }, true);
       rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
     }
 

@@ -2431,7 +2431,8 @@ body:has(.archive-world) .archive-world-loading {
 .archive-world-status__bar label b { font-weight: 400; }
 .archive-world-status__bar i { display: block; height: 4px; margin-top: 4px; background: rgba(221, 211, 178, 0.18); }
 .archive-world-status__bar i em { display: block; height: 100%; background: #b69d56; transition: width 180ms linear; }
-.archive-world-status__bar.is-health i em { background: #6f8b68; }
+.archive-world-status__bar.is-health i em { background: #936b52; }
+.archive-world-status__bar.is-warmth i em { background: #6f8b68; }
 .archive-world-status p { margin: 9px 0 0; color: rgba(235, 225, 197, 0.48); }
 
 .archive-world-keepsake-toast {

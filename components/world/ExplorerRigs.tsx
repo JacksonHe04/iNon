@@ -41,7 +41,7 @@ export default function ExplorerRigs({
         position={spawn}
         colliders={false}
         enabledRotations={[false, false, false]}
-        linearDamping={9}
+        linearDamping={0.8}
         friction={1.05}
         canSleep={false}
         ccd

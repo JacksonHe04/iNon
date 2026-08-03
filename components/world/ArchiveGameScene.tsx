@@ -78,6 +78,7 @@ export default function ArchiveGameScene({
   entered,
   worldTime,
   warmth,
+  vitality,
   destinations,
   playerPosition,
   travelRequest,
@@ -92,6 +93,7 @@ export default function ArchiveGameScene({
   onInspectHomeRecord,
   homeExhibits,
   forageCollectedIds,
+  onFallImpact,
 }: ArchiveGameSceneProps) {
   return (
     <>
@@ -162,6 +164,7 @@ export default function ArchiveGameScene({
           <FirstPersonExplorer
             enabled={entered}
             warmth={warmth}
+            vitality={vitality}
             destinations={destinations}
             playerPosition={playerPosition}
             travelRequest={travelRequest}
@@ -170,6 +173,7 @@ export default function ArchiveGameScene({
             onOpen={onOpen}
             onNearby={onNearby}
             onTelemetry={onTelemetry}
+            onFallImpact={onFallImpact}
           />
         </Physics>
       </Suspense>

@@ -12,11 +12,13 @@ export function useArchiveResting({
   telemetry,
   enabled,
   onRested,
+  onRationUsed,
 }: {
   owner: string;
   telemetry: GameTelemetry;
   enabled: boolean;
   onRested?: () => void;
+  onRationUsed?: () => void;
 }) {
   const storageKey = useMemo(() => `inon-world-rations-${owner}`, [owner]);
   const [rations, setRations] = useState(3);
@@ -67,7 +69,8 @@ export function useArchiveResting({
     if (rations <= 0) return;
     setRations((current) => Math.max(0, current - 1));
     restoreStamina();
-  }, [rations]);
+    onRationUsed?.();
+  }, [onRationUsed, rations]);
   const addRation = useCallback(() => setRations((current) => Math.min(99, current + 1)), []);
 
   useEffect(() => {

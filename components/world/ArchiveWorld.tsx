@@ -1,5 +1,4 @@
 'use client';
-
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { ACESFilmicToneMapping, SRGBColorSpace, Vector3 } from 'three';
@@ -31,12 +30,12 @@ import { useArchiveWorldClock } from '@/hooks/useArchiveWorldClock';
 import { useArchiveForaging } from '@/hooks/useArchiveForaging';
 import WorldFieldFeedback from '@/components/world/WorldFieldFeedback';
 import { useArchiveWarmth } from '@/hooks/useArchiveWarmth';
+import { useArchiveVitality } from '@/hooks/useArchiveVitality';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
   layoutConfig?: LayoutConfig;
 }
-
 export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) {
   const [mode, setMode] = useState<ArchiveWorldMode>('world');
   const [diagnostics, setDiagnostics] = useState('WebGL initialising');
@@ -71,15 +70,18 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
   const worldClock = useArchiveWorldClock({ owner: data.basic.name, running: worldEnabled });
   const warmth = useArchiveWarmth({ owner: data.basic.name, telemetry, worldTime: worldClock, enabled: worldEnabled });
+  const vitality = useArchiveVitality(data.basic.name);
   const advanceAfterRest = useCallback(() => {
     worldClock.advance(360);
     warmth.restore();
-  }, [warmth.restore, worldClock.advance]);
+    vitality.restore();
+  }, [vitality.restore, warmth.restore, worldClock.advance]);
   const resting = useArchiveResting({
     owner: data.basic.name,
     telemetry,
     enabled: worldEnabled,
     onRested: advanceAfterRest,
+    onRationUsed: () => vitality.heal(18),
   });
   const foraging = useArchiveForaging({
     owner: data.basic.name,
@@ -98,6 +100,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     worldTime: worldClock,
     forageIngredients: foraging.ingredients,
     warmth: warmth.value,
+    vitality: vitality.value,
   });
 
   useEffect(() => {
@@ -180,15 +183,14 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           camera={{ position: [WORLD_PLAYER_SPAWN[0], 3, WORLD_PLAYER_SPAWN[2]], fov: 52, near: 0.1, far: 600 }}
           gl={{ antialias: false, powerPreference: 'high-performance', alpha: false }}
           onCreated={({ gl }) => {
-            gl.toneMapping = ACESFilmicToneMapping;
-            gl.toneMappingExposure = 0.92;
-            gl.outputColorSpace = SRGBColorSpace;
+            Object.assign(gl, { toneMapping: ACESFilmicToneMapping, toneMappingExposure: 0.92, outputColorSpace: SRGBColorSpace });
           }}
         >
           <ArchiveGameScene
             entered={worldEnabled}
             worldTime={worldClock}
             warmth={warmth.value}
+            vitality={vitality.value}
             destinations={OUTDOOR_DESTINATIONS}
             playerPosition={playerPosition}
             travelRequest={travelRequest}
@@ -206,6 +208,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             }}
             homeExhibits={homeExhibits}
             forageCollectedIds={foraging.collectedIds}
+            onFallImpact={vitality.receiveFall}
           />
         </Canvas>
       </div>
@@ -235,6 +238,8 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           warmth={warmth.value}
           warmthLabel={warmth.label}
           warmthSource={warmth.source}
+          vitality={vitality.value}
+          vitalityLabel={vitality.label}
           foragePatch={foraging.nearbyPatch}
           forageIngredients={foraging.ingredients}
           cookSite={foraging.cookSite}
@@ -274,6 +279,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           keepsakes={recoveredKeepsakes}
           fieldRouteStageIndex={fieldRoute.stageIndex}
           forageIngredients={foraging.ingredients}
+          vitality={vitality.value}
           onClose={() => setInventoryOpen(false)}
           onRestartRoute={fieldRoute.restart}
           onUseRation={resting.useRation}
@@ -287,6 +293,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
         restFeedback={resting.feedback}
         forageFeedback={foraging.feedback}
         forageIngredients={foraging.ingredients}
+        vitalityFeedback={vitality.feedback}
       />
     </section>
   );
