@@ -16,8 +16,8 @@ const ITEMS_PER_CHUNK = 42;
 function itemsForRing(ring: number, biome: WorldBiome) {
   if (ring === 0) return ITEMS_PER_CHUNK;
   const denseDistance = biome === 'coast' || biome === 'meadow' || biome === 'wetland';
-  if (ring === 1) return denseDistance ? 32 : 24;
-  return denseDistance ? 16 : 8;
+  if (ring === 1) return denseDistance ? 28 : 24;
+  return denseDistance ? 12 : 8;
 }
 
 export interface GroundPlacement extends WorldPlacement {
