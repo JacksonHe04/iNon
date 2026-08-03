@@ -40,6 +40,7 @@ export const ARCHIVE_SPECIES = [
 
 export const ARCHIVE_SPECIES_COUNT = ARCHIVE_SPECIES.length;
 export type ArchiveSpeciesId = (typeof ARCHIVE_SPECIES)[number]['id'];
+export const ARCHIVE_HABITATS = ['家园', '林地', '草原', '河谷', '海岸', '天空'] as const;
 
 const ARCHIVE_SPECIES_IDS = new Set<string>(ARCHIVE_SPECIES.map((species) => species.id));
 
@@ -49,4 +50,21 @@ export function isArchiveSpeciesId(value: unknown): value is ArchiveSpeciesId {
 
 export function archiveSpeciesById(id: ArchiveSpeciesId) {
   return ARCHIVE_SPECIES.find((species) => species.id === id);
+}
+
+export function archiveObservedSpecies(ids: readonly ArchiveSpeciesId[]) {
+  const observed = new Set(ids);
+  return ARCHIVE_SPECIES.filter((species) => observed.has(species.id));
+}
+
+export function archiveHabitatProgress(ids: readonly ArchiveSpeciesId[]) {
+  const observed = new Set(ids);
+  return ARCHIVE_HABITATS.map((habitat) => {
+    const species = ARCHIVE_SPECIES.filter((record) => record.habitat === habitat);
+    return {
+      habitat,
+      observed: species.filter((record) => observed.has(record.id)).length,
+      total: species.length,
+    };
+  });
 }

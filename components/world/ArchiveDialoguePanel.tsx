@@ -8,7 +8,7 @@ import type { WorldDialogueContext } from '@/components/world/archiveWorldTeleme
 import styles from '@/components/world/ArchiveDialoguePanel.module.css';
 
 const OWNER_SUGGESTIONS = ['最近在做什么？', '推荐一张喜欢的唱片', '讲讲这里的收藏', '为什么建造这个世界？'];
-const COMPANION_SUGGESTIONS = ['今天森林里发生了什么？', '带我去你喜欢的地方', '你为什么跟着我？', '讲讲主人的收藏'];
+const COMPANION_SUGGESTIONS = ['我们已经遇见过哪些动物？', '带我去你喜欢的地方', '你为什么跟着我？', '讲讲主人的收藏'];
 
 export default function ArchiveDialoguePanel({
   data,
@@ -62,7 +62,7 @@ export default function ArchiveDialoguePanel({
           DAY {worldContext.day} · {worldContext.phaseLabel} {worldContext.clockLabel} · {worldContext.motion} · X {worldContext.x} / Z {worldContext.z} · ALT {worldContext.y.toFixed(1)} M · 朝向 {worldContext.heading}°
         </p>
         <small>
-          生命 {worldContext.vitality}（{worldContext.vitalityLabel}） · 体力 {worldContext.stamina} · 体温 {worldContext.warmth}（{worldContext.warmthLabel}） · 口粮 {worldContext.rations} · 食材 {worldContext.forageIngredients} / 3 · 田野札记 {worldContext.collectedKeepsakeIds.length} / 18 · {worldContext.companionNearby ? '苔苔就在身边' : '苔苔正在循着气味赶来'}
+          生命 {worldContext.vitality}（{worldContext.vitalityLabel}） · 体力 {worldContext.stamina} · 体温 {worldContext.warmth}（{worldContext.warmthLabel}） · 口粮 {worldContext.rations} · 食材 {worldContext.forageIngredients} / 3 · 田野札记 {worldContext.collectedKeepsakeIds.length} / 18 · 动物观察 {worldContext.observedSpeciesIds.length} / 30 · {worldContext.companionNearby ? '苔苔就在身边' : '苔苔正在循着气味赶来'}
         </small>
       </aside>
 

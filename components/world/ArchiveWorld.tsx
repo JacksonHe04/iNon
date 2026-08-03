@@ -101,6 +101,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     forageIngredients: foraging.ingredients,
     warmth: warmth.value,
     vitality: vitality.value,
+    observedSpeciesIds: speciesJournal.observedIds,
   });
 
   useEffect(() => {

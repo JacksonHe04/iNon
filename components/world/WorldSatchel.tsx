@@ -5,12 +5,11 @@ import type { ArchiveKeepsake } from '@/components/world/archiveKeepsakes';
 import {
   ARCHIVE_SPECIES,
   ARCHIVE_SPECIES_COUNT,
+  ARCHIVE_HABITATS,
   type ArchiveSpeciesId,
 } from '@/components/world/archiveSpeciesCatalog';
 import styles from '@/components/world/WorldSatchel.module.css';
 import { FIELD_ROUTE_STAGES } from '@/components/world/archiveFieldRoute';
-
-const FIELD_HABITATS = ['家园', '林地', '草原', '河谷', '海岸', '天空'] as const;
 
 export default function WorldSatchel({
   rations,
@@ -94,7 +93,7 @@ export default function WorldSatchel({
           <b>{observedSpeciesIds.length} / {ARCHIVE_SPECIES_COUNT} 种 ＋</b>
         </summary>
         <div>
-          {FIELD_HABITATS.map((habitat, index) => {
+          {ARCHIVE_HABITATS.map((habitat, index) => {
             const species = ARCHIVE_SPECIES.filter((record) => record.habitat === habitat);
             const observed = species.filter((record) => observedSpecies.has(record.id));
             return (
