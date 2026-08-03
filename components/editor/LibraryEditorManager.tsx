@@ -1,22 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  Music as MusicIcon,
-  Film as FilmIcon,
-  BookOpen as BookIcon,
-  Gamepad2 as GameIcon,
-  Plus,
-  Compass,
-  FileEdit,
-  Settings,
-} from 'lucide-react';
 import GlassCard from '@/components/GlassCard';
 import LibraryCategoryModal from './LibraryCategoryModal';
 import LibraryItemEditorList from './LibraryItemEditorList';
 import { useSectionSave } from './hooks/useSectionSave';
 import type { LibraryByKind, LibraryItemDTO, LibraryCategoryDTO, LibraryKind, LibrarySubtype } from '@/types';
 import LibraryPreviewPanel from './LibraryPreviewPanel';
+import { LibraryCollectionControls, LibraryKindToolbar } from './LibraryEditorToolbar';
 
 // Safe UUID/ID generator helper
 const generateUUID = () => {
@@ -80,13 +71,6 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
 
   // Hook handles auto-saving of changes to the "library" endpoint (background execution, no user-facing status pill)
   const { triggerSave } = useSectionSave('library');
-
-  const kindConfig = {
-    music: { label: '音乐', icon: MusicIcon },
-    film: { label: '影视', icon: FilmIcon },
-    game: { label: '游戏', icon: GameIcon },
-    book: { label: '读书', icon: BookIcon },
-  } as const;
 
   const updateCategories = (newCategories: LibraryCategoryDTO[]) => {
     setLibraryData((prev) => {
@@ -288,178 +272,31 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
     return list.filter((item) => item.categoryName === selectedCategoryName);
   };
 
-  const activeConfig = kindConfig[activeKind];
-
   return (
     <div className="space-y-6">
-      {/* Top Header Row: Merges Kind Tabs and Mode Switch into a single highly-compact line */}
-      <div className="flex flex-row items-center justify-between gap-4 border-b border-white/10 pb-4 overflow-x-auto">
-        {/* Kind selector tabs */}
-        <div className="flex bg-gray-500/10 rounded-2xl p-1 border border-white/5">
-          {(Object.keys(kindConfig) as LibraryKind[]).map((k) => {
-            const cfg = kindConfig[k];
-            const Icon = cfg.icon;
-            const isSelected = activeKind === k;
-            return (
-              <button
-                key={k}
-                onClick={() => setActiveKind(k)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{cfg.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Mode Switch (Edit vs Preview) */}
-        <div className="flex bg-gray-500/10 rounded-2xl p-1 border border-white/5">
-          <button
-            onClick={() => setEditMode('edit')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              editMode === 'edit'
-                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-            }`}
-          >
-            <FileEdit className="w-3.5 h-3.5" />
-            <span>编辑数据</span>
-          </button>
-          <button
-            onClick={() => setEditMode('preview')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              editMode === 'preview'
-                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-            }`}
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span>卡片预览</span>
-          </button>
-        </div>
-      </div>
+      <LibraryKindToolbar
+        activeKind={activeKind}
+        editMode={editMode}
+        onKindChange={setActiveKind}
+        onModeChange={setEditMode}
+      />
 
       {/* Main Panel Card (No hover bouncy effects, starts directly with content controls) */}
       <GlassCard className="p-6 space-y-6" hover={false}>
-        {/* Category Tabs & Subtype controls merged into a single clean line */}
-        {(activeKind === 'music' || editMode === 'edit') && (
-          <div className="flex flex-row items-center justify-between gap-4 border-b border-white/10 pb-4 overflow-x-auto">
-            {activeKind === 'music' ? (
-              <>
-                {/* Left Column: Categories List */}
-                <div className="flex items-center gap-1.5 flex-nowrap">
-                  {categories.map((cat) => {
-                    const isSelected = selectedCategoryName === cat.name;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSelectedCategoryName(cat.name)}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition duration-200 cursor-pointer whitespace-nowrap ${
-                          isSelected
-                            ? 'bg-teal-500/10 border-teal-500/30 text-teal-600 dark:text-teal-400'
-                            : 'bg-white/30 dark:bg-gray-800/30 border-white/10 text-gray-500 hover:text-gray-800 hover:bg-white/50 dark:hover:bg-gray-800/50'
-                        }`}
-                      >
-                        {cat.name}
-                      </button>
-                    );
-                  })}
-                  
-                  {editMode === 'edit' && (
-                    <button
-                      onClick={() => setIsCategoryModalOpen(true)}
-                      className="p-2 rounded-xl bg-white/30 dark:bg-gray-800/30 border border-white/10 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 cursor-pointer transition ml-1"
-                      title="管理分类"
-                    >
-                      <Settings className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Right Column: Subtype filter & Add button */}
-                {editMode === 'edit' && categories.length > 0 && selectedCategoryName && (
-                  <div className="flex items-center gap-3">
-                    <div className="flex bg-gray-500/10 rounded-xl p-0.5 border border-white/5">
-                      {[
-                        { id: 'work', label: '专辑' },
-                        { id: 'song', label: '单曲' },
-                        { id: 'creator', label: '音乐人' },
-                      ].map((tab) => {
-                        const isActive = activeSubtypeTab === tab.id;
-                        const count = getActiveItems(
-                          tab.id === 'work' ? works : tab.id === 'creator' ? creators : songs
-                        ).length;
-                        return (
-                          <button
-                            key={tab.id}
-                            onClick={() => setActiveSubtypeTab(tab.id as any)}
-                            className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
-                              isActive
-                                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
-                                : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-                            }`}
-                          >
-                            <span>{tab.label}</span>
-                            <span className="text-[10px] opacity-75 font-mono ml-1">({count})</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <button
-                      onClick={handleAddItem}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-xs font-semibold hover:bg-teal-500/20 transition cursor-pointer whitespace-nowrap"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>添加条目</span>
-                    </button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                {/* Left Column: Subtype Tabs */}
-                <div className="flex bg-gray-500/10 rounded-xl p-0.5 border border-white/5">
-                  {[
-                    { id: 'work', label: activeKind === 'game' ? '游戏' : activeKind === 'book' ? '书籍' : '影片' },
-                    { id: 'creator', label: activeKind === 'game' ? '开发商' : activeKind === 'book' ? '作者' : '影人' },
-                  ].map((tab) => {
-                    const isActive = activeSubtypeTab === tab.id;
-                    const count = tab.id === 'work' ? works.length : creators.length;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveSubtypeTab(tab.id as any)}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
-                          isActive
-                            ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
-                            : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-                        }`}
-                      >
-                        <span>{tab.label}</span>
-                        <span className="text-[10px] opacity-75 font-mono ml-1">({count})</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Right Column: Add Item Button (Uniformly aligned to the right!) */}
-                <button
-                  onClick={handleAddItem}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-xs font-semibold hover:bg-teal-500/20 transition cursor-pointer whitespace-nowrap animate-fadeIn"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>添加条目</span>
-                </button>
-              </>
-            )}
-          </div>
-        )}
+        <LibraryCollectionControls
+          activeKind={activeKind}
+          activeSubtype={activeSubtypeTab}
+          categories={categories}
+          creators={creators}
+          editMode={editMode}
+          selectedCategoryName={selectedCategoryName}
+          songs={songs}
+          works={works}
+          onAddItem={handleAddItem}
+          onManageCategories={() => setIsCategoryModalOpen(true)}
+          onSelectCategory={setSelectedCategoryName}
+          onSubtypeChange={setActiveSubtypeTab}
+        />
 
         {/* Mode contents */}
         {editMode === 'preview' ? (
