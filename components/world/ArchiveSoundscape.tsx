@@ -53,6 +53,16 @@ export default function ArchiveSoundscape({
   }, [shouldPlay]);
 
   useEffect(() => {
+    const settle = (audio: HTMLAudioElement | null) => {
+      if (!audio) return;
+      audio.volume = 0;
+      audio.dataset.mix = '0.000';
+    };
+    if (!shouldPlay) {
+      settle(forest.current);
+      settle(water.current);
+      return;
+    }
     let frame = 0;
     const mix = () => {
       if (forest.current) {
@@ -67,7 +77,7 @@ export default function ArchiveSoundscape({
     };
     frame = window.requestAnimationFrame(mix);
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [shouldPlay]);
 
   return (
     <div hidden aria-hidden="true">
