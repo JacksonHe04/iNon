@@ -1,13 +1,28 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from 'react';
+import { useCallback, useMemo, useRef, type MutableRefObject } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { Group, Mesh, Vector3 } from 'three';
+import {
+  Group,
+  InstancedMesh,
+  Matrix4,
+  Mesh,
+  Object3D,
+  Vector3,
+  type BufferGeometry,
+  type Material,
+} from 'three';
 import AnimatedAnimalScene from '@/components/world/AnimatedAnimalScene';
 import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog';
 
 const BEE_COUNT = 14;
+
+interface BeePart {
+  geometry: BufferGeometry;
+  material: Material | Material[];
+  localMatrix: Matrix4;
+}
 
 function AnimatedWasp({
   index,
@@ -64,39 +79,53 @@ export default function ArchivePollinators({
   onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
   const gltf = useGLTF('/archive-world/quaternius-animals/Bee.glb');
-  const bees = useMemo(
-    () => Array.from({ length: BEE_COUNT }, () => gltf.scene.clone(true)),
-    [gltf.scene],
-  );
-  const groups = useRef<Array<Group | null>>([]);
+  const meshes = useRef<Array<InstancedMesh | null>>([]);
+  const dummy = useMemo(() => new Object3D(), []);
+  const finalMatrix = useMemo(() => new Matrix4(), []);
+  const parts = useMemo(() => {
+    const result: BeePart[] = [];
+    gltf.scene.updateMatrixWorld(true);
+    gltf.scene.traverse((child) => {
+      if (!(child instanceof Mesh)) return;
+      result.push({
+        geometry: child.geometry,
+        material: child.material,
+        localMatrix: child.matrixWorld.clone(),
+      });
+    });
+    return result;
+  }, [gltf.scene]);
   const anchor = useRef(new Vector3(playerPosition.current.x, 0, playerPosition.current.z));
-
-  useEffect(() => {
-    bees.forEach((bee) => bee.traverse((child) => {
-      if (child instanceof Mesh) child.castShadow = true;
-    }));
-  }, [bees]);
 
   useFrame(({ clock }) => {
     if (!enabled) return;
     const player = playerPosition.current;
+    const visible = heightAt(player.x, player.z) < 8;
+    meshes.current.forEach((mesh) => {
+      if (mesh) mesh.visible = visible;
+    });
+    if (!visible) return;
     if (Math.hypot(player.x - anchor.current.x, player.z - anchor.current.z) > 42) {
       anchor.current.set(player.x, 0, player.z);
     }
-    groups.current.forEach((group, index) => {
-      if (!group) return;
-      group.visible = heightAt(player.x, player.z) < 8;
-      if (!group.visible) return;
+    for (let index = 0; index < BEE_COUNT; index += 1) {
       const phase = index * 2.399;
       const radius = 7 + (index % 5) * 5.1;
       const angle = clock.elapsedTime * (0.28 + (index % 3) * 0.06) + phase;
       const x = anchor.current.x + Math.cos(angle) * radius + Math.sin(phase * 3.1) * 4;
       const z = anchor.current.z + Math.sin(angle * 1.17) * radius + Math.cos(phase * 2.3) * 4;
       const y = heightAt(x, z) + 1.3 + Math.sin(clock.elapsedTime * 3.2 + phase) * 0.48;
-      group.position.set(x, y, z);
-      group.rotation.y = -angle + Math.PI / 2;
-      group.rotation.z = Math.sin(clock.elapsedTime * 5 + phase) * 0.12;
+      dummy.position.set(x, y, z);
+      dummy.rotation.set(0, -angle + Math.PI / 2, Math.sin(clock.elapsedTime * 5 + phase) * 0.12);
+      dummy.scale.setScalar(0.32 + (index % 3) * 0.035);
+      dummy.updateMatrix();
+      parts.forEach((part, partIndex) => {
+        meshes.current[partIndex]?.setMatrixAt(index, finalMatrix.multiplyMatrices(dummy.matrix, part.localMatrix));
+      });
       if (Math.hypot(x - player.x, y - player.y, z - player.z) < 6) onObserveSpecies('bee');
+    }
+    meshes.current.forEach((mesh) => {
+      if (mesh) mesh.instanceMatrix.needsUpdate = true;
     });
   });
 
@@ -104,14 +133,14 @@ export default function ArchivePollinators({
   return (
     <group name="archive-world-quaternius-pollinators">
       <group name="bee-swarm">
-        {bees.map((bee, index) => (
-          <group
-            key={index}
-            ref={(group) => { groups.current[index] = group; }}
-            scale={0.32 + (index % 3) * 0.035}
-          >
-            <primitive object={bee} />
-          </group>
+        {parts.map((part, index) => (
+          <instancedMesh
+            key={`${part.geometry.uuid}-${index}`}
+            ref={(mesh) => { meshes.current[index] = mesh; }}
+            args={[part.geometry, part.material, BEE_COUNT]}
+            castShadow
+            frustumCulled={false}
+          />
         ))}
       </group>
       <group name="wasp-flight">
