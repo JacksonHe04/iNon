@@ -23,6 +23,8 @@ export default function BlockImage({ src, alt, className = "aspect-square rounde
       src={src}
       alt={alt}
       loading="lazy"
+      decoding="async"
+      fetchPriority="low"
       onError={() => setHasError(true)}
       className={className}
     />

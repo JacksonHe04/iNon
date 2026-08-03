@@ -90,6 +90,9 @@ export default function LinkGridBlock({
                 <img
                   src={item.imageUrl}
                   alt={item.imageAlt || item.name}
+                  loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
                   className="h-5 w-5 rounded-full object-cover shrink-0"
                 />
               ) : (
