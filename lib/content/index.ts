@@ -1,5 +1,7 @@
+import { cache } from 'react';
 import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
 import type { ReadmeData } from '@/types';
+import type { ProfileRow } from '@/types/database';
 import { loadProfile } from './db-helpers';
 import {
   mapProfileAndBasic,
@@ -18,20 +20,32 @@ import {
 } from './mappers';
 import { loadReadmeSourceData } from './readme-source-data';
 
+const loadResolvedProfile = cache(async (slug: string): Promise<ProfileRow> => {
+  let profileResult = await loadProfile(slug);
+  if (!profileResult.data && slug !== DEFAULT_PROFILE_SLUG) {
+    profileResult = await loadProfile(DEFAULT_PROFILE_SLUG);
+  }
+  if (!profileResult.data) {
+    profileResult = await loadProfile('');
+  }
+  if (profileResult.error || !profileResult.data) {
+    throw profileResult.error ?? new Error(`Profile "${slug}" not found`);
+  }
+  return profileResult.data;
+});
+
+export async function getSiteMetadata() {
+  const profile = await loadResolvedProfile(DEFAULT_PROFILE_SLUG);
+  return {
+    title: profile.meta_title,
+    description: profile.meta_description,
+    author: profile.meta_author,
+  };
+}
+
 export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<ReadmeData> {
   try {
-    let profileResult = await loadProfile(slug);
-    if (!profileResult.data && slug !== DEFAULT_PROFILE_SLUG) {
-      profileResult = await loadProfile(DEFAULT_PROFILE_SLUG);
-    }
-    if (!profileResult.data) {
-      profileResult = await loadProfile('');
-    }
-    if (profileResult.error || !profileResult.data) {
-      throw profileResult.error ?? new Error(`Profile "${slug}" not found`);
-    }
-
-    const profile = profileResult.data;
+    const profile = await loadResolvedProfile(slug);
     const sourceData = await loadReadmeSourceData(profile.id);
 
     const profileAndBasic = mapProfileAndBasic(profile, sourceData.tags);

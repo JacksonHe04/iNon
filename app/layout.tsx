@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getReadmeData } from '@/lib/content';
+import { getSiteMetadata } from '@/lib/content';
 import { Providers } from '@/components/providers';
 import ArchiveAtmosphere from '@/components/archive/ArchiveAtmosphere';
 import './globals.css';
@@ -7,7 +7,7 @@ import './globals.css';
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const siteMeta = (await getReadmeData()).meta;
+  const siteMeta = await getSiteMetadata();
 
   return {
     title: siteMeta.title,
