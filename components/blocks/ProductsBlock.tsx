@@ -96,7 +96,7 @@ export default function ProductsBlock({
       </div>
 
       {colSpan === 2 && showScene && (
-        <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-amber-50/50 to-orange-50/30 dark:from-amber-950/20 dark:to-orange-950/10 p-2">
+        <div className="archive-embedded-field-panel">
           <ProductDeskScene
             favoriteProducts={favoriteProducts}
             recommendedProducts={recommendedProducts}
@@ -111,9 +111,6 @@ export default function ProductsBlock({
               })
             }
           />
-          <p className="text-[10px] text-gray-400 text-center mt-2">
-            💡 点击 3D 桌面上的硬件或书籍查看产品卡片。
-          </p>
         </div>
       )}
 

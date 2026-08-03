@@ -41,16 +41,6 @@ export default function BlockCanvasEngine({
   if (mode === 'readonly') {
     return (
       <section className="archive-block-grid" aria-label="个人档案目录">
-        <header className="archive-block-grid__prologue">
-          <div>
-            <p className="archive-kicker">Collected fragments · private field catalogue</p>
-            <h2>个人档案索引</h2>
-          </div>
-          <p>
-            <strong>{String(activeBlocks.length).padStart(2, '0')}</strong>
-            份记录沿着时间、兴趣与创造彼此交叠。
-          </p>
-        </header>
         {activeBlocks.map((block, index) => {
           const isFullWidth = block.colSpan === 2;
           return (

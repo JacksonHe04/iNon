@@ -93,15 +93,12 @@ export default function CreationBlock({
       </div>
 
       {colSpan === 2 && showScene && (
-        <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-purple-50/50 to-pink-50/30 dark:from-purple-950/20 dark:to-pink-950/10 p-2">
+        <div className="archive-embedded-field-panel">
           <CreationGalaxy
             activeCategory={activeCategory}
             categories={categoryOrder.map((c) => ({ id: c.id, label: c.label }))}
             onChange={setActiveCategory}
           />
-          <p className="text-[10px] text-gray-400 text-center mt-2">
-            💡 点击星系轨道上的创作星球切换展示类别。
-          </p>
         </div>
       )}
 
