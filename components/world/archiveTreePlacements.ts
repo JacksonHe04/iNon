@@ -13,6 +13,12 @@ export const TREE_VARIANT_COUNT = 8;
 export const TREE_MAX_PER_VARIANT = 180;
 const TREES_PER_CHUNK = 11;
 
+function treesForRing(ring: number) {
+  if (ring <= 1) return TREES_PER_CHUNK;
+  if (ring === 2) return 8;
+  return 3;
+}
+
 export interface TreePlacement extends WorldPlacement {
   key: string;
   y: number;
@@ -45,7 +51,9 @@ export function treePlacementsAround({
   for (let chunkX = centerX - radius; chunkX <= centerX + radius; chunkX += 1) {
     for (let chunkZ = centerZ - radius; chunkZ <= centerZ + radius; chunkZ += 1) {
       const random = seededRandom(coordinateSeed(chunkX, chunkZ));
-      for (let tree = 0; tree < TREES_PER_CHUNK; tree += 1) {
+      const ring = Math.max(Math.abs(chunkX - centerX), Math.abs(chunkZ - centerZ));
+      const treeCount = treesForRing(ring);
+      for (let tree = 0; tree < treeCount; tree += 1) {
         const x = chunkX * TREE_CHUNK_SIZE + random() * TREE_CHUNK_SIZE;
         const z = chunkZ * TREE_CHUNK_SIZE + random() * TREE_CHUNK_SIZE;
         const rawHeightScale = 0.78 + random() * 0.54;
