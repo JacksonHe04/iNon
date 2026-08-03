@@ -1,0 +1,143 @@
+/* Verdant correction: green is the structural field; paper is material placed on top of it. */
+.archive-shell {
+  isolation: isolate;
+}
+
+.archive-shell::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0 0 0 auto;
+  width: min(31vw, 430px);
+  content: "";
+  pointer-events: none;
+  background: color-mix(in srgb, var(--archive-forest-surface) 30%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--archive-paper-light) 20%, transparent);
+}
+
+.archive-atmosphere {
+  background: var(--archive-canvas);
+}
+
+.archive-atmosphere__landscape {
+  height: min(68vw, 920px);
+  opacity: 0.28;
+  background-position: center 62%;
+  filter: saturate(0.82) contrast(0.92) sepia(0.12);
+  mix-blend-mode: multiply;
+}
+
+.archive-atmosphere__paper {
+  opacity: 0.13;
+}
+
+.archive-atmosphere__botanical,
+.archive-atmosphere__branch,
+.archive-atmosphere__birds,
+.archive-atmosphere__postage {
+  position: absolute;
+  pointer-events: none;
+  background-image: url("/archive-assets/ephemera-sheet.png");
+  background-repeat: no-repeat;
+  background-size: 400% 200%;
+  filter: saturate(0.78) contrast(0.96);
+}
+
+.archive-atmosphere__botanical {
+  right: -48px;
+  bottom: -44px;
+  width: clamp(330px, 31vw, 560px);
+  opacity: 0.28;
+  background-position: 0 0;
+  transform: rotate(4deg);
+}
+
+.archive-atmosphere__branch {
+  top: 32vh;
+  left: -74px;
+  width: clamp(250px, 24vw, 430px);
+  aspect-ratio: 0.75;
+  opacity: 0.2;
+  background-position: 66.666% 0;
+  transform: rotate(-8deg);
+}
+
+.archive-atmosphere__birds {
+  top: 18vh;
+  right: 5vw;
+  width: clamp(180px, 18vw, 320px);
+  aspect-ratio: 0.8;
+  opacity: 0.24;
+  background-position: 100% 0;
+}
+
+.archive-atmosphere__postage {
+  right: 7vw;
+  bottom: 18vh;
+  width: 190px;
+  aspect-ratio: 0.75;
+  opacity: 0.16;
+  background-position: 0 100%;
+  transform: rotate(8deg);
+}
+
+.archive-top-nav {
+  --archive-ink: #f2ead6;
+  --archive-muted: #c8c8ad;
+  --archive-umber: #e8dfc9;
+  --archive-paper-light: #d8d5bd;
+  --archive-line: rgba(242, 234, 214, 0.2);
+  --archive-line-strong: rgba(242, 234, 214, 0.38);
+  --theme-primary: #c2c69f;
+  --theme-primary-hover: #f2ead6;
+  color: var(--archive-ink);
+  border-color: rgba(242, 234, 214, 0.18) !important;
+  background: rgba(24, 36, 27, 0.58) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 12px 36px rgba(9, 18, 12, 0.14);
+  -webkit-backdrop-filter: blur(22px) saturate(118%);
+  backdrop-filter: blur(22px) saturate(118%);
+}
+
+.archive-top-nav::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.018) 42%,
+    rgba(255, 255, 255, 0.045)
+  );
+}
+
+.archive-userinfo-menu {
+  color: var(--archive-ink);
+}
+
+.archive-userinfo-item {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--archive-line);
+  color: inherit;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.78rem;
+  text-align: left;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.archive-userinfo-item:last-child {
+  border-bottom: 0;
+}
+
+.archive-userinfo-item:hover,
+.archive-userinfo-item:focus-visible {
+  color: var(--archive-paper);
+  background: rgb(242 234 214 / 0.08);
+  outline: none;
+}
