@@ -22,7 +22,7 @@ export function SocialLinks({ platformAccounts }: SocialLinksProps) {
             href={platform.homepage_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600"
+            className="w-10 h-10 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600"
           >
             {Icon ? (
               <Icon className="h-4 w-4" />

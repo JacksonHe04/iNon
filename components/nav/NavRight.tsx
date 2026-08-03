@@ -88,7 +88,7 @@ export function NavRight({
             return next;
           });
         }}
-        className="archive-nav-global-control relative w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
+        className="archive-nav-global-control relative w-10 h-10 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
         aria-label="查看通知"
       >
         <Bell className="h-4 w-4" />
@@ -102,7 +102,7 @@ export function NavRight({
       {/* Theme Switcher Button */}
       <button
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="archive-nav-global-control w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 transition hover:border-teal-300 hover:text-teal-500"
+        className="archive-nav-global-control w-10 h-10 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 transition hover:border-teal-300 hover:text-teal-500"
         aria-label="切换主题"
         title="切换暗黑/亮色主题"
       >

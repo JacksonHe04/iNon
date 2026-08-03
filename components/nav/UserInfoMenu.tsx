@@ -60,7 +60,7 @@ export default function UserInfoMenu({
       <button
         type="button"
         onClick={onLogin}
-        className="archive-userinfo-trigger flex h-11 items-center gap-2 border border-[var(--archive-line-strong)] px-3 text-[10px] font-mono uppercase tracking-[0.12em] transition hover:bg-white/10 sm:h-9"
+        className="archive-userinfo-trigger flex h-10 items-center gap-2 border border-[var(--archive-line-strong)] px-3 text-[10px] font-mono uppercase tracking-[0.12em] transition hover:bg-white/10"
       >
         <LogIn className="h-4 w-4" />
         <span className="hidden lg:inline">登录</span>
@@ -79,7 +79,7 @@ export default function UserInfoMenu({
         onClick={() => setOpen((value) => !value)}
         onMouseEnter={onPrimaryPrefetch}
         onFocus={onPrimaryPrefetch}
-        className="archive-userinfo-trigger flex h-11 max-w-52 items-center gap-2 border border-[var(--archive-line-strong)] px-2.5 text-left transition hover:bg-white/10 sm:h-9"
+        className="archive-userinfo-trigger flex h-10 max-w-52 items-center gap-2 border border-[var(--archive-line-strong)] px-2.5 text-left transition hover:bg-white/10"
       >
         <span className="grid h-6 w-6 shrink-0 place-items-center border border-[var(--archive-line)] font-mono text-[9px] uppercase">
           {displayName.slice(0, 2)}

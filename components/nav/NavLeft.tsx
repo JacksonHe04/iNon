@@ -39,19 +39,19 @@ export function NavLeft({
       <button
         type="button"
         onClick={() => setShowMobilePanel(true)}
-        className="sm:hidden w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 font-semibold"
+        className="sm:hidden w-10 h-10 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 font-semibold"
         aria-label="打开个人面板"
       >
         {data.basic.name[0]}
       </button>
       <div className="hidden sm:flex items-center gap-3">
-        <div className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 font-bold text-sm">
+        <div className="w-10 h-10 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 font-bold text-sm">
           {data.basic.name[0]}
         </div>
         <motion.button
           type="button"
           whileHover={{ scale: 1.04, y: -2 }}
-          className="hidden sm:flex flex-col text-left text-gray-700 rounded-2xl px-3 py-1.5 bg-white/30 border border-white/40 cursor-pointer"
+          className="hidden h-10 sm:flex flex-col justify-center text-left text-gray-700 rounded-xl px-3 bg-white/30 border border-white/40 cursor-pointer"
           onClick={() => {
             if (distance !== null) {
               setShowLocationModal(true);
@@ -78,7 +78,7 @@ export function NavLeft({
         <motion.button
           type="button"
           whileHover={{ scale: 1.02, y: -2 }}
-          className="hidden md:flex flex-col text-left text-gray-700 rounded-2xl px-3 py-1.5 bg-white/30 border border-white/40"
+          className="hidden h-10 md:flex flex-col justify-center text-left text-gray-700 rounded-xl px-3 bg-white/30 border border-white/40"
           onClick={() => setShowLevelModal(true)}
         >
           <span className="flex items-center gap-2 text-xs lg:text-sm font-medium">
