@@ -31,6 +31,11 @@ interface BlockRendererProps {
   mode?: 'readonly' | 'edit';
 }
 
+function isHiphopCategory(categoryName: string) {
+  const normalized = categoryName.trim().toLocaleLowerCase().replace(/[\s_-]+/g, '');
+  return normalized === '嘻哈' || normalized === '说唱' || normalized === 'hiphop';
+}
+
 export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererProps) {
   const title = getBlockTitle(block.blockType);
 
@@ -79,9 +84,9 @@ export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererP
     case 'music':
       return (
         <MusicBlock
-          albums={data.library.music.works.filter((w) => w.categoryName !== '嘻哈')}
-          songs={data.library.music.songs.filter((s) => s.categoryName !== '嘻哈')}
-          musicians={data.library.music.creators.filter((m) => m.categoryName !== '嘻哈')}
+          albums={data.library.music.works.filter((w) => !isHiphopCategory(w.categoryName))}
+          songs={data.library.music.songs.filter((s) => !isHiphopCategory(s.categoryName))}
+          musicians={data.library.music.creators.filter((m) => !isHiphopCategory(m.categoryName))}
           title={title}
           colSpan={block.colSpan}
         />
@@ -167,9 +172,9 @@ export function BlockRenderer({ block, data, mode = 'readonly' }: BlockRendererP
     case 'hiphop':
       return (
         <HiphopBlock
-          albums={data.library.music.works.filter((w) => w.categoryName === '嘻哈')}
-          songs={data.library.music.songs.filter((s) => s.categoryName === '嘻哈')}
-          musicians={data.library.music.creators.filter((m) => m.categoryName === '嘻哈')}
+          albums={data.library.music.works.filter((w) => isHiphopCategory(w.categoryName))}
+          songs={data.library.music.songs.filter((s) => isHiphopCategory(s.categoryName))}
+          musicians={data.library.music.creators.filter((m) => isHiphopCategory(m.categoryName))}
           title={title}
           colSpan={block.colSpan}
         />
