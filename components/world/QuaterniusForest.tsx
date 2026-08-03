@@ -14,7 +14,12 @@ import {
   type BufferGeometry,
   type Material,
 } from 'three';
-import { nearCameraVisibility, playerMovedBeyond, type WorldPlacement } from '@/components/world/archiveWorldOcclusion';
+import {
+  nearCameraVisibility,
+  placementWithinView,
+  playerMovedBeyond,
+  type WorldPlacement,
+} from '@/components/world/archiveWorldOcclusion';
 import type { GameDestination } from '@/components/world/archiveGameTypes';
 import {
   TREE_CHUNK_SIZE,
@@ -88,11 +93,13 @@ export default function QuaterniusForest({
   const placementsRef = useRef<Array<WorldPlacement[]>>([]);
   const lastChunk = useRef('');
   const lastVisibilityPosition = useMemo(() => new Vector3(Number.POSITIVE_INFINITY, 0, 0), []);
+  const viewDirection = useMemo(() => new Vector3(), []);
+  const lastViewDirection = useMemo(() => new Vector3(), []);
   const baseMatrix = useMemo(() => new Matrix4(), []);
   const finalMatrix = useMemo(() => new Matrix4(), []);
   const fadeScale = useMemo(() => new Vector3(), []);
 
-  useFrame(() => {
+  useFrame(({ camera }) => {
     const centerX = Math.floor(playerPosition.current.x / TREE_CHUNK_SIZE);
     const centerZ = Math.floor(playerPosition.current.z / TREE_CHUNK_SIZE);
     const chunkKey = `${centerX}:${centerZ}`;
@@ -110,21 +117,29 @@ export default function QuaterniusForest({
       });
       placementsRef.current = placements;
     }
-    if (!chunkChanged && !playerMovedBeyond(playerPosition.current, lastVisibilityPosition, 0.35)) return;
+    camera.getWorldDirection(viewDirection);
+    viewDirection.y = 0;
+    viewDirection.normalize();
+    const moved = playerMovedBeyond(playerPosition.current, lastVisibilityPosition, 0.35);
+    const turned = viewDirection.dot(lastViewDirection) < 0.995;
+    if (!chunkChanged && !moved && !turned) return;
     lastVisibilityPosition.set(playerPosition.current.x, 0, playerPosition.current.z);
+    lastViewDirection.copy(viewDirection);
     partsByVariant.forEach((parts, variantIndex) => {
       parts.forEach((part, partIndex) => {
         const mesh = meshes.current[variantIndex]?.[partIndex];
         if (!mesh) return;
         const activePlacements = placementsRef.current[variantIndex] ?? [];
-        for (let index = 0; index < activePlacements.length; index += 1) {
-          const placement = activePlacements[index];
+        let visibleCount = 0;
+        for (const placement of activePlacements) {
+          if (!placementWithinView(playerPosition.current, viewDirection, placement, 22)) continue;
           const visibility = nearCameraVisibility(playerPosition.current, placement, 1.1, 3.8);
           baseMatrix.copy(placement.matrix).scale(fadeScale.setScalar(visibility));
           finalMatrix.multiplyMatrices(baseMatrix, part.localMatrix);
-          mesh.setMatrixAt(index, finalMatrix);
+          mesh.setMatrixAt(visibleCount, finalMatrix);
+          visibleCount += 1;
         }
-        mesh.count = activePlacements.length;
+        mesh.count = visibleCount;
         mesh.instanceMatrix.needsUpdate = true;
         if (chunkChanged) mesh.computeBoundingSphere();
       });

@@ -27,3 +27,17 @@ export function playerMovedBeyond(
   previous.set(player.x, 0, player.z);
   return true;
 }
+
+export function placementWithinView(
+  player: Vector3,
+  direction: Vector3,
+  placement: WorldPlacement,
+  alwaysVisibleRadius: number,
+  minimumDot = -0.35,
+) {
+  const dx = placement.x - player.x;
+  const dz = placement.z - player.z;
+  const distance = Math.hypot(dx, dz);
+  if (distance < alwaysVisibleRadius) return true;
+  return (dx * direction.x + dz * direction.z) / distance > minimumDot;
+}
