@@ -3,6 +3,7 @@ import { getCachedSiteMetadata } from '@/lib/content/site-metadata';
 import { Providers } from '@/components/providers';
 import ArchiveAtmosphere from '@/components/archive/ArchiveAtmosphere';
 import './globals.css';
+import './styles/world-collection-realms.css';
 import './styles/world-interior-overlay.css';
 import './styles/public-atmosphere.css';
 
