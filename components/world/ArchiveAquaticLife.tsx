@@ -9,6 +9,7 @@ import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog'
 
 const FISH_ROOT = '/archive-world/quaternius-fish';
 const RIVER_FISH_SPECIES = ['river-fish-a', 'river-fish-b', 'river-fish-c'] as const;
+const RIVER_FISH_COUNT = 10;
 
 interface FishConfig {
   id: string;
@@ -20,7 +21,7 @@ interface FishConfig {
   speciesId: ArchiveSpeciesId;
 }
 
-const RIVER_FISH: readonly FishConfig[] = Array.from({ length: 18 }, (_, index) => ({
+const RIVER_FISH: readonly FishConfig[] = Array.from({ length: RIVER_FISH_COUNT }, (_, index) => ({
   id: `river-fish-${index + 1}`,
   file: `Fish${(index % 3) + 1}.fbx` as FishConfig['file'],
   scale: [0.0025, 0.0018, 0.0022][index % 3] * (0.78 + (index % 4) * 0.08),
