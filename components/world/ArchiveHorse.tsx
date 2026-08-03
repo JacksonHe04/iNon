@@ -10,6 +10,7 @@ import {
   MeshStandardMaterial,
 } from 'three';
 import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
+import { advanceArchiveAnimation } from '@/components/world/archiveAnimationCadence';
 
 export type HorseMotion = 'Idle' | 'Walk' | 'Gallop';
 
@@ -43,6 +44,7 @@ export default function ArchiveHorse({
   const scene = useMemo(() => cloneAnimatedAsset(gltf.scene), [gltf.scene]);
   const mixer = useMemo(() => new AnimationMixer(scene), [scene]);
   const currentMotion = useRef<HorseMotion>('Idle');
+  const animationDelta = useRef(0);
   const actions = useMemo(
     () => new Map(gltf.animations.map((clip) => [clip.name, mixer.clipAction(clip)])),
     [gltf.animations, mixer],
@@ -72,7 +74,7 @@ export default function ArchiveHorse({
   }, [actions, mixer]);
 
   useFrame((_, delta) => {
-    mixer.update(delta);
+    advanceArchiveAnimation(mixer, animationDelta, delta);
     if (motion.current === currentMotion.current) return;
     const previous = actions.get(currentMotion.current);
     const next = actions.get(motion.current) ?? actions.get('Idle');

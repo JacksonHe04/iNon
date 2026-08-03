@@ -25,6 +25,7 @@ import {
 } from '@/components/world/archiveAnimalTerrain';
 import { worldBiomeAt } from '@/components/world/archiveWorldBiomes';
 import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
+import { advanceArchiveAnimation } from '@/components/world/archiveAnimationCadence';
 
 const ANIMAL_ROOT = '/archive-world/quaternius-animals';
 const ALPINE_SPECIES = new Set<AnimalConfig['species']>(['deer', 'fox', 'stag', 'wolf']);
@@ -57,6 +58,7 @@ function AnimatedAnimal({
   const movementDirection = useRef(new Vector3());
   const fleeDirection = useRef(new Vector3());
   const hasWalkableGround = useRef(true);
+  const animationDelta = useRef(0);
 
   const actions = useMemo(() => {
     const map = new Map<string, ReturnType<typeof mixer.clipAction>>();
@@ -119,7 +121,7 @@ function AnimatedAnimal({
     group.visible = hasWalkableGround.current
       && (player.y < 12 || ALPINE_SPECIES.has(config.species));
     if (!group.visible) return;
-    mixer.update(delta);
+    advanceArchiveAnimation(mixer, animationDelta, delta);
     const distanceToPlayer = Math.hypot(group.position.x - player.x, group.position.z - player.z);
     const observationDistance = Math.hypot(
       group.position.x - player.x,

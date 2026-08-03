@@ -11,6 +11,7 @@ import {
   Object3D,
 } from 'three';
 import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
+import { advanceArchiveAnimation } from '@/components/world/archiveAnimationCadence';
 
 export default function AnimatedAnimalScene({
   source,
@@ -32,6 +33,7 @@ export default function AnimatedAnimalScene({
   const root = useRef<Group>(null);
   const scene = useMemo(() => cloneAnimatedAsset(source), [source]);
   const mixer = useMemo(() => new AnimationMixer(scene), [scene]);
+  const animationDelta = useRef(0);
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -61,7 +63,7 @@ export default function AnimatedAnimalScene({
 
   useFrame(({ clock }, delta) => {
     if (!root.current) return;
-    mixer.update(delta);
+    advanceArchiveAnimation(mixer, animationDelta, delta);
     update(root.current, clock.elapsedTime, delta);
   });
 

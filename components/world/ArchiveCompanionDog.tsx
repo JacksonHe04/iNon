@@ -5,6 +5,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { AnimationMixer, Group, Mesh, MeshStandardMaterial, Vector3 } from 'three';
 import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
+import { advanceArchiveAnimation } from '@/components/world/archiveAnimationCadence';
 import {
   chooseCompanionStep,
   companionDoorTarget,
@@ -56,6 +57,7 @@ export default function ArchiveCompanionDog({
   const obstacles = useRef<CompanionObstacle[]>([]);
   const obstacleCell = useRef('');
   const lastTelemetryAt = useRef(-Infinity);
+  const animationDelta = useRef(0);
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -88,7 +90,7 @@ export default function ArchiveCompanionDog({
   useFrame(({ clock, camera }, delta) => {
     const group = root.current;
     if (!group) return;
-    mixer.update(delta);
+    advanceArchiveAnimation(mixer, animationDelta, delta);
 
     const player = playerPosition.current;
     if (!wasPlaced.current) {
