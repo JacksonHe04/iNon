@@ -33,7 +33,7 @@ export function placementWithinView(
   direction: Vector3,
   placement: WorldPlacement,
   alwaysVisibleRadius: number,
-  minimumDot = -0.35,
+  minimumDot = -0.2,
 ) {
   const dx = placement.x - player.x;
   const dz = placement.z - player.z;
