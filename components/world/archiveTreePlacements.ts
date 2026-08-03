@@ -4,7 +4,12 @@ import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 import { coordinateSeed, seededRandom } from '@/components/world/archiveTerrainMath';
 import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
 import type { WorldPlacement } from '@/components/world/archiveWorldOcclusion';
-import { biomeKeepsTree, treeVariantFor, worldBiomeAt } from '@/components/world/archiveWorldBiomes';
+import {
+  biomeKeepsTree,
+  treeVariantFor,
+  worldBiomeAt,
+  type WorldBiome,
+} from '@/components/world/archiveWorldBiomes';
 
 export const TREE_CHUNK_SIZE = 38;
 export const TREE_RENDER_RADIUS = 3;
@@ -13,10 +18,11 @@ export const TREE_VARIANT_COUNT = 8;
 export const TREE_MAX_PER_VARIANT = 180;
 const TREES_PER_CHUNK = 11;
 
-function treesForRing(ring: number) {
+function treesForRing(ring: number, biome: WorldBiome) {
   if (ring <= 1) return TREES_PER_CHUNK;
-  if (ring === 2) return 8;
-  return 3;
+  const denseDistance = biome === 'coast' || biome === 'meadow';
+  if (ring === 2) return denseDistance ? 8 : 5;
+  return denseDistance ? 3 : 1;
 }
 
 export interface TreePlacement extends WorldPlacement {
@@ -52,7 +58,10 @@ export function treePlacementsAround({
     for (let chunkZ = centerZ - radius; chunkZ <= centerZ + radius; chunkZ += 1) {
       const random = seededRandom(coordinateSeed(chunkX, chunkZ));
       const ring = Math.max(Math.abs(chunkX - centerX), Math.abs(chunkZ - centerZ));
-      const treeCount = treesForRing(ring);
+      const sampleX = (chunkX + 0.5) * TREE_CHUNK_SIZE;
+      const sampleZ = (chunkZ + 0.5) * TREE_CHUNK_SIZE;
+      const chunkBiome = worldBiomeAt(sampleX, sampleZ, heightAt(sampleX, sampleZ));
+      const treeCount = treesForRing(ring, chunkBiome);
       for (let tree = 0; tree < treeCount; tree += 1) {
         const x = chunkX * TREE_CHUNK_SIZE + random() * TREE_CHUNK_SIZE;
         const z = chunkZ * TREE_CHUNK_SIZE + random() * TREE_CHUNK_SIZE;
