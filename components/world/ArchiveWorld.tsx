@@ -39,6 +39,8 @@ import { useArchiveFieldRoute } from '@/hooks/useArchiveFieldRoute';
 import type { CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
 import { useArchiveResting } from '@/hooks/useArchiveResting';
 import { useArchiveWorldClock } from '@/hooks/useArchiveWorldClock';
+import { useArchiveForaging } from '@/hooks/useArchiveForaging';
+import WorldFieldFeedback from '@/components/world/WorldFieldFeedback';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -85,12 +87,22 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     enabled: worldEnabled,
     onRested: advanceAfterRest,
   });
+  const foraging = useArchiveForaging({
+    owner: data.basic.name,
+    day: worldClock.day,
+    clockReady: worldClock.ready,
+    telemetry,
+    enabled: worldEnabled,
+    restSite: resting.restSite,
+    onCookRation: resting.addRation,
+  });
   const worldDialogueContext = buildWorldDialogueContext({
     telemetry,
     rations: resting.rations,
     companionNearby,
     collectedKeepsakeIds: collectedKeepsakes,
     worldTime: worldClock,
+    forageIngredients: foraging.ingredients,
   });
 
   useEffect(() => {
@@ -197,6 +209,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
               setSelectedHomeRecord(record);
             }}
             homeExhibits={homeExhibits}
+            forageCollectedIds={foraging.collectedIds}
           />
         </Canvas>
       </div>
@@ -223,7 +236,12 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           recentFieldRouteStage={fieldRoute.recentStage}
           restSite={resting.restSite}
           worldTime={worldClock}
+          foragePatch={foraging.nearbyPatch}
+          forageIngredients={foraging.ingredients}
+          cookSite={foraging.cookSite}
           onRest={resting.rest}
+          onGather={foraging.gather}
+          onCook={foraging.cook}
           onToggleSound={() => setSoundEnabled((enabled) => !enabled)}
           onOpenInventory={() => {
             releasePointerLock();
@@ -256,31 +274,21 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           rations={resting.rations}
           keepsakes={recoveredKeepsakes}
           fieldRouteStageIndex={fieldRoute.stageIndex}
+          forageIngredients={foraging.ingredients}
           onClose={() => setInventoryOpen(false)}
           onRestartRoute={fieldRoute.restart}
           onUseRation={resting.useRation}
         />
       )}
 
-      {lastKeepsake && mode === 'world' && (
-        <div className="archive-world-keepsake-toast" role="status">
-          <span>FIELD PAGE RECOVERED</span>
-          <strong>{lastRecoveredKeepsake?.text ?? '拾得一卷田野札记'}</strong>
-          <small>{lastRecoveredKeepsake?.kind ?? 'FIELD NOTE'} · {collectedKeepsakes.length}</small>
-        </div>
-      )}
-
-      {resting.feedback && mode === 'world' && (
-        <div className="archive-world-keepsake-toast is-rest" role="status">
-          <span>{resting.feedback.site.folio}</span>
-          <strong>{resting.feedback.status === 'rested' ? '体力已经恢复' : '背包里没有足够口粮'}</strong>
-          <small>
-            {resting.feedback.status === 'rested'
-              ? `${resting.feedback.site.title} · ${resting.feedback.site.rationCost ? '口粮 -1' : '家园补给'} · 时间 +6H`
-              : '返回主屋补给，或在背包中检查物资'}
-          </small>
-        </div>
-      )}
+      <WorldFieldFeedback
+        active={mode === 'world'}
+        lastKeepsake={lastRecoveredKeepsake}
+        keepsakeCount={collectedKeepsakes.length}
+        restFeedback={resting.feedback}
+        forageFeedback={foraging.feedback}
+        forageIngredients={foraging.ingredients}
+      />
     </section>
   );
 }

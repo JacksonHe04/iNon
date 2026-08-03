@@ -12,6 +12,7 @@ export default function WorldSatchel({
   rations,
   keepsakes,
   fieldRouteStageIndex,
+  forageIngredients,
   onUseRation,
   onRestartRoute,
   onClose,
@@ -19,6 +20,7 @@ export default function WorldSatchel({
   rations: number;
   keepsakes: ArchiveKeepsake[];
   fieldRouteStageIndex: number;
+  forageIngredients: number;
   onUseRation: () => void;
   onRestartRoute: () => void;
   onClose: () => void;
@@ -52,9 +54,9 @@ export default function WorldSatchel({
           <small>小地图、罗盘与高度计共用同一份世界坐标。</small>
         </div>
         <div>
-          <span>马匹口粮</span>
-          <strong>2</strong>
-          <small>留给林径马匹的苹果。</small>
+          <span>采得食材</span>
+          <strong>{forageIngredients} / 3</strong>
+          <small>三份可在家园或雪线的现有营火旁烹成一份口粮。</small>
         </div>
       </div>
       <details className={styles.routeJournal} open>

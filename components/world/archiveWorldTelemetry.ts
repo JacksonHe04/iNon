@@ -34,6 +34,7 @@ export interface WorldDialogueContext {
   day: number;
   clockLabel: string;
   phaseLabel: string;
+  forageIngredients: number;
   companionNearby: boolean;
   collectedKeepsakeIds: string[];
 }
@@ -71,12 +72,14 @@ export function buildWorldDialogueContext({
   companionNearby,
   collectedKeepsakeIds,
   worldTime,
+  forageIngredients,
 }: {
   telemetry: GameTelemetry;
   rations: number;
   companionNearby: boolean;
   collectedKeepsakeIds: string[];
   worldTime: WorldTimeSnapshot;
+  forageIngredients: number;
 }): WorldDialogueContext {
   return {
     location: worldLocationLabel(telemetry),
@@ -90,6 +93,7 @@ export function buildWorldDialogueContext({
     day: worldTime.day,
     clockLabel: worldTime.clockLabel,
     phaseLabel: worldTime.phaseLabel,
+    forageIngredients,
     companionNearby,
     collectedKeepsakeIds,
   };

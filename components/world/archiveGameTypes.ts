@@ -49,6 +49,7 @@ export interface ArchiveGameSceneProps {
   onCollectKeepsake: (id: string) => void;
   onInspectHomeRecord: (record: HomeRecordId) => void;
   homeExhibits: HomeExhibit[];
+  forageCollectedIds: string[];
 }
 
 export interface FirstPersonExplorerProps {

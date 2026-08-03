@@ -26,6 +26,7 @@ import {
 import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import type { ArchiveGameSceneProps } from '@/components/world/archiveGameTypes';
 import ArchiveWorldLighting from '@/components/world/ArchiveWorldLighting';
+import ArchiveForagePatches from '@/components/world/ArchiveForagePatches';
 
 export type {
   ArchiveGameSceneProps,
@@ -89,6 +90,7 @@ export default function ArchiveGameScene({
   onCollectKeepsake,
   onInspectHomeRecord,
   homeExhibits,
+  forageCollectedIds,
 }: ArchiveGameSceneProps) {
   return (
     <>
@@ -111,6 +113,7 @@ export default function ArchiveGameScene({
           heightAt={terrainHeightAt}
           waterLevel={WATER_LEVEL}
         />
+        <ArchiveForagePatches collectedIds={forageCollectedIds} />
       </Suspense>
       <Suspense fallback={null}>
         <ArchiveWildlife playerPosition={playerPosition} heightAt={terrainHeightAt} animalsEnabled={entered} />

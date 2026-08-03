@@ -68,6 +68,7 @@ export function useArchiveResting({
     setRations((current) => Math.max(0, current - 1));
     restoreStamina();
   }, [rations]);
+  const addRation = useCallback(() => setRations((current) => Math.min(99, current + 1)), []);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -78,5 +79,5 @@ export function useArchiveResting({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [enabled, rest]);
 
-  return { rations, restSite, feedback, rest, useRation };
+  return { rations, restSite, feedback, rest, useRation, addRation };
 }

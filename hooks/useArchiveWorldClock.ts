@@ -4,9 +4,11 @@ import { WORLD_TIME_START, worldTimeSnapshot } from '@/components/world/archiveW
 export function useArchiveWorldClock({ owner, running }: { owner: string; running: boolean }) {
   const storageKey = useMemo(() => `inon-world-time-${owner}`, [owner]);
   const [totalMinutes, setTotalMinutes] = useState(WORLD_TIME_START);
+  const [ready, setReady] = useState(false);
   const totalMinutesRef = useRef(WORLD_TIME_START);
 
   useEffect(() => {
+    setReady(false);
     let saved = WORLD_TIME_START;
     try {
       const stored = window.localStorage.getItem(storageKey);
@@ -17,6 +19,7 @@ export function useArchiveWorldClock({ owner, running }: { owner: string; runnin
     }
     totalMinutesRef.current = saved;
     setTotalMinutes(saved);
+    setReady(true);
   }, [storageKey]);
 
   const addMinutes = useCallback((minutes: number, forcePersist = false) => {
@@ -32,11 +35,11 @@ export function useArchiveWorldClock({ owner, running }: { owner: string; runnin
   }, [storageKey]);
 
   useEffect(() => {
-    if (!running) return;
+    if (!running || !ready) return;
     const interval = window.setInterval(() => addMinutes(1, false), 1000);
     return () => window.clearInterval(interval);
-  }, [addMinutes, running]);
+  }, [addMinutes, ready, running]);
 
   const advance = useCallback((minutes: number) => addMinutes(minutes, true), [addMinutes]);
-  return { ...worldTimeSnapshot(totalMinutes), advance };
+  return { ...worldTimeSnapshot(totalMinutes), advance, ready };
 }

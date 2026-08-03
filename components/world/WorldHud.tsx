@@ -12,6 +12,7 @@ import type { FieldRouteStage } from '@/components/world/archiveFieldRoute';
 import type { CompanionBehavior, CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
 import type { WorldRestSite } from '@/components/world/archiveWorldRest';
 import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
+import { FORAGE_RECIPE_COST, type WorldForagePatch } from '@/components/world/archiveWorldForage';
 
 const COMPANION_BEHAVIOR_LABELS: Record<CompanionBehavior, string> = {
   resting: '在身边休息',
@@ -37,10 +38,15 @@ export default function WorldHud({
   recentFieldRouteStage,
   restSite,
   worldTime,
+  foragePatch,
+  forageIngredients,
+  cookSite,
   onOpenInventory,
   onToggleSound,
   onTalkToCompanion,
   onRest,
+  onGather,
+  onCook,
   onTravel,
 }: {
   owner: string;
@@ -54,10 +60,15 @@ export default function WorldHud({
   recentFieldRouteStage: FieldRouteStage | null;
   restSite: WorldRestSite | null;
   worldTime: WorldTimeSnapshot;
+  foragePatch: WorldForagePatch | null;
+  forageIngredients: number;
+  cookSite: WorldRestSite | null;
   onOpenInventory: () => void;
   onToggleSound: () => void;
   onTalkToCompanion: () => void;
   onRest: () => void;
+  onGather: () => void;
+  onCook: () => void;
   onTravel: (waypoint: WorldWaypoint) => void;
 }) {
   const insideHome = isInsideArchiveHome(telemetry.x, telemetry.z);
@@ -123,7 +134,7 @@ export default function WorldHud({
         </div>
       )}
 
-      {(companionNearby || telemetry.canMount || restSite) && (
+      {(companionNearby || telemetry.canMount || restSite || foragePatch || cookSite) && (
         <div className="archive-world-interactions" aria-label="附近交互">
           {companionNearby && (
             <button className="archive-world-interact" onClick={onTalkToCompanion}>
@@ -147,6 +158,18 @@ export default function WorldHud({
             <button className="archive-world-interact" onClick={onRest}>
               <kbd>R</kbd>
               {restSite.prompt}
+            </button>
+          )}
+          {foragePatch && (
+            <button className="archive-world-interact" onClick={onGather}>
+              <kbd>G</kbd>
+              {foragePatch.prompt}
+            </button>
+          )}
+          {cookSite && (
+            <button className="archive-world-interact" onClick={onCook}>
+              <kbd>C</kbd>
+              烹制田野口粮 {forageIngredients} / {FORAGE_RECIPE_COST}
             </button>
           )}
         </div>
