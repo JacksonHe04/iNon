@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUserContext } from '@/lib/auth/user';
 import { listOwnerMessages, setMessageVisibility } from '@/lib/content/messages';
+import { invalidatePublicPageCache } from '@/lib/content/public-cache';
 
 export async function GET() {
   const userContext = await getUserContext();
@@ -41,6 +42,7 @@ export async function PATCH(req: Request) {
 
   try {
     await setMessageVisibility(messageId, visible, userContext.profile.id);
+    invalidatePublicPageCache();
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(

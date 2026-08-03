@@ -5,6 +5,7 @@ import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
 import { mergeWithDefaultLayoutConfig } from '@/lib/content/layout';
 import type { LayoutConfig } from '@/types/layout';
 import { revalidatePath } from 'next/cache';
+import { invalidatePublicPageCache } from '@/lib/content/public-cache';
 
 export async function GET() {
   const userContext = await getUserContext();
@@ -94,6 +95,7 @@ export async function PUT(req: Request) {
       revalidatePath(`/${profile.username}`);
       revalidatePath(`/i/${profile.username}`);
     }
+    invalidatePublicPageCache();
 
     return NextResponse.json({
       ok: true,

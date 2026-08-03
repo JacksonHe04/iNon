@@ -15,6 +15,7 @@ import {
   updateThoughtsSection,
   updateWorkSection,
 } from '@/lib/content/admin-mutations';
+import { invalidatePublicPageCache } from '@/lib/content/public-cache';
 
 type RouteContext = {
   params: Promise<{ section: string }>;
@@ -118,6 +119,7 @@ export async function PUT(req: Request, context: RouteContext) {
         return NextResponse.json({ error: 'Unknown section' }, { status: 404 });
     }
 
+    invalidatePublicPageCache();
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUserContext } from '@/lib/auth/user';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
+import { invalidatePublicPageCache } from '@/lib/content/public-cache';
 
 function isValidIdentifier(val: string): boolean {
   if (val === '') return true;
@@ -126,6 +127,7 @@ export async function PUT(req: Request) {
       revalidatePath(`/i/${s}`);
     }
   }
+  invalidatePublicPageCache();
 
   return NextResponse.json({
     ok: true,

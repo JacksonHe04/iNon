@@ -1,11 +1,12 @@
-import { cache } from 'react';
 import { getProfileIdBySlug } from '@/lib/analytics/profile-id';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { unstable_cache } from 'next/cache';
 import { DEFAULT_LAYOUT_CONFIG } from './default-layout';
 import { DEFAULT_PROFILE_SLUG } from './constants';
 import { getReadmeData, mapReadmeData } from './index';
 import { getLayoutConfig, mergeWithDefaultLayoutConfig } from './layout';
 import { normalizeAggregatedSourceData } from './readme-source-data';
+import { PUBLIC_PAGE_CACHE_TAG } from './public-cache';
 import type { ReadmeData } from '@/types';
 import type { ProfileRow } from '@/types/database';
 import type { LayoutConfig } from '@/types/layout';
@@ -41,7 +42,7 @@ async function loadLegacyPublicPageData(slug: string): Promise<PublicPageData> {
   return { data, layoutConfig, profileId: profileId ?? '' };
 }
 
-export const getPublicPageData = cache(async (slug: string): Promise<PublicPageData> => {
+async function loadPublicPageData(slug: string): Promise<PublicPageData> {
   const client = createAdminClient();
   const { data, error } = await client.rpc('read_public_profile_page', {
     target_identifier: slug,
@@ -60,4 +61,10 @@ export const getPublicPageData = cache(async (slug: string): Promise<PublicPageD
     layoutConfig: resolvedLayout(slug, payload),
     profileId: payload.profile.id,
   };
-});
+}
+
+export const getPublicPageData = unstable_cache(
+  loadPublicPageData,
+  ['public-page-data'],
+  { revalidate: 3600, tags: [PUBLIC_PAGE_CACHE_TAG] },
+);

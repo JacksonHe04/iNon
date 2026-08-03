@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
+import { invalidatePublicPageCache } from '@/lib/content/public-cache';
 
 type MessagePayload = {
   nickname?: string;
@@ -69,6 +70,7 @@ export async function POST(req: Request) {
       );
     }
 
+    invalidatePublicPageCache();
     return NextResponse.json({ ok: true, message: insertResult.data });
   } catch (error) {
     return NextResponse.json(
