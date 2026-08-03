@@ -7,6 +7,7 @@ import {
   HOME_GROUNDS_ROOT,
   InstancedAsset,
   MEDIEVAL_ROOT,
+  PROP_ROOT,
   MedievalAsset,
   PropAsset,
   TintedGltfAsset,
@@ -16,25 +17,17 @@ import {
   ARCHIVE_HOME_GROUND_Y,
   ARCHIVE_HOME_X,
   ARCHIVE_HOME_Z,
+  archiveHomeGroundChildTransform,
   archiveHomeGroundTransform,
   archiveHomeLocalGroundY,
 } from '@/components/world/archiveHomeGroundMath';
 import { HOME_FENCE_COLLIDERS, HOME_GROVE_COLLIDERS, makeHomeFenceTransforms } from '@/components/world/archiveHomeGroundLayout';
 
-function GardenPatch({ position, rotation = 0 }: { position: [number, number]; rotation?: number }) {
-  const [x, z] = position;
-  const y = archiveHomeLocalGroundY(x, z);
-  return (
-    <group position={[x, y, z]} rotation-y={rotation}>
-      <TintedGltfAsset
-        src={`${HOME_GROUNDS_ROOT}/Flowers.glb`}
-        tint="#a0aa83"
-        scale={1.15}
-      />
-      <PropAsset name="Bucket_Wooden_1" position={[4.1, 0, -0.6]} scale={0.76} />
-    </group>
-  );
-}
+const GARDEN_PATCHES = [
+  [4.1, -8.2, 0.12],
+  [8.5, -8, -0.08],
+  [11.6, -6.7, -0.42],
+] as const;
 
 function GardenPlanting() {
   const ferns = useMemo(() => [
@@ -43,12 +36,17 @@ function GardenPlanting() {
     archiveHomeGroundTransform(11, -2.4, 0.8, 0.9),
     archiveHomeGroundTransform(12.8, -0.3, -0.3, 1.08),
   ], []);
+  const flowers = useMemo(() => GARDEN_PATCHES.map(([x, z, rotation]) => (
+    archiveHomeGroundTransform(x, z, rotation, 1.15)
+  )), []);
+  const buckets = useMemo(() => GARDEN_PATCHES.map((patch) => (
+    archiveHomeGroundChildTransform(patch, [4.1, 0, -0.6, 0, 0.76])
+  )), []);
   return (
     <group name="archive-home-garden">
       <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/Fern_1.gltf`} transforms={ferns} />
-      <GardenPatch position={[4.1, -8.2]} rotation={0.12} />
-      <GardenPatch position={[8.5, -8]} rotation={-0.08} />
-      <GardenPatch position={[11.6, -6.7]} rotation={-0.42} />
+      <InstancedAsset src={`${HOME_GROUNDS_ROOT}/Flowers.glb`} transforms={flowers} tint="#a0aa83" />
+      <InstancedAsset src={`${PROP_ROOT}/Bucket_Wooden_1.gltf`} transforms={buckets} tint="#a2ad98" />
       <PropAsset name="Bench" position={[7.2, 0.08, -1.5]} rotation={[0, Math.PI, 0]} scale={0.92} />
       <PropAsset name="Bucket_Metal" position={[12.7, 0.08, -5.4]} rotation={[0, -0.28, 0]} scale={0.52} />
       <PropAsset name="Bag" position={[10.9, 0.12, -4.9]} rotation={[0, 0.46, 0]} scale={0.5} />

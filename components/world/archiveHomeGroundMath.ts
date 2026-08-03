@@ -21,3 +21,17 @@ export function archiveHomeGroundTransform(
     new Vector3(scale, scale, scale),
   );
 }
+
+export function archiveHomeGroundChildTransform(
+  parent: readonly [x: number, z: number, rotationY: number],
+  child: readonly [x: number, y: number, z: number, rotationY: number, scale: number],
+) {
+  const [parentX, parentZ, parentRotation] = parent;
+  const [x, y, z, rotationY, scale] = child;
+  const childMatrix = new Matrix4().compose(
+    new Vector3(x, y, z),
+    new Quaternion().setFromEuler(new Euler(0, rotationY, 0)),
+    new Vector3(scale, scale, scale),
+  );
+  return archiveHomeGroundTransform(parentX, parentZ, parentRotation).multiply(childMatrix);
+}
