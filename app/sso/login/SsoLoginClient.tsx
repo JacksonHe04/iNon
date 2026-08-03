@@ -10,6 +10,7 @@ import {
 import { TurnstileField } from "@/components/sso/TurnstileField";
 import { SsoHandoff } from "@/components/sso/SsoHandoff";
 import { GithubIcon } from "@/components/icons/PlatformIcons";
+import { SsoLoginFields } from "@/components/sso/SsoLoginFields";
 import { requestSsoJson, SsoApiError } from "@/lib/sso/browser-client";
 
 type LoginMode = "otp" | "password";
@@ -227,70 +228,18 @@ export function SsoLoginClient({
       </div>
 
       <form className="sso-stack" onSubmit={submit}>
-        {mode === "otp" ? (
-          <>
-            <label className="sso-label">
-              邮箱
-              <input
-                className="sso-input"
-                type="email"
-                autoComplete="email"
-                required
-                disabled={otpSent}
-                value={email}
-                placeholder="you@example.com"
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </label>
-            {otpSent ? (
-              <label className="sso-label">
-                验证码
-                <input
-                  className="sso-input"
-                  type="text"
-                  autoComplete="one-time-code"
-                  inputMode="numeric"
-                  maxLength={6}
-                  required
-                  autoFocus
-                  value={otp}
-                  placeholder="000000"
-                  onChange={(event) =>
-                    setOtp(event.target.value.replace(/\D/g, ""))
-                  }
-                />
-              </label>
-            ) : null}
-          </>
-        ) : (
-          <>
-            <label className="sso-label">
-              邮箱或用户名
-              <input
-                className="sso-input"
-                type="text"
-                autoComplete="username"
-                required
-                value={identifier}
-                placeholder="you@example.com 或用户名"
-                onChange={(event) => setIdentifier(event.target.value)}
-              />
-            </label>
-            <label className="sso-label">
-              密码
-              <input
-                className="sso-input"
-                type="password"
-                autoComplete="current-password"
-                minLength={8}
-                required
-                value={password}
-                placeholder="至少 8 个字符"
-                onChange={(event) => setPassword(event.target.value)}
-              />
-            </label>
-          </>
-        )}
+        <SsoLoginFields
+          email={email}
+          identifier={identifier}
+          mode={mode}
+          otp={otp}
+          otpSent={otpSent}
+          password={password}
+          setEmail={setEmail}
+          setIdentifier={setIdentifier}
+          setOtp={setOtp}
+          setPassword={setPassword}
+        />
 
         <TurnstileField
           key={`login-${challengeVersion}`}
