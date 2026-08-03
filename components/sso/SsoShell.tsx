@@ -1,6 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import styles from "./SsoShell.module.css";
+import baseStyles from "./SsoShell.module.css";
+import verdantStyles from "./SsoShellVerdant.module.css";
+
+const shellClass = (name: string) =>
+  [baseStyles[name], verdantStyles[name]].filter(Boolean).join(" ");
 
 const projects = [
   { name: "iNon", code: "IN", tone: "mint" },
@@ -24,30 +28,30 @@ export function SsoShell({
   description,
 }: SsoShellProps) {
   return (
-    <main className={styles.viewport}>
-      <div className={styles.noise} aria-hidden="true" />
-      <section className={styles.shell}>
-        <aside className={styles.identity}>
-          <Link className={styles.brand} href="/" aria-label="返回 iNon">
-            <span className={styles.brandMark}>iN</span>
+    <main className={shellClass("viewport")}>
+      <div className={shellClass("noise")} aria-hidden="true" />
+      <section className={shellClass("shell")}>
+        <aside className={shellClass("identity")}>
+          <Link className={shellClass("brand")} href="/" aria-label="返回 iNon">
+            <span className={shellClass("brandMark")}>iN</span>
             <span>
               <strong>iNon</strong>
               <small>One account, five places.</small>
             </span>
           </Link>
 
-          <div className={styles.thesis}>
+          <div className={shellClass("thesis")}>
             <p>{eyebrow}</p>
             <h1>{title}</h1>
             <span>{description}</span>
           </div>
 
-          <div className={styles.projectRail}>
-            <div className={styles.railLine} aria-hidden="true" />
+          <div className={shellClass("projectRail")}>
+            <div className={shellClass("railLine")} aria-hidden="true" />
             {projects.map((project, index) => (
-              <div className={styles.project} key={project.name}>
+              <div className={shellClass("project")} key={project.name}>
                 <span
-                  className={styles.projectNode}
+                  className={shellClass("projectNode")}
                   data-tone={project.tone}
                 >
                   {project.code}
@@ -62,12 +66,12 @@ export function SsoShell({
             ))}
           </div>
 
-          <p className={styles.identityFoot}>
+          <p className={shellClass("identityFoot")}>
             登录一次，在五个项目之间保持同一个你。
           </p>
         </aside>
 
-        <section className={styles.panel}>{children}</section>
+        <section className={shellClass("panel")}>{children}</section>
       </section>
     </main>
   );
