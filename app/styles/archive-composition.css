@@ -163,7 +163,13 @@
   position: relative;
   min-width: 0;
   isolation: isolate;
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 860px;
   transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.archive-block-frame[data-archive-layout="full"] {
+  contain-intrinsic-block-size: auto 1100px;
 }
 
 .archive-block-frame[data-archive-layout="wide-left"] {
