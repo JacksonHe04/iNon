@@ -1,14 +1,13 @@
 'use client';
 
 import { useMemo } from 'react';
-import { CuboidCollider, RigidBody } from '@react-three/rapier';
-import { Matrix4 } from 'three';
+import { CuboidCollider, CylinderCollider, RigidBody } from '@react-three/rapier';
 import ArchiveHomeEcology from '@/components/world/ArchiveHomeEcology';
 import {
   HOME_GROUNDS_ROOT,
   InstancedAsset,
   MEDIEVAL_ROOT,
-  PROP_ROOT,
+  MedievalAsset,
   PropAsset,
   TintedGltfAsset,
 } from '@/components/world/ArchiveAsset';
@@ -20,19 +19,7 @@ import {
   archiveHomeGroundTransform,
   archiveHomeLocalGroundY,
 } from '@/components/world/archiveHomeGroundMath';
-
-function makeFenceTransforms() {
-  const placements: Matrix4[] = [];
-  for (let x = -14; x <= 16; x += 2) {
-    placements.push(archiveHomeGroundTransform(x, -11, 0, 1.04));
-    if (x < -4 || x > 2) placements.push(archiveHomeGroundTransform(x, 26, Math.PI, 1.04));
-  }
-  for (let z = -9; z <= 24; z += 2) {
-    placements.push(archiveHomeGroundTransform(-16, z, Math.PI / 2, 1.04));
-    placements.push(archiveHomeGroundTransform(17, z, -Math.PI / 2, 1.04));
-  }
-  return placements;
-}
+import { HOME_FENCE_COLLIDERS, HOME_GROVE_COLLIDERS, makeHomeFenceTransforms } from '@/components/world/archiveHomeGroundLayout';
 
 function GardenPatch({ position, rotation = 0 }: { position: [number, number]; rotation?: number }) {
   const [x, z] = position;
@@ -63,6 +50,33 @@ function GardenPlanting() {
       <GardenPatch position={[8.5, -8]} rotation={-0.08} />
       <GardenPatch position={[11.6, -6.7]} rotation={-0.42} />
       <PropAsset name="Bench" position={[7.2, 0.08, -1.5]} rotation={[0, Math.PI, 0]} scale={0.92} />
+      <PropAsset name="Bucket_Metal" position={[12.7, 0.08, -5.4]} rotation={[0, -0.28, 0]} scale={0.52} />
+      <PropAsset name="Bag" position={[10.9, 0.12, -4.9]} rotation={[0, 0.46, 0]} scale={0.5} />
+    </group>
+  );
+}
+
+function WorkingYard() {
+  return (
+    <group name="archive-home-working-yard">
+      <PropAsset name="Workbench" position={[-12.2, 0.1, -7.1]} rotation={[0, 0.18, 0]} scale={0.86} />
+      <PropAsset name="Workbench_Drawers" position={[-9.7, 0.1, -7.5]} rotation={[0, -0.12, 0]} scale={0.78} />
+      <PropAsset name="Barrel" position={[-14.1, 0.1, -6.7]} scale={0.92} />
+      <PropAsset name="Bucket_Wooden_1" position={[-13.8, 0.08, -3.9]} rotation={[0, 0.32, 0]} scale={0.62} />
+      <PropAsset name="Rope_1" position={[-11.2, 0.12, -5.4]} rotation={[0, -0.46, 0]} scale={0.58} />
+      <MedievalAsset name="Prop_Crate" position={[-9.3, 0.08, -5.8]} rotation={[0, 0.2, 0]} scale={0.74} tint="#78806a" />
+      <MedievalAsset name="Prop_Wagon" position={[-13.3, 0.12, -0.7]} rotation={[0, 1.38, 0]} scale={0.72} tint="#7b846d" />
+    </group>
+  );
+}
+
+function FrontPorchLife() {
+  return (
+    <group name="archive-home-front-porch-life">
+      <PropAsset name="Bench" position={[-6.1, 0.08, 5.7]} rotation={[0, 1.62, 0]} scale={0.78} />
+      <PropAsset name="Bag" position={[-4.8, 0.1, 6.2]} rotation={[0, -0.34, 0]} scale={0.56} />
+      <MedievalAsset name="Prop_Crate" position={[3.2, 0.08, 5.8]} rotation={[0, -0.18, 0]} scale={0.56} tint="#7d836b" />
+      <PropAsset name="Lantern_Wall" position={[3.3, 0.66, 5.7]} rotation={[0, 0.18, 0]} scale={0.62} />
     </group>
   );
 }
@@ -116,7 +130,7 @@ function FadedPool() {
 }
 
 export default function ArchiveHomeGrounds() {
-  const fences = useMemo(makeFenceTransforms, []);
+  const fences = useMemo(makeHomeFenceTransforms, []);
   return (
     <RigidBody
       type="fixed"
@@ -125,17 +139,22 @@ export default function ArchiveHomeGrounds() {
       name="single-coastal-home-grounds"
     >
       <InstancedAsset src={`${MEDIEVAL_ROOT}/Prop_WoodenFence_Extension1.gltf`} transforms={fences} />
-      <CuboidCollider args={[0.24, 0.8, 18.5]} position={[-16, 0.8, 7.5]} />
-      <CuboidCollider args={[0.24, 0.8, 18.5]} position={[17, 0.8, 7.5]} />
-      <CuboidCollider args={[16.5, 0.8, 0.24]} position={[0.5, 0.8, -11]} />
-      <CuboidCollider args={[5.6, 0.8, 0.24]} position={[-10.4, 0.8, 26]} />
-      <CuboidCollider args={[6.4, 0.8, 0.24]} position={[10.6, 0.8, 26]} />
+      {HOME_FENCE_COLLIDERS.map((collider, index) => (
+        <CuboidCollider key={index} args={[...collider.args]} position={[...collider.position]} />
+      ))}
+      {HOME_GROVE_COLLIDERS.map(([x, z, radius]) => (
+        <CylinderCollider
+          key={`${x}:${z}`}
+          args={[2.8, radius]}
+          position={[x, archiveHomeLocalGroundY(x, z) + 2.8, z]}
+        />
+      ))}
       <GardenPlanting />
+      <WorkingYard />
+      <FrontPorchLife />
       <ArchiveHomeEcology />
       <FadedPool />
       <FireCircle />
-      <PropAsset name="Barrel" position={[-14.1, 0.1, -6.7]} scale={0.92} />
-      <PropAsset name="Workbench" position={[-12.2, 0.1, -7.1]} rotation={[0, 0.18, 0]} scale={0.86} />
     </RigidBody>
   );
 }

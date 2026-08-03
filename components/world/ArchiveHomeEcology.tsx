@@ -86,6 +86,16 @@ const PATH_OUTSIDE = transforms([
   [6, 33.5, -0.08, 0.76], [9, 34.5, 0.12, 0.8], [12, 35, -0.14, 0.74],
 ]);
 
+const COASTAL_GROVE_1 = transforms([
+  [-20.2, -7.4, 0.22, 0.86], [21.2, 8.4, -0.48, 0.92],
+]);
+const COASTAL_GROVE_2 = transforms([
+  [-21.4, 6.2, -0.34, 0.94], [19.3, -12.6, 0.52, 1.02],
+]);
+const COASTAL_GROVE_TWISTED = transforms([
+  [-19.6, 20.8, 0.44, 0.82], [19.7, 23.4, -0.62, 0.9],
+]);
+
 function natureAsset(file: string, placements: import('three').Matrix4[]) {
   return <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/${file}.gltf`} transforms={placements} />;
 }
@@ -108,6 +118,9 @@ export default function ArchiveHomeEcology() {
       {natureAsset('RockPath_Round_Thin', PATH_THRESHOLD)}
       {natureAsset('RockPath_Round_Wide', PATH_GATE)}
       {natureAsset('RockPath_Round_Small_2', PATH_OUTSIDE)}
+      {natureAsset('CommonTree_1', COASTAL_GROVE_1)}
+      {natureAsset('CommonTree_2', COASTAL_GROVE_2)}
+      {natureAsset('TwistedTree_2', COASTAL_GROVE_TWISTED)}
     </group>
   );
 }
