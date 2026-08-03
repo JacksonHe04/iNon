@@ -18,7 +18,7 @@ import {
   mapThoughts,
   mapNotifications,
 } from './mappers';
-import { loadReadmeSourceData } from './readme-source-data';
+import { loadReadmeSourceData, type ReadmeSourceData } from './readme-source-data';
 
 const loadResolvedProfile = cache(async (slug: string): Promise<ProfileRow> => {
   let profileResult = await loadProfile(slug);
@@ -43,48 +43,37 @@ export async function getSiteMetadata() {
   };
 }
 
-export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<ReadmeData> {
-  try {
-    const profile = await loadResolvedProfile(slug);
-    const sourceData = await loadReadmeSourceData(profile.id);
-
-    const profileAndBasic = mapProfileAndBasic(profile, sourceData.tags);
-    const life = mapLife(sourceData.life, sourceData.listItems);
-    const experience = mapExperience(sourceData.experiences);
-    const education = mapEducation(sourceData.schools, sourceData.educationMeta);
-    const work = mapWork(sourceData.jobs, sourceData.workMeta, sourceData.listItems);
-    const development = mapDevelopment(
+export function mapReadmeData(profile: ProfileRow, sourceData: ReadmeSourceData): ReadmeData {
+  return {
+    ...mapProfileAndBasic(profile, sourceData.tags),
+    life: mapLife(sourceData.life, sourceData.listItems),
+    experience: mapExperience(sourceData.experiences),
+    education: mapEducation(sourceData.schools, sourceData.educationMeta),
+    work: mapWork(sourceData.jobs, sourceData.workMeta, sourceData.listItems),
+    development: mapDevelopment(
       sourceData.developmentSkills,
       sourceData.projects,
       sourceData.projectTechStack,
       sourceData.projectRoles,
       sourceData.devTools,
-      sourceData.devToolTags
-    );
-    const products = mapProducts(sourceData.productItems, sourceData.productItemTags, sourceData.hardwareItems);
-    const creation = mapCreation(sourceData.creationItems, sourceData.listItems);
-    const library = mapLibrary(sourceData.libraryItems, sourceData.libraryCategories);
-    const events = mapEvents(sourceData.performances);
-    const contact = mapContact(sourceData.contactMethods, sourceData.platformAccounts);
-    const thoughts = mapThoughts(sourceData.listItems, sourceData.thoughtQa);
-    const notifications = mapNotifications(sourceData.notifications);
+      sourceData.devToolTags,
+    ),
+    products: mapProducts(sourceData.productItems, sourceData.productItemTags, sourceData.hardwareItems),
+    creation: mapCreation(sourceData.creationItems, sourceData.listItems),
+    library: mapLibrary(sourceData.libraryItems, sourceData.libraryCategories),
+    events: mapEvents(sourceData.performances),
+    contact: mapContact(sourceData.contactMethods, sourceData.platformAccounts),
+    thoughts: mapThoughts(sourceData.listItems, sourceData.thoughtQa),
+    notifications: mapNotifications(sourceData.notifications),
+    messages: sourceData.messages,
+  };
+}
 
-    return {
-      ...profileAndBasic,
-      life,
-      experience,
-      education,
-      work,
-      development,
-      products,
-      creation,
-      library,
-      events,
-      contact,
-      thoughts,
-      notifications,
-      messages: sourceData.messages,
-    };
+export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<ReadmeData> {
+  try {
+    const profile = await loadResolvedProfile(slug);
+    const sourceData = await loadReadmeSourceData(profile.id);
+    return mapReadmeData(profile, sourceData);
   } catch (error) {
     throw new Error(`Failed to load readme data from Supabase: ${(error as Error).message}`);
   }

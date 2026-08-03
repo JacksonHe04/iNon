@@ -74,12 +74,8 @@ function firstError(results: Array<{ error: Error | null }>): Error | null {
   return results.find((result) => result.error)?.error ?? null;
 }
 
-async function loadAggregatedSourceData(profileId: string): Promise<ReadmeSourceData | null> {
-  const client = createAdminClient();
-  const { data, error } = await client.rpc('read_public_profile_source', {
-    target_profile_id: profileId,
-  });
-  if (error || !data || typeof data !== 'object' || Array.isArray(data)) return null;
+export function normalizeAggregatedSourceData(data: unknown): ReadmeSourceData | null {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return null;
   const payload = data as unknown as AggregatedSourcePayload;
   const projects = sortByOrder(payload.projects ?? []);
   const devTools = sortByOrder(payload.devTools ?? []);
@@ -96,6 +92,14 @@ async function loadAggregatedSourceData(profileId: string): Promise<ReadmeSource
     devToolTags: groupByKey(sortByOrder(payload.devToolTags ?? []), 'dev_tool_id'),
     productItemTags: groupByKey(sortByOrder(payload.productItemTags ?? []), 'product_item_id'),
   };
+}
+
+async function loadAggregatedSourceData(profileId: string): Promise<ReadmeSourceData | null> {
+  const client = createAdminClient();
+  const { data, error } = await client.rpc('read_public_profile_source', {
+    target_profile_id: profileId,
+  });
+  return error ? null : normalizeAggregatedSourceData(data);
 }
 
 export async function loadReadmeSourceData(profileId: string): Promise<ReadmeSourceData> {

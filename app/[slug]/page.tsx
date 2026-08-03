@@ -1,6 +1,4 @@
-import { getReadmeData } from '@/lib/content';
-import { getLayoutConfig } from '@/lib/content/layout';
-import { getProfileIdBySlug } from '@/lib/analytics/profile-id';
+import { getPublicPageData } from '@/lib/content/public-page-data';
 import ShellLayout from '@/components/layout/ShellLayout';
 import PublicBlockRenderer from '@/components/blocks/PublicBlockRenderer';
 import PageViewTracker from '@/components/analytics/PageViewTracker';
@@ -15,24 +13,19 @@ interface UserPublicPageProps {
 
 export default async function UserPublicPage({ params }: UserPublicPageProps) {
   const { slug } = await params;
-  const [rawData, layoutConfig, profileId] = await Promise.all([
-    getReadmeData(slug),
-    getLayoutConfig(slug),
-    getProfileIdBySlug(slug),
-  ]);
-
-  const data = deduplicateReadmeData(rawData);
+  const pageData = await getPublicPageData(slug);
+  const data = deduplicateReadmeData(pageData.data);
 
   return (
     <ShellLayout
       data={data}
       username={slug}
       showSideNav={true}
-      blocks={layoutConfig.blocks}
-      theme={layoutConfig.theme}
+      blocks={pageData.layoutConfig.blocks}
+      theme={pageData.layoutConfig.theme}
     >
-      <PublicBlockRenderer data={data} layoutConfig={layoutConfig} />
-      {profileId ? <PageViewTracker profileId={profileId} /> : null}
+      <PublicBlockRenderer data={data} layoutConfig={pageData.layoutConfig} />
+      {pageData.profileId ? <PageViewTracker profileId={pageData.profileId} /> : null}
       <Analytics />
     </ShellLayout>
   );
