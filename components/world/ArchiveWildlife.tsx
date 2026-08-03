@@ -28,6 +28,8 @@ import { cloneAnimatedAsset } from '@/components/world/cloneAnimatedAsset';
 
 const ANIMAL_ROOT = '/archive-world/quaternius-animals';
 const ALPINE_SPECIES = new Set<AnimalConfig['species']>(['deer', 'fox', 'stag', 'wolf']);
+const WILDLIFE_STREAM_RADIUS = 105;
+const WILDLIFE_STREAM_STEP = 32;
 
 function AnimatedAnimal({
   config,
@@ -232,20 +234,30 @@ export default function ArchiveWildlife({
   onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
   const initialHeight = heightAt(playerPosition.current.x, playerPosition.current.z);
-  const [activeBiome, setActiveBiome] = useState(() => (
-    worldBiomeAt(playerPosition.current.x, playerPosition.current.z, initialHeight)
-  ));
-  const activeBiomeRef = useRef(activeBiome);
+  const [stream, setStream] = useState(() => ({
+    x: playerPosition.current.x,
+    z: playerPosition.current.z,
+    biome: worldBiomeAt(playerPosition.current.x, playerPosition.current.z, initialHeight),
+  }));
+  const streamRef = useRef(stream);
   const activeAnimals = useMemo(
-    () => WORLD_ANIMALS.filter(({ species }) => animalAppearsInHabitat(species, activeBiome)),
-    [activeBiome],
+    () => WORLD_ANIMALS.filter(({ species, offset }) => (
+      animalAppearsInHabitat(species, stream.biome)
+      && Math.hypot(offset[0] - stream.x, offset[1] - stream.z) < WILDLIFE_STREAM_RADIUS
+    )),
+    [stream],
   );
   useFrame(() => {
     const player = playerPosition.current;
-    const next = worldBiomeAt(player.x, player.z, heightAt(player.x, player.z));
-    if (next === activeBiomeRef.current) return;
-    activeBiomeRef.current = next;
-    setActiveBiome(next);
+    const biome = worldBiomeAt(player.x, player.z, heightAt(player.x, player.z));
+    const current = streamRef.current;
+    if (
+      biome === current.biome
+      && Math.hypot(player.x - current.x, player.z - current.z) < WILDLIFE_STREAM_STEP
+    ) return;
+    const next = { x: player.x, z: player.z, biome };
+    streamRef.current = next;
+    setStream(next);
   });
   return (
     <group name="archive-world-wildlife">
