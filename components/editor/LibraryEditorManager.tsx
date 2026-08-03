@@ -16,10 +16,7 @@ import LibraryCategoryModal from './LibraryCategoryModal';
 import LibraryItemEditorList from './LibraryItemEditorList';
 import { useSectionSave } from './hooks/useSectionSave';
 import type { LibraryByKind, LibraryItemDTO, LibraryCategoryDTO, LibraryKind, LibrarySubtype } from '@/types';
-import MusicBlock from '@/components/blocks/MusicBlock';
-import MovieBlock from '@/components/blocks/MovieBlock';
-import BookBlock from '@/components/blocks/BookBlock';
-import GameBlock from '@/components/blocks/GameBlock';
+import LibraryPreviewPanel from './LibraryPreviewPanel';
 
 // Safe UUID/ID generator helper
 const generateUUID = () => {
@@ -466,51 +463,19 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
 
         {/* Mode contents */}
         {editMode === 'preview' ? (
-          <div className="space-y-6 animate-fadeIn">
-            {activeKind !== 'music' || (categories.length > 0 && selectedCategoryName) ? (
-              <div className="border border-white/10 rounded-3xl p-1 bg-black/5 dark:bg-black/20">
-                {activeKind === 'music' && (
-                  <MusicBlock
-                    albums={getActiveItems(works)}
-                    songs={getActiveItems(songs)}
-                    musicians={getActiveItems(creators)}
-                    title={`${selectedCategoryName} · 音乐`}
-                    colSpan={2}
-                  />
-                )}
-                {activeKind === 'film' && (
-                  <MovieBlock
-                    films={works}
-                    directors={creators}
-                    title="影视"
-                    colSpan={2}
-                    mode="readonly"
-                  />
-                )}
-                {activeKind === 'book' && (
-                  <BookBlock
-                    books={works}
-                    authors={creators}
-                    title="读书"
-                    colSpan={2}
-                    mode="readonly"
-                  />
-                )}
-                {activeKind === 'game' && (
-                  <GameBlock
-                    works={works}
-                    creators={creators}
-                    title="游戏"
-                    colSpan={2}
-                  />
-                )}
-              </div>
-            ) : (
-              <p className="text-xs text-gray-400 italic text-center py-12">
-                无任何分类，请先切换到“编辑数据”模式新增分类
-              </p>
-            )}
-          </div>
+          activeKind !== 'music' || (categories.length > 0 && selectedCategoryName) ? (
+            <LibraryPreviewPanel
+              creators={creators}
+              kind={activeKind}
+              selectedCategoryName={selectedCategoryName}
+              songs={songs}
+              works={works}
+            />
+          ) : (
+            <p className="py-12 text-center text-gray-400 text-xs italic">
+              无任何分类，请先切换到“编辑数据”模式新增分类
+            </p>
+          )
         ) : (
           <div className="space-y-6 animate-fadeIn">
             {activeKind !== 'music' || (categories.length > 0 && selectedCategoryName) ? (
