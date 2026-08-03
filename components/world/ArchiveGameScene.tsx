@@ -94,6 +94,7 @@ export default function ArchiveGameScene({
   homeExhibits,
   forageCollectedIds,
   onFallImpact,
+  onObserveSpecies,
 }: ArchiveGameSceneProps) {
   return (
     <>
@@ -119,9 +120,24 @@ export default function ArchiveGameScene({
         <ArchiveForagePatches collectedIds={forageCollectedIds} />
       </Suspense>
       <Suspense fallback={null}>
-        <ArchiveWildlife playerPosition={playerPosition} heightAt={terrainHeightAt} animalsEnabled={entered} />
-        <ArchiveBirdFlock playerPosition={playerPosition} heightAt={terrainHeightAt} />
-        <ArchivePollinators enabled={entered} playerPosition={playerPosition} heightAt={terrainHeightAt} />
+        <ArchiveWildlife
+          playerPosition={playerPosition}
+          heightAt={terrainHeightAt}
+          animalsEnabled={entered}
+          onObserveSpecies={onObserveSpecies}
+        />
+        <ArchiveBirdFlock
+          enabled={entered}
+          playerPosition={playerPosition}
+          heightAt={terrainHeightAt}
+          onObserveSpecies={onObserveSpecies}
+        />
+        <ArchivePollinators
+          enabled={entered}
+          playerPosition={playerPosition}
+          heightAt={terrainHeightAt}
+          onObserveSpecies={onObserveSpecies}
+        />
         <ArchiveCompanionDog
           enabled={entered}
           playerPosition={playerPosition}
@@ -131,9 +147,9 @@ export default function ArchiveGameScene({
         />
       </Suspense>
       <Suspense fallback={null}>
-        <ArchiveAquaticLife enabled={entered} playerPosition={playerPosition} />
-        <ArchiveOceanLife enabled={entered} playerPosition={playerPosition} />
-        <ArchiveCoastalLife enabled={entered} playerPosition={playerPosition} />
+        <ArchiveAquaticLife enabled={entered} playerPosition={playerPosition} onObserveSpecies={onObserveSpecies} />
+        <ArchiveOceanLife enabled={entered} playerPosition={playerPosition} onObserveSpecies={onObserveSpecies} />
+        <ArchiveCoastalLife enabled={entered} playerPosition={playerPosition} onObserveSpecies={onObserveSpecies} />
       </Suspense>
       <InfiniteWater playerPosition={playerPosition} />
       <Suspense fallback={null}>

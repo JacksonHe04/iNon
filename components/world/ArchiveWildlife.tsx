@@ -13,10 +13,12 @@ import {
 import {
   ANIMAL_BEHAVIOUR,
   ANIMAL_FILES,
+  ANIMAL_SPECIES_RECORD,
   WORLD_ANIMALS,
   animalAppearsInHabitat,
   type AnimalConfig,
 } from '@/components/world/archiveAnimalConfig';
+import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog';
 import {
   findWalkableAnimalGround,
   isWalkableAnimalGround,
@@ -31,10 +33,12 @@ function AnimatedAnimal({
   config,
   playerPosition,
   heightAt,
+  onObserveSpecies,
 }: {
   config: AnimalConfig;
   playerPosition: MutableRefObject<Vector3>;
   heightAt: (x: number, z: number) => number;
+  onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
   const behaviour = ANIMAL_BEHAVIOUR[config.species];
   const url = `${ANIMAL_ROOT}/${ANIMAL_FILES[config.species]}`;
@@ -118,6 +122,14 @@ function AnimatedAnimal({
     if (!group.visible) return;
     mixer.update(delta);
     const distanceToPlayer = Math.hypot(group.position.x - player.x, group.position.z - player.z);
+    const observationDistance = Math.hypot(
+      group.position.x - player.x,
+      group.position.y - player.y,
+      group.position.z - player.z,
+    );
+    if (observationDistance < Math.max(12, behaviour.fleeDistance + 2)) {
+      onObserveSpecies(ANIMAL_SPECIES_RECORD[config.species]);
+    }
 
     if (distanceToPlayer > 118) {
       const reanchored = findWalkableAnimalGround({
@@ -212,10 +224,12 @@ export default function ArchiveWildlife({
   playerPosition,
   heightAt,
   animalsEnabled,
+  onObserveSpecies,
 }: {
   playerPosition: MutableRefObject<Vector3>;
   heightAt: (x: number, z: number) => number;
   animalsEnabled: boolean;
+  onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
   return (
     <group name="archive-world-wildlife">
@@ -227,6 +241,7 @@ export default function ArchiveWildlife({
                 config={config}
                 playerPosition={playerPosition}
                 heightAt={heightAt}
+                onObserveSpecies={onObserveSpecies}
               />
             </Suspense>
           ))}

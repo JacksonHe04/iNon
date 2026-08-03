@@ -1,3 +1,5 @@
+import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog';
+
 export type AnimalSpecies =
   | 'alpaca'
   | 'bull'
@@ -58,6 +60,13 @@ const ANIMAL_HABITATS: Record<AnimalSpecies, readonly AnimalHabitat[]> = {
 export function animalAppearsInHabitat(species: AnimalSpecies, habitat: AnimalHabitat) {
   return ANIMAL_HABITATS[species].includes(habitat);
 }
+
+export const ANIMAL_SPECIES_RECORD: Record<AnimalSpecies, ArchiveSpeciesId> = {
+  alpaca: 'alpaca', bull: 'cattle', bunny: 'rabbit', chicken: 'chicken', cow: 'cattle',
+  deer: 'deer', donkey: 'donkey', fox: 'fox', frog: 'frog', husky: 'wolf-dog',
+  llama: 'llama', panda: 'panda', pig: 'pig', pug: 'wolf-dog', rat: 'rat',
+  sheep: 'sheep', snake: 'snake', spider: 'spider', stag: 'deer', wolf: 'wolf-dog', zebra: 'zebra',
+};
 
 export const ANIMAL_FILES: Record<AnimalSpecies, string> = {
   alpaca: 'Alpaca.glb',

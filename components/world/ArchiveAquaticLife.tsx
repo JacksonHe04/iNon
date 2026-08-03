@@ -5,8 +5,10 @@ import { type Group, Vector3 } from 'three';
 import AnimatedAquaticAnimal from '@/components/world/AnimatedAquaticAnimal';
 import { WATER_LEVEL } from '@/components/world/archiveWorldConstants';
 import { riverCenterAt } from '@/components/world/archiveTerrainMath';
+import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog';
 
 const FISH_ROOT = '/archive-world/quaternius-fish';
+const RIVER_FISH_SPECIES = ['river-fish-a', 'river-fish-b', 'river-fish-c'] as const;
 
 interface FishConfig {
   id: string;
@@ -15,6 +17,7 @@ interface FishConfig {
   phase: number;
   lane: number;
   speed: number;
+  speciesId: ArchiveSpeciesId;
 }
 
 const RIVER_FISH: readonly FishConfig[] = Array.from({ length: 18 }, (_, index) => ({
@@ -24,14 +27,17 @@ const RIVER_FISH: readonly FishConfig[] = Array.from({ length: 18 }, (_, index) 
   phase: index * 7.73,
   lane: (index % 5) - 2,
   speed: 0.88 + (index % 4) * 0.14,
+  speciesId: RIVER_FISH_SPECIES[index % RIVER_FISH_SPECIES.length],
 }));
 
 function AnimatedRiverFish({
   config,
   playerPosition,
+  onObserveSpecies,
 }: {
   config: FishConfig;
   playerPosition: MutableRefObject<Vector3>;
+  onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
   const anchorZ = useRef(playerPosition.current.z);
   const update = useCallback((group: Group, elapsed: number) => {
@@ -52,7 +58,14 @@ function AnimatedRiverFish({
     );
     group.rotation.y = Math.atan2(nextX - x, 0.5);
     group.rotation.z = Math.sin(elapsed * 0.55 + config.phase) * 0.035;
-  }, [config, playerPosition]);
+    if (Math.hypot(
+      x - playerPosition.current.x,
+      group.position.y - playerPosition.current.y,
+      z - playerPosition.current.z,
+    ) < 7.5) {
+      onObserveSpecies(config.speciesId);
+    }
+  }, [config, onObserveSpecies, playerPosition]);
 
   return (
     <AnimatedAquaticAnimal
@@ -67,15 +80,22 @@ function AnimatedRiverFish({
 export default function ArchiveAquaticLife({
   enabled,
   playerPosition,
+  onObserveSpecies,
 }: {
   enabled: boolean;
   playerPosition: MutableRefObject<Vector3>;
+  onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
   if (!enabled) return null;
   return (
     <group name="archive-world-river-fish">
       {RIVER_FISH.map((config) => (
-        <AnimatedRiverFish key={config.id} config={config} playerPosition={playerPosition} />
+        <AnimatedRiverFish
+          key={config.id}
+          config={config}
+          playerPosition={playerPosition}
+          onObserveSpecies={onObserveSpecies}
+        />
       ))}
     </group>
   );

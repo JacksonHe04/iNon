@@ -4,6 +4,7 @@ import type { BlockType } from '@/types/layout';
 import type { HomeExhibit, HomeInspectionId } from '@/components/world/archiveHomeRecords';
 import type { CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
 import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
+import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog';
 
 export interface GameDestination {
   blockType: BlockType;
@@ -53,6 +54,7 @@ export interface ArchiveGameSceneProps {
   homeExhibits: HomeExhibit[];
   forageCollectedIds: string[];
   onFallImpact: (impactSpeed: number, mounted: boolean) => void;
+  onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }
 
 export interface FirstPersonExplorerProps {

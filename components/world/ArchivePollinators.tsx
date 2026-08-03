@@ -5,6 +5,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Group, Mesh, Vector3 } from 'three';
 import AnimatedAnimalScene from '@/components/world/AnimatedAnimalScene';
+import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog';
 
 const BEE_COUNT = 14;
 
@@ -12,10 +13,12 @@ function AnimatedWasp({
   index,
   playerPosition,
   heightAt,
+  onObserveSpecies,
 }: {
   index: number;
   playerPosition: MutableRefObject<Vector3>;
   heightAt: (x: number, z: number) => number;
+  onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
   const gltf = useGLTF('/archive-world/quaternius-animals/Wasp.glb');
   const anchor = useRef(new Vector3(playerPosition.current.x, 0, playerPosition.current.z));
@@ -34,7 +37,8 @@ function AnimatedWasp({
     group.position.set(x, heightAt(x, z) + 2.2 + Math.sin(angle * 3) * 0.65, z);
     group.rotation.y = -angle + Math.PI / 2;
     group.rotation.z = Math.sin(angle * 4) * 0.11;
-  }, [heightAt, index, phase, playerPosition]);
+    if (Math.hypot(x - player.x, group.position.y - player.y, z - player.z) < 7) onObserveSpecies('wasp');
+  }, [heightAt, index, onObserveSpecies, phase, playerPosition]);
   return (
     <AnimatedAnimalScene
       source={gltf.scene}
@@ -52,10 +56,12 @@ export default function ArchivePollinators({
   enabled,
   playerPosition,
   heightAt,
+  onObserveSpecies,
 }: {
   enabled: boolean;
   playerPosition: MutableRefObject<Vector3>;
   heightAt: (x: number, z: number) => number;
+  onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
   const gltf = useGLTF('/archive-world/quaternius-animals/Bee.glb');
   const bees = useMemo(
@@ -90,6 +96,7 @@ export default function ArchivePollinators({
       group.position.set(x, y, z);
       group.rotation.y = -angle + Math.PI / 2;
       group.rotation.z = Math.sin(clock.elapsedTime * 5 + phase) * 0.12;
+      if (Math.hypot(x - player.x, y - player.y, z - player.z) < 6) onObserveSpecies('bee');
     });
   });
 
@@ -109,7 +116,13 @@ export default function ArchivePollinators({
       </group>
       <group name="wasp-flight">
         {Array.from({ length: 6 }, (_, index) => (
-          <AnimatedWasp key={index} index={index} playerPosition={playerPosition} heightAt={heightAt} />
+          <AnimatedWasp
+            key={index}
+            index={index}
+            playerPosition={playerPosition}
+            heightAt={heightAt}
+            onObserveSpecies={onObserveSpecies}
+          />
         ))}
       </group>
     </group>

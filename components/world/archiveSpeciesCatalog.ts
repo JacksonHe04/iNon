@@ -5,7 +5,7 @@ export interface ArchiveSpecies {
 }
 
 // 性别差异、犬种和同种模型变体在此合并，不重复计算。
-export const ARCHIVE_SPECIES: readonly ArchiveSpecies[] = [
+export const ARCHIVE_SPECIES = [
   { id: 'alpaca', label: '羊驼', habitat: '草原' },
   { id: 'deer', label: '鹿', habitat: '林地' },
   { id: 'donkey', label: '驴', habitat: '家园' },
@@ -36,6 +36,17 @@ export const ARCHIVE_SPECIES: readonly ArchiveSpecies[] = [
   { id: 'rat', label: '鼠', habitat: '家园' },
   { id: 'spider', label: '蜘蛛', habitat: '林地' },
   { id: 'panda', label: '熊猫', habitat: '林地' },
-] as const;
+] as const satisfies readonly ArchiveSpecies[];
 
 export const ARCHIVE_SPECIES_COUNT = ARCHIVE_SPECIES.length;
+export type ArchiveSpeciesId = (typeof ARCHIVE_SPECIES)[number]['id'];
+
+const ARCHIVE_SPECIES_IDS = new Set<string>(ARCHIVE_SPECIES.map((species) => species.id));
+
+export function isArchiveSpeciesId(value: unknown): value is ArchiveSpeciesId {
+  return typeof value === 'string' && ARCHIVE_SPECIES_IDS.has(value);
+}
+
+export function archiveSpeciesById(id: ArchiveSpeciesId) {
+  return ARCHIVE_SPECIES.find((species) => species.id === id);
+}

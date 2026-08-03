@@ -56,6 +56,7 @@ export default function WorldHud({
   warmthSource,
   vitality,
   vitalityLabel,
+  observedSpeciesCount,
   foragePatch,
   forageIngredients,
   cookSite,
@@ -83,6 +84,7 @@ export default function WorldHud({
   warmthSource: string;
   vitality: number;
   vitalityLabel: WorldVitalityLabel;
+  observedSpeciesCount: number;
   foragePatch: WorldForagePatch | null;
   forageIngredients: number;
   cookSite: WorldRestSite | null;
@@ -253,7 +255,7 @@ export default function WorldHud({
           <label><span>体温 · {warmthLabel}</span><b>{Math.round(warmth)}</b></label>
           <i><em style={{ width: `${warmth}%` }} /></i>
         </div>
-        <p>DAY {worldTime.day} · 生态 {ARCHIVE_SPECIES_COUNT} 种 · ALT {telemetry.y.toFixed(1)} M · SPD {telemetry.speed.toFixed(1)}</p>
+        <p>DAY {worldTime.day} · 生态 {observedSpeciesCount} / {ARCHIVE_SPECIES_COUNT} · ALT {telemetry.y.toFixed(1)} M · SPD {telemetry.speed.toFixed(1)}</p>
         <p>{warmthSource} · 苔苔 {COMPANION_BEHAVIOR_LABELS[companionTelemetry.behavior]} · {companionDistance} M</p>
       </div>
     </div>

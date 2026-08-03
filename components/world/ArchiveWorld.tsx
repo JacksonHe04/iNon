@@ -29,6 +29,7 @@ import WorldFieldFeedback from '@/components/world/WorldFieldFeedback';
 import { useArchiveWarmth } from '@/hooks/useArchiveWarmth';
 import { useArchiveVitality } from '@/hooks/useArchiveVitality';
 import ArchiveWorldPanels from '@/components/world/ArchiveWorldPanels';
+import { useArchiveSpeciesJournal } from '@/hooks/useArchiveSpeciesJournal';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -69,6 +70,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const worldClock = useArchiveWorldClock({ owner: data.basic.name, running: worldEnabled });
   const warmth = useArchiveWarmth({ owner: data.basic.name, telemetry, worldTime: worldClock, enabled: worldEnabled });
   const vitality = useArchiveVitality(data.basic.name);
+  const speciesJournal = useArchiveSpeciesJournal(data.basic.name);
   const advanceAfterRest = useCallback(() => {
     worldClock.advance(360);
     warmth.restore();
@@ -123,6 +125,10 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     const timeout = window.setTimeout(() => setLastKeepsake(null), 2400);
     return () => window.clearTimeout(timeout);
   }, [lastKeepsake]);
+
+  useEffect(() => {
+    if (telemetry.canMount || telemetry.mounted) speciesJournal.observe('horse');
+  }, [speciesJournal.observe, telemetry.canMount, telemetry.mounted]);
 
   useEffect(() => {
     const toggleInventory = (event: KeyboardEvent) => {
@@ -207,6 +213,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
             homeExhibits={homeExhibits}
             forageCollectedIds={foraging.collectedIds}
             onFallImpact={vitality.receiveFall}
+            onObserveSpecies={speciesJournal.observe}
           />
         </Canvas>
       </div>
@@ -238,6 +245,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           warmthSource={warmth.source}
           vitality={vitality.value}
           vitalityLabel={vitality.label}
+          observedSpeciesCount={speciesJournal.observedIds.length}
           foragePatch={foraging.nearbyPatch}
           forageIngredients={foraging.ingredients}
           cookSite={foraging.cookSite}
@@ -268,6 +276,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           fieldRouteStageIndex={fieldRoute.stageIndex}
           forageIngredients={foraging.ingredients}
           vitality={vitality.value}
+          observedSpeciesIds={speciesJournal.observedIds}
           onClose={() => setInventoryOpen(false)}
           onRestartRoute={fieldRoute.restart}
           onUseRation={resting.useRation}
@@ -282,6 +291,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
         forageFeedback={foraging.feedback}
         forageIngredients={foraging.ingredients}
         vitalityFeedback={vitality.feedback}
+        lastObservedSpecies={speciesJournal.lastObserved}
       />
     </section>
   );

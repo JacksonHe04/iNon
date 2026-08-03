@@ -11,6 +11,7 @@ import {
   Vector3,
   type BufferGeometry,
 } from 'three';
+import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog';
 
 const BIRD_URL = '/archive-world/quaternius-animals/Bird.glb';
 const BIRD_COUNT = 18;
@@ -21,11 +22,15 @@ interface BirdPart {
 }
 
 export default function ArchiveBirdFlock({
+  enabled,
   playerPosition,
   heightAt,
+  onObserveSpecies,
 }: {
+  enabled: boolean;
   playerPosition: MutableRefObject<Vector3>;
   heightAt: (x: number, z: number) => number;
+  onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
   const gltf = useGLTF(BIRD_URL);
   const meshes = useRef<Array<InstancedMesh | null>>([]);
@@ -44,7 +49,9 @@ export default function ArchiveBirdFlock({
   }, [gltf.scene]);
 
   useFrame(({ clock }) => {
+    if (!enabled) return;
     const player = playerPosition.current;
+    let nearestBirdDistance = Number.POSITIVE_INFINITY;
     const dx = anchor.current.x - player.x;
     const dz = anchor.current.z - player.z;
     if (dx * dx + dz * dz > 170 * 170) {
@@ -60,6 +67,7 @@ export default function ArchiveBirdFlock({
       const z = anchor.current.z + Math.sin(angle) * radius * 0.68;
       const altitude = 18 + lane * 6 + Math.sin(angle * 2.2 + index) * 2.4;
       const y = Math.max(9, heightAt(x, z)) + altitude;
+      nearestBirdDistance = Math.min(nearestBirdDistance, Math.hypot(x - player.x, y - player.y, z - player.z));
       dummy.position.set(x, y, z);
       dummy.rotation.set(
         Math.sin(angle * 2.1 + index) * 0.05,
@@ -74,6 +82,7 @@ export default function ArchiveBirdFlock({
     meshes.current.forEach((mesh) => {
       if (mesh) mesh.instanceMatrix.needsUpdate = true;
     });
+    if (nearestBirdDistance < 38) onObserveSpecies('jay');
   });
 
   return (

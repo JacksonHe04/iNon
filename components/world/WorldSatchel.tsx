@@ -2,7 +2,11 @@
 
 import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
 import type { ArchiveKeepsake } from '@/components/world/archiveKeepsakes';
-import { ARCHIVE_SPECIES, ARCHIVE_SPECIES_COUNT } from '@/components/world/archiveSpeciesCatalog';
+import {
+  ARCHIVE_SPECIES,
+  ARCHIVE_SPECIES_COUNT,
+  type ArchiveSpeciesId,
+} from '@/components/world/archiveSpeciesCatalog';
 import styles from '@/components/world/WorldSatchel.module.css';
 import { FIELD_ROUTE_STAGES } from '@/components/world/archiveFieldRoute';
 
@@ -14,6 +18,7 @@ export default function WorldSatchel({
   fieldRouteStageIndex,
   forageIngredients,
   vitality,
+  observedSpeciesIds,
   onUseRation,
   onRestartRoute,
   onClose,
@@ -23,10 +28,12 @@ export default function WorldSatchel({
   fieldRouteStageIndex: number;
   forageIngredients: number;
   vitality: number;
+  observedSpeciesIds: ArchiveSpeciesId[];
   onUseRation: () => void;
   onRestartRoute: () => void;
   onClose: () => void;
 }) {
+  const observedSpecies = new Set(observedSpeciesIds);
   return (
     <aside className="archive-world-inventory archive-world-satchel" aria-label="随身背包">
       <header>
@@ -82,18 +89,21 @@ export default function WorldSatchel({
       </details>
       <details className={styles.fieldGuide}>
         <summary>
-          <span>FIELD GUIDE / VERIFIED</span>
+          <span>FIELD GUIDE / OBSERVED</span>
           <strong>动物观察册</strong>
-          <b>{ARCHIVE_SPECIES_COUNT} 种生态记录 ＋</b>
+          <b>{observedSpeciesIds.length} / {ARCHIVE_SPECIES_COUNT} 种 ＋</b>
         </summary>
         <div>
           {FIELD_HABITATS.map((habitat, index) => {
             const species = ARCHIVE_SPECIES.filter((record) => record.habitat === habitat);
+            const observed = species.filter((record) => observedSpecies.has(record.id));
             return (
               <section key={habitat}>
                 <span>{String(index + 1).padStart(2, '0')} / {habitat}</span>
-                <strong>{species.length}</strong>
-                <p>{species.map((record) => record.label).join(' · ')}</p>
+                <strong>{observed.length} / {species.length}</strong>
+                <p>{observed.length
+                  ? `${observed.map((record) => record.label).join(' · ')}${observed.length < species.length ? ' · 未识别痕迹' : ''}`
+                  : '尚未在这个栖息地完成目击'}</p>
               </section>
             );
           })}
