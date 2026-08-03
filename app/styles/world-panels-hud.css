@@ -1,0 +1,220 @@
+.archive-world-dossier,
+.archive-world-codex {
+  position: absolute;
+  z-index: 15;
+  color: #213328;
+  background:
+    linear-gradient(rgba(221, 212, 184, 0.96), rgba(204, 198, 166, 0.98)),
+    url("/archive-assets/aged-paper-texture.webp");
+  box-shadow: -24px 0 70px rgba(9, 20, 13, 0.48);
+}
+
+.archive-world-dossier {
+  top: 18px;
+  right: 18px;
+  bottom: 18px;
+  width: min(720px, calc(100vw - 36px));
+  overflow: hidden;
+  border: 1px solid rgba(41, 63, 48, 0.4);
+  transform: rotate(0.18deg);
+}
+
+.archive-world-dossier[data-block-type="music"],
+.archive-world-dossier[data-block-type="movies"] {
+  width: min(1040px, calc(100vw - 36px));
+}
+
+.archive-world-codex {
+  inset: 0;
+  overflow: hidden;
+  background: #6f7b63;
+}
+
+.archive-world-dossier > header,
+.archive-world-codex > header {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  min-height: 88px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid rgba(39, 59, 45, 0.35);
+  padding: 16px 24px;
+  background: rgba(207, 199, 166, 0.92);
+}
+
+.archive-world-codex > header {
+  color: #f1ead5;
+  background: #26382c;
+}
+
+.archive-world-dossier > header p,
+.archive-world-codex > header p,
+.archive-world-dossier > header h2,
+.archive-world-codex > header h2 {
+  margin: 0;
+}
+
+.archive-world-dossier > header h2,
+.archive-world-codex > header h2 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(26px, 3vw, 44px);
+  font-weight: 500;
+}
+
+.archive-world-dossier__content,
+.archive-world-codex__scroll {
+  height: calc(100% - 88px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.archive-world-dossier__content {
+  padding: 26px;
+}
+
+.archive-world-dossier__content > * {
+  max-width: none !important;
+}
+
+.archive-world-codex__scroll {
+  padding: 0 clamp(12px, 3vw, 44px) 80px;
+  background: #6f7b63;
+}
+
+.archive-world-mobile-controls {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: grid;
+  width: 142px;
+  grid-template-columns: repeat(3, 42px);
+  grid-template-rows: repeat(2, 42px);
+  gap: 6px;
+  pointer-events: auto;
+  transform: rotate(-1deg);
+}
+
+.archive-world-mobile-controls button {
+  border: 1px solid rgba(235, 226, 198, 0.48);
+  color: #eee6cf;
+  background:
+    linear-gradient(rgba(31, 52, 39, 0.82), rgba(26, 44, 33, 0.9)),
+    url("/archive-assets/aged-paper-texture.webp");
+  box-shadow: 3px 3px 0 rgba(13, 25, 17, 0.28);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 16px;
+  backdrop-filter: blur(8px);
+  touch-action: none;
+}
+
+.archive-world-mobile-controls button:active {
+  color: #293a2f;
+  background: #d2c38f;
+  transform: translate(2px, 2px);
+}
+
+.archive-world-mobile-controls button:first-child { grid-column: 2; }
+.archive-world-mobile-controls button:nth-child(2) { grid-column: 1; grid-row: 2; }
+.archive-world-mobile-controls button:nth-child(3) { grid-column: 2; grid-row: 2; }
+.archive-world-mobile-controls button:nth-child(4) { grid-column: 3; grid-row: 2; }
+
+.archive-world-minimap {
+  position: absolute;
+  top: 72px;
+  left: 20px;
+  width: 190px;
+  padding: 10px 10px 8px;
+  border: 1px solid rgba(228, 215, 177, 0.38);
+  color: #eee6ce;
+  background:
+    linear-gradient(rgba(31, 49, 37, 0.82), rgba(24, 41, 30, 0.9)),
+    url("/archive-assets/aged-paper-texture.webp");
+  box-shadow: 8px 9px 0 rgba(14, 27, 18, 0.22);
+  transform: rotate(-0.35deg);
+  backdrop-filter: blur(9px);
+  pointer-events: auto;
+}
+
+.archive-world-minimap__heading,
+.archive-world-minimap__coordinates {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.archive-world-minimap__heading span { color: #cfbb77; }
+.archive-world-minimap__heading strong { font-weight: 500; }
+.archive-world-minimap svg { display: block; width: 100%; margin: 4px 0; filter: sepia(0.18) contrast(1.05); }
+.archive-world-minimap svg g[role="button"] { cursor: pointer; }
+.archive-world-minimap__targets {
+  position: absolute;
+  top: 28px;
+  right: 10px;
+  left: 10px;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+.archive-world-minimap__targets button {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  opacity: 1;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+}
+.archive-world-minimap__targets button:focus-visible {
+  outline: 2px solid #f0e3bd;
+  opacity: 0.34;
+}
+.archive-world-minimap__coordinates { justify-content: center; color: rgba(237, 228, 202, 0.62); }
+
+.archive-world-status {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: 218px;
+  border-right: 2px solid #c5ae69;
+  padding: 13px 14px 11px;
+  color: #ede5cd;
+  background: rgba(25, 43, 32, 0.78);
+  box-shadow: -8px 8px 0 rgba(14, 26, 18, 0.22);
+  backdrop-filter: blur(9px);
+  transform: rotate(0.4deg);
+}
+
+.archive-world-status__compass,
+.archive-world-status__bar label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.archive-world-status__compass span,
+.archive-world-status__bar label,
+.archive-world-status p {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.archive-world-status__compass span { color: #c8b46f; }
+.archive-world-status__compass strong { font-family: var(--font-serif), Georgia, serif; font-size: 14px; font-weight: 500; }
+.archive-world-status__bar { margin-top: 10px; }
+.archive-world-status__bar label { color: rgba(237, 229, 205, 0.7); }
+.archive-world-status__bar label b { font-weight: 400; }
+.archive-world-status__bar i { display: block; height: 4px; margin-top: 4px; background: rgba(221, 211, 178, 0.18); }
+.archive-world-status__bar i em { display: block; height: 100%; background: #b69d56; transition: width 180ms linear; }
+.archive-world-status__bar.is-health i em { background: #936b52; }
+.archive-world-status__bar.is-warmth i em { background: #6f8b68; }
+.archive-world-status p { margin: 9px 0 0; color: rgba(235, 225, 197, 0.48); }
