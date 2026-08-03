@@ -1,7 +1,9 @@
 'use client';
 
-import ArchiveMountainExpedition from '@/components/world/ArchiveMountainExpedition';
-import ArchiveTidalCove from '@/components/world/ArchiveTidalCove';
+import { lazy } from 'react';
+
+const ArchiveMountainExpedition = lazy(() => import('@/components/world/ArchiveMountainExpedition'));
+const ArchiveTidalCove = lazy(() => import('@/components/world/ArchiveTidalCove'));
 
 export default function ArchiveWildernessLandmarks({
   mountain,

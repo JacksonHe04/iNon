@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, Suspense, useRef } from 'react';
+import { lazy, memo, Suspense, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import FirstPersonExplorer from '@/components/world/FirstPersonExplorer';
@@ -9,7 +9,6 @@ import QuaterniusGroundCover from '@/components/world/QuaterniusGroundCover';
 import ArchiveWildlife from '@/components/world/ArchiveWildlife';
 import ArchiveBirdFlock from '@/components/world/ArchiveBirdFlock';
 import ArchiveCompanionDog from '@/components/world/ArchiveCompanionDog';
-import ArchiveAquaticLife from '@/components/world/ArchiveAquaticLife';
 import ArchiveOceanLife from '@/components/world/ArchiveOceanLife';
 import ArchivePollinators from '@/components/world/ArchivePollinators';
 import ArchiveCoastalLife from '@/components/world/ArchiveCoastalLife';
@@ -28,6 +27,8 @@ import type { ArchiveGameSceneProps } from '@/components/world/archiveGameTypes'
 import ArchiveWorldLighting from '@/components/world/ArchiveWorldLighting';
 import ArchiveForagePatches from '@/components/world/ArchiveForagePatches';
 import { useArchiveWorldRegions } from '@/components/world/useArchiveWorldRegions';
+
+const ArchiveAquaticLife = lazy(() => import('@/components/world/ArchiveAquaticLife'));
 
 export type {
   ArchiveGameSceneProps,
