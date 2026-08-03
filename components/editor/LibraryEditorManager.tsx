@@ -7,22 +7,19 @@ import {
   BookOpen as BookIcon,
   Gamepad2 as GameIcon,
   Plus,
-  Trash2,
-  ArrowUp,
-  ArrowDown,
   Compass,
   FileEdit,
   Settings,
 } from 'lucide-react';
 import GlassCard from '@/components/GlassCard';
 import LibraryCategoryModal from './LibraryCategoryModal';
+import LibraryItemEditorList from './LibraryItemEditorList';
 import { useSectionSave } from './hooks/useSectionSave';
 import type { LibraryByKind, LibraryItemDTO, LibraryCategoryDTO, LibraryKind, LibrarySubtype } from '@/types';
 import MusicBlock from '@/components/blocks/MusicBlock';
 import MovieBlock from '@/components/blocks/MovieBlock';
 import BookBlock from '@/components/blocks/BookBlock';
 import GameBlock from '@/components/blocks/GameBlock';
-import ImageInput from './ImageInput';
 
 // Safe UUID/ID generator helper
 const generateUUID = () => {
@@ -518,203 +515,32 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
           <div className="space-y-6 animate-fadeIn">
             {activeKind !== 'music' || (categories.length > 0 && selectedCategoryName) ? (
               <>
-                {/* Items List (Strictly isolated by selectedCategoryName for music, or global for others) */}
-                <div className="space-y-4 max-h-[640px] overflow-y-auto pr-1">
-                  {getActiveItems(
-                    activeSubtypeTab === 'work' ? works : activeSubtypeTab === 'creator' ? creators : songs
-                  ).map((item, idx) => (
-                    <div
-                      key={item.id}
-                      className="p-4 rounded-2xl bg-white/30 dark:bg-gray-800/40 border border-white/20 space-y-4 hover:border-teal-500/20 transition"
-                    >
-                      {/* Item Header */}
-                      <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                        <span className="text-xs font-extrabold text-teal-600 dark:text-teal-400">
-                          #{idx + 1} {item.name || '新条目'}
-                        </span>
-
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleMoveItem(activeSubtypeTab, idx, 'up')}
-                            disabled={idx === 0}
-                            className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-white disabled:opacity-30 cursor-pointer"
-                            title="上移"
-                          >
-                            <ArrowUp className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleMoveItem(activeSubtypeTab, idx, 'down')}
-                            disabled={
-                              idx ===
-                              getActiveItems(
-                                activeSubtypeTab === 'work' ? works : activeSubtypeTab === 'creator' ? creators : songs
-                              ).length - 1
-                            }
-                            className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-white disabled:opacity-30 cursor-pointer"
-                            title="下移"
-                          >
-                            <ArrowDown className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteItem(activeSubtypeTab, item.id)}
-                            className="p-1 text-rose-500 hover:bg-rose-500/10 rounded-xl transition cursor-pointer ml-1"
-                            title="删除"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Fields grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Name */}
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                            名称
-                          </label>
-                          <input
-                            type="text"
-                            value={item.name}
-                            onChange={(e) => {
-                              const globalListKey = activeSubtypeTab === 'work' ? 'works' : activeSubtypeTab === 'creator' ? 'creators' : 'songs';
-                              const globalList = (libraryData[activeKind] as any)[globalListKey];
-                              const globalIdx = globalList.findIndex((it: LibraryItemDTO) => it.id === item.id);
-                              if (globalIdx !== -1) {
-                                handleUpdateItemField(activeSubtypeTab, globalIdx, 'name', e.target.value);
-                              }
-                            }}
-                            className="w-full bg-white/50 dark:bg-gray-900/50 border border-white/10 dark:border-gray-800 rounded-xl px-3 py-1.5 text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:border-teal-500"
-                            placeholder="名称"
-                          />
-                        </div>
-
-                        {/* Creator */}
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                            {activeSubtypeTab === 'creator'
-                              ? '所属地区/类型'
-                              : activeKind === 'music'
-                              ? '音乐人'
-                              : activeKind === 'film'
-                              ? '导演/主创'
-                              : activeKind === 'game'
-                              ? '发行/开发商'
-                              : '作者'}
-                          </label>
-                          <input
-                            type="text"
-                            value={item.creator}
-                            onChange={(e) => {
-                              const globalListKey = activeSubtypeTab === 'work' ? 'works' : activeSubtypeTab === 'creator' ? 'creators' : 'songs';
-                              const globalList = (libraryData[activeKind] as any)[globalListKey];
-                              const globalIdx = globalList.findIndex((it: LibraryItemDTO) => it.id === item.id);
-                              if (globalIdx !== -1) {
-                                handleUpdateItemField(activeSubtypeTab, globalIdx, 'creator', e.target.value);
-                              }
-                            }}
-                            className="w-full bg-white/50 dark:bg-gray-900/50 border border-white/10 dark:border-gray-800 rounded-xl px-3 py-1.5 text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:border-teal-500"
-                            placeholder="创作者"
-                          />
-                        </div>
-
-                        {/* Category Dropdown (Only for music) */}
-                        {activeKind === 'music' && (
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                              归属类别
-                            </label>
-                            <select
-                              value={item.categoryName || ''}
-                              onChange={(e) => {
-                                const globalListKey = activeSubtypeTab === 'work' ? 'works' : activeSubtypeTab === 'creator' ? 'creators' : 'songs';
-                                const globalList = (libraryData[activeKind] as any)[globalListKey];
-                                const globalIdx = globalList.findIndex((it: LibraryItemDTO) => it.id === item.id);
-                                if (globalIdx !== -1) {
-                                  handleUpdateItemField(activeSubtypeTab, globalIdx, 'categoryName', e.target.value);
-                              }
-                            }}
-                            className="w-full bg-white/50 dark:bg-gray-900/50 border border-white/10 dark:border-gray-800 rounded-xl px-3 py-1.5 text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:border-teal-500"
-                            >
-                              <option value="">未分类</option>
-                              {categories.map((cat) => (
-                                <option key={cat.id} value={cat.name}>
-                                  {cat.name}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
-
-                        {/* Link */}
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                            跳转链接 (Link)
-                          </label>
-                          <input
-                            type="text"
-                            value={item.link}
-                            onChange={(e) => {
-                              const globalListKey = activeSubtypeTab === 'work' ? 'works' : activeSubtypeTab === 'creator' ? 'creators' : 'songs';
-                              const globalList = (libraryData[activeKind] as any)[globalListKey];
-                              const globalIdx = globalList.findIndex((it: LibraryItemDTO) => it.id === item.id);
-                              if (globalIdx !== -1) {
-                                handleUpdateItemField(activeSubtypeTab, globalIdx, 'link', e.target.value);
-                              }
-                            }}
-                            className="w-full bg-white/50 dark:bg-gray-900/50 border border-white/10 dark:border-gray-800 rounded-xl px-3 py-1.5 text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:border-teal-500"
-                            placeholder="https://..."
-                          />
-                        </div>
-
-                        {/* Image URL with upload & preview */}
-                        <div className="col-span-full">
-                          <ImageInput
-                            label="封面图片链接 (ImageUrl)"
-                            value={item.imageUrl || ''}
-                            disableUpload={true}
-                            onChange={(val) => {
-                              const globalListKey = activeSubtypeTab === 'work' ? 'works' : activeSubtypeTab === 'creator' ? 'creators' : 'songs';
-                              const globalList = (libraryData[activeKind] as any)[globalListKey];
-                              const globalIdx = globalList.findIndex((it: LibraryItemDTO) => it.id === item.id);
-                              if (globalIdx !== -1) {
-                                handleUpdateItemField(activeSubtypeTab, globalIdx, 'imageUrl', val);
-                              }
-                            }}
-                          />
-                        </div>
-
-                        {/* Comment */}
-                        <div className="col-span-full space-y-1">
-                          <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                            短评 / 鉴赏心得
-                          </label>
-                          <textarea
-                            value={item.comment}
-                            onChange={(e) => {
-                              const globalListKey = activeSubtypeTab === 'work' ? 'works' : activeSubtypeTab === 'creator' ? 'creators' : 'songs';
-                              const globalList = (libraryData[activeKind] as any)[globalListKey];
-                              const globalIdx = globalList.findIndex((it: LibraryItemDTO) => it.id === item.id);
-                              if (globalIdx !== -1) {
-                                handleUpdateItemField(activeSubtypeTab, globalIdx, 'comment', e.target.value);
-                              }
-                            }}
-                            rows={3}
-                            className="w-full bg-white/50 dark:bg-gray-900/50 border border-white/10 dark:border-gray-800 rounded-xl px-3 py-1.5 text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:border-teal-500"
-                            placeholder="评论 / 鉴赏心得"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {getActiveItems(
-                    activeSubtypeTab === 'work' ? works : activeSubtypeTab === 'creator' ? creators : songs
-                  ).length === 0 && (
-                    <p className="text-xs text-gray-400 italic text-center py-12 border border-dashed border-white/20 rounded-2xl bg-white/5 dark:bg-black/10 animate-fadeIn">
-                      暂无条目，请点击右上角“添加条目”
-                    </p>
+                <LibraryItemEditorList
+                  categories={categories}
+                  items={getActiveItems(
+                    activeSubtypeTab === 'work'
+                      ? works
+                      : activeSubtypeTab === 'creator'
+                        ? creators
+                        : songs
                   )}
-                </div>
+                  kind={activeKind}
+                  onDelete={handleDeleteItem}
+                  onMove={handleMoveItem}
+                  onUpdate={(id, field, value) => {
+                    const list =
+                      activeSubtypeTab === 'work'
+                        ? works
+                        : activeSubtypeTab === 'creator'
+                          ? creators
+                          : songs;
+                    const index = list.findIndex((item: LibraryItemDTO) => item.id === id);
+                    if (index !== -1) {
+                      handleUpdateItemField(activeSubtypeTab, index, field, value);
+                    }
+                  }}
+                  subtype={activeSubtypeTab}
+                />
               </>
             ) : (
               <p className="text-xs text-gray-400 italic text-center py-12 animate-fadeIn">
