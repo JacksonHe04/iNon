@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+import { InstancedMesh, Matrix4 } from 'three';
 import { InstancedAsset } from '@/components/world/ArchiveAsset';
 import { QUATERNIUS_NATURE_ROOT } from '@/components/world/QuaterniusForest';
 import { archiveHomeGroundTransform } from '@/components/world/archiveHomeGroundMath';
@@ -85,6 +87,10 @@ const PATH_OUTSIDE = transforms([
   [-2, 29, 0.08, 0.78], [0, 31, -0.12, 0.74], [3, 32.5, 0.16, 0.8],
   [6, 33.5, -0.08, 0.76], [9, 34.5, 0.12, 0.8], [12, 35, -0.14, 0.74],
 ]);
+const PATH_SMALL = [...PATH_SMALL_1, ...PATH_SMALL_2, ...PATH_SMALL_3, ...PATH_OUTSIDE];
+const SMALL_STONE_SIZE = [0.78, 0.1, 0.58] as const;
+const THRESHOLD_STONE_SIZE = [1.2, 0.11, 0.52] as const;
+const GATE_STONE_SIZE = [1.38, 0.12, 0.82] as const;
 
 const COASTAL_GROVE_1 = transforms([
   [-20.2, -7.4, 0.22, 0.86], [21.2, 8.4, -0.48, 0.92],
@@ -100,6 +106,33 @@ function natureAsset(file: string, placements: import('three').Matrix4[]) {
   return <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/${file}.gltf`} transforms={placements} />;
 }
 
+function PathStoneInstances({
+  placements,
+  size,
+}: {
+  placements: Matrix4[];
+  size: readonly [number, number, number];
+}) {
+  const mesh = useRef<InstancedMesh>(null);
+  useEffect(() => {
+    const target = mesh.current;
+    if (!target) return;
+    const shape = new Matrix4().makeScale(...size);
+    const matrix = new Matrix4();
+    placements.forEach((placement, index) => {
+      target.setMatrixAt(index, matrix.multiplyMatrices(placement, shape));
+    });
+    target.instanceMatrix.needsUpdate = true;
+    target.computeBoundingSphere();
+  }, [placements, size]);
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, placements.length]} castShadow receiveShadow>
+      <dodecahedronGeometry args={[1, 0]} />
+      <meshStandardMaterial color="#686d58" roughness={1} metalness={0} />
+    </instancedMesh>
+  );
+}
+
 export default function ArchiveHomeEcology() {
   return (
     <group name="layered-coastal-home-ecology">
@@ -112,12 +145,9 @@ export default function ArchiveHomeEcology() {
       {natureAsset('Grass_Wispy_Tall', WISPY_TALL_GRASS)}
       {natureAsset('Plant_1_Big', EDGE_PLANTS_1)}
       {natureAsset('Plant_7_Big', EDGE_PLANTS_7)}
-      {natureAsset('RockPath_Round_Small_1', PATH_SMALL_1)}
-      {natureAsset('RockPath_Round_Small_2', PATH_SMALL_2)}
-      {natureAsset('RockPath_Round_Small_3', PATH_SMALL_3)}
-      {natureAsset('RockPath_Round_Thin', PATH_THRESHOLD)}
-      {natureAsset('RockPath_Round_Wide', PATH_GATE)}
-      {natureAsset('RockPath_Round_Small_2', PATH_OUTSIDE)}
+      <PathStoneInstances placements={PATH_SMALL} size={SMALL_STONE_SIZE} />
+      <PathStoneInstances placements={PATH_THRESHOLD} size={THRESHOLD_STONE_SIZE} />
+      <PathStoneInstances placements={PATH_GATE} size={GATE_STONE_SIZE} />
       {natureAsset('CommonTree_1', COASTAL_GROVE_1)}
       {natureAsset('CommonTree_2', COASTAL_GROVE_2)}
       {natureAsset('TwistedTree_2', COASTAL_GROVE_TWISTED)}
