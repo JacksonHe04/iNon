@@ -103,7 +103,14 @@ const COASTAL_GROVE_TWISTED = transforms([
 ]);
 
 function natureAsset(file: string, placements: import('three').Matrix4[]) {
-  return <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/${file}.gltf`} transforms={placements} />;
+  const castsShadow = file.startsWith('CommonTree') || file.startsWith('TwistedTree');
+  return (
+    <InstancedAsset
+      src={`${QUATERNIUS_NATURE_ROOT}/${file}.gltf`}
+      transforms={placements}
+      castShadow={castsShadow}
+    />
+  );
 }
 
 function PathStoneInstances({

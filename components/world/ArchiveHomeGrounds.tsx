@@ -44,8 +44,8 @@ function GardenPlanting() {
   )), []);
   return (
     <group name="archive-home-garden">
-      <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/Fern_1.gltf`} transforms={ferns} />
-      <InstancedAsset src={`${HOME_GROUNDS_ROOT}/Flowers.glb`} transforms={flowers} tint="#a0aa83" />
+      <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/Fern_1.gltf`} transforms={ferns} castShadow={false} />
+      <InstancedAsset src={`${HOME_GROUNDS_ROOT}/Flowers.glb`} transforms={flowers} tint="#a0aa83" castShadow={false} />
       <PropAsset name="Bucket_Metal" position={[12.7, 0.08, -5.4]} rotation={[0, -0.28, 0]} scale={0.52} />
     </group>
   );

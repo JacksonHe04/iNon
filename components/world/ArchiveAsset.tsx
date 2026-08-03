@@ -61,10 +61,12 @@ export function InstancedAsset({
   src,
   transforms,
   tint = '#a7b29a',
+  castShadow = true,
 }: {
   src: string;
   transforms: Matrix4[];
   tint?: string;
+  castShadow?: boolean;
 }) {
   const { scene } = useGLTF(src);
   const parts = useMemo(() => collectQuaterniusParts(scene, tint), [scene, tint]);
@@ -84,7 +86,7 @@ export function InstancedAsset({
       key={`${src}:${index}`}
       ref={(mesh) => { meshes.current[index] = mesh; }}
       args={[part.geometry, part.material, transforms.length]}
-      castShadow
+      castShadow={castShadow}
       receiveShadow
     />
   ));
