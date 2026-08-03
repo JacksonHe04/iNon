@@ -1,6 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef, useState, type MutableRefObject } from 'react';
+import { useFrame } from '@react-three/fiber';
+import type { Vector3 } from 'three';
 import { CuboidCollider, CylinderCollider, RigidBody } from '@react-three/rapier';
 import ArchiveHomeEcology from '@/components/world/ArchiveHomeEcology';
 import {
@@ -136,8 +138,27 @@ function FadedPool() {
   );
 }
 
-export default function ArchiveHomeGrounds() {
+export default function ArchiveHomeGrounds({
+  playerPosition,
+}: {
+  playerPosition: MutableRefObject<Vector3>;
+}) {
   const fences = useMemo(makeHomeFenceTransforms, []);
+  const distanceToWorkingYard = () => Math.hypot(
+    playerPosition.current.x - (ARCHIVE_HOME_X - 11.5),
+    playerPosition.current.z - (ARCHIVE_HOME_Z - 5),
+  );
+  const [yardMounted, setYardMounted] = useState(() => distanceToWorkingYard() < 28);
+  const yardMountedRef = useRef(yardMounted);
+  const yardFrame = useRef(0);
+  useFrame(() => {
+    yardFrame.current = (yardFrame.current + 1) % 15;
+    if (yardFrame.current !== 0) return;
+    const next = distanceToWorkingYard() < (yardMountedRef.current ? 38 : 28);
+    if (next === yardMountedRef.current) return;
+    yardMountedRef.current = next;
+    setYardMounted(next);
+  });
   return (
     <RigidBody
       type="fixed"
@@ -158,7 +179,7 @@ export default function ArchiveHomeGrounds() {
       ))}
       <GardenPlanting />
       <RepeatedHomeProps />
-      <WorkingYard />
+      {yardMounted && <WorkingYard />}
       <FrontPorchLife />
       <ArchiveHomeEcology />
       <FadedPool />

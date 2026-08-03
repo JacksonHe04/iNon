@@ -193,7 +193,7 @@ function ArchiveGameScene({
           <ArchiveForestColliders playerPosition={playerPosition} destinations={destinations} />
           <Suspense fallback={null}>
             {regions.bridge && <RiverFootbridge />}
-            {regions.home && <ArchiveHomeGrounds />}
+            {regions.home && <ArchiveHomeGrounds playerPosition={playerPosition} />}
             <ArchiveWildernessLandmarks mountain={regions.mountain} tidalCove={regions.tidalCove} />
             {regions.home && (
               <CoastalArchiveHome
