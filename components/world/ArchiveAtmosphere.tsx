@@ -104,6 +104,7 @@ export function WorldKeepsakes({
   const placement = useMemo(() => new Matrix4(), []);
   const collectedSet = useMemo(() => new Set(collected), [collected]);
   const announced = useRef(new Set<string>());
+  const proximityFrame = useRef(0);
 
   useEffect(() => {
     WORLD_KEEPSAKES.forEach(([id, x, z], index) => {
@@ -128,6 +129,8 @@ export function WorldKeepsakes({
 
   useFrame(() => {
     if (!enabled) return;
+    proximityFrame.current = (proximityFrame.current + 1) % 10;
+    if (proximityFrame.current !== 0) return;
     WORLD_KEEPSAKES.forEach(([id, x, z]) => {
       if (collectedSet.has(id) || announced.current.has(id)) return;
       if (Math.hypot(playerPosition.current.x - x, playerPosition.current.z - z) >= 1.65) return;

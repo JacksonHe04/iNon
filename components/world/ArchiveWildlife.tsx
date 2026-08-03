@@ -116,11 +116,8 @@ function AnimatedAnimal({
     }
 
     const player = playerPosition.current;
-    const playerHeight = heightAt(player.x, player.z);
-    const playerBiome = worldBiomeAt(player.x, player.z, playerHeight);
     group.visible = hasWalkableGround.current
-      && animalAppearsInHabitat(config.species, playerBiome)
-      && (playerHeight < 12 || ALPINE_SPECIES.has(config.species));
+      && (player.y < 12 || ALPINE_SPECIES.has(config.species));
     if (!group.visible) return;
     mixer.update(delta);
     const distanceToPlayer = Math.hypot(group.position.x - player.x, group.position.z - player.z);
@@ -240,6 +237,7 @@ export default function ArchiveWildlife({
     biome: worldBiomeAt(playerPosition.current.x, playerPosition.current.z, initialHeight),
   }));
   const streamRef = useRef(stream);
+  const streamFrame = useRef(0);
   const activeAnimals = useMemo(
     () => WORLD_ANIMALS.filter(({ species, offset }) => (
       animalAppearsInHabitat(species, stream.biome)
@@ -248,6 +246,8 @@ export default function ArchiveWildlife({
     [stream],
   );
   useFrame(() => {
+    streamFrame.current = (streamFrame.current + 1) % 12;
+    if (streamFrame.current !== 0) return;
     const player = playerPosition.current;
     const biome = worldBiomeAt(player.x, player.z, heightAt(player.x, player.z));
     const current = streamRef.current;
