@@ -1,0 +1,163 @@
+.archive-block-frame__body {
+  position: relative;
+  z-index: 1;
+}
+
+.archive-block-frame__body::before {
+  position: absolute;
+  z-index: -2;
+  inset: 14px -14px -14px 14px;
+  content: "";
+  pointer-events: none;
+  background: color-mix(in srgb, var(--archive-paper) 72%, var(--archive-forest-surface));
+  opacity: 0.62;
+  transform: rotate(0.7deg);
+}
+
+.archive-block-frame .archive-paper-surface {
+  overflow: visible;
+  border-color: var(--archive-line-strong);
+  background: rgb(var(--archive-paper-rgb) / 0.96);
+  box-shadow: none;
+}
+
+.archive-block-frame .archive-paper-surface::before {
+  opacity: 0.1;
+}
+
+.archive-block-frame[data-archive-tone="forest"] .archive-paper-surface::before,
+.archive-block-frame[data-archive-tone="moss"] .archive-paper-surface::before {
+  opacity: 0.07;
+  mix-blend-mode: screen;
+}
+
+.archive-block-frame .archive-section-heading h3 {
+  overflow: visible;
+  font-size: clamp(24px, 3.2vw, 42px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.archive-block-frame .archive-section-heading__mark {
+  width: 42px;
+  height: 42px;
+}
+
+.archive-block-frame__folio {
+  position: absolute;
+  z-index: 4;
+  top: -29px;
+  left: 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  color: var(--archive-ink);
+  font-family: var(--font-geist-mono), monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.archive-block-frame__folio b {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.archive-block-frame__folio span {
+  font-size: 7px;
+  opacity: 0.76;
+}
+
+.archive-block-frame__annotation {
+  position: absolute;
+  z-index: 5;
+  right: -18px;
+  bottom: -25px;
+  max-width: 210px;
+  padding: 8px 14px 7px;
+  border-bottom: 1px solid currentColor;
+  color: var(--archive-ink);
+  background: color-mix(in srgb, var(--archive-paper-light) 86%, transparent);
+  font-family: "Kaiti SC", STKaiti, KaiTi, var(--font-noto-serif-sc), serif;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  transform: rotate(-2.2deg);
+}
+
+.archive-block-frame__motif {
+  position: absolute;
+  z-index: 3;
+  width: 180px;
+  aspect-ratio: 0.75;
+  pointer-events: none;
+  opacity: 0.84;
+  background-image: url("/archive-assets/ephemera-sheet.png");
+  background-repeat: no-repeat;
+  background-size: 400% 200%;
+  filter: saturate(0.82) contrast(0.98);
+}
+
+.archive-block-frame[data-archive-motif="fern"] .archive-block-frame__motif {
+  top: -86px;
+  right: -62px;
+  width: 210px;
+  background-position: 0 0;
+  transform: rotate(7deg);
+}
+
+.archive-block-frame[data-archive-motif="flower"] .archive-block-frame__motif {
+  top: -72px;
+  right: -50px;
+  width: 190px;
+  background-position: 33.333% 0;
+  transform: rotate(4deg);
+}
+
+.archive-block-frame[data-archive-motif="branch"] .archive-block-frame__motif {
+  top: -112px;
+  right: -88px;
+  width: 230px;
+  background-position: 66.666% 0;
+  transform: rotate(8deg);
+}
+
+.archive-block-frame[data-archive-motif="birds"] .archive-block-frame__motif {
+  top: -72px;
+  right: -54px;
+  width: 190px;
+  background-position: 100% 0;
+}
+
+.archive-block-frame[data-archive-motif="stamp"] .archive-block-frame__motif {
+  right: -42px;
+  bottom: -86px;
+  width: 150px;
+  background-position: 0 100%;
+  transform: rotate(8deg);
+}
+
+.archive-block-frame[data-archive-motif="letter"] .archive-block-frame__motif {
+  right: -58px;
+  bottom: -94px;
+  width: 190px;
+  background-position: 33.333% 100%;
+  transform: rotate(5deg);
+}
+
+.archive-block-frame[data-archive-motif="ochre"] .archive-block-frame__motif {
+  right: -48px;
+  bottom: -88px;
+  width: 180px;
+  background-position: 66.666% 100%;
+  transform: rotate(-4deg);
+}
+
+.archive-block-frame[data-archive-motif="field"] .archive-block-frame__motif {
+  right: -54px;
+  bottom: -84px;
+  width: 190px;
+  background-position: 100% 100%;
+  transform: rotate(3deg);
+}
