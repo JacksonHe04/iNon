@@ -75,7 +75,7 @@ export default function ArchiveWorldLighting({ worldTime }: { worldTime: WorldTi
         position={[-32, 42, 22]}
         intensity={2.6}
         color="#e2d4aa"
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-camera-far={150}
         shadow-camera-left={-75}
         shadow-camera-right={75}

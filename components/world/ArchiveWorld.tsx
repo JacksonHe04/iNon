@@ -172,7 +172,7 @@ export default function ArchiveWorld({ active, data, onModeChange }: ArchiveWorl
         <Canvas
           shadows
           frameloop={active ? 'always' : 'never'}
-          dpr={[1, 1.5]}
+          dpr={[1, 1.35]}
           camera={{ position: [WORLD_PLAYER_SPAWN[0], 3, WORLD_PLAYER_SPAWN[2]], fov: 52, near: 0.1, far: 600 }}
           gl={{ antialias: false, powerPreference: 'high-performance', alpha: false }}
           onCreated={({ gl }) => {
