@@ -23,7 +23,7 @@ import { weatherFragment, weatherVertex } from '@/components/world/archiveWorldS
 
 export function FallingPaperSnow({
   playerPosition,
-  count = 1680,
+  count = 1440,
 }: {
   playerPosition: MutableRefObject<Vector3>;
   count?: number;

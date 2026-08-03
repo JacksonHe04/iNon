@@ -95,7 +95,6 @@ export default function ArchiveBirdFlock({
           key={`${part.geometry.uuid}-${index}`}
           ref={(mesh) => { meshes.current[index] = mesh; }}
           args={[part.geometry, part.material, BIRD_COUNT]}
-          castShadow
           frustumCulled={false}
         />
       ))}
