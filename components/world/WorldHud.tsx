@@ -1,7 +1,6 @@
 'use client';
 
 import type { GameTelemetry } from '@/components/world/ArchiveGameScene';
-import { WORLD_KEEPSAKE_COUNT } from '@/components/world/ArchiveGameScene';
 import { WORLD_WAYPOINTS, type WorldWaypoint } from '@/components/world/archiveWorldConfig';
 import WorldMinimap from '@/components/world/WorldMinimap';
 import { ARCHIVE_SPECIES_COUNT } from '@/components/world/archiveSpeciesCatalog';
@@ -40,10 +39,7 @@ function pulseKey(code: string) {
 }
 
 export default function WorldHud({
-  owner,
   telemetry,
-  keepsakes,
-  soundEnabled,
   companionNearby,
   companionTelemetry,
   fieldRouteStage,
@@ -60,18 +56,13 @@ export default function WorldHud({
   foragePatch,
   forageIngredients,
   cookSite,
-  onOpenInventory,
-  onToggleSound,
   onTalkToCompanion,
   onRest,
   onGather,
   onCook,
   onTravel,
 }: {
-  owner: string;
   telemetry: GameTelemetry;
-  keepsakes: number;
-  soundEnabled: boolean;
   companionNearby: boolean;
   companionTelemetry: CompanionTelemetry;
   fieldRouteStage: FieldRouteStage | null;
@@ -88,8 +79,6 @@ export default function WorldHud({
   foragePatch: WorldForagePatch | null;
   forageIngredients: number;
   cookSite: WorldRestSite | null;
-  onOpenInventory: () => void;
-  onToggleSound: () => void;
   onTalkToCompanion: () => void;
   onRest: () => void;
   onGather: () => void;
@@ -103,35 +92,6 @@ export default function WorldHud({
   ));
   return (
     <div className="archive-world-overlay">
-      <header className="archive-world-gamebar">
-        <div className="archive-world-gamebar__brand">
-          <span>INON / VERDANT FIELD</span>
-          <strong>{owner}</strong>
-        </div>
-        <div className="archive-world-gamebar__mission">
-          <span>当前状态</span>
-          <strong>
-            {companionNearby
-              ? '苔苔在等你说话'
-              : telemetry.flying
-              ? '飞行模式 · 空格上升 · Ctrl 下降'
-              : telemetry.canMount
-              ? '林径马匹就在身旁 · F 骑乘'
-              : telemetry.mounted
-                ? '沿海岸与山脊继续探索'
-                : `散落纸片 ${keepsakes} / ${WORLD_KEEPSAKE_COUNT}`}
-          </strong>
-        </div>
-        <nav aria-label="世界操作">
-          <button onClick={() => {
-            dispatchKey('keydown', 'KeyV');
-            dispatchKey('keyup', 'KeyV');
-          }}>飞行 {telemetry.flying ? 'ON' : 'OFF'} <kbd>V</kbd></button>
-          <button onClick={onToggleSound}>声景 {soundEnabled ? 'ON' : 'OFF'} <kbd>M</kbd></button>
-          <button onClick={onOpenInventory}>背包 <kbd>B</kbd></button>
-        </nav>
-      </header>
-
       <div className="archive-world-hud">
         <div>
           <span>FIELD / LIVE</span>

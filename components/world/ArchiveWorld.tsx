@@ -3,12 +3,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { ACESFilmicToneMapping, SRGBColorSpace, Vector3 } from 'three';
 import type { ReadmeData } from '@/types';
-import type { LayoutConfig } from '@/types/layout';
-import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
 import ArchiveGameScene, { type GameTelemetry, type GameTravelRequest } from '@/components/world/ArchiveGameScene';
 import ArchiveSoundscape from '@/components/world/ArchiveSoundscape';
 import WorldHud from '@/components/world/WorldHud';
-import WorldModeSwitch from '@/components/world/WorldModeSwitch';
 import WorldSatchel from '@/components/world/WorldSatchel';
 import {
   INITIAL_WORLD_TELEMETRY,
@@ -17,7 +14,12 @@ import {
   type WorldWaypoint,
 } from '@/components/world/archiveWorldConfig';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
-import { buildHomeExhibits, type HomeInspectionId } from '@/components/world/archiveHomeRecords';
+import {
+  buildHomeExhibits,
+  exhibitIdFromInspection,
+  type HomeInspectionId,
+  type HomeRecordId,
+} from '@/components/world/archiveHomeRecords';
 import { buildArchiveKeepsakes } from '@/components/world/archiveKeepsakes';
 import { buildWorldDialogueContext, type WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
 import { useArchiveFieldRoute } from '@/hooks/useArchiveFieldRoute';
@@ -28,20 +30,25 @@ import { useArchiveForaging } from '@/hooks/useArchiveForaging';
 import WorldFieldFeedback from '@/components/world/WorldFieldFeedback';
 import { useArchiveWarmth } from '@/hooks/useArchiveWarmth';
 import { useArchiveVitality } from '@/hooks/useArchiveVitality';
-import ArchiveWorldPanels from '@/components/world/ArchiveWorldPanels';
 import { useArchiveSpeciesJournal } from '@/hooks/useArchiveSpeciesJournal';
+import ArchiveHomeRecordPanel from '@/components/world/ArchiveHomeRecordPanel';
+import ArchiveHomeExhibitPanel from '@/components/world/ArchiveHomeExhibitPanel';
+import { useArchiveWorldControls } from '@/hooks/useArchiveWorldControls';
 
 interface ArchiveWorldProps {
+  active: boolean;
   data: ReadmeData;
-  layoutConfig?: LayoutConfig;
+  onModeChange: (
+    mode: ArchiveWorldMode,
+    context?: WorldDialogueContext,
+    persona?: 'owner' | 'companion',
+  ) => void;
 }
-export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) {
-  const [mode, setMode] = useState<ArchiveWorldMode>('world');
+export default function ArchiveWorld({ active, data, onModeChange }: ArchiveWorldProps) {
   const [diagnostics, setDiagnostics] = useState('WebGL initialising');
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [travelRequest, setTravelRequest] = useState<GameTravelRequest | null>(null);
   const [telemetry, setTelemetry] = useState<GameTelemetry>(INITIAL_WORLD_TELEMETRY);
-  const [soundEnabled, setSoundEnabled] = useState(false);
   const [collectedKeepsakes, setCollectedKeepsakes] = useState<string[]>([]);
   const [lastKeepsake, setLastKeepsake] = useState<string | null>(null);
   const [companionNearby, setCompanionNearby] = useState(false);
@@ -51,11 +58,13 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     z: WORLD_PLAYER_SPAWN[2] + 3,
     behavior: 'resting',
   });
-  const [dialoguePersona, setDialoguePersona] = useState<'owner' | 'companion'>('owner');
   const [selectedHomeRecord, setSelectedHomeRecord] = useState<HomeInspectionId | null>(null);
+  const { releasePointerLock, soundEnabled } = useArchiveWorldControls({
+    active,
+    flying: telemetry.flying,
+    setInventoryOpen,
+  });
   const playerPosition = useRef(new Vector3(...WORLD_PLAYER_SPAWN));
-  const dialogueContext = useRef<WorldDialogueContext | null>(null);
-  const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
   const keepsakeStorageKey = `inon-world-keepsakes-${data.basic.name}`;
   const allKeepsakes = useMemo(() => buildArchiveKeepsakes(data), [data]);
   const homeExhibits = useMemo(() => buildHomeExhibits(data), [data]);
@@ -66,7 +75,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     keepsakeCount: recoveredKeepsakes.length,
   });
   const lastRecoveredKeepsake = allKeepsakes.find((record) => record.id === lastKeepsake);
-  const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
+  const worldEnabled = active && !inventoryOpen && !selectedHomeRecord;
   const worldClock = useArchiveWorldClock({ owner: data.basic.name, running: worldEnabled });
   const warmth = useArchiveWarmth({ owner: data.basic.name, telemetry, worldTime: worldClock, enabled: worldEnabled });
   const vitality = useArchiveVitality(data.basic.name);
@@ -131,37 +140,11 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     if (telemetry.canMount || telemetry.mounted) speciesJournal.observe('horse');
   }, [speciesJournal.observe, telemetry.canMount, telemetry.mounted]);
 
-  useEffect(() => {
-    const toggleInventory = (event: KeyboardEvent) => {
-      if (event.code !== 'KeyB' || mode !== 'world') return;
-      setInventoryOpen((open) => !open);
-    };
-    window.addEventListener('keydown', toggleInventory);
-    return () => window.removeEventListener('keydown', toggleInventory);
-  }, [mode]);
-
-  useEffect(() => {
-    const toggleSound = (event: KeyboardEvent) => {
-      if (event.code !== 'KeyM' || event.repeat || mode !== 'world') return;
-      setSoundEnabled((enabled) => !enabled);
-    };
-    window.addEventListener('keydown', toggleSound);
-    return () => window.removeEventListener('keydown', toggleSound);
-  }, [mode]);
-
-  const releasePointerLock = () => {
-    if (document.pointerLockElement) document.exitPointerLock();
-  };
-
   const changeMode = (nextMode: ArchiveWorldMode, persona: 'owner' | 'companion' = 'owner') => {
     releasePointerLock();
     setInventoryOpen(false);
     setSelectedHomeRecord(null);
-    if (nextMode === 'dialogue') {
-      dialogueContext.current = worldDialogueContext;
-      setDialoguePersona(persona);
-    }
-    setMode(nextMode);
+    onModeChange(nextMode, nextMode === 'dialogue' ? worldDialogueContext : undefined, persona);
   };
 
   const travelTo = (waypoint: WorldWaypoint) => {
@@ -180,10 +163,15 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   };
 
   return (
-    <section className={`archive-world is-${mode}`} aria-label="iNon 绿迹开放世界">
-      <div className={`archive-world__canvas ${mode === 'world' ? '' : 'is-inactive'}`} aria-hidden={mode !== 'world'}>
+    <section
+      className={`archive-world is-world ${active ? 'is-active' : 'is-background'}`}
+      aria-label="iNon 绿迹开放世界"
+      aria-hidden={!active}
+    >
+      <div className="archive-world__canvas">
         <Canvas
           shadows
+          frameloop={active ? 'always' : 'never'}
           dpr={[1, 1.5]}
           camera={{ position: [WORLD_PLAYER_SPAWN[0], 3, WORLD_PLAYER_SPAWN[2]], fov: 52, near: 0.1, far: 600 }}
           gl={{ antialias: false, powerPreference: 'high-performance', alpha: false }}
@@ -225,15 +213,11 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
       </output>
       <div className="archive-world__grain" aria-hidden="true" />
       <div className="archive-world__vignette" aria-hidden="true" />
-      <ArchiveSoundscape enabled={soundEnabled} active={mode === 'world'} telemetry={telemetry} />
-      <WorldModeSwitch mode={mode} onChange={changeMode} />
+      <ArchiveSoundscape enabled={soundEnabled} active={active} telemetry={telemetry} />
 
-      {mode === 'world' && !selectedHomeRecord && (
+      {active && !selectedHomeRecord && (
         <WorldHud
-          owner={data.basic.name}
           telemetry={telemetry}
-          keepsakes={recoveredKeepsakes.length}
-          soundEnabled={soundEnabled}
           companionNearby={companionNearby}
           companionTelemetry={companionTelemetry}
           fieldRouteStage={fieldRoute.stage}
@@ -253,22 +237,28 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           onRest={resting.rest}
           onGather={foraging.gather}
           onCook={foraging.cook}
-          onToggleSound={() => setSoundEnabled((enabled) => !enabled)}
-          onOpenInventory={() => {
-            releasePointerLock();
-            setInventoryOpen(true);
-          }}
           onTravel={travelTo}
           onTalkToCompanion={() => changeMode('dialogue', 'companion')}
         />
       )}
 
-      <ArchiveWorldPanels
-        mode={mode} data={data} layoutConfig={config} dialoguePersona={dialoguePersona}
-        dialogueContext={dialogueContext.current ?? worldDialogueContext}
-        homeSelection={selectedHomeRecord} homeExhibits={homeExhibits}
-        onCloseHome={() => setSelectedHomeRecord(null)}
-      />
+      {active && selectedHomeRecord && (() => {
+        const exhibitId = exhibitIdFromInspection(selectedHomeRecord);
+        const exhibit = exhibitId ? homeExhibits.find((item) => item.id === exhibitId) : null;
+        if (exhibit) {
+          return <ArchiveHomeExhibitPanel exhibit={exhibit} onClose={() => setSelectedHomeRecord(null)} />;
+        }
+        if (!exhibitId) {
+          return (
+            <ArchiveHomeRecordPanel
+              data={data}
+              recordId={selectedHomeRecord as HomeRecordId}
+              onClose={() => setSelectedHomeRecord(null)}
+            />
+          );
+        }
+        return null;
+      })()}
 
       {inventoryOpen && (
         <WorldSatchel
@@ -285,7 +275,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
       )}
 
       <WorldFieldFeedback
-        active={mode === 'world'}
+        active={active}
         lastKeepsake={lastRecoveredKeepsake}
         keepsakeCount={collectedKeepsakes.length}
         restFeedback={resting.feedback}

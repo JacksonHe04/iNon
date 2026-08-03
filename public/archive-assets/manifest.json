@@ -20,6 +20,18 @@
       "kind": "generated-original",
       "purpose": "decorative botanical and archival overlays",
       "source": "OpenAI image generation with local chroma-key extraction"
+    },
+    {
+      "file": "weathered-wood-fiber-v1.webp",
+      "kind": "generated-original",
+      "purpose": "animated low-contrast wood and paper fiber atmosphere",
+      "source": "OpenAI image generation"
+    },
+    {
+      "file": "archive-relics-sheet-v1.webp",
+      "kind": "generated-original",
+      "purpose": "twelve-object archival relic and drifting debris sprite sheet",
+      "source": "OpenAI image generation with local chroma-key extraction"
     }
   ]
 }

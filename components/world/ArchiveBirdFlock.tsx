@@ -99,5 +99,3 @@ export default function ArchiveBirdFlock({
     </group>
   );
 }
-
-useGLTF.preload(BIRD_URL);

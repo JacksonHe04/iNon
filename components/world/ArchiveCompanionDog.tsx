@@ -209,5 +209,3 @@ export default function ArchiveCompanionDog({
     </group>
   );
 }
-
-useGLTF.preload(DOG_URL);

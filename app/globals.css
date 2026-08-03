@@ -1,4 +1,6 @@
 @import "../components/world/archive-home.css";
+
+/* Public profile atmosphere and optimized WebP assets are declared near the end. */
 @import "tailwindcss";
 
 :root {
@@ -886,21 +888,56 @@ select:focus-visible,
   --theme-primary: #c2c69f;
   --theme-primary-hover: #f2ead6;
   color: var(--archive-ink);
-  background: var(--archive-forest-surface) !important;
-  box-shadow: none;
+  border-color: rgba(242, 234, 214, 0.18) !important;
+  background: rgba(24, 36, 27, 0.58) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 12px 36px rgba(9, 18, 12, 0.14);
+  -webkit-backdrop-filter: blur(22px) saturate(118%);
+  backdrop-filter: blur(22px) saturate(118%);
 }
 
 .archive-top-nav::before {
   position: absolute;
-  top: 0;
-  right: 18%;
-  width: 34%;
-  height: 100%;
+  inset: 0;
   content: "";
   pointer-events: none;
-  opacity: 0.15;
-  background: url("/archive-assets/aged-paper-texture.webp") center / 520px auto;
-  mix-blend-mode: screen;
+  background: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.018) 42%,
+    rgba(255, 255, 255, 0.045)
+  );
+}
+
+.archive-userinfo-menu {
+  color: var(--archive-ink);
+}
+
+.archive-userinfo-item {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--archive-line);
+  color: inherit;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.78rem;
+  text-align: left;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.archive-userinfo-item:last-child {
+  border-bottom: 0;
+}
+
+.archive-userinfo-item:hover,
+.archive-userinfo-item:focus-visible {
+  color: var(--archive-paper);
+  background: rgb(242 234 214 / 0.08);
+  outline: none;
 }
 
 .archive-side-nav,
@@ -1411,17 +1448,6 @@ select:focus-visible,
   background: url("/archive-assets/ephemera-sheet.png") 66.666% 0 / 400% 200% no-repeat;
 }
 
-.archive-admin-nav {
-  --archive-ink: #f2ead6;
-  --archive-muted: #d4d2bb;
-  --archive-umber: #ece4cf;
-  --archive-paper-light: #d8d5bd;
-  --archive-line: rgba(242, 234, 214, 0.2);
-  --archive-line-strong: rgba(242, 234, 214, 0.4);
-  color: var(--archive-ink);
-  background: var(--archive-forest-surface) !important;
-}
-
 .archive-upload-zone {
   --archive-ink: #f2ead6;
   --archive-muted: #d4d2bb;
@@ -1622,6 +1648,31 @@ select:focus-visible,
 /* Verdant Archive — explorable public world                                  */
 /* -------------------------------------------------------------------------- */
 
+.public-experience {
+  position: fixed;
+  z-index: 30;
+  inset: 4rem 0 0;
+  overflow: hidden;
+  background: #6f7b63;
+  isolation: isolate;
+}
+
+.public-experience > .archive-world {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+}
+
+.public-experience > .archive-world.is-background {
+  pointer-events: none;
+}
+
+.public-experience > .archive-world-loading {
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+}
+
 .archive-world,
 .archive-world-loading {
   position: fixed;
@@ -1640,7 +1691,7 @@ body:has(.archive-world) .archive-side-nav {
   display: none !important;
 }
 
-body:has(.archive-world) .archive-top-nav {
+body:has(.public-experience) .archive-side-nav {
   display: none !important;
 }
 
@@ -1648,88 +1699,6 @@ body:has(.archive-world) .archive-world,
 body:has(.archive-world) .archive-world-loading {
   top: 0;
 }
-
-.archive-world-gamebar {
-  position: absolute;
-  z-index: 5;
-  top: 0;
-  right: 0;
-  left: 0;
-  display: grid;
-  min-height: 54px;
-  grid-template-columns: minmax(190px, 0.7fr) minmax(280px, 1.4fr) minmax(300px, 0.9fr);
-  align-items: stretch;
-  border-bottom: 1px solid rgba(218, 205, 164, 0.32);
-  color: #ece4cb;
-  background:
-    linear-gradient(90deg, rgba(21, 37, 27, 0.97), rgba(38, 56, 42, 0.91) 52%, rgba(20, 35, 26, 0.97)),
-    url("/archive-assets/aged-paper-texture.webp");
-  box-shadow: 0 8px 28px rgba(11, 21, 14, 0.2);
-  pointer-events: auto;
-}
-
-.archive-world-gamebar__brand,
-.archive-world-gamebar__mission {
-  display: flex;
-  min-width: 0;
-  align-items: baseline;
-  gap: 12px;
-  border-right: 1px solid rgba(226, 215, 181, 0.16);
-  padding: 10px 18px;
-}
-
-.archive-world-gamebar__brand span,
-.archive-world-gamebar__mission span {
-  flex: none;
-  color: #bca768;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 7px;
-  letter-spacing: 0.14em;
-}
-
-.archive-world-gamebar__brand strong,
-.archive-world-gamebar__mission strong {
-  overflow: hidden;
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: 13px;
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.archive-world-gamebar__mission {
-  justify-content: center;
-}
-
-.archive-world-gamebar nav {
-  display: flex;
-  align-items: stretch;
-  justify-content: flex-end;
-}
-
-.archive-world-gamebar nav button {
-  border: 0;
-  border-left: 1px solid rgba(226, 215, 181, 0.16);
-  padding: 0 17px;
-  color: rgba(239, 231, 206, 0.82);
-  background: transparent;
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: 11px;
-  transition: color 160ms ease, background-color 160ms ease;
-}
-
-.archive-world-gamebar nav button:hover {
-  color: #26382c;
-  background: #cabc8c;
-}
-
-.archive-world-gamebar kbd {
-  margin-left: 5px;
-  color: #c5af6c;
-  font: inherit;
-}
-
-.archive-world-gamebar nav button:hover kbd { color: #3c4b3e; }
 
 .archive-world__canvas,
 .archive-world__canvas > div,
@@ -1777,23 +1746,20 @@ body:has(.archive-world) .archive-world-loading {
   100% { transform: translate3d(-1.5%, -1%, 0); filter: contrast(112%); }
 }
 
-.archive-world-mode-switch {
-  position: absolute;
-  z-index: 24;
-  top: 7px;
-  left: 50%;
+.archive-topnav-mode-switch {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(3, minmax(74px, 1fr));
-  border: 1px solid rgba(224, 211, 173, 0.34);
+  overflow: hidden;
+  border: 1px solid rgba(242, 234, 214, 0.2);
+  border-radius: 12px;
   padding: 3px;
-  background:
-    linear-gradient(90deg, rgba(22, 39, 29, 0.96), rgba(53, 67, 49, 0.94)),
-    url("/archive-assets/aged-paper-texture.webp");
-  box-shadow: 0 8px 28px rgba(9, 21, 13, 0.3);
-  transform: translateX(-50%);
+  background: rgba(242, 234, 214, 0.055);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
-.archive-world-mode-switch button {
+.archive-topnav-mode-switch button {
   display: grid;
   min-height: 38px;
   align-content: center;
@@ -1802,18 +1768,41 @@ body:has(.archive-world) .archive-world-loading {
   color: rgba(239, 231, 207, 0.64);
   background: transparent;
   font-family: var(--font-serif), Georgia, serif;
+  transition: color 180ms ease, background-color 180ms ease;
 }
 
-.archive-world-mode-switch button + button {
+.archive-topnav-mode-switch button + button {
   border-left: 1px solid rgba(225, 213, 179, 0.14);
 }
 
-.archive-world-mode-switch button span { font-size: 12px; }
-.archive-world-mode-switch button small { color: #bda96c; font: 6px/1.2 var(--font-mono), monospace; letter-spacing: 0.16em; }
-.archive-world-mode-switch button.is-active { color: #223329; background: #c9bd91; }
-.archive-world-mode-switch button.is-active small { color: #59654e; }
-.archive-world-gamebar { grid-template-columns: minmax(280px, 1fr) minmax(180px, 1fr); }
-.archive-world-gamebar__mission { display: none; }
+.archive-topnav-mode-switch button span { font-size: 12px; }
+.archive-topnav-mode-switch button small { color: #bda96c; font: 6px/1.2 var(--font-mono), monospace; letter-spacing: 0.16em; }
+.archive-topnav-mode-switch button:hover { color: var(--archive-ink); background: rgba(242, 234, 214, 0.07); }
+.archive-topnav-mode-switch button.is-active { color: var(--archive-ink); background: rgba(242, 234, 214, 0.16); }
+.archive-topnav-mode-switch button.is-active small { color: #d8c98f; }
+
+.archive-topnav-world-controls {
+  display: flex;
+  height: 36px;
+  align-items: stretch;
+  border: 1px solid var(--archive-line-strong);
+}
+
+.archive-topnav-world-controls button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  border-left: 1px solid var(--archive-line);
+  padding: 0 9px;
+  color: var(--archive-ink);
+  background: transparent;
+  font: 10px/1 var(--font-serif), Georgia, serif;
+}
+
+.archive-topnav-world-controls button:first-child { border-left: 0; }
+.archive-topnav-world-controls button:hover { color: #24362a; background: #c9bd91; }
+.archive-topnav-world-controls small { color: #c5af6c; font: 7px/1 var(--font-mono), monospace; }
 
 .archive-world-dialogue {
   position: absolute;
@@ -3053,11 +3042,14 @@ body:has(.archive-world) .archive-world-loading {
 }
 
 @media (max-width: 768px) {
-  .archive-world-gamebar { min-height: 46px; grid-template-columns: 1fr auto; }
-  .archive-world-gamebar__brand { padding: 8px 12px; }
-  .archive-world-gamebar__mission { display: none; }
-  .archive-world-gamebar nav button { padding: 0 9px; font-size: 8px; }
-  .archive-world-gamebar nav button:nth-child(2) { display: none; }
+  .archive-topnav-mode-switch { grid-template-columns: repeat(3, 48px); padding: 2px; }
+  .archive-topnav-mode-switch button { min-height: 36px; padding: 3px 6px; }
+  .archive-topnav-mode-switch button span { font-size: 10px; }
+  .archive-topnav-mode-switch button small { display: none; }
+  .archive-nav-actions.is-experience .archive-nav-global-control { display: none; }
+  .archive-topnav-world-controls button { width: 32px; justify-content: center; padding: 0; }
+  .archive-topnav-world-controls button span,
+  .archive-topnav-world-controls button small { display: none; }
   .archive-world-minimap { top: 58px; }
   .archive-world-hud { top: 58px; left: 156px; }
   .archive-interior-world__header { top: 12px; right: 12px; left: 12px; }
@@ -3085,5 +3077,158 @@ body:has(.archive-world) .archive-world-loading {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* Public archive atmosphere — a gently moving, weathered specimen table. */
+.public-experience > .archive-atmosphere--profile {
+  position: absolute;
+  z-index: 1;
+  background:
+    radial-gradient(circle at 28% 16%, rgba(194, 198, 159, 0.2), transparent 34%),
+    linear-gradient(112deg, #7f8974 0%, #68745f 45%, #56644f 100%);
+}
+
+.archive-atmosphere--profile .archive-atmosphere__landscape {
+  height: 70%;
+  opacity: 0.11;
+  filter: saturate(0.54) contrast(0.88) sepia(0.22);
+  animation: archive-landscape-breathe 22s ease-in-out infinite alternate;
+}
+
+.archive-atmosphere__wood {
+  position: absolute;
+  inset: -5%;
+  opacity: 0.34;
+  background: url("/archive-assets/weathered-wood-fiber-v1.webp") center / 780px auto repeat;
+  filter: contrast(0.82) saturate(0.72);
+  mix-blend-mode: multiply;
+  animation: archive-material-drift 38s steps(12, end) infinite alternate;
+}
+
+.archive-atmosphere--profile .archive-atmosphere__paper {
+  opacity: 0.18;
+  background-size: 590px auto;
+  animation: archive-paper-shiver 14s steps(8, end) infinite alternate;
+}
+
+.archive-atmosphere--profile .archive-atmosphere__grain {
+  opacity: 0.1;
+  background-size: 145px 145px;
+  animation: archive-grain-flicker 5.8s steps(5, end) infinite;
+}
+
+.archive-atmosphere__dust {
+  position: absolute;
+  inset: -18% -8%;
+  opacity: 0.42;
+  background-image:
+    radial-gradient(circle at 8% 18%, rgba(235, 225, 193, 0.36) 0 0.8px, transparent 1.5px),
+    radial-gradient(circle at 34% 72%, rgba(44, 55, 43, 0.34) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 72% 24%, rgba(226, 211, 173, 0.3) 0 0.7px, transparent 1.4px),
+    radial-gradient(circle at 91% 67%, rgba(42, 54, 41, 0.28) 0 1.2px, transparent 2px);
+  background-size: 83px 97px, 131px 109px, 157px 137px, 191px 173px;
+  animation: archive-dust-drift 44s linear infinite;
+}
+
+.archive-atmosphere__relics {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.archive-relic {
+  --relic-rotation: 0deg;
+  --relic-drift-x: 10px;
+  --relic-drift-y: -18px;
+  position: absolute;
+  display: block;
+  width: clamp(62px, 8vw, 132px);
+  aspect-ratio: 1;
+  opacity: 0.24;
+  background-image: url("/archive-assets/archive-relics-sheet-v1.webp");
+  background-repeat: no-repeat;
+  background-size: 400% 300%;
+  filter: saturate(0.58) sepia(0.18) contrast(0.9);
+  mix-blend-mode: multiply;
+  will-change: transform;
+  animation: archive-relic-float 28s ease-in-out infinite;
+}
+
+.archive-relic[data-relic="ginkgo"] { top: 8%; left: 3%; width: clamp(110px, 15vw, 230px); background-position: 0 0; --relic-rotation: -13deg; --relic-drift-x: 16px; --relic-drift-y: 22px; animation-duration: 34s; }
+.archive-relic[data-relic="oak"] { top: 32%; right: 2%; width: clamp(100px, 13vw, 200px); background-position: 33.333% 0; --relic-rotation: 16deg; --relic-drift-x: -14px; animation-duration: 31s; animation-delay: -12s; }
+.archive-relic[data-relic="pods"] { bottom: 1%; left: 12%; width: clamp(92px, 12vw, 186px); background-position: 66.667% 0; --relic-rotation: -22deg; --relic-drift-y: -26px; animation-duration: 37s; animation-delay: -8s; }
+.archive-relic[data-relic="moth"] { top: 18%; right: 24%; width: clamp(42px, 5vw, 78px); background-position: 100% 0; --relic-rotation: 5deg; --relic-drift-x: -28px; --relic-drift-y: 16px; animation-duration: 24s; animation-delay: -17s; }
+.archive-relic[data-relic="ticket"] { top: 58%; left: 1%; background-position: 0 50%; --relic-rotation: 9deg; animation-delay: -6s; }
+.archive-relic[data-relic="film"] { top: 74%; right: 6%; width: clamp(82px, 10vw, 160px); background-position: 33.333% 50%; --relic-rotation: -8deg; --relic-drift-x: -18px; animation-duration: 33s; animation-delay: -21s; }
+.archive-relic[data-relic="key"] { top: 43%; left: 17%; width: clamp(48px, 6vw, 92px); background-position: 66.667% 50%; --relic-rotation: 18deg; --relic-drift-y: 19px; animation-duration: 36s; animation-delay: -26s; }
+.archive-relic[data-relic="thread"] { bottom: 10%; right: 28%; width: clamp(48px, 5vw, 84px); background-position: 100% 50%; --relic-rotation: -4deg; animation-duration: 30s; animation-delay: -9s; }
+.archive-relic[data-relic="wax"] { top: 9%; left: 42%; width: clamp(48px, 6vw, 94px); background-position: 0 100%; --relic-rotation: -17deg; --relic-drift-x: 22px; animation-duration: 32s; animation-delay: -23s; }
+.archive-relic[data-relic="map"] { bottom: -2%; right: 42%; width: clamp(92px, 11vw, 170px); background-position: 33.333% 100%; --relic-rotation: 11deg; --relic-drift-y: -16px; animation-duration: 39s; animation-delay: -14s; }
+.archive-relic[data-relic="label"] { top: 52%; right: 15%; width: clamp(70px, 8vw, 126px); background-position: 66.667% 100%; --relic-rotation: -10deg; animation-duration: 29s; animation-delay: -4s; }
+.archive-relic[data-relic="envelope"] { top: 27%; left: 31%; width: clamp(70px, 9vw, 138px); background-position: 100% 100%; --relic-rotation: 8deg; --relic-drift-x: -16px; animation-duration: 35s; animation-delay: -19s; }
+
+.public-experience .archive-world-codex--mode,
+.public-experience .archive-world-codex__scroll {
+  background: transparent;
+}
+
+.public-experience .archive-world-codex--mode {
+  box-shadow: none;
+}
+
+.public-experience .archive-world-codex__scroll {
+  background-color: rgb(111 123 99 / 0.32);
+}
+
+@keyframes archive-grain-flicker {
+  0%, 100% { opacity: 0.08; transform: translate3d(0, 0, 0); }
+  38% { opacity: 0.14; transform: translate3d(-0.6%, 0.4%, 0); }
+  71% { opacity: 0.1; transform: translate3d(0.5%, -0.45%, 0); }
+}
+
+@keyframes archive-paper-shiver {
+  from { background-position: 0 0; filter: contrast(0.98); }
+  to { background-position: 17px -11px; filter: contrast(1.04); }
+}
+
+@keyframes archive-material-drift {
+  from { transform: translate3d(-1.2%, -0.8%, 0) scale(1.02); }
+  to { transform: translate3d(1.1%, 0.9%, 0) scale(1.035); }
+}
+
+@keyframes archive-dust-drift {
+  from { transform: translate3d(0, 4%, 0) rotate(0.001deg); }
+  to { transform: translate3d(-3%, -8%, 0) rotate(0.001deg); }
+}
+
+@keyframes archive-relic-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--relic-rotation)); }
+  50% { transform: translate3d(var(--relic-drift-x), var(--relic-drift-y), 0) rotate(calc(var(--relic-rotation) + 2deg)); }
+}
+
+@keyframes archive-landscape-breathe {
+  from { opacity: 0.08; transform: scale(1.015); }
+  to { opacity: 0.14; transform: scale(1.045); }
+}
+
+@media (max-width: 720px) {
+  .archive-atmosphere__wood { opacity: 0.27; background-size: 560px auto; }
+  .archive-atmosphere__dust { opacity: 0.3; }
+  .archive-relic { opacity: 0.18; }
+  .archive-relic[data-relic="key"],
+  .archive-relic[data-relic="thread"],
+  .archive-relic[data-relic="wax"],
+  .archive-relic[data-relic="label"] { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-atmosphere--profile .archive-atmosphere__landscape,
+  .archive-atmosphere--profile .archive-atmosphere__paper,
+  .archive-atmosphere--profile .archive-atmosphere__grain,
+  .archive-atmosphere__wood,
+  .archive-atmosphere__dust,
+  .archive-relic {
+    animation: none !important;
   }
 }
