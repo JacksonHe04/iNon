@@ -1,0 +1,152 @@
+/* Public archive atmosphere — a gently moving, weathered specimen table. */
+.public-experience > .archive-atmosphere--profile {
+  position: absolute;
+  z-index: 1;
+  background:
+    radial-gradient(circle at 28% 16%, rgba(194, 198, 159, 0.2), transparent 34%),
+    linear-gradient(112deg, #7f8974 0%, #68745f 45%, #56644f 100%);
+}
+
+.archive-atmosphere--profile .archive-atmosphere__landscape {
+  height: 70%;
+  opacity: 0.11;
+  filter: saturate(0.54) contrast(0.88) sepia(0.22);
+  animation: archive-landscape-breathe 22s ease-in-out infinite alternate;
+}
+
+.archive-atmosphere__wood {
+  position: absolute;
+  inset: -5%;
+  opacity: 0.34;
+  background: url("/archive-assets/weathered-wood-fiber-v1.webp") center / 780px auto repeat;
+  filter: contrast(0.82) saturate(0.72);
+  mix-blend-mode: multiply;
+  animation: archive-material-drift 38s steps(12, end) infinite alternate;
+}
+
+.archive-atmosphere--profile .archive-atmosphere__paper {
+  opacity: 0.18;
+  background-size: 590px auto;
+  animation: archive-paper-shiver 14s steps(8, end) infinite alternate;
+}
+
+.archive-atmosphere--profile .archive-atmosphere__grain {
+  opacity: 0.1;
+  background-size: 145px 145px;
+  animation: archive-grain-flicker 5.8s steps(5, end) infinite;
+}
+
+.archive-atmosphere__dust {
+  position: absolute;
+  inset: -18% -8%;
+  opacity: 0.42;
+  background-image:
+    radial-gradient(circle at 8% 18%, rgba(235, 225, 193, 0.36) 0 0.8px, transparent 1.5px),
+    radial-gradient(circle at 34% 72%, rgba(44, 55, 43, 0.34) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 72% 24%, rgba(226, 211, 173, 0.3) 0 0.7px, transparent 1.4px),
+    radial-gradient(circle at 91% 67%, rgba(42, 54, 41, 0.28) 0 1.2px, transparent 2px);
+  background-size: 83px 97px, 131px 109px, 157px 137px, 191px 173px;
+  animation: archive-dust-drift 44s linear infinite;
+}
+
+.archive-atmosphere__relics {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.archive-relic {
+  --relic-rotation: 0deg;
+  --relic-drift-x: 10px;
+  --relic-drift-y: -18px;
+  position: absolute;
+  display: block;
+  width: clamp(62px, 8vw, 132px);
+  aspect-ratio: 1;
+  opacity: 0.24;
+  background-image: url("/archive-assets/archive-relics-sheet-v1.webp");
+  background-repeat: no-repeat;
+  background-size: 400% 300%;
+  filter: saturate(0.58) sepia(0.18) contrast(0.9);
+  mix-blend-mode: multiply;
+  will-change: transform;
+  animation: archive-relic-float 28s ease-in-out infinite;
+}
+
+.archive-relic[data-relic="ginkgo"] { top: 8%; left: 3%; width: clamp(110px, 15vw, 230px); background-position: 0 0; --relic-rotation: -13deg; --relic-drift-x: 16px; --relic-drift-y: 22px; animation-duration: 34s; }
+.archive-relic[data-relic="oak"] { top: 32%; right: 2%; width: clamp(100px, 13vw, 200px); background-position: 33.333% 0; --relic-rotation: 16deg; --relic-drift-x: -14px; animation-duration: 31s; animation-delay: -12s; }
+.archive-relic[data-relic="pods"] { bottom: 1%; left: 12%; width: clamp(92px, 12vw, 186px); background-position: 66.667% 0; --relic-rotation: -22deg; --relic-drift-y: -26px; animation-duration: 37s; animation-delay: -8s; }
+.archive-relic[data-relic="moth"] { top: 18%; right: 24%; width: clamp(42px, 5vw, 78px); background-position: 100% 0; --relic-rotation: 5deg; --relic-drift-x: -28px; --relic-drift-y: 16px; animation-duration: 24s; animation-delay: -17s; }
+.archive-relic[data-relic="ticket"] { top: 58%; left: 1%; background-position: 0 50%; --relic-rotation: 9deg; animation-delay: -6s; }
+.archive-relic[data-relic="film"] { top: 74%; right: 6%; width: clamp(82px, 10vw, 160px); background-position: 33.333% 50%; --relic-rotation: -8deg; --relic-drift-x: -18px; animation-duration: 33s; animation-delay: -21s; }
+.archive-relic[data-relic="key"] { top: 43%; left: 17%; width: clamp(48px, 6vw, 92px); background-position: 66.667% 50%; --relic-rotation: 18deg; --relic-drift-y: 19px; animation-duration: 36s; animation-delay: -26s; }
+.archive-relic[data-relic="thread"] { bottom: 10%; right: 28%; width: clamp(48px, 5vw, 84px); background-position: 100% 50%; --relic-rotation: -4deg; animation-duration: 30s; animation-delay: -9s; }
+.archive-relic[data-relic="wax"] { top: 9%; left: 42%; width: clamp(48px, 6vw, 94px); background-position: 0 100%; --relic-rotation: -17deg; --relic-drift-x: 22px; animation-duration: 32s; animation-delay: -23s; }
+.archive-relic[data-relic="map"] { bottom: -2%; right: 42%; width: clamp(92px, 11vw, 170px); background-position: 33.333% 100%; --relic-rotation: 11deg; --relic-drift-y: -16px; animation-duration: 39s; animation-delay: -14s; }
+.archive-relic[data-relic="label"] { top: 52%; right: 15%; width: clamp(70px, 8vw, 126px); background-position: 66.667% 100%; --relic-rotation: -10deg; animation-duration: 29s; animation-delay: -4s; }
+.archive-relic[data-relic="envelope"] { top: 27%; left: 31%; width: clamp(70px, 9vw, 138px); background-position: 100% 100%; --relic-rotation: 8deg; --relic-drift-x: -16px; animation-duration: 35s; animation-delay: -19s; }
+
+.public-experience .archive-world-codex--mode,
+.public-experience .archive-world-codex__scroll {
+  background: transparent;
+}
+
+.public-experience .archive-world-codex--mode {
+  box-shadow: none;
+}
+
+.public-experience .archive-world-codex__scroll {
+  background-color: rgb(111 123 99 / 0.32);
+}
+
+@keyframes archive-grain-flicker {
+  0%, 100% { opacity: 0.08; transform: translate3d(0, 0, 0); }
+  38% { opacity: 0.14; transform: translate3d(-0.6%, 0.4%, 0); }
+  71% { opacity: 0.1; transform: translate3d(0.5%, -0.45%, 0); }
+}
+
+@keyframes archive-paper-shiver {
+  from { background-position: 0 0; filter: contrast(0.98); }
+  to { background-position: 17px -11px; filter: contrast(1.04); }
+}
+
+@keyframes archive-material-drift {
+  from { transform: translate3d(-1.2%, -0.8%, 0) scale(1.02); }
+  to { transform: translate3d(1.1%, 0.9%, 0) scale(1.035); }
+}
+
+@keyframes archive-dust-drift {
+  from { transform: translate3d(0, 4%, 0) rotate(0.001deg); }
+  to { transform: translate3d(-3%, -8%, 0) rotate(0.001deg); }
+}
+
+@keyframes archive-relic-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--relic-rotation)); }
+  50% { transform: translate3d(var(--relic-drift-x), var(--relic-drift-y), 0) rotate(calc(var(--relic-rotation) + 2deg)); }
+}
+
+@keyframes archive-landscape-breathe {
+  from { opacity: 0.08; transform: scale(1.015); }
+  to { opacity: 0.14; transform: scale(1.045); }
+}
+
+@media (max-width: 720px) {
+  .archive-atmosphere__wood { opacity: 0.27; background-size: 560px auto; }
+  .archive-atmosphere__dust { opacity: 0.3; }
+  .archive-relic { opacity: 0.18; }
+  .archive-relic[data-relic="key"],
+  .archive-relic[data-relic="thread"],
+  .archive-relic[data-relic="wax"],
+  .archive-relic[data-relic="label"] { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-atmosphere--profile .archive-atmosphere__landscape,
+  .archive-atmosphere--profile .archive-atmosphere__paper,
+  .archive-atmosphere--profile .archive-atmosphere__grain,
+  .archive-atmosphere__wood,
+  .archive-atmosphere__dust,
+  .archive-relic {
+    animation: none !important;
+  }
+}
