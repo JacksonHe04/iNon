@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getReadmeData } from '@/lib/content';
-import { readmeDataToMarkdown } from '@/lib/markdown';
-import { ReadmeData } from '@/types';
 import { getAuthorNickname } from '@/lib/utils';
+import { getAssistantProfileContext } from '@/lib/assistant/profile-context';
 import { buildArchiveKeepsakes } from '@/components/world/archiveKeepsakes';
 import {
   WORLD_LOCATION_LABELS,
@@ -74,23 +72,39 @@ function safeWorldContext(value: unknown): WorldDialogueContext | null {
 
 export async function POST(req: Request) {
   try {
-    const { messages, persona = 'owner', worldContext: rawWorldContext } = (await req.json()) as {
-      messages: Array<{ role: 'user' | 'assistant'; content: string }>;
-      persona?: 'owner' | 'companion';
-      worldContext?: unknown;
-    };
+    const [requestBody, profileContext] = await Promise.all([
+      req.json() as Promise<{
+        messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+        persona?: 'owner' | 'companion';
+        worldContext?: unknown;
+      }>,
+      getAssistantProfileContext(),
+    ]);
+    const { messages, persona = 'owner', worldContext: rawWorldContext } = requestBody;
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: '消息格式不正确' }, { status: 400 });
     }
+
+    const safeMessages = messages
+      .filter((message) => (
+        (message.role === 'user' || message.role === 'assistant')
+        && typeof message.content === 'string'
+      ))
+      .slice(-12)
+      .map((message) => ({ ...message, content: message.content.slice(0, 4000) }));
+
+    if (safeMessages.length === 0) {
+      return NextResponse.json({ error: '消息格式不正确' }, { status: 400 });
+    }
+
+    const { readmeData, profileMarkdown } = profileContext;
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: '缺少 API KEY' }, { status: 500 });
     }
 
-    const readmeData = (await getReadmeData()) as ReadmeData;
-    const profileMarkdown = readmeDataToMarkdown(readmeData);
     const worldContext = safeWorldContext(rawWorldContext);
     const recoveredNotes = worldContext
       ? buildArchiveKeepsakes(readmeData).filter((note) => worldContext.collectedKeepsakeIds.includes(note.id))
@@ -136,7 +150,7 @@ export async function POST(req: Request) {
       reasoning: { effort: 'none', exclude: true },
       messages: [
         { role: 'system', content: systemPrompt },
-        ...messages.map((msg) => ({ role: msg.role, content: msg.content })),
+        ...safeMessages,
       ],
     };
 

@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import type { ReadmeData } from '@/types';
 import { getAuthorNickname } from '@/lib/utils';
 import type { WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
@@ -22,6 +22,9 @@ export function useAIAssistant({ data, persona = 'owner', worldContext }: UseAIA
   const [pendingPrompt, setPendingPrompt] = useState<'mbti' | 'zodiac' | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const activeRequest = useRef<AbortController | null>(null);
+
+  useEffect(() => () => activeRequest.current?.abort(), []);
 
   const handleSend = async (prompt?: string) => {
     const rawInput = prompt ?? aiInput;
@@ -50,7 +53,9 @@ export function useAIAssistant({ data, persona = 'owner', worldContext }: UseAIA
     setIsStreaming(true);
     setErrorMessage('');
 
+    activeRequest.current?.abort();
     const controller = new AbortController();
+    activeRequest.current = controller;
     const timeout = window.setTimeout(() => controller.abort(), 45000);
     try {
       const response = await fetch('/api/assistant', {
@@ -67,10 +72,8 @@ export function useAIAssistant({ data, persona = 'owner', worldContext }: UseAIA
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let assistantReply = '';
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        assistantReply += decoder.decode(value, { stream: true });
+      let lastPublishedAt = 0;
+      const publishReply = () => {
         setMessages((prev) => {
           if (!prev.length) return prev;
           const updated = [...prev];
@@ -80,7 +83,18 @@ export function useAIAssistant({ data, persona = 'owner', worldContext }: UseAIA
           }
           return updated;
         });
+      };
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        assistantReply += decoder.decode(value, { stream: true });
+        const now = performance.now();
+        if (now - lastPublishedAt >= 50) {
+          publishReply();
+          lastPublishedAt = now;
+        }
       }
+      publishReply();
       if (!assistantReply.trim()) throw new Error('EMPTY_ASSISTANT_RESPONSE');
     } catch (error) {
       console.error('AI assistant error:', error);
@@ -104,6 +118,7 @@ export function useAIAssistant({ data, persona = 'owner', worldContext }: UseAIA
       });
     } finally {
       window.clearTimeout(timeout);
+      if (activeRequest.current === controller) activeRequest.current = null;
       setIsStreaming(false);
     }
   };
