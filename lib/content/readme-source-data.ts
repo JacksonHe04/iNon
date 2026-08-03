@@ -1,6 +1,7 @@
 import { listVisibleMessages } from './messages';
 import { groupByKey, sortByOrder } from './mappers';
 import { listByForeignIds, listTable, maybeSingleByProfile } from './db-helpers';
+import { createAdminClient } from '@/lib/supabase/admin';
 import type {
   ProfileLifeRow,
   ValueRow,
@@ -59,11 +60,51 @@ export interface ReadmeSourceData {
   messages: Awaited<ReturnType<typeof listVisibleMessages>>;
 }
 
+type AggregatedSourcePayload = Omit<
+  ReadmeSourceData,
+  'projectRoles' | 'projectTechStack' | 'devToolTags' | 'productItemTags'
+> & {
+  projectRoles: ProjectListRow[];
+  projectTechStack: ProjectListRow[];
+  devToolTags: DevToolTagRow[];
+  productItemTags: ProductItemTagRow[];
+};
+
 function firstError(results: Array<{ error: Error | null }>): Error | null {
   return results.find((result) => result.error)?.error ?? null;
 }
 
+async function loadAggregatedSourceData(profileId: string): Promise<ReadmeSourceData | null> {
+  const client = createAdminClient();
+  const { data, error } = await client.rpc('read_public_profile_source', {
+    target_profile_id: profileId,
+  });
+  if (error || !data || typeof data !== 'object' || Array.isArray(data)) return null;
+  const payload = data as unknown as AggregatedSourcePayload;
+  const projects = sortByOrder(payload.projects ?? []);
+  const devTools = sortByOrder(payload.devTools ?? []);
+  const productItems = sortByOrder(payload.productItems ?? []);
+  return {
+    ...payload,
+    projects,
+    devTools,
+    productItems,
+    hardwareItems: sortByOrder(payload.hardwareItems ?? []),
+    creationItems: sortByOrder(payload.creationItems ?? []),
+    projectRoles: groupByKey(sortByOrder(payload.projectRoles ?? []), 'project_id'),
+    projectTechStack: groupByKey(sortByOrder(payload.projectTechStack ?? []), 'project_id'),
+    devToolTags: groupByKey(sortByOrder(payload.devToolTags ?? []), 'dev_tool_id'),
+    productItemTags: groupByKey(sortByOrder(payload.productItemTags ?? []), 'product_item_id'),
+  };
+}
+
 export async function loadReadmeSourceData(profileId: string): Promise<ReadmeSourceData> {
+  const aggregated = await loadAggregatedSourceData(profileId);
+  if (aggregated) return aggregated;
+  return loadLegacyReadmeSourceData(profileId);
+}
+
+async function loadLegacyReadmeSourceData(profileId: string): Promise<ReadmeSourceData> {
   const [
     lifeResult,
     tagsResult,

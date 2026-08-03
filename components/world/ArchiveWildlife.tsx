@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useRef, type MutableRefObject } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
@@ -231,11 +231,27 @@ export default function ArchiveWildlife({
   animalsEnabled: boolean;
   onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
+  const initialHeight = heightAt(playerPosition.current.x, playerPosition.current.z);
+  const [activeBiome, setActiveBiome] = useState(() => (
+    worldBiomeAt(playerPosition.current.x, playerPosition.current.z, initialHeight)
+  ));
+  const activeBiomeRef = useRef(activeBiome);
+  const activeAnimals = useMemo(
+    () => WORLD_ANIMALS.filter(({ species }) => animalAppearsInHabitat(species, activeBiome)),
+    [activeBiome],
+  );
+  useFrame(() => {
+    const player = playerPosition.current;
+    const next = worldBiomeAt(player.x, player.z, heightAt(player.x, player.z));
+    if (next === activeBiomeRef.current) return;
+    activeBiomeRef.current = next;
+    setActiveBiome(next);
+  });
   return (
     <group name="archive-world-wildlife">
       {animalsEnabled && (
         <>
-          {WORLD_ANIMALS.map((config) => (
+          {activeAnimals.map((config) => (
             <Suspense key={config.id} fallback={null}>
               <AnimatedAnimal
                 config={config}
