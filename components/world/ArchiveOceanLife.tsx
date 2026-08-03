@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useRef, type MutableRefObject } from 'react';
+import { useCallback, useRef, useState, type MutableRefObject } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { type Group, Vector3 } from 'three';
 import AnimatedAquaticAnimal from '@/components/world/AnimatedAquaticAnimal';
 import { WATER_LEVEL } from '@/components/world/archiveWorldConstants';
@@ -95,10 +96,27 @@ export default function ArchiveOceanLife({
   playerPosition: MutableRefObject<Vector3>;
   onObserveSpecies: (id: ArchiveSpeciesId) => void;
 }) {
+  const player = playerPosition.current;
+  const [deepOceanMounted, setDeepOceanMounted] = useState(() => (
+    player.x < coastlineXAt(player.z) - 2
+  ));
+  const deepOceanMountedRef = useRef(deepOceanMounted);
+  const depthFrame = useRef(0);
+  useFrame(() => {
+    depthFrame.current = (depthFrame.current + 1) % 15;
+    if (depthFrame.current !== 0) return;
+    const current = playerPosition.current;
+    const next = current.x < coastlineXAt(current.z) + (deepOceanMountedRef.current ? 8 : -2);
+    if (next === deepOceanMountedRef.current) return;
+    deepOceanMountedRef.current = next;
+    setDeepOceanMounted(next);
+  });
   if (!enabled) return null;
   return (
     <group name="archive-world-ocean-life">
-      {OCEAN_ANIMALS.map((config) => (
+      {OCEAN_ANIMALS.filter((config) => (
+        config.file === 'Dolphin.fbx' || deepOceanMounted
+      )).map((config) => (
         <OceanAnimal
           key={config.id}
           config={config}
