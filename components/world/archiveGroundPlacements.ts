@@ -4,7 +4,7 @@ import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
 import { coordinateSeed, seededRandom } from '@/components/world/archiveTerrainMath';
 import { isInsideWorldTrail } from '@/components/world/archiveWorldTrails';
 import type { WorldPlacement } from '@/components/world/archiveWorldOcclusion';
-import { groundVariantFor, worldBiomeAt } from '@/components/world/archiveWorldBiomes';
+import { groundVariantFor, worldBiomeAt, type WorldBiome } from '@/components/world/archiveWorldBiomes';
 
 export const GROUND_CHUNK_SIZE = 28;
 export const GROUND_RENDER_RADIUS = 2;
@@ -13,10 +13,11 @@ export const GROUND_VARIANT_COUNT = 15;
 export const GROUND_MAX_PER_VARIANT = 240;
 const ITEMS_PER_CHUNK = 42;
 
-function itemsForRing(ring: number) {
+function itemsForRing(ring: number, biome: WorldBiome) {
   if (ring === 0) return ITEMS_PER_CHUNK;
-  if (ring === 1) return 32;
-  return 16;
+  const denseDistance = biome === 'coast' || biome === 'meadow' || biome === 'wetland';
+  if (ring === 1) return denseDistance ? 32 : 24;
+  return denseDistance ? 16 : 8;
 }
 
 export interface GroundPlacement extends WorldPlacement {
@@ -57,7 +58,10 @@ export function groundPlacementsAround({
         z: chunkZ * GROUND_CHUNK_SIZE + 4 + random() * (GROUND_CHUNK_SIZE - 8),
       }));
       const ring = Math.max(Math.abs(chunkX - centerX), Math.abs(chunkZ - centerZ));
-      const itemCount = itemsForRing(ring);
+      const sampleX = (chunkX + 0.5) * GROUND_CHUNK_SIZE;
+      const sampleZ = (chunkZ + 0.5) * GROUND_CHUNK_SIZE;
+      const chunkBiome = worldBiomeAt(sampleX, sampleZ, heightAt(sampleX, sampleZ));
+      const itemCount = itemsForRing(ring, chunkBiome);
       for (let index = 0; index < itemCount; index += 1) {
         const cluster = clusters[Math.floor(random() * clusters.length)];
         const angle = random() * Math.PI * 2;
