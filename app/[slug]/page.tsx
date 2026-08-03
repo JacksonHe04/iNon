@@ -19,7 +19,7 @@ export default async function UserPublicPage({ params }: UserPublicPageProps) {
   return (
     <ShellLayout
       data={data}
-      username={slug}
+      publicPath={`/${slug}`}
       showSideNav={true}
       blocks={pageData.layoutConfig.blocks}
       theme={pageData.layoutConfig.theme}

@@ -12,7 +12,7 @@ export default async function Home() {
   return (
     <ShellLayout
       data={data}
-      username={data.basic.name || ''}
+      publicPath="/"
       showSideNav={true}
       blocks={pageData.layoutConfig.blocks}
       theme={pageData.layoutConfig.theme}

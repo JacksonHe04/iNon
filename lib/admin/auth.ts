@@ -7,6 +7,7 @@ export type AdminContext = {
   user: {
     id: string;
     email: string;
+    username: string | null;
   };
 };
 
@@ -20,6 +21,7 @@ export async function getAdminContext(): Promise<AdminContext | null> {
     user: {
       id: session.id,
       email: session.email,
+      username: session.username,
     },
   };
 }
@@ -32,6 +34,7 @@ export async function requireAdminPage(
     user: {
       id: session.id,
       email: session.email,
+      username: session.username,
     },
   };
 }

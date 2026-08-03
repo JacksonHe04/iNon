@@ -3,14 +3,14 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import type { ReadmeData } from '@/types';
 import type { BlockConfig, ThemeType } from '@/types/layout';
-import HeaderNav from '@/components/layout/HeaderNav';
+import TopNav from '@/components/TopNav';
 import SideNav from '@/components/SideNav';
 import { APP_EVENTS, dispatchAppEvent, addAppEventListener } from '@/lib/dom-events';
 
 interface ShellLayoutProps {
   children: ReactNode;
   data: ReadmeData;
-  username?: string;
+  publicPath?: string;
   showSideNav?: boolean;
   blocks?: BlockConfig[];
   theme?: ThemeType;
@@ -19,7 +19,7 @@ interface ShellLayoutProps {
 export default function ShellLayout({
   children,
   data,
-  username = '',
+  publicPath = '/',
   showSideNav = true,
   blocks,
   theme = 'green',
@@ -49,7 +49,7 @@ export default function ShellLayout({
 
   return (
     <main className="relative min-h-screen archive-shell">
-      <HeaderNav data={data} username={username} blocks={blocks} />
+      <TopNav data={data} blocks={blocks} publicPath={publicPath} />
       {actualShowSideNav && <SideNav blocks={blocks} />}
       <div className={`pt-24 pb-16 transition-[padding] duration-500 ${actualShowSideNav ? 'lg:pl-32 xl:pl-40 2xl:pl-48' : 'px-4 sm:px-6 lg:px-8'}`}>
         {children}

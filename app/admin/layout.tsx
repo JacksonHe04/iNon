@@ -1,14 +1,18 @@
 import type { ReactNode } from 'react';
 import { requireAdminPage } from '@/lib/admin/auth';
-import AdminNav from '@/components/admin/AdminNav';
+import { getReadmeData } from '@/lib/content';
+import ShellLayout from '@/components/layout/ShellLayout';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const admin = await requireAdminPage('/admin');
+  const username = admin.user.username || admin.user.email.split('@')[0];
+  const data = await getReadmeData(username);
 
   return (
-    <div className="min-h-screen archive-admin">
-      <AdminNav email={admin.user.email} />
-      <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
-    </div>
+    <ShellLayout data={data} publicPath={`/${username}`} showSideNav={false}>
+      <div className="min-h-[calc(100vh-6rem)] archive-admin">
+        <main className="mx-auto max-w-7xl py-8">{children}</main>
+      </div>
+    </ShellLayout>
   );
 }

@@ -17,7 +17,7 @@ export default async function DefaultUserDashboardPage() {
   const data = await getReadmeData('');
 
   return (
-    <ShellLayout data={data} username="" showSideNav={false}>
+    <ShellLayout data={data} publicPath="/" showSideNav={false}>
       <ConsoleHomeContent data={data} />
     </ShellLayout>
   );

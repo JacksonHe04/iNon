@@ -16,7 +16,7 @@ export default function WorldModeSwitch({
   onChange: (mode: ArchiveWorldMode) => void;
 }) {
   return (
-    <nav className="archive-world-mode-switch" aria-label="体验模式">
+    <nav className="archive-topnav-mode-switch" aria-label="体验模式">
       {MODES.map((item) => (
         <button
           key={item.id}

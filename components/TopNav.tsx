@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useTransition } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import type { ReadmeData } from '@/types';
 import { calculateAge, getAuthorNickname } from '@/lib/utils';
@@ -14,18 +14,46 @@ import useClockAndYearProgress from '@/hooks/useClockAndYearProgress';
 import useUserDistance from '@/hooks/useUserDistance';
 import useAIAssistant from '@/hooks/useAIAssistant';
 import NavLeft from './nav/NavLeft';
-import NavMiddle from './nav/NavMiddle';
 import NavRight from './nav/NavRight';
 import NavModals from './nav/NavModals';
 import FloatingAIPanel from './nav/FloatingAIPanel';
+import type { TopNavSession } from './nav/types';
+import WorldModeSwitch from './world/WorldModeSwitch';
+import { useUniversalTopNav } from './nav/useUniversalTopNav';
 
 interface TopNavProps {
   data: ReadmeData;
   className?: string;
   blocks?: BlockConfig[];
+  publicPath?: string;
 }
 
-export default function TopNav({ data, className, blocks }: TopNavProps) {
+function readTopNavSession(payload: unknown): TopNavSession | null {
+  if (!payload || typeof payload !== 'object' || !('session' in payload)) {
+    return null;
+  }
+
+  const session = payload.session;
+  if (!session || typeof session !== 'object') {
+    return null;
+  }
+
+  const email = 'email' in session ? session.email : null;
+  const username = 'username' in session ? session.username : null;
+  const projectRole = 'projectRole' in session ? session.projectRole : null;
+
+  if (typeof email !== 'string') {
+    return null;
+  }
+
+  return {
+    email,
+    username: typeof username === 'string' ? username : null,
+    projectRole: projectRole === 'admin' ? 'admin' : 'member',
+  };
+}
+
+export default function TopNav({ data, className, blocks, publicPath = '/' }: TopNavProps) {
   const navItems = blocks && blocks.length > 0
     ? blocks
         .filter((block) => block.visible)
@@ -35,14 +63,13 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
           label: getBlockTitle(block.blockType),
         }))
     : [];
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isPending, startTransition] = useTransition();
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const experience = useUniversalTopNav((state) => state.experience);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [session, setSession] = useState<TopNavSession | null>(null);
 
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showLevelModal, setShowLevelModal] = useState(false);
@@ -74,10 +101,22 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
     isStreaming,
     errorMessage,
     handleSend,
-    handleSuggestionClick,
     handleInputKeyDown,
     getInputPlaceholder,
   } = useAIAssistant({ data });
+
+  const handleExperienceModeChange = (mode: 'world' | 'archive' | 'dialogue') => {
+    if (experience) {
+      experience.onModeChange(mode);
+      const url = new URL(window.location.href);
+      url.searchParams.set('mode', mode);
+      window.history.replaceState(window.history.state, '', url);
+      return;
+    }
+
+    const separator = publicPath.includes('?') ? '&' : '?';
+    router.push(`${publicPath}${separator}mode=${mode}`);
+  };
 
   useEffect(() => {
     const handleOpenAIPanel = () => setAIState('floating');
@@ -95,17 +134,7 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
         response.ok ? response.json() : null,
       )
       .then((payload) => {
-        const session =
-          payload &&
-          typeof payload === 'object' &&
-          'session' in payload &&
-          payload.session &&
-          typeof payload.session === 'object'
-            ? payload.session
-            : null;
-        const email =
-          session && 'email' in session ? session.email : null;
-        setUserEmail(typeof email === 'string' ? email : null);
+        setSession(readTopNavSession(payload));
       })
       .catch(() => undefined);
 
@@ -118,16 +147,6 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
     setNotificationsViewed(latestCount);
     window.localStorage.setItem(notificationsStorageKey, String(latestCount));
   };
-
-  const isConsolePage = pathname?.startsWith('/i/') ?? false;
-
-  const handlePrefetch = useCallback(() => {
-    if (userEmail) {
-      const name = userEmail.split('@')[0];
-      const targetPath = isConsolePage ? `/${name}` : `/i/${name}/home`;
-      router.prefetch(targetPath);
-    }
-  }, [userEmail, isConsolePage, router]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -161,37 +180,22 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
               isMounted={isMounted}
             />
 
-            <NavMiddle
-              aiState={aiState}
-              setAIState={setAIState}
-              messages={messages}
-              aiInput={aiInput}
-              setAIInput={setAIInput}
-              isStreaming={isStreaming}
-              errorMessage={errorMessage}
-              handleSend={handleSend}
-              handleSuggestionClick={handleSuggestionClick}
-              handleInputKeyDown={handleInputKeyDown}
-              getInputPlaceholder={getInputPlaceholder}
-              nickname={nickname}
+            <WorldModeSwitch
+              mode={experience?.mode ?? 'archive'}
+              onChange={handleExperienceModeChange}
             />
 
             <NavRight
               data={data}
-              userEmail={userEmail}
+              session={session}
               shouldShowBadge={shouldShowBadge}
               isMounted={isMounted}
               currentTime={currentTime}
-              isConsolePage={isConsolePage}
-              isPending={isPending}
               theme={theme}
               setTheme={setTheme}
               setShowNotifications={setShowNotifications}
               markNotificationsRead={markNotificationsRead}
-              handlePrefetch={handlePrefetch}
               setShowAuthModal={setShowAuthModal}
-              startTransition={startTransition}
-              router={router}
             />
           </div>
         </div>
@@ -199,7 +203,7 @@ export default function TopNav({ data, className, blocks }: TopNavProps) {
 
       <NavModals
         data={data}
-        userEmail={userEmail}
+        userEmail={session?.email ?? null}
         age={age}
         yearProgress={yearProgress}
         distance={distance}

@@ -1,64 +1,82 @@
-import React from 'react';
-import { Bell, Sun, Moon, Eye, Loader2, User } from 'lucide-react';
+import { useSyncExternalStore, useTransition, type Dispatch, type SetStateAction } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Bell, Sun, Moon } from 'lucide-react';
 import SocialLinks from './SocialLinks';
+import UserInfoMenu from './UserInfoMenu';
+import WorldTopNavControls from './WorldTopNavControls';
 import type { ReadmeData } from '@/types';
+import type { TopNavSession } from './types';
 import { APP_EVENTS, addAppEventListener, dispatchAppEvent } from '@/lib/dom-events';
+import { useUniversalTopNav } from './useUniversalTopNav';
 
 interface NavRightProps {
   data: ReadmeData;
-  userEmail: string | null;
+  session: TopNavSession | null;
   shouldShowBadge: boolean;
   isMounted: boolean;
   currentTime: string;
-  isConsolePage: boolean;
-  isPending: boolean;
   theme: string | undefined;
   setTheme: (theme: string) => void;
-  setShowNotifications: (show: any) => void;
+  setShowNotifications: Dispatch<SetStateAction<boolean>>;
   markNotificationsRead: () => void;
-  handlePrefetch: () => void;
   setShowAuthModal: (show: boolean) => void;
-  startTransition: (cb: () => void) => void;
-  router: any;
+}
+
+function subscribeToLocationChange(onStoreChange: () => void) {
+  window.addEventListener('popstate', onStoreChange);
+  const removeLocationChange = addAppEventListener(APP_EVENTS.locationChange, onStoreChange);
+  return () => {
+    window.removeEventListener('popstate', onStoreChange);
+    removeLocationChange();
+  };
 }
 
 export function NavRight({
   data,
-  userEmail,
+  session,
   shouldShowBadge,
   isMounted,
   currentTime,
-  isConsolePage,
-  isPending,
   theme,
   setTheme,
   setShowNotifications,
   markNotificationsRead,
-  handlePrefetch,
   setShowAuthModal,
-  startTransition,
-  router,
 }: NavRightProps) {
-  const [currentPath, setCurrentPath] = React.useState('');
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const experience = useUniversalTopNav((state) => state.experience);
+  const worldControls = useUniversalTopNav((state) => state.worldControls);
+  const currentPath = useSyncExternalStore(
+    subscribeToLocationChange,
+    () => window.location.pathname,
+    () => pathname ?? '',
+  );
 
-  React.useEffect(() => {
-    const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
-    handleLocationChange();
-    window.addEventListener('popstate', handleLocationChange);
-    const removeLocationChange = addAppEventListener(APP_EVENTS.locationChange, handleLocationChange);
-    return () => {
-      window.removeEventListener('popstate', handleLocationChange);
-      removeLocationChange();
-    };
-  }, []);
+  const activeIsConsolePage = currentPath.startsWith('/i/');
+  const username = session?.username || session?.email.split('@')[0] || '';
+  const primaryPath = activeIsConsolePage ? `/${username}` : `/i/${username}/home`;
 
-  const activeIsConsolePage = isMounted ? (currentPath.startsWith('/i/') || currentPath === '') : isConsolePage;
+  const navigateTo = (targetPath: string) => {
+    const eventDispatched = dispatchAppEvent(
+      APP_EVENTS.toggleConsolePreview,
+      { targetPath },
+      { cancelable: true },
+    );
+
+    if (!eventDispatched) {
+      return;
+    }
+
+    startTransition(() => router.push(targetPath));
+  };
 
   return (
-    <div className="archive-nav-actions flex items-center gap-1 sm:gap-2 lg:gap-4">
+    <div className={`archive-nav-actions flex items-center gap-1 sm:gap-2 lg:gap-4 ${experience ? 'is-experience' : ''}`}>
       <SocialLinks platformAccounts={data.contact.platform_accounts} />
+
+      {experience?.mode === 'world' && worldControls ? <WorldTopNavControls controls={worldControls} /> : null}
 
       <button
         onClick={() => {
@@ -70,7 +88,7 @@ export function NavRight({
             return next;
           });
         }}
-        className="relative w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
+        className="archive-nav-global-control relative w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
         aria-label="查看通知"
       >
         <Bell className="h-4 w-4" />
@@ -84,7 +102,7 @@ export function NavRight({
       {/* Theme Switcher Button */}
       <button
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 transition hover:border-teal-300 hover:text-teal-500"
+        className="archive-nav-global-control w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 transition hover:border-teal-300 hover:text-teal-500"
         aria-label="切换主题"
         title="切换暗黑/亮色主题"
       >
@@ -93,45 +111,16 @@ export function NavRight({
 
       <div className="hidden md:block text-xs lg:text-sm font-mono">{isMounted ? currentTime : ''}</div>
 
-      {/* UserInfo Button */}
-      <button
-        onClick={() => {
-          if (userEmail) {
-            const name = userEmail.split('@')[0];
-            const targetPath = activeIsConsolePage ? `/${name}` : `/i/${name}/home`;
-            
-            // Dispatch custom event to see if client layout wants to handle it instantly
-            const eventDispatched = dispatchAppEvent(
-              APP_EVENTS.toggleConsolePreview,
-              { targetPath },
-              { cancelable: true }
-            );
-
-            // If the event was intercepted and prevented (returned false), do not perform Next.js transition
-            if (!eventDispatched) {
-              return;
-            }
-
-            startTransition(() => {
-              router.push(targetPath);
-            });
-          } else {
-            setShowAuthModal(true);
-          }
+      <UserInfoMenu
+        session={session}
+        isConsolePage={activeIsConsolePage}
+        isPending={isPending}
+        onLogin={() => setShowAuthModal(true)}
+        onPrimaryAction={() => navigateTo(primaryPath)}
+        onPrimaryPrefetch={() => {
+          if (session) router.prefetch(primaryPath);
         }}
-        onMouseEnter={handlePrefetch}
-        className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 transition hover:border-purple-200 hover:text-purple-600 cursor-pointer"
-        title={userEmail ? (activeIsConsolePage ? "预览公开主页" : "进入我的个人 OS 控制台") : "登录"}
-        aria-label={userEmail ? (activeIsConsolePage ? "预览公开主页" : "进入控制台") : "登录"}
-      >
-        {isPending ? (
-          <Loader2 className="h-4 w-4 animate-spin text-teal-500" />
-        ) : activeIsConsolePage ? (
-          <Eye className="h-4 w-4" />
-        ) : (
-          <User className="h-4 w-4" />
-        )}
-      </button>
+      />
     </div>
   );
 }

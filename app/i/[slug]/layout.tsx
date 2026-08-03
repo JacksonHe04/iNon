@@ -27,7 +27,7 @@ export default async function UserDashboardLayout({ children, params }: UserDash
   ]);
 
   return (
-    <ShellLayout data={data} username={slug} showSideNav={true} blocks={layoutConfig.blocks} theme={layoutConfig.theme}>
+    <ShellLayout data={data} publicPath={`/${slug}`} showSideNav={true} blocks={layoutConfig.blocks} theme={layoutConfig.theme}>
       <div className="relative min-h-screen">
         <div className="w-full py-2">
           <DashboardLayoutClient
@@ -45,4 +45,3 @@ export default async function UserDashboardLayout({ children, params }: UserDash
   );
 
 }
-
