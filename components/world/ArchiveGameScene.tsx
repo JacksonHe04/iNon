@@ -3,6 +3,7 @@
 import { lazy, memo, Suspense, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
+import { InstancedMesh, Mesh } from 'three';
 import FirstPersonExplorer from '@/components/world/FirstPersonExplorer';
 import QuaterniusForest from '@/components/world/QuaterniusForest';
 import QuaterniusGroundCover from '@/components/world/QuaterniusGroundCover';
@@ -53,16 +54,27 @@ function Diagnostics({ onReport }: { onReport: (message: string) => void }) {
     const context = gl.getContext();
     const renderList = gl.renderLists.get(scene, 0);
     const rootCounts = new Map<string, number>();
+    const rootTriangles = new Map<string, number>();
     [...renderList.opaque, ...renderList.transmissive, ...renderList.transparent].forEach(({ object }) => {
       let root = object;
       while (root.parent && root.parent !== scene) root = root.parent;
       const label = root.name || root.type;
       rootCounts.set(label, (rootCounts.get(label) ?? 0) + 1);
+      if (object instanceof Mesh) {
+        const elements = object.geometry.index?.count ?? object.geometry.attributes.position?.count ?? 0;
+        const instances = object instanceof InstancedMesh ? object.count : 1;
+        rootTriangles.set(label, (rootTriangles.get(label) ?? 0) + Math.floor(elements / 3) * instances);
+      }
     });
     const busiestRoots = [...rootCounts.entries()]
       .sort((left, right) => right[1] - left[1])
       .slice(0, 4)
       .map(([label, count]) => `${label}:${count}`)
+      .join(',');
+    const heaviestRoots = [...rootTriangles.entries()]
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 4)
+      .map(([label, triangles]) => `${label}:${Math.round(triangles / 1000)}k`)
       .join(',');
     onReport([
       context.isContextLost() ? 'WebGL context lost' : 'WebGL live',
@@ -70,6 +82,7 @@ function Diagnostics({ onReport }: { onReport: (message: string) => void }) {
       `${gl.info.render.triangles} triangles`,
       `${scene.children.length} scene nodes`,
       `main ${busiestRoots}`,
+      `heavy ${heaviestRoots}`,
       `camera ${camera.position.toArray().map((value) => value.toFixed(1)).join('/')}`,
     ].join(' · '));
   });
