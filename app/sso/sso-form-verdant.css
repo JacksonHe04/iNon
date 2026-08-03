@@ -1,0 +1,99 @@
+@keyframes sso-handoff-progress {
+  0% {
+    transform: translateX(-105%);
+  }
+  45%,
+  70% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(105%);
+  }
+}
+
+/* Verdant Archive form language: a typed letter on a faded-green dossier page. */
+.sso-form {
+  padding: 24px 28px;
+}
+
+.sso-kicker {
+  color: var(--archive-sage);
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.sso-form h2,
+.sso-label,
+.sso-button-secondary {
+  color: var(--archive-ink);
+}
+
+.sso-form-header > p:last-child,
+.sso-footnote,
+.sso-divider {
+  color: var(--archive-muted);
+}
+
+.sso-tabs {
+  padding: 0;
+  border-width: 0 0 1px;
+  border-color: var(--archive-line-strong);
+  border-radius: 0;
+  background: transparent;
+}
+
+.sso-tab {
+  border-radius: 0;
+  color: var(--archive-muted);
+}
+
+.sso-tab[data-active="true"] {
+  color: #f2ead6;
+  background: var(--archive-moss);
+  box-shadow: none;
+}
+
+.sso-input {
+  padding: 0 4px;
+  border-width: 0 0 1px;
+  border-color: var(--archive-line-strong);
+  border-radius: 0;
+  color: var(--archive-ink);
+  background: transparent;
+  box-shadow: none;
+}
+
+.sso-input:focus {
+  border-color: var(--archive-forest);
+  background: color-mix(in srgb, var(--archive-sage-light) 28%, transparent);
+  box-shadow: none;
+}
+
+.sso-input::placeholder {
+  color: var(--archive-muted);
+}
+
+.sso-button {
+  border-radius: 1px;
+  color: #f2ead6;
+  background: var(--archive-forest-surface);
+}
+
+.sso-button:hover:not(:disabled) {
+  background: var(--archive-moss);
+}
+
+.sso-button-secondary {
+  border-color: var(--archive-line-strong);
+  background: color-mix(in srgb, var(--archive-sage-light) 40%, transparent);
+}
+
+.sso-status {
+  border-radius: 0;
+  border-color: color-mix(in srgb, var(--archive-sage) 55%, transparent);
+  color: var(--archive-forest);
+  background: color-mix(in srgb, var(--archive-sage-light) 44%, transparent);
+}
+
+.sso-error {
+  border-radius: 0;
+}
