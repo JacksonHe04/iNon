@@ -18,7 +18,7 @@
   position: absolute;
   inset: -5%;
   opacity: 0.34;
-  background: url("/archive-assets/weathered-wood-fiber-v1.webp") center / 780px auto repeat;
+  background: url("/archive-assets/weathered-wood-fiber-v2.webp") center / 780px auto repeat;
   filter: contrast(0.82) saturate(0.72);
   mix-blend-mode: multiply;
   animation: archive-material-drift 38s steps(12, end) infinite alternate;
