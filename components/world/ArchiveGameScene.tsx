@@ -27,6 +27,7 @@ import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import type { ArchiveGameSceneProps } from '@/components/world/archiveGameTypes';
 import ArchiveWorldLighting from '@/components/world/ArchiveWorldLighting';
 import ArchiveForagePatches from '@/components/world/ArchiveForagePatches';
+import { useArchiveWorldRegions } from '@/components/world/useArchiveWorldRegions';
 
 export type {
   ArchiveGameSceneProps,
@@ -96,6 +97,7 @@ function ArchiveGameScene({
   onFallImpact,
   onObserveSpecies,
 }: ArchiveGameSceneProps) {
+  const regions = useArchiveWorldRegions(playerPosition);
   return (
     <>
       <ArchiveWorldLighting worldTime={worldTime} />
@@ -147,9 +149,15 @@ function ArchiveGameScene({
         />
       </Suspense>
       <Suspense fallback={null}>
-        <ArchiveAquaticLife enabled={entered} playerPosition={playerPosition} onObserveSpecies={onObserveSpecies} />
-        <ArchiveOceanLife enabled={entered} playerPosition={playerPosition} onObserveSpecies={onObserveSpecies} />
-        <ArchiveCoastalLife enabled={entered} playerPosition={playerPosition} onObserveSpecies={onObserveSpecies} />
+        {regions.river && (
+          <ArchiveAquaticLife enabled={entered} playerPosition={playerPosition} onObserveSpecies={onObserveSpecies} />
+        )}
+        {regions.coast && (
+          <>
+            <ArchiveOceanLife enabled={entered} playerPosition={playerPosition} onObserveSpecies={onObserveSpecies} />
+            <ArchiveCoastalLife enabled={entered} playerPosition={playerPosition} onObserveSpecies={onObserveSpecies} />
+          </>
+        )}
       </Suspense>
       <InfiniteWater playerPosition={playerPosition} />
       <Suspense fallback={null}>
@@ -170,14 +178,16 @@ function ArchiveGameScene({
           </Suspense>
           <ArchiveForestColliders playerPosition={playerPosition} destinations={destinations} />
           <Suspense fallback={null}>
-            <RiverFootbridge />
-            <ArchiveHomeGrounds />
-            <ArchiveWildernessLandmarks />
-            <CoastalArchiveHome
-              playerPosition={playerPosition}
-              onInspect={onInspectHomeRecord}
-              exhibits={homeExhibits}
-            />
+            {regions.bridge && <RiverFootbridge />}
+            {regions.home && <ArchiveHomeGrounds />}
+            <ArchiveWildernessLandmarks mountain={regions.mountain} tidalCove={regions.tidalCove} />
+            {regions.home && (
+              <CoastalArchiveHome
+                playerPosition={playerPosition}
+                onInspect={onInspectHomeRecord}
+                exhibits={homeExhibits}
+              />
+            )}
           </Suspense>
           <FirstPersonExplorer
             enabled={entered}
