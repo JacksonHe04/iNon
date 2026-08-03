@@ -1,0 +1,183 @@
+/* Verdant Archive form language */
+.sso-kicker {
+  color: var(--archive-forest);
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.sso-form h2,
+.sso-card h3 {
+  color: var(--archive-ink);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+
+.sso-form-header > p:last-child,
+.sso-footnote,
+.sso-card-head p,
+.sso-card > p {
+  color: var(--archive-muted);
+}
+
+.sso-tabs,
+.sso-input,
+.sso-button,
+.sso-status,
+.sso-error,
+.sso-handoff-spinner,
+.sso-card {
+  border-radius: 2px;
+}
+
+.sso-tabs {
+  border-color: var(--archive-line);
+  background: var(--archive-paper);
+}
+
+.sso-tab {
+  border-radius: 1px;
+  color: var(--archive-muted);
+}
+
+.sso-tab[data-active="true"] {
+  color: var(--archive-ink);
+  background: var(--archive-paper-light);
+  box-shadow: inset 0 -2px 0 var(--archive-sage);
+}
+
+.sso-input {
+  border-color: var(--archive-line);
+  color: var(--archive-ink);
+  background: color-mix(in srgb, var(--archive-paper-light) 84%, transparent);
+}
+
+.sso-input:focus {
+  border-color: var(--archive-sage);
+  background: var(--archive-paper-light);
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--archive-sand) 60%, transparent);
+}
+
+.sso-button {
+  border-color: var(--archive-forest);
+  color: var(--archive-paper-light);
+  background: var(--archive-forest);
+}
+
+.sso-button:hover:not(:disabled) {
+  background: var(--archive-sage);
+}
+
+.sso-button-secondary {
+  color: var(--archive-ink);
+  border-color: var(--archive-line-strong);
+  background: transparent;
+}
+
+.sso-status,
+.sso-badge {
+  color: var(--archive-forest);
+  border-color: color-mix(in srgb, var(--archive-sage) 45%, transparent);
+  background: color-mix(in srgb, var(--archive-sage) 12%, transparent);
+}
+
+.sso-error {
+  color: var(--archive-seal);
+  border-color: color-mix(in srgb, var(--archive-seal) 38%, transparent);
+  background: color-mix(in srgb, var(--archive-seal) 9%, transparent);
+}
+
+.sso-card {
+  border-color: var(--archive-line);
+  background: color-mix(in srgb, var(--archive-paper) 82%, transparent);
+}
+
+@media (max-width: 520px) {
+  .sso-card {
+    padding: 17px;
+  }
+
+  .sso-session {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sso-admin-search {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sso-spinner {
+    animation-duration: 1.5s;
+  }
+}
+
+/* Final verdant overrides stay last so legacy SSO rules cannot restore cream SaaS cards. */
+.sso-form {
+  padding: 24px 28px;
+}
+
+.sso-tabs {
+  padding: 0;
+  border-width: 0 0 1px;
+  border-color: var(--archive-line-strong);
+  border-radius: 0;
+  background: transparent;
+}
+
+.sso-tab,
+.sso-tab[data-active="true"] {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.sso-tab[data-active="true"] {
+  color: #f2ead6;
+  background: var(--archive-moss);
+}
+
+.sso-input {
+  padding: 0 4px;
+  border-width: 0 0 1px;
+  border-color: var(--archive-line-strong);
+  border-radius: 0;
+  color: var(--archive-ink);
+  background: transparent;
+  box-shadow: none;
+}
+
+.sso-input:focus {
+  border-color: var(--archive-forest);
+  background: color-mix(in srgb, var(--archive-sage-light) 28%, transparent);
+  box-shadow: none;
+}
+
+.sso-button {
+  border-radius: 1px;
+  color: #f2ead6;
+  background: var(--archive-forest-surface);
+}
+
+.sso-button-secondary {
+  color: var(--archive-ink);
+  border-color: var(--archive-line-strong);
+  background: color-mix(in srgb, var(--archive-sage-light) 40%, transparent);
+}
+
+.sso-card,
+.sso-admin-user,
+.sso-admin-projects > div {
+  border-radius: 1px;
+  border-color: var(--archive-line);
+  background: color-mix(in srgb, var(--archive-sage-light) 34%, var(--archive-paper-light));
+}
+
+.sso-status,
+.sso-error {
+  border-radius: 0;
+}
+
+@media (max-width: 820px) {
+  .sso-form {
+    padding: 28px 20px;
+  }
+}
