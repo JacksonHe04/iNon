@@ -67,27 +67,6 @@ export default function PublicExperienceClient({
   const [dialogueContext, setDialogueContext] = useState(INITIAL_DIALOGUE_CONTEXT);
   const setExperience = useUniversalTopNav((state) => state.setExperience);
 
-  useEffect(() => {
-    const connection = (navigator as Navigator & {
-      connection?: { saveData?: boolean };
-    }).connection;
-    if (connection?.saveData) return;
-
-    let idleId: number | undefined;
-    const delay = window.setTimeout(() => {
-      if ('requestIdleCallback' in window) {
-        idleId = window.requestIdleCallback(() => void loadArchiveWorld(), { timeout: 2200 });
-      } else {
-        void loadArchiveWorld();
-      }
-    }, 1500);
-
-    return () => {
-      window.clearTimeout(delay);
-      if (idleId !== undefined && 'cancelIdleCallback' in window) window.cancelIdleCallback(idleId);
-    };
-  }, []);
-
   const changeMode = useCallback((nextMode: ArchiveWorldMode) => {
     if (nextMode === 'world') setWorldRequested(true);
     if (nextMode === 'dialogue') setDialoguePersona('owner');
