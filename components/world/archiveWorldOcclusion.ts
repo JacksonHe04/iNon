@@ -15,3 +15,15 @@ export function nearCameraVisibility(
   const distance = Math.hypot(player.x - placement.x, player.z - placement.z);
   return MathUtils.smoothstep(distance, hiddenRadius, visibleRadius);
 }
+
+export function playerMovedBeyond(
+  player: Vector3,
+  previous: Vector3,
+  threshold: number,
+) {
+  const dx = player.x - previous.x;
+  const dz = player.z - previous.z;
+  if (dx * dx + dz * dz < threshold * threshold) return false;
+  previous.set(player.x, 0, player.z);
+  return true;
+}

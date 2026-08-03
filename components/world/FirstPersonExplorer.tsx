@@ -8,9 +8,10 @@ import ExplorerRigs from '@/components/world/ExplorerRigs';
 import useExplorerPointerLook from '@/components/world/useExplorerPointerLook';
 import { terrainKindAt } from '@/components/world/archiveTerrainMath';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
-import type { GameDestination, GameTravelRequest, FirstPersonExplorerProps } from '@/components/world/archiveGameTypes';
+import type { GameDestination, GameTelemetry, GameTravelRequest, FirstPersonExplorerProps } from '@/components/world/archiveGameTypes';
 import { explorerMovementSpeed, flyingAltitude } from '@/components/world/archiveExplorerMotion';
 import { trackFallImpact } from '@/components/world/archiveWorldVitality';
+import { telemetryChanged } from '@/components/world/archiveTelemetryPublishing';
 export default function FirstPersonExplorer({
   enabled,
   warmth,
@@ -46,7 +47,7 @@ export default function FirstPersonExplorer({
   ]);
   const nearest = useRef<GameDestination | null>(null);
   const nearestKey = useRef<string | null>(null);
-  const telemetryFrame = useRef(0);
+  const telemetryFrame = useRef(0); const lastTelemetry = useRef<GameTelemetry | null>(null);
   const fallImpact = useRef({ peakDownSpeed: 0, airborne: false });
   const appliedTravelId = useRef<number | null>(null);
   const { camera, gl } = useThree();
@@ -125,9 +126,7 @@ export default function FirstPersonExplorer({
   }, [heightAt, onNearby, playerPosition]);
 
   useEffect(() => {
-    const restore = () => {
-      stamina.current = 100;
-    };
+    const restore = () => { stamina.current = 100; };
     window.addEventListener('archive-world:restore-stamina', restore);
     return () => window.removeEventListener('archive-world:restore-stamina', restore);
   }, []);
@@ -265,7 +264,7 @@ export default function FirstPersonExplorer({
     telemetryFrame.current += 1;
     if (telemetryFrame.current % 6 === 0) {
       const terrain = terrainKindAt(translation.x, translation.z, groundHeight);
-      onTelemetry({
+      const nextTelemetry: GameTelemetry = {
         x: translation.x,
         y: translation.y,
         z: translation.z,
@@ -279,13 +278,15 @@ export default function FirstPersonExplorer({
         flying: isFlying,
         canMount: canMount.current,
         terrain,
-      });
+      };
+      if (telemetryChanged(lastTelemetry.current, nextTelemetry)) {
+        lastTelemetry.current = nextTelemetry;
+        onTelemetry(nextTelemetry);
+      }
     }
   });
-
   return (
-    <ExplorerRigs
-      enabled={enabled}
+    <ExplorerRigs enabled={enabled}
       mounted={mounted}
       body={body}
       mountedHorse={mountedHorse}

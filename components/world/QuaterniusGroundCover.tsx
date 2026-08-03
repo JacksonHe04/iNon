@@ -5,7 +5,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { DynamicDrawUsage, InstancedMesh, Matrix4, Vector3 } from 'three';
 import type { GameDestination } from '@/components/world/archiveGameTypes';
-import { nearCameraVisibility, type WorldPlacement } from '@/components/world/archiveWorldOcclusion';
+import { nearCameraVisibility, playerMovedBeyond, type WorldPlacement } from '@/components/world/archiveWorldOcclusion';
 import {
   QUATERNIUS_NATURE_ROOT,
   collectQuaterniusParts,
@@ -60,7 +60,7 @@ export default function QuaterniusGroundCover({
   const meshes = useRef<Array<Array<InstancedMesh | null>>>([]);
   const placementsRef = useRef<Array<WorldPlacement[]>>([]);
   const lastChunk = useRef('');
-  const visibilityFrame = useRef(0);
+  const lastVisibilityPosition = useMemo(() => new Vector3(Number.POSITIVE_INFINITY, 0, 0), []);
   const baseMatrix = useMemo(() => new Matrix4(), []);
   const finalMatrix = useMemo(() => new Matrix4(), []);
   const fadeScale = useMemo(() => new Vector3(), []);
@@ -70,7 +70,8 @@ export default function QuaterniusGroundCover({
     const centerZ = Math.floor(playerPosition.current.z / GROUND_CHUNK_SIZE);
     const chunkKey = `${centerX}:${centerZ}`;
     if (meshes.current.length !== assets.length) return;
-    if (chunkKey !== lastChunk.current) {
+    const chunkChanged = chunkKey !== lastChunk.current;
+    if (chunkChanged) {
       lastChunk.current = chunkKey;
       const placements = groundPlacementsAround({
         centerX,
@@ -83,30 +84,31 @@ export default function QuaterniusGroundCover({
       });
       placementsRef.current = placements;
     }
-
-    visibilityFrame.current += 1;
-    if (visibilityFrame.current % 3 !== 0) return;
+    if (!chunkChanged && !playerMovedBeyond(playerPosition.current, lastVisibilityPosition, 0.25)) return;
+    lastVisibilityPosition.set(playerPosition.current.x, 0, playerPosition.current.z);
     assets.forEach((parts, variantIndex) => {
       parts.forEach((part, partIndex) => {
         const mesh = meshes.current[variantIndex]?.[partIndex];
         if (!mesh) return;
         const active = placementsRef.current[variantIndex] ?? [];
-        active.forEach((placement, index) => {
+        for (let index = 0; index < active.length; index += 1) {
+          const placement = active[index];
           const visibility = nearCameraVisibility(playerPosition.current, placement, 0.45, 2.7);
           baseMatrix.copy(placement.matrix).scale(fadeScale.setScalar(visibility));
           finalMatrix.multiplyMatrices(baseMatrix, part.localMatrix);
           mesh.setMatrixAt(index, finalMatrix);
-        });
+        }
         mesh.count = active.length;
         mesh.instanceMatrix.needsUpdate = true;
-        mesh.computeBoundingSphere();
+        if (chunkChanged) mesh.computeBoundingSphere();
       });
     });
   });
 
   useEffect(() => {
     lastChunk.current = '';
-  }, [assets]);
+    lastVisibilityPosition.set(Number.POSITIVE_INFINITY, 0, 0);
+  }, [assets, lastVisibilityPosition]);
 
   return (
     <group name="quaternius-cc0-ground-cover">

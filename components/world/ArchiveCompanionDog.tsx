@@ -55,7 +55,7 @@ export default function ArchiveCompanionDog({
   const right = useRef(new Vector3());
   const obstacles = useRef<CompanionObstacle[]>([]);
   const obstacleCell = useRef('');
-  const telemetryFrame = useRef(0);
+  const lastTelemetryAt = useRef(-Infinity);
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -192,8 +192,8 @@ export default function ArchiveCompanionDog({
       );
       group.rotation.y += yawDelta * Math.min(1, delta * 7);
     }
-    telemetryFrame.current += 1;
-    if (telemetryFrame.current % 12 === 0) {
+    if (clock.elapsedTime - lastTelemetryAt.current >= 0.75) {
+      lastTelemetryAt.current = clock.elapsedTime;
       onTelemetry({
         x: group.position.x,
         y: group.position.y,

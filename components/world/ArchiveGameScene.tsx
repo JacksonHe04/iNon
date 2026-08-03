@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useRef } from 'react';
+import { memo, Suspense, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import FirstPersonExplorer from '@/components/world/FirstPersonExplorer';
@@ -74,7 +74,7 @@ function Diagnostics({ onReport }: { onReport: (message: string) => void }) {
   return null;
 }
 
-export default function ArchiveGameScene({
+function ArchiveGameScene({
   entered,
   worldTime,
   warmth,
@@ -198,3 +198,18 @@ export default function ArchiveGameScene({
     </>
   );
 }
+
+function sceneInputsAreEqual(previous: ArchiveGameSceneProps, next: ArchiveGameSceneProps) {
+  return previous.entered === next.entered
+    && previous.worldTime.totalMinutes === next.worldTime.totalMinutes
+    && previous.warmth === next.warmth
+    && previous.vitality === next.vitality
+    && previous.destinations === next.destinations
+    && previous.playerPosition === next.playerPosition
+    && previous.travelRequest === next.travelRequest
+    && previous.collectedKeepsakes === next.collectedKeepsakes
+    && previous.homeExhibits === next.homeExhibits
+    && previous.forageCollectedIds === next.forageCollectedIds;
+}
+
+export default memo(ArchiveGameScene, sceneInputsAreEqual);

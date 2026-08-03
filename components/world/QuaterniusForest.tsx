@@ -14,7 +14,7 @@ import {
   type BufferGeometry,
   type Material,
 } from 'three';
-import { nearCameraVisibility, type WorldPlacement } from '@/components/world/archiveWorldOcclusion';
+import { nearCameraVisibility, playerMovedBeyond, type WorldPlacement } from '@/components/world/archiveWorldOcclusion';
 import type { GameDestination } from '@/components/world/archiveGameTypes';
 import {
   TREE_CHUNK_SIZE,
@@ -87,7 +87,7 @@ export default function QuaterniusForest({
   const meshes = useRef<Array<Array<InstancedMesh | null>>>([]);
   const placementsRef = useRef<Array<WorldPlacement[]>>([]);
   const lastChunk = useRef('');
-  const visibilityFrame = useRef(0);
+  const lastVisibilityPosition = useMemo(() => new Vector3(Number.POSITIVE_INFINITY, 0, 0), []);
   const baseMatrix = useMemo(() => new Matrix4(), []);
   const finalMatrix = useMemo(() => new Matrix4(), []);
   const fadeScale = useMemo(() => new Vector3(), []);
@@ -97,7 +97,8 @@ export default function QuaterniusForest({
     const centerZ = Math.floor(playerPosition.current.z / TREE_CHUNK_SIZE);
     const chunkKey = `${centerX}:${centerZ}`;
     if (meshes.current.length !== partsByVariant.length) return;
-    if (chunkKey !== lastChunk.current) {
+    const chunkChanged = chunkKey !== lastChunk.current;
+    if (chunkChanged) {
       lastChunk.current = chunkKey;
       const placements = treePlacementsAround({
         centerX,
@@ -109,9 +110,8 @@ export default function QuaterniusForest({
       });
       placementsRef.current = placements;
     }
-
-    visibilityFrame.current += 1;
-    if (visibilityFrame.current % 2 !== 0) return;
+    if (!chunkChanged && !playerMovedBeyond(playerPosition.current, lastVisibilityPosition, 0.35)) return;
+    lastVisibilityPosition.set(playerPosition.current.x, 0, playerPosition.current.z);
     partsByVariant.forEach((parts, variantIndex) => {
       parts.forEach((part, partIndex) => {
         const mesh = meshes.current[variantIndex]?.[partIndex];
@@ -126,7 +126,7 @@ export default function QuaterniusForest({
         }
         mesh.count = activePlacements.length;
         mesh.instanceMatrix.needsUpdate = true;
-        mesh.computeBoundingSphere();
+        if (chunkChanged) mesh.computeBoundingSphere();
       });
     });
 
@@ -134,7 +134,8 @@ export default function QuaterniusForest({
 
   useEffect(() => {
     lastChunk.current = '';
-  }, [partsByVariant]);
+    lastVisibilityPosition.set(Number.POSITIVE_INFINITY, 0, 0);
+  }, [lastVisibilityPosition, partsByVariant]);
 
   return (
     <group name="quaternius-cc0-forest">
