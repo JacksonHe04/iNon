@@ -79,12 +79,12 @@ export default function CreationBlock({
               {showScene ? (
                 <>
                   <EyeOff className="w-3.5 h-3.5" />
-                  <span>隐藏星系</span>
+                  <span>隐藏图谱</span>
                 </>
               ) : (
                 <>
                   <Eye className="w-3.5 h-3.5" />
-                  <span>显示星系</span>
+                  <span>显示图谱</span>
                 </>
               )}
             </button>

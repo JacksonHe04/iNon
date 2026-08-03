@@ -82,12 +82,12 @@ export default function ProductsBlock({
               {showScene ? (
                 <>
                   <EyeOff className="w-3.5 h-3.5" />
-                  <span>隐藏桌面</span>
+                  <span>隐藏器物台</span>
                 </>
               ) : (
                 <>
                   <Eye className="w-3.5 h-3.5" />
-                  <span>显示桌面</span>
+                  <span>显示器物台</span>
                 </>
               )}
             </button>
