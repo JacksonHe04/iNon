@@ -3,6 +3,7 @@ import { getCachedSiteMetadata } from '@/lib/content/site-metadata';
 import { Providers } from '@/components/providers';
 import ArchiveAtmosphere from '@/components/archive/ArchiveAtmosphere';
 import './globals.css';
+import './styles/archive-materials.css';
 import './styles/archive-base-components.css';
 import './styles/base-responsive.css';
 import './styles/archive-verdant-shell.css';
