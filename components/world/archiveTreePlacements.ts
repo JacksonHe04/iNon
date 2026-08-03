@@ -21,8 +21,8 @@ const TREES_PER_CHUNK = 11;
 function treesForRing(ring: number, biome: WorldBiome) {
   if (ring <= 1) return TREES_PER_CHUNK;
   const denseDistance = biome === 'coast' || biome === 'meadow';
-  if (ring === 2) return denseDistance ? 8 : 5;
-  return denseDistance ? 3 : 1;
+  if (ring === 2) return denseDistance ? 7 : 5;
+  return denseDistance ? 2 : 1;
 }
 
 export interface TreePlacement extends WorldPlacement {
