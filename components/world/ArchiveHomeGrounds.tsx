@@ -19,6 +19,7 @@ import {
   ARCHIVE_HOME_Z,
   archiveHomeGroundChildTransform,
   archiveHomeGroundTransform,
+  archiveHomeLocalTransform,
   archiveHomeLocalGroundY,
 } from '@/components/world/archiveHomeGroundMath';
 import { HOME_FENCE_COLLIDERS, HOME_GROVE_COLLIDERS, makeHomeFenceTransforms } from '@/components/world/archiveHomeGroundLayout';
@@ -39,17 +40,44 @@ function GardenPlanting() {
   const flowers = useMemo(() => GARDEN_PATCHES.map(([x, z, rotation]) => (
     archiveHomeGroundTransform(x, z, rotation, 1.15)
   )), []);
-  const buckets = useMemo(() => GARDEN_PATCHES.map((patch) => (
-    archiveHomeGroundChildTransform(patch, [4.1, 0, -0.6, 0, 0.76])
-  )), []);
   return (
     <group name="archive-home-garden">
       <InstancedAsset src={`${QUATERNIUS_NATURE_ROOT}/Fern_1.gltf`} transforms={ferns} />
       <InstancedAsset src={`${HOME_GROUNDS_ROOT}/Flowers.glb`} transforms={flowers} tint="#a0aa83" />
-      <InstancedAsset src={`${PROP_ROOT}/Bucket_Wooden_1.gltf`} transforms={buckets} tint="#a2ad98" />
-      <PropAsset name="Bench" position={[7.2, 0.08, -1.5]} rotation={[0, Math.PI, 0]} scale={0.92} />
       <PropAsset name="Bucket_Metal" position={[12.7, 0.08, -5.4]} rotation={[0, -0.28, 0]} scale={0.52} />
-      <PropAsset name="Bag" position={[10.9, 0.12, -4.9]} rotation={[0, 0.46, 0]} scale={0.5} />
+    </group>
+  );
+}
+
+function RepeatedHomeProps() {
+  const buckets = useMemo(() => [
+    ...GARDEN_PATCHES.map((patch) => (
+      archiveHomeGroundChildTransform(patch, [4.1, 0, -0.6, 0, 0.76])
+    )),
+    archiveHomeLocalTransform(-13.8, 0.08, -3.9, 0.32, 0.62),
+  ], []);
+  const benches = useMemo(() => [
+    archiveHomeLocalTransform(7.2, 0.08, -1.5, Math.PI, 0.92),
+    archiveHomeLocalTransform(-6.1, 0.08, 5.7, 1.62, 0.78),
+  ], []);
+  const bags = useMemo(() => [
+    archiveHomeLocalTransform(10.9, 0.12, -4.9, 0.46, 0.5),
+    archiveHomeLocalTransform(-4.8, 0.1, 6.2, -0.34, 0.56),
+  ], []);
+  const logs = useMemo(() => {
+    const x = -10.5; const z = 14.5;
+    const y = archiveHomeLocalGroundY(x, z);
+    return [
+      archiveHomeGroundChildTransform([x, z, 0], [-3.4, archiveHomeLocalGroundY(x - 3.4, z + 0.8) - y + 0.32, 0.8, 0.62, 4.2]),
+      archiveHomeGroundChildTransform([x, z, 0], [-2.7, archiveHomeLocalGroundY(x - 2.7, z + 2.6) - y + 0.29, 2.6, 1.28, 3.7]),
+    ];
+  }, []);
+  return (
+    <group name="archive-home-repeated-props">
+      <InstancedAsset src={`${PROP_ROOT}/Bucket_Wooden_1.gltf`} transforms={buckets} tint="#a2ad98" />
+      <InstancedAsset src={`${PROP_ROOT}/Bench.gltf`} transforms={benches} tint="#a2ad98" />
+      <InstancedAsset src={`${PROP_ROOT}/Bag.gltf`} transforms={bags} tint="#a2ad98" />
+      <InstancedAsset src={`${HOME_GROUNDS_ROOT}/LogPile.glb`} transforms={logs} tint="#858f72" />
     </group>
   );
 }
@@ -60,7 +88,6 @@ function WorkingYard() {
       <PropAsset name="Workbench" position={[-12.2, 0.1, -7.1]} rotation={[0, 0.18, 0]} scale={0.86} />
       <PropAsset name="Workbench_Drawers" position={[-9.7, 0.1, -7.5]} rotation={[0, -0.12, 0]} scale={0.78} />
       <PropAsset name="Barrel" position={[-14.1, 0.1, -6.7]} scale={0.92} />
-      <PropAsset name="Bucket_Wooden_1" position={[-13.8, 0.08, -3.9]} rotation={[0, 0.32, 0]} scale={0.62} />
       <PropAsset name="Rope_1" position={[-11.2, 0.12, -5.4]} rotation={[0, -0.46, 0]} scale={0.58} />
       <MedievalAsset name="Prop_Crate" position={[-9.3, 0.08, -5.8]} rotation={[0, 0.2, 0]} scale={0.74} tint="#78806a" />
       <MedievalAsset name="Prop_Wagon" position={[-13.3, 0.12, -0.7]} rotation={[0, 1.38, 0]} scale={0.72} tint="#7b846d" />
@@ -71,8 +98,6 @@ function WorkingYard() {
 function FrontPorchLife() {
   return (
     <group name="archive-home-front-porch-life">
-      <PropAsset name="Bench" position={[-6.1, 0.08, 5.7]} rotation={[0, 1.62, 0]} scale={0.78} />
-      <PropAsset name="Bag" position={[-4.8, 0.1, 6.2]} rotation={[0, -0.34, 0]} scale={0.56} />
       <MedievalAsset name="Prop_Crate" position={[3.2, 0.08, 5.8]} rotation={[0, -0.18, 0]} scale={0.56} tint="#7d836b" />
       <PropAsset name="Lantern_Wall" position={[3.3, 0.66, 5.7]} rotation={[0, 0.18, 0]} scale={0.62} />
     </group>
@@ -83,26 +108,10 @@ function FireCircle() {
   const x = -10.5;
   const z = 14.5;
   const y = archiveHomeLocalGroundY(x, z);
-  const firstLogY = archiveHomeLocalGroundY(x - 3.4, z + 0.8) - y + 0.32;
-  const secondLogY = archiveHomeLocalGroundY(x - 2.7, z + 2.6) - y + 0.29;
   return (
     <group name="archive-home-fire-circle" position={[x, y, z]}>
       <TintedGltfAsset src={`${HOME_GROUNDS_ROOT}/Campfire.glb`} tint="#d0ba83" scale={0.38} />
       <pointLight position={[0, 2.1, 0]} color="#d59a52" intensity={14} distance={16} decay={2} />
-      <TintedGltfAsset
-        src={`${HOME_GROUNDS_ROOT}/LogPile.glb`}
-        position={[-3.4, firstLogY, 0.8]}
-        rotation={[0, 0.62, 0]}
-        scale={4.2}
-        tint="#858f72"
-      />
-      <TintedGltfAsset
-        src={`${HOME_GROUNDS_ROOT}/LogPile.glb`}
-        position={[-2.7, secondLogY, 2.6]}
-        rotation={[0, 1.28, 0]}
-        scale={3.7}
-        tint="#858f72"
-      />
       <PropAsset name="Axe_Bronze" position={[-4.4, 0.12, -0.5]} rotation={[0, -0.7, -1.15]} scale={0.85} />
     </group>
   );
@@ -148,6 +157,7 @@ export default function ArchiveHomeGrounds() {
         />
       ))}
       <GardenPlanting />
+      <RepeatedHomeProps />
       <WorkingYard />
       <FrontPorchLife />
       <ArchiveHomeEcology />

@@ -15,8 +15,18 @@ export function archiveHomeGroundTransform(
   rotationY = 0,
   scale = 1,
 ) {
+  return archiveHomeLocalTransform(x, archiveHomeLocalGroundY(x, z), z, rotationY, scale);
+}
+
+export function archiveHomeLocalTransform(
+  x: number,
+  y: number,
+  z: number,
+  rotationY = 0,
+  scale = 1,
+) {
   return new Matrix4().compose(
-    new Vector3(x, archiveHomeLocalGroundY(x, z), z),
+    new Vector3(x, y, z),
     new Quaternion().setFromEuler(new Euler(0, rotationY, 0)),
     new Vector3(scale, scale, scale),
   );
@@ -28,10 +38,6 @@ export function archiveHomeGroundChildTransform(
 ) {
   const [parentX, parentZ, parentRotation] = parent;
   const [x, y, z, rotationY, scale] = child;
-  const childMatrix = new Matrix4().compose(
-    new Vector3(x, y, z),
-    new Quaternion().setFromEuler(new Euler(0, rotationY, 0)),
-    new Vector3(scale, scale, scale),
-  );
+  const childMatrix = archiveHomeLocalTransform(x, y, z, rotationY, scale);
   return archiveHomeGroundTransform(parentX, parentZ, parentRotation).multiply(childMatrix);
 }
