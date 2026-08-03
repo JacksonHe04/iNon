@@ -93,7 +93,7 @@
   aspect-ratio: 0.75;
   pointer-events: none;
   opacity: 0.84;
-  background-image: url("/archive-assets/ephemera-sheet.png");
+  background-image: url("/archive-assets/ephemera-sheet.webp");
   background-repeat: no-repeat;
   background-size: 400% 200%;
   filter: saturate(0.82) contrast(0.98);

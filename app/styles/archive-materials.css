@@ -47,7 +47,7 @@
   width: clamp(270px, 28vw, 520px);
   aspect-ratio: 1;
   opacity: 0.08;
-  background: url("/archive-assets/ephemera-sheet.png") 6% 5% / 415% auto no-repeat;
+  background: url("/archive-assets/ephemera-sheet.webp") 6% 5% / 415% auto no-repeat;
   transform: rotate(4deg);
 }
 

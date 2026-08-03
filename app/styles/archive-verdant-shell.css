@@ -36,7 +36,7 @@
 .archive-atmosphere__postage {
   position: absolute;
   pointer-events: none;
-  background-image: url("/archive-assets/ephemera-sheet.png");
+  background-image: url("/archive-assets/ephemera-sheet.webp");
   background-repeat: no-repeat;
   background-size: 400% 200%;
   filter: saturate(0.78) contrast(0.96);

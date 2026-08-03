@@ -92,7 +92,7 @@
   width: 260px;
   height: 390px;
   opacity: 0.075;
-  background: url("/archive-assets/ephemera-sheet.png") 4% 3% / 418% auto no-repeat;
+  background: url("/archive-assets/ephemera-sheet.webp") 4% 3% / 418% auto no-repeat;
   transform: rotate(8deg);
 }
 

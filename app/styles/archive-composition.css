@@ -27,7 +27,7 @@
   content: "";
   pointer-events: none;
   opacity: 0.48;
-  background: url("/archive-assets/ephemera-sheet.png") 0 0 / 400% 200% no-repeat;
+  background: url("/archive-assets/ephemera-sheet.webp") 0 0 / 400% 200% no-repeat;
   transform: rotate(7deg);
 }
 
@@ -126,7 +126,7 @@
   aspect-ratio: 0.75;
   content: "";
   opacity: 0.75;
-  background: url("/archive-assets/ephemera-sheet.png") 66.666% 0 / 400% 200% no-repeat;
+  background: url("/archive-assets/ephemera-sheet.webp") 66.666% 0 / 400% 200% no-repeat;
   transform: rotate(6deg);
 }
 

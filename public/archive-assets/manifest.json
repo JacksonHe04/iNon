@@ -16,7 +16,7 @@
       "source": "OpenAI image generation"
     },
     {
-      "file": "ephemera-sheet.png",
+      "file": "ephemera-sheet.webp",
       "kind": "generated-original",
       "purpose": "decorative botanical and archival overlays",
       "source": "OpenAI image generation with local chroma-key extraction"

@@ -42,7 +42,7 @@
   aspect-ratio: 0.75;
   content: "";
   opacity: 0.58;
-  background: url("/archive-assets/ephemera-sheet.png") 100% 0 / 400% 200% no-repeat;
+  background: url("/archive-assets/ephemera-sheet.webp") 100% 0 / 400% 200% no-repeat;
 }
 
 .archive-workspace-header .archive-kicker {
@@ -71,7 +71,7 @@
   content: "";
   pointer-events: none;
   opacity: 0.55;
-  background: url("/archive-assets/ephemera-sheet.png") 0 0 / 400% 200% no-repeat;
+  background: url("/archive-assets/ephemera-sheet.webp") 0 0 / 400% 200% no-repeat;
   transform: rotate(8deg);
 }
 
@@ -93,7 +93,7 @@
   content: "";
   pointer-events: none;
   opacity: 0.38;
-  background: url("/archive-assets/ephemera-sheet.png") 66.666% 0 / 400% 200% no-repeat;
+  background: url("/archive-assets/ephemera-sheet.webp") 66.666% 0 / 400% 200% no-repeat;
 }
 
 .archive-upload-zone {
@@ -116,7 +116,7 @@
   content: "";
   pointer-events: none;
   opacity: 0.5;
-  background: url("/archive-assets/ephemera-sheet.png") 100% 0 / 400% 200% no-repeat;
+  background: url("/archive-assets/ephemera-sheet.webp") 100% 0 / 400% 200% no-repeat;
 }
 
 .archive-asset-grid {
