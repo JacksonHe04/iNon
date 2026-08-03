@@ -12,6 +12,7 @@ import {
   type BufferGeometry,
 } from 'three';
 import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog';
+import { shouldAdvanceArchiveMotion } from '@/components/world/archiveAnimationCadence';
 
 const BIRD_URL = '/archive-world/quaternius-animals/Bird.glb';
 const BIRD_COUNT = 18;
@@ -36,6 +37,7 @@ export default function ArchiveBirdFlock({
   const meshes = useRef<Array<InstancedMesh | null>>([]);
   const dummy = useMemo(() => new Object3D(), []);
   const anchor = useRef(new Vector3(28, 0, -34));
+  const nextUpdateAt = useRef(0);
   const parts = useMemo(() => {
     const result: BirdPart[] = [];
     gltf.scene.updateMatrixWorld(true);
@@ -50,6 +52,7 @@ export default function ArchiveBirdFlock({
 
   useFrame(({ clock }) => {
     if (!enabled) return;
+    if (!shouldAdvanceArchiveMotion(nextUpdateAt, clock.elapsedTime)) return;
     const player = playerPosition.current;
     let nearestBirdDistance = Number.POSITIVE_INFINITY;
     const dx = anchor.current.x - player.x;

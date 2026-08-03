@@ -15,6 +15,7 @@ import {
 } from 'three';
 import AnimatedAnimalScene from '@/components/world/AnimatedAnimalScene';
 import type { ArchiveSpeciesId } from '@/components/world/archiveSpeciesCatalog';
+import { shouldAdvanceArchiveMotion } from '@/components/world/archiveAnimationCadence';
 
 const BEE_COUNT = 14;
 
@@ -38,7 +39,9 @@ function AnimatedWasp({
   const gltf = useGLTF('/archive-world/quaternius-animals/Wasp.glb');
   const anchor = useRef(new Vector3(playerPosition.current.x, 0, playerPosition.current.z));
   const phase = index * 2.71;
+  const nextUpdateAt = useRef(0);
   const update = useCallback((group: Group, elapsed: number) => {
+    if (!shouldAdvanceArchiveMotion(nextUpdateAt, elapsed)) return;
     const player = playerPosition.current;
     group.visible = heightAt(player.x, player.z) < 8;
     if (!group.visible) return;
@@ -96,9 +99,11 @@ export default function ArchivePollinators({
     return result;
   }, [gltf.scene]);
   const anchor = useRef(new Vector3(playerPosition.current.x, 0, playerPosition.current.z));
+  const nextUpdateAt = useRef(0);
 
   useFrame(({ clock }) => {
     if (!enabled) return;
+    if (!shouldAdvanceArchiveMotion(nextUpdateAt, clock.elapsedTime)) return;
     const player = playerPosition.current;
     const visible = heightAt(player.x, player.z) < 8;
     meshes.current.forEach((mesh) => {
