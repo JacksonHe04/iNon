@@ -30,10 +30,10 @@ export interface QuaterniusAssetPart {
   localMatrix: Matrix4;
 }
 
-function fadedMaterial(material: Material) {
+function fadedMaterial(material: Material, tint: string) {
   const clone = material.clone();
   if ('color' in clone && clone.color instanceof Color) {
-    clone.color.multiply(new Color('#a7b29a'));
+    clone.color.multiply(new Color(tint));
   }
   if ('alphaTest' in clone && typeof clone.alphaTest === 'number' && clone.transparent) {
     clone.alphaTest = Math.max(0.36, clone.alphaTest);
@@ -42,14 +42,14 @@ function fadedMaterial(material: Material) {
   return clone;
 }
 
-export function collectQuaterniusParts(root: Object3D): QuaterniusAssetPart[] {
+export function collectQuaterniusParts(root: Object3D, tint = '#a7b29a'): QuaterniusAssetPart[] {
   root.updateMatrixWorld(true);
   const parts: QuaterniusAssetPart[] = [];
   root.traverse((object) => {
     if (!(object instanceof Mesh)) return;
     const material = Array.isArray(object.material)
-      ? object.material.map(fadedMaterial)
-      : fadedMaterial(object.material);
+      ? object.material.map((entry) => fadedMaterial(entry, tint))
+      : fadedMaterial(object.material, tint);
     parts.push({
       geometry: object.geometry,
       material,

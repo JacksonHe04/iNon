@@ -57,9 +57,17 @@ export function FurnitureAsset({ name, ...props }: Omit<ComponentProps<typeof Ti
   return <TintedGltfAsset src={`${FURNITURE_ROOT}/${name}.glb`} tint="#a9ad92" {...props} />;
 }
 
-export function InstancedAsset({ src, transforms }: { src: string; transforms: Matrix4[] }) {
+export function InstancedAsset({
+  src,
+  transforms,
+  tint = '#a7b29a',
+}: {
+  src: string;
+  transforms: Matrix4[];
+  tint?: string;
+}) {
   const { scene } = useGLTF(src);
-  const parts = useMemo(() => collectQuaterniusParts(scene), [scene]);
+  const parts = useMemo(() => collectQuaterniusParts(scene, tint), [scene, tint]);
   const meshes = useRef<Array<InstancedMesh | null>>([]);
   useEffect(() => {
     parts.forEach((part, partIndex) => {

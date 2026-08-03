@@ -11,6 +11,10 @@ import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import { ARCHIVE_HOME_ROTATION } from '@/components/world/archiveWorldZones';
 import type { HomeExhibit, HomeInspectionId } from '@/components/world/archiveHomeRecords';
 
+function structureTransform(x: number, y: number, z: number, yaw = 0) {
+  return new Matrix4().makeRotationY(yaw).setPosition(x, y, z);
+}
+
 export function RiverFootbridge() {
   const floor = useMemo(() => Array.from({ length: 14 }, (_, index) => {
     const x = -13 + index * 2;
@@ -66,21 +70,42 @@ function ArchiveHomeModel({
   playerPosition: MutableRefObject<Vector3>;
   exhibits: HomeExhibit[];
 }) {
+  const straightWalls = useMemo(() => [
+    structureTransform(-1, 0, -3, Math.PI),
+    structureTransform(1, 0, -3, Math.PI),
+    structureTransform(-2, 0, -2, Math.PI / 2),
+    structureTransform(-2, 0, 2, Math.PI / 2),
+    structureTransform(2, 0, -2, -Math.PI / 2),
+    structureTransform(2, 0, 2, -Math.PI / 2),
+  ], []);
+  const windowWalls = useMemo(() => [
+    structureTransform(1, 0, 3),
+    structureTransform(-2, 0, 0, Math.PI / 2),
+    structureTransform(2, 0, 0, -Math.PI / 2),
+  ], []);
+  const windows = useMemo(() => [
+    structureTransform(1, 0, 3.06),
+    structureTransform(-2.05, 0, 0, Math.PI / 2),
+    structureTransform(2.05, 0, 0, -Math.PI / 2),
+  ], []);
+  const floors = useMemo(() => [-1, 1].flatMap((x) => (
+    [-2, 0, 2].map((z) => structureTransform(x, 0.03, z))
+  )), []);
+  const roofFronts = useMemo(() => [
+    structureTransform(0, 3, 3),
+    structureTransform(0, 3, -3, Math.PI),
+  ], []);
+  const shellTint = '#8a9680';
   return (
     <group name="single-coastal-archive-home" rotation-y={-0.07} scale={[2.05, 1.48, 1.72]}>
       <MedievalAsset name="Wall_Plaster_Door_Round" position={[-1, 0, 3]} />
-      <MedievalAsset name="Wall_Plaster_Window_Wide_Round" position={[1, 0, 3]} />
-      <MedievalAsset name="Window_Wide_Round1" position={[1, 0, 3.06]} />
+      <InstancedAsset src={`${MEDIEVAL_ROOT}/Wall_Plaster_Window_Wide_Round.gltf`} transforms={windowWalls} tint={shellTint} />
+      <InstancedAsset src={`${MEDIEVAL_ROOT}/Window_Wide_Round1.gltf`} transforms={windows} tint={shellTint} />
       <MedievalAsset name="WindowShutters_Wide_Round_Open" position={[1, 0, 3.05]} />
-      {[-1, 1].map((x) => <MedievalAsset key={`rear-${x}`} name="Wall_Plaster_Straight" position={[x, 0, -3]} rotation={[0, Math.PI, 0]} />)}
-      {[-2, 2].map((z) => <MedievalAsset key={`left-${z}`} name="Wall_Plaster_Straight" position={[-2, 0, z]} rotation={[0, Math.PI / 2, 0]} />)}
-      {[-2, 2].map((z) => <MedievalAsset key={`right-${z}`} name="Wall_Plaster_Straight" position={[2, 0, z]} rotation={[0, -Math.PI / 2, 0]} />)}
-      {[-2, 2].map((x) => <MedievalAsset key={`side-window-${x}`} name="Wall_Plaster_Window_Wide_Round" position={[x, 0, 0]} rotation={[0, x < 0 ? Math.PI / 2 : -Math.PI / 2, 0]} />)}
-      {[-2.05, 2.05].map((x) => <MedievalAsset key={`window-${x}`} name="Window_Wide_Round1" position={[x, 0, 0]} rotation={[0, x < 0 ? Math.PI / 2 : -Math.PI / 2, 0]} />)}
-      {[-1, 1].flatMap((x) => [-2, 0, 2].map((z) => <MedievalAsset key={`floor-${x}-${z}`} name="Floor_WoodDark" position={[x, 0.03, z]} />))}
+      <InstancedAsset src={`${MEDIEVAL_ROOT}/Wall_Plaster_Straight.gltf`} transforms={straightWalls} tint={shellTint} />
+      <InstancedAsset src={`${MEDIEVAL_ROOT}/Floor_WoodDark.gltf`} transforms={floors} tint={shellTint} />
       <MedievalAsset name="Roof_RoundTiles_4x6" position={[0, 3, 0]} rotation={[0, 0, 0.025]} />
-      <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, 3]} />
-      <MedievalAsset name="Roof_Front_Brick4" position={[0, 3, -3]} rotation={[0, Math.PI, 0]} />
+      <InstancedAsset src={`${MEDIEVAL_ROOT}/Roof_Front_Brick4.gltf`} transforms={roofFronts} tint={shellTint} />
       <MedievalAsset name="Prop_Chimney" position={[-1.35, 3.8, -0.8]} scale={0.82} />
       <MedievalAsset name="Prop_Vine1" position={[1.8, 2.3, 3.13]} />
       <ArchiveHomeDoor playerPosition={playerPosition} />
@@ -100,7 +125,13 @@ export function CoastalArchiveHome({
 }) {
   const [x, , z] = WORLD_HOME_POSITION;
   return (
-    <RigidBody type="fixed" colliders={false} position={[x, terrainHeightAt(x, z), z]} rotation={[0, ARCHIVE_HOME_ROTATION, 0]}>
+    <RigidBody
+      type="fixed"
+      colliders={false}
+      name="single-coastal-archive-home"
+      position={[x, terrainHeightAt(x, z), z]}
+      rotation={[0, ARCHIVE_HOME_ROTATION, 0]}
+    >
       <CuboidCollider args={[4.35, 2.25, 0.24]} position={[0, 2.25, -5.05]} />
       <CuboidCollider args={[0.24, 2.25, 5]} position={[-4.18, 2.25, 0]} />
       <CuboidCollider args={[0.24, 2.25, 5]} position={[4.18, 2.25, 0]} />
