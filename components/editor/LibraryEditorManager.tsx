@@ -15,7 +15,7 @@ import {
   Settings,
 } from 'lucide-react';
 import GlassCard from '@/components/GlassCard';
-import Modal from '@/components/Modal';
+import LibraryCategoryModal from './LibraryCategoryModal';
 import { useSectionSave } from './hooks/useSectionSave';
 import type { LibraryByKind, LibraryItemDTO, LibraryCategoryDTO, LibraryKind, LibrarySubtype } from '@/types';
 import MusicBlock from '@/components/blocks/MusicBlock';
@@ -725,85 +725,15 @@ export default function LibraryEditorManager({ initialLibrary }: LibraryEditorMa
         )}
       </GlassCard>
 
-      {/* Categories Editing Modal */}
-      <Modal
-        open={isCategoryModalOpen}
+      <LibraryCategoryModal
+        categories={categories}
+        onAdd={handleAddCategory}
         onClose={() => setIsCategoryModalOpen(false)}
-        className="max-w-md bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-gray-100 border border-white/20"
-      >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 dark:border-gray-800 pb-2">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
-              管理音乐分类
-            </h3>
-            <button
-              onClick={handleAddCategory}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-xs font-bold hover:bg-teal-500/20 transition cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>新增分类</span>
-            </button>
-          </div>
-
-          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-            {categories.map((cat, idx) => (
-              <div
-                key={cat.id}
-                className="flex items-center gap-2 p-2 rounded-xl bg-gray-500/5 border border-white/10 dark:border-gray-800 transition"
-              >
-                <input
-                  type="text"
-                  value={cat.name}
-                  onChange={(e) => handleUpdateCategoryName(idx, e.target.value)}
-                  className="flex-1 bg-white/50 dark:bg-gray-900/50 border border-white/10 dark:border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:border-teal-500 font-bold"
-                  placeholder="分类名称"
-                />
-
-                <div className="flex items-center gap-0.5">
-                  <button
-                    onClick={() => handleMoveCategory(idx, 'up')}
-                    disabled={idx === 0}
-                    className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-white disabled:opacity-30 cursor-pointer"
-                    title="上移"
-                  >
-                    <ArrowUp className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleMoveCategory(idx, 'down')}
-                    disabled={idx === categories.length - 1}
-                    className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-white disabled:opacity-30 cursor-pointer"
-                    title="下移"
-                  >
-                    <ArrowDown className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCategory(idx)}
-                    className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
-                    title="删除"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {categories.length === 0 && (
-              <p className="text-xs text-gray-400 italic text-center py-6">
-                暂无分类，请点击右上角“新增分类”
-              </p>
-            )}
-          </div>
-
-          <div className="flex justify-end pt-2 border-t border-white/10 dark:border-gray-800">
-            <button
-              onClick={() => setIsCategoryModalOpen(false)}
-              className="px-4 py-2 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-xs font-bold transition cursor-pointer"
-            >
-              完成编辑
-            </button>
-          </div>
-        </div>
-      </Modal>
+        onDelete={handleDeleteCategory}
+        onMove={handleMoveCategory}
+        onRename={handleUpdateCategoryName}
+        open={isCategoryModalOpen}
+      />
     </div>
   );
 }
