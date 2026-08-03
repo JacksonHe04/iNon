@@ -177,11 +177,11 @@ export default function ArchiveHomeGrounds({
           position={[x, archiveHomeLocalGroundY(x, z) + 2.8, z]}
         />
       ))}
-      <GardenPlanting />
+      {yardMounted && <GardenPlanting />}
       <RepeatedHomeProps />
       {yardMounted && <WorkingYard />}
       <FrontPorchLife />
-      <ArchiveHomeEcology />
+      <ArchiveHomeEcology rearGardenVisible={yardMounted} />
       <FadedPool />
       <FireCircle />
     </RigidBody>

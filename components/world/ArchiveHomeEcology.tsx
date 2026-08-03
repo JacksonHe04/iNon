@@ -140,17 +140,21 @@ function PathStoneInstances({
   );
 }
 
-export default function ArchiveHomeEcology() {
+export default function ArchiveHomeEcology({
+  rearGardenVisible,
+}: {
+  rearGardenVisible: boolean;
+}) {
   return (
     <group name="layered-coastal-home-ecology">
-      {natureAsset('Bush_Common_Flowers', FLOWERING_SHRUBS)}
-      {natureAsset('Flower_3_Group', FLOWER_GROUPS_3)}
+      {rearGardenVisible && natureAsset('Bush_Common_Flowers', FLOWERING_SHRUBS)}
+      {rearGardenVisible && natureAsset('Flower_3_Group', FLOWER_GROUPS_3)}
       {natureAsset('Flower_4_Group', FLOWER_GROUPS_4)}
-      {natureAsset('Clover_1', CLOVER_1)}
+      {rearGardenVisible && natureAsset('Clover_1', CLOVER_1)}
       {natureAsset('Clover_2', CLOVER_2)}
       {natureAsset('Grass_Common_Tall', COMMON_TALL_GRASS)}
       {natureAsset('Grass_Wispy_Tall', WISPY_TALL_GRASS)}
-      {natureAsset('Plant_1_Big', EDGE_PLANTS_1)}
+      {rearGardenVisible && natureAsset('Plant_1_Big', EDGE_PLANTS_1)}
       {natureAsset('Plant_7_Big', EDGE_PLANTS_7)}
       <PathStoneInstances placements={PATH_SMALL} size={SMALL_STONE_SIZE} />
       <PathStoneInstances placements={PATH_THRESHOLD} size={THRESHOLD_STONE_SIZE} />
