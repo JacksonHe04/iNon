@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { Image } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { DoubleSide, Group, Vector3 } from 'three';
+import { DoubleSide, Vector3 } from 'three';
 import { FurnitureAsset, MedievalAsset, PropAsset } from '@/components/world/ArchiveAsset';
 import { exhibitInspectionId, type HomeExhibit, type HomeInspectionId, type HomeRecordId } from '@/components/world/archiveHomeRecords';
 import { WORLD_HOME_POSITION } from '@/components/world/archiveWorldConstants';
@@ -152,16 +152,25 @@ export default function ArchiveHomeInterior({
   onInspect: (record: HomeInspectionId) => void;
   playerPosition: MutableRefObject<Vector3>;
 }) {
-  const interior = useRef<Group>(null);
+  const distanceToHome = () => Math.hypot(
+    playerPosition.current.x - WORLD_HOME_POSITION[0],
+    playerPosition.current.z - WORLD_HOME_POSITION[2],
+  );
+  const [mounted, setMounted] = useState(() => distanceToHome() < 24);
+  const mountedRef = useRef(mounted);
+  const frame = useRef(0);
   useFrame(() => {
-    if (!interior.current) return;
-    interior.current.visible = Math.hypot(
-      playerPosition.current.x - WORLD_HOME_POSITION[0],
-      playerPosition.current.z - WORLD_HOME_POSITION[2],
-    ) < 52;
+    frame.current = (frame.current + 1) % 15;
+    if (frame.current !== 0) return;
+    const next = distanceToHome() < (mountedRef.current ? 36 : 24);
+    if (next === mountedRef.current) return;
+    mountedRef.current = next;
+    setMounted(next);
   });
   return (
-    <group ref={interior} name="lived-in-archive-interior">
+    <group name="lived-in-archive-interior">
+      {mounted && (
+        <>
       <InteractiveFurniture record="bedside" label="bed-and-nightstand" onInspect={onInspect}>
         <FurnitureAsset name="BedTwin" position={[-1.08, 0.06, -1.12]} rotation={[0, Math.PI / 2, 0]} scale={0.48} tint="#8e9b7d" />
         <FurnitureAsset name="NightStand" position={[-1.42, 0.05, -2.32]} rotation={[0, 0.08, 0]} scale={0.72} tint="#8b765a" />
@@ -202,6 +211,8 @@ export default function ArchiveHomeInterior({
       <PropAsset name="Lantern_Wall" position={[1.82, 1.58, -0.75]} rotation={[0, -Math.PI / 2, 0]} scale={0.72} />
       <pointLight position={[0.6, 1.7, 0.45]} intensity={48} distance={15} decay={1.6} color="#cda867" />
       <pointLight position={[-1.1, 1.15, -1.8]} intensity={22} distance={7} decay={1.5} color="#e0b66d" />
+        </>
+      )}
     </group>
   );
 }
