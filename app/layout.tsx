@@ -3,6 +3,7 @@ import { getCachedSiteMetadata } from '@/lib/content/site-metadata';
 import { Providers } from '@/components/providers';
 import ArchiveAtmosphere from '@/components/archive/ArchiveAtmosphere';
 import './globals.css';
+import './styles/archive-dashboard-admin.css';
 import './styles/archive-responsive.css';
 import './styles/world-foundation.css';
 import './styles/archive-field-panels.css';

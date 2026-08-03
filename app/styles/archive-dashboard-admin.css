@@ -1,0 +1,138 @@
+.archive-index-card {
+  border-width: 0 0 1px;
+  background: color-mix(in srgb, var(--archive-paper-light) 34%, transparent);
+}
+
+.archive-index-card:nth-child(2n) {
+  margin-left: clamp(8px, 2vw, 28px);
+  transform: rotate(0.35deg);
+}
+
+.archive-index-card:nth-child(3n) {
+  margin-right: clamp(6px, 1.5vw, 20px);
+  margin-left: 0;
+  transform: rotate(-0.4deg);
+}
+
+.archive-public-composition__closing {
+  position: relative;
+  margin-top: -38px;
+  padding: 70px 28px 0;
+  background: var(--archive-forest-surface);
+  transform: rotate(-0.2deg);
+}
+
+.archive-workspace-header {
+  --archive-ink: #f2ead6;
+  --archive-muted: #cac7ad;
+  --archive-line: rgba(242, 234, 214, 0.2);
+  --archive-line-strong: rgba(242, 234, 214, 0.42);
+  min-height: 168px;
+  color: var(--archive-ink);
+  background: var(--archive-moss);
+  box-shadow: 14px 16px 0 color-mix(in srgb, var(--archive-forest-surface) 38%, transparent);
+  transform: rotate(0.2deg);
+}
+
+.archive-workspace-header::before {
+  position: absolute;
+  top: -36px;
+  right: 11%;
+  width: 170px;
+  aspect-ratio: 0.75;
+  content: "";
+  opacity: 0.58;
+  background: url("/archive-assets/ephemera-sheet.png") 100% 0 / 400% 200% no-repeat;
+}
+
+.archive-workspace-header .archive-kicker {
+  color: #d8caa7;
+}
+
+.archive-dashboard-main {
+  position: relative;
+  padding: 0 0 80px;
+}
+
+.archive-dashboard-content {
+  position: relative;
+  margin-top: 42px;
+  padding: 36px;
+  background: color-mix(in srgb, var(--archive-sage-mist) 78%, transparent);
+}
+
+.archive-dashboard-content::before {
+  position: absolute;
+  z-index: 3;
+  top: -90px;
+  right: -32px;
+  width: 180px;
+  aspect-ratio: 0.75;
+  content: "";
+  pointer-events: none;
+  opacity: 0.55;
+  background: url("/archive-assets/ephemera-sheet.png") 0 0 / 400% 200% no-repeat;
+  transform: rotate(8deg);
+}
+
+.archive-dashboard-content .archive-paper-surface:nth-of-type(3n + 1) {
+  background: color-mix(in srgb, var(--archive-sage-light) 82%, var(--archive-paper));
+}
+
+.archive-admin {
+  position: relative;
+  background: color-mix(in srgb, var(--archive-sage-mist) 82%, transparent);
+}
+
+.archive-admin::before {
+  position: fixed;
+  right: -80px;
+  bottom: -80px;
+  width: 360px;
+  aspect-ratio: 0.75;
+  content: "";
+  pointer-events: none;
+  opacity: 0.38;
+  background: url("/archive-assets/ephemera-sheet.png") 66.666% 0 / 400% 200% no-repeat;
+}
+
+.archive-upload-zone {
+  --archive-ink: #f2ead6;
+  --archive-muted: #d4d2bb;
+  --archive-umber: #ece4cf;
+  --archive-line: rgba(242, 234, 214, 0.24);
+  --archive-line-strong: rgba(242, 234, 214, 0.44);
+  min-height: 260px;
+  color: var(--archive-ink);
+  background: color-mix(in srgb, var(--archive-moss) 90%, transparent) !important;
+}
+
+.archive-upload-zone::after {
+  position: absolute;
+  right: 3%;
+  bottom: -42px;
+  width: 150px;
+  aspect-ratio: 0.75;
+  content: "";
+  pointer-events: none;
+  opacity: 0.5;
+  background: url("/archive-assets/ephemera-sheet.png") 100% 0 / 400% 200% no-repeat;
+}
+
+.archive-asset-grid {
+  align-items: start;
+}
+
+.archive-asset-card {
+  background: color-mix(in srgb, var(--archive-paper-light) 90%, transparent) !important;
+  box-shadow: 7px 8px 0 color-mix(in srgb, var(--archive-forest-surface) 18%, transparent) !important;
+}
+
+.archive-asset-card:nth-child(3n + 1) {
+  background: color-mix(in srgb, var(--archive-sage-light) 82%, var(--archive-paper)) !important;
+  transform: translateY(10px) rotate(-0.35deg);
+}
+
+.archive-asset-card:nth-child(4n + 2) {
+  transform: translateY(-5px) rotate(0.35deg);
+}
