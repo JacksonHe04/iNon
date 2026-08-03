@@ -116,15 +116,26 @@ export const waterFragment = /* glsl */ `
 export const weatherVertex = /* glsl */ `
   uniform float uTime;
   varying float vPulse;
+  varying vec2 vPaperUv;
   varying vec3 vWeatherWorld;
   void main() {
     vec3 origin = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     vec3 localVertex = (instanceMatrix * vec4(position, 0.0)).xyz;
     float phase = origin.x * 0.71 + origin.y * 1.13 + origin.z * 0.53;
+    float spin = uTime * (0.18 + fract(phase * 0.37) * 0.32) + phase;
+    float tumble = uTime * (0.12 + fract(phase * 0.61) * 0.28) - phase * 0.7;
+    mat2 spinMatrix = mat2(cos(spin), -sin(spin), sin(spin), cos(spin));
+    mat2 tumbleMatrix = mat2(cos(tumble), -sin(tumble), sin(tumble), cos(tumble));
+    localVertex.xz = spinMatrix * localVertex.xz;
+    localVertex.yz = tumbleMatrix * localVertex.yz;
     origin.x += sin(uTime * 0.24 + phase) * 0.8;
-    origin.y = mod(origin.y - uTime * (0.7 + fract(phase) * 0.8) + 18.0, 20.0) - 2.0;
+    origin.y = mod(origin.y - uTime * (0.7 + fract(phase) * 0.8) + 9.0, 26.0) - 9.0;
     origin.z += cos(uTime * 0.19 + phase) * 0.55;
     vPulse = 0.72 + 0.28 * sin(phase * 4.0);
+    float tile = floor(fract(sin(phase * 12.9898) * 43758.5453) * 16.0);
+    vec2 tileUv = uv;
+    if (fract(phase * 3.17) > 0.5) tileUv.x = 1.0 - tileUv.x;
+    vPaperUv = (tileUv + vec2(mod(tile, 4.0), floor(tile / 4.0))) * 0.25;
     vec4 world = modelMatrix * vec4(origin + localVertex, 1.0);
     vWeatherWorld = world.xyz;
     gl_Position = projectionMatrix * viewMatrix * world;
@@ -132,9 +143,11 @@ export const weatherVertex = /* glsl */ `
 `;
 
 export const weatherFragment = /* glsl */ `
-  uniform vec3 uPaper;
-  uniform vec3 uOchre;
+  uniform sampler2D uPaperAtlas;
+  uniform vec3 uMistTint;
+  uniform vec3 uOchreTint;
   varying float vPulse;
+  varying vec2 vPaperUv;
   varying vec3 vWeatherWorld;
   void main() {
     vec2 homeOffset = vWeatherWorld.xz - vec2(${WORLD_HOME_POSITION[0].toFixed(1)}, ${WORLD_HOME_POSITION[2].toFixed(1)});
@@ -149,7 +162,12 @@ export const weatherFragment = /* glsl */ `
     bool insideHome = abs(homeLocal.x) < ${ARCHIVE_HOME_HALF_WIDTH.toFixed(2)}
       && abs(homeLocal.y) < ${ARCHIVE_HOME_HALF_DEPTH.toFixed(2)};
     if (beneathRoof && insideHome) discard;
-    vec3 color = mix(uPaper, uOchre, max(0.0, vPulse) * 0.18);
-    gl_FragColor = vec4(color, 0.08 + max(0.0, vPulse) * 0.42);
+    vec4 paper = texture2D(uPaperAtlas, vPaperUv);
+    if (paper.a < 0.045) discard;
+    vec3 tint = mix(uMistTint, uOchreTint, max(0.0, vPulse) * 0.22);
+    vec3 color = paper.rgb * tint * 1.08;
+    gl_FragColor = vec4(color, paper.a * (0.52 + max(0.0, vPulse) * 0.42));
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
   }
 `;

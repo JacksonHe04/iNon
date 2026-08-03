@@ -136,7 +136,9 @@ export default function ArchiveGameScene({
         <ArchiveCoastalLife enabled={entered} playerPosition={playerPosition} />
       </Suspense>
       <InfiniteWater playerPosition={playerPosition} />
-      <FallingPaperSnow playerPosition={playerPosition} />
+      <Suspense fallback={null}>
+        <FallingPaperSnow playerPosition={playerPosition} />
+      </Suspense>
       <Suspense fallback={null}>
         <WorldKeepsakes
           enabled={entered}

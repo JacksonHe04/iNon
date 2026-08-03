@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
-import { useGLTF } from '@react-three/drei';
+import { useGLTF, useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
   Color,
@@ -11,6 +11,7 @@ import {
   InstancedMesh,
   Matrix4,
   Object3D,
+  SRGBColorSpace,
   ShaderMaterial,
   type Vector3,
 } from 'three';
@@ -22,7 +23,7 @@ import { weatherFragment, weatherVertex } from '@/components/world/archiveWorldS
 
 export function FallingPaperSnow({
   playerPosition,
-  count = 980,
+  count = 1680,
 }: {
   playerPosition: MutableRefObject<Vector3>;
   count?: number;
@@ -31,19 +32,26 @@ export function FallingPaperSnow({
   const mesh = useRef<InstancedMesh>(null);
   const material = useRef<ShaderMaterial>(null);
   const dummy = useMemo(() => new Object3D(), []);
+  const paperAtlas = useTexture('/archive-world/weather/aged-paper-fragments-v1.webp');
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
-    uPaper: { value: new Color('#e7e4d2') },
-    uOchre: { value: new Color('#c4a45d') },
-  }), []);
+    uPaperAtlas: { value: paperAtlas },
+    uMistTint: { value: new Color('#d8d8c8') },
+    uOchreTint: { value: new Color('#c4a45d') },
+  }), [paperAtlas]);
+
+  useEffect(() => {
+    paperAtlas.colorSpace = SRGBColorSpace;
+    paperAtlas.needsUpdate = true;
+  }, [paperAtlas]);
 
   useEffect(() => {
     if (!mesh.current) return;
     const random = seededRandom(3141592);
     for (let index = 0; index < count; index += 1) {
-      dummy.position.set((random() - 0.5) * 76, random() * 20, (random() - 0.5) * 76);
-      const scale = 0.075 + random() * 0.19;
-      dummy.scale.set(scale, scale * (0.42 + random() * 0.88), scale);
+      dummy.position.set((random() - 0.5) * 58, random() * 26, (random() - 0.5) * 58);
+      const scale = 0.12 + random() * 0.24;
+      dummy.scale.setScalar(scale);
       dummy.rotation.set(random() * Math.PI, random() * Math.PI, random() * Math.PI);
       dummy.updateMatrix();
       mesh.current.setMatrixAt(index, dummy.matrix);
@@ -56,13 +64,14 @@ export function FallingPaperSnow({
     if (material.current) material.current.uniforms.uTime.value = clock.elapsedTime;
     if (!group.current) return;
     group.current.position.x = playerPosition.current.x;
+    group.current.position.y = playerPosition.current.y;
     group.current.position.z = playerPosition.current.z;
   });
 
   return (
     <group ref={group}>
       <instancedMesh ref={mesh} args={[undefined, undefined, count]} frustumCulled={false}>
-        <planeGeometry args={[1, 0.54]} />
+        <planeGeometry args={[1, 1]} />
         <shaderMaterial
           ref={material}
           uniforms={uniforms}
