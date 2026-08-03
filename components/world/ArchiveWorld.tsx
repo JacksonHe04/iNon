@@ -6,9 +6,6 @@ import type { ReadmeData } from '@/types';
 import type { LayoutConfig } from '@/types/layout';
 import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
 import ArchiveGameScene, { type GameTelemetry, type GameTravelRequest } from '@/components/world/ArchiveGameScene';
-import ArchiveCodexPanel from '@/components/world/ArchiveCodexPanel';
-import ArchiveDialoguePanel from '@/components/world/ArchiveDialoguePanel';
-import ArchiveHomeRecordPanel from '@/components/world/ArchiveHomeRecordPanel';
 import ArchiveSoundscape from '@/components/world/ArchiveSoundscape';
 import WorldHud from '@/components/world/WorldHud';
 import WorldModeSwitch from '@/components/world/WorldModeSwitch';
@@ -20,7 +17,7 @@ import {
   type WorldWaypoint,
 } from '@/components/world/archiveWorldConfig';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
-import { buildHomeExhibits, type HomeRecordId } from '@/components/world/archiveHomeRecords';
+import { buildHomeExhibits, type HomeInspectionId } from '@/components/world/archiveHomeRecords';
 import { buildArchiveKeepsakes } from '@/components/world/archiveKeepsakes';
 import { buildWorldDialogueContext, type WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
 import { useArchiveFieldRoute } from '@/hooks/useArchiveFieldRoute';
@@ -31,6 +28,7 @@ import { useArchiveForaging } from '@/hooks/useArchiveForaging';
 import WorldFieldFeedback from '@/components/world/WorldFieldFeedback';
 import { useArchiveWarmth } from '@/hooks/useArchiveWarmth';
 import { useArchiveVitality } from '@/hooks/useArchiveVitality';
+import ArchiveWorldPanels from '@/components/world/ArchiveWorldPanels';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -53,7 +51,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     behavior: 'resting',
   });
   const [dialoguePersona, setDialoguePersona] = useState<'owner' | 'companion'>('owner');
-  const [selectedHomeRecord, setSelectedHomeRecord] = useState<HomeRecordId | null>(null);
+  const [selectedHomeRecord, setSelectedHomeRecord] = useState<HomeInspectionId | null>(null);
   const playerPosition = useRef(new Vector3(...WORLD_PLAYER_SPAWN));
   const dialogueContext = useRef<WorldDialogueContext | null>(null);
   const config = layoutConfig ?? DEFAULT_LAYOUT_CONFIG;
@@ -256,22 +254,12 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
         />
       )}
 
-      {mode === 'archive' && <ArchiveCodexPanel data={data} layoutConfig={config} />}
-      {mode === 'dialogue' && (
-        <ArchiveDialoguePanel
-          data={data}
-          persona={dialoguePersona}
-          worldContext={dialogueContext.current ?? worldDialogueContext}
-        />
-      )}
-
-      {mode === 'world' && selectedHomeRecord && (
-        <ArchiveHomeRecordPanel
-          data={data}
-          recordId={selectedHomeRecord}
-          onClose={() => setSelectedHomeRecord(null)}
-        />
-      )}
+      <ArchiveWorldPanels
+        mode={mode} data={data} layoutConfig={config} dialoguePersona={dialoguePersona}
+        dialogueContext={dialogueContext.current ?? worldDialogueContext}
+        homeSelection={selectedHomeRecord} homeExhibits={homeExhibits}
+        onCloseHome={() => setSelectedHomeRecord(null)}
+      />
 
       {inventoryOpen && (
         <WorldSatchel

@@ -9,7 +9,7 @@ import { InstancedAsset, MEDIEVAL_ROOT, MedievalAsset, PROP_ROOT, PropAsset } fr
 import { RIVER_BRIDGE_POSITION, WORLD_HOME_POSITION } from '@/components/world/archiveWorldConstants';
 import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import { ARCHIVE_HOME_ROTATION } from '@/components/world/archiveWorldZones';
-import type { HomeExhibit, HomeRecordId } from '@/components/world/archiveHomeRecords';
+import type { HomeExhibit, HomeInspectionId } from '@/components/world/archiveHomeRecords';
 
 export function RiverFootbridge() {
   const floor = useMemo(() => Array.from({ length: 14 }, (_, index) => {
@@ -62,7 +62,7 @@ function ArchiveHomeModel({
   playerPosition,
   exhibits,
 }: {
-  onInspect: (record: HomeRecordId) => void;
+  onInspect: (record: HomeInspectionId) => void;
   playerPosition: MutableRefObject<Vector3>;
   exhibits: HomeExhibit[];
 }) {
@@ -94,7 +94,7 @@ export function CoastalArchiveHome({
   playerPosition,
   exhibits,
 }: {
-  onInspect: (record: HomeRecordId) => void;
+  onInspect: (record: HomeInspectionId) => void;
   playerPosition: MutableRefObject<Vector3>;
   exhibits: HomeExhibit[];
 }) {

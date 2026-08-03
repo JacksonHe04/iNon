@@ -1,7 +1,7 @@
 import type { MutableRefObject } from 'react';
 import type { Vector3 } from 'three';
 import type { BlockType } from '@/types/layout';
-import type { HomeExhibit, HomeRecordId } from '@/components/world/archiveHomeRecords';
+import type { HomeExhibit, HomeInspectionId } from '@/components/world/archiveHomeRecords';
 import type { CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
 import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
 
@@ -49,7 +49,7 @@ export interface ArchiveGameSceneProps {
   onCompanionTelemetry: (telemetry: CompanionTelemetry) => void;
   collectedKeepsakes: string[];
   onCollectKeepsake: (id: string) => void;
-  onInspectHomeRecord: (record: HomeRecordId) => void;
+  onInspectHomeRecord: (record: HomeInspectionId) => void;
   homeExhibits: HomeExhibit[];
   forageCollectedIds: string[];
   onFallImpact: (impactSpeed: number, mounted: boolean) => void;

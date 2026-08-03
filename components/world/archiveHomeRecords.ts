@@ -1,14 +1,17 @@
 import type { ReadmeData } from '@/types';
 
 export type HomeRecordId = 'desk' | 'bookcase' | 'record-box' | 'bedside' | 'letters';
+export type HomeInspectionId = HomeRecordId | `exhibit:${string}`;
 
 export interface HomeExhibit {
   id: string;
   kind: 'music' | 'film' | 'book';
-  recordId: HomeRecordId;
   title: string;
   creator: string;
   imageUrl: string;
+  comment: string;
+  href: string;
+  categoryName: string;
 }
 
 export interface HomeRecordEntry {
@@ -33,7 +36,6 @@ export function buildHomeExhibits(data: ReadmeData): HomeExhibit[] {
   const collect = (
     items: ReadmeData['library']['music']['works'],
     kind: HomeExhibit['kind'],
-    recordId: HomeRecordId,
     limit: number,
   ) => items
     .filter((item): item is typeof item & { imageUrl: string } => Boolean(item.imageUrl))
@@ -41,17 +43,27 @@ export function buildHomeExhibits(data: ReadmeData): HomeExhibit[] {
     .map((item) => ({
       id: `${kind}:${item.id}`,
       kind,
-      recordId,
       title: item.name,
       creator: item.creator,
       imageUrl: item.imageUrl,
+      comment: item.comment,
+      href: item.link,
+      categoryName: item.categoryName,
     }));
 
   return [
-    ...collect(data.library.music.works, 'music', 'record-box', 3),
-    ...collect(data.library.film.works, 'film', 'record-box', 1),
-    ...collect(data.library.book.works, 'book', 'bookcase', 1),
+    ...collect(data.library.music.works, 'music', 3),
+    ...collect(data.library.film.works, 'film', 1),
+    ...collect(data.library.book.works, 'book', 1),
   ];
+}
+
+export function exhibitInspectionId(id: string): HomeInspectionId {
+  return `exhibit:${id}`;
+}
+
+export function exhibitIdFromInspection(id: HomeInspectionId | null) {
+  return id?.startsWith('exhibit:') ? id.slice('exhibit:'.length) : null;
 }
 
 export function buildHomeRecord(data: ReadmeData, id: HomeRecordId): HomeRecord {

@@ -5,7 +5,7 @@ import { Image } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { DoubleSide, Group, Vector3 } from 'three';
 import { FurnitureAsset, MedievalAsset, PropAsset } from '@/components/world/ArchiveAsset';
-import type { HomeExhibit, HomeRecordId } from '@/components/world/archiveHomeRecords';
+import { exhibitInspectionId, type HomeExhibit, type HomeInspectionId, type HomeRecordId } from '@/components/world/archiveHomeRecords';
 import { WORLD_HOME_POSITION } from '@/components/world/archiveWorldConstants';
 
 function InteractiveFurniture({
@@ -16,7 +16,7 @@ function InteractiveFurniture({
 }: {
   record: HomeRecordId;
   label: string;
-  onInspect: (record: HomeRecordId) => void;
+  onInspect: (record: HomeInspectionId) => void;
   children: ReactNode;
 }) {
   const [hovered, setHovered] = useState(false);
@@ -50,7 +50,7 @@ function ExhibitImage({
   position: [number, number, number];
   rotation?: [number, number, number];
   scale: [number, number];
-  onInspect: (record: HomeRecordId) => void;
+  onInspect: (record: HomeInspectionId) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   useEffect(() => {
@@ -66,7 +66,7 @@ function ExhibitImage({
       scale={hovered ? 1.035 : 1}
       onClick={(event) => {
         event.stopPropagation();
-        onInspect(exhibit.recordId);
+        onInspect(exhibitInspectionId(exhibit.id));
       }}
       onPointerOver={(event) => {
         event.stopPropagation();
@@ -91,7 +91,7 @@ function HomeDataExhibits({
   onInspect,
 }: {
   exhibits: HomeExhibit[];
-  onInspect: (record: HomeRecordId) => void;
+  onInspect: (record: HomeInspectionId) => void;
 }) {
   const music = exhibits.filter((exhibit) => exhibit.kind === 'music');
   const film = exhibits.find((exhibit) => exhibit.kind === 'film');
@@ -149,7 +149,7 @@ export default function ArchiveHomeInterior({
   playerPosition,
 }: {
   exhibits: HomeExhibit[];
-  onInspect: (record: HomeRecordId) => void;
+  onInspect: (record: HomeInspectionId) => void;
   playerPosition: MutableRefObject<Vector3>;
 }) {
   const interior = useRef<Group>(null);
