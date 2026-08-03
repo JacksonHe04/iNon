@@ -13,6 +13,12 @@ export const GROUND_VARIANT_COUNT = 15;
 export const GROUND_MAX_PER_VARIANT = 240;
 const ITEMS_PER_CHUNK = 42;
 
+function itemsForRing(ring: number) {
+  if (ring === 0) return ITEMS_PER_CHUNK;
+  if (ring === 1) return 32;
+  return 16;
+}
+
 export interface GroundPlacement extends WorldPlacement {
   key: string;
   y: number;
@@ -50,7 +56,9 @@ export function groundPlacementsAround({
         x: chunkX * GROUND_CHUNK_SIZE + 4 + random() * (GROUND_CHUNK_SIZE - 8),
         z: chunkZ * GROUND_CHUNK_SIZE + 4 + random() * (GROUND_CHUNK_SIZE - 8),
       }));
-      for (let index = 0; index < ITEMS_PER_CHUNK; index += 1) {
+      const ring = Math.max(Math.abs(chunkX - centerX), Math.abs(chunkZ - centerZ));
+      const itemCount = itemsForRing(ring);
+      for (let index = 0; index < itemCount; index += 1) {
         const cluster = clusters[Math.floor(random() * clusters.length)];
         const angle = random() * Math.PI * 2;
         const radiusFromCluster = Math.sqrt(random()) * 6.8;
