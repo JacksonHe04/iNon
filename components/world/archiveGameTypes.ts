@@ -36,6 +36,7 @@ export interface GameTravelRequest {
 export interface ArchiveGameSceneProps {
   entered: boolean;
   worldTime: WorldTimeSnapshot;
+  warmth: number;
   destinations: GameDestination[];
   playerPosition: MutableRefObject<Vector3>;
   travelRequest: GameTravelRequest | null;
@@ -54,6 +55,7 @@ export interface ArchiveGameSceneProps {
 
 export interface FirstPersonExplorerProps {
   enabled: boolean;
+  warmth: number;
   destinations: GameDestination[];
   playerPosition: MutableRefObject<Vector3>;
   travelRequest: GameTravelRequest | null;

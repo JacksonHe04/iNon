@@ -13,6 +13,7 @@ import type { CompanionBehavior, CompanionTelemetry } from '@/components/world/A
 import type { WorldRestSite } from '@/components/world/archiveWorldRest';
 import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
 import { FORAGE_RECIPE_COST, type WorldForagePatch } from '@/components/world/archiveWorldForage';
+import type { WorldWarmthLabel } from '@/components/world/archiveWorldWarmth';
 
 const COMPANION_BEHAVIOR_LABELS: Record<CompanionBehavior, string> = {
   resting: '在身边休息',
@@ -38,6 +39,9 @@ export default function WorldHud({
   recentFieldRouteStage,
   restSite,
   worldTime,
+  warmth,
+  warmthLabel,
+  warmthSource,
   foragePatch,
   forageIngredients,
   cookSite,
@@ -60,6 +64,9 @@ export default function WorldHud({
   recentFieldRouteStage: FieldRouteStage | null;
   restSite: WorldRestSite | null;
   worldTime: WorldTimeSnapshot;
+  warmth: number;
+  warmthLabel: WorldWarmthLabel;
+  warmthSource: string;
   foragePatch: WorldForagePatch | null;
   forageIngredients: number;
   cookSite: WorldRestSite | null;
@@ -220,11 +227,11 @@ export default function WorldHud({
           <i><em style={{ width: `${telemetry.stamina}%` }} /></i>
         </div>
         <div className="archive-world-status__bar is-health">
-          <label><span>状态</span><b>100</b></label>
-          <i><em style={{ width: '100%' }} /></i>
+          <label><span>体温 · {warmthLabel}</span><b>{Math.round(warmth)}</b></label>
+          <i><em style={{ width: `${warmth}%` }} /></i>
         </div>
         <p>DAY {worldTime.day} · 生态 {ARCHIVE_SPECIES_COUNT} 种 · ALT {telemetry.y.toFixed(1)} M · SPD {telemetry.speed.toFixed(1)}</p>
-        <p>苔苔 · {COMPANION_BEHAVIOR_LABELS[companionTelemetry.behavior]} · {companionDistance} M</p>
+        <p>{warmthSource} · 苔苔 {COMPANION_BEHAVIOR_LABELS[companionTelemetry.behavior]} · {companionDistance} M</p>
       </div>
     </div>
   );

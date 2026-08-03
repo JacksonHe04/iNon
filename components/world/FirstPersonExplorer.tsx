@@ -15,8 +15,10 @@ import type {
   GameTravelRequest,
   FirstPersonExplorerProps,
 } from '@/components/world/archiveGameTypes';
+import { explorerMovementSpeed } from '@/components/world/archiveExplorerMotion';
 export default function FirstPersonExplorer({
   enabled,
+  warmth,
   destinations,
   playerPosition,
   travelRequest,
@@ -185,13 +187,9 @@ export default function FirstPersonExplorer({
       0,
       Math.min(100, stamina.current + (sprinting && !isFlying ? (isMounted ? -14 : -22) : 17) * delta),
     );
-    const speed = isFlying
-      ? sprinting ? 30 : 17
-      : inWater
-      ? isMounted ? 5.8 : 4.8
-      : isMounted
-        ? sprinting ? 34 : 18
-        : sprinting ? 22 : 12;
+    const speed = explorerMovementSpeed({
+      flying: isFlying, sprinting, inWater, mounted: isMounted, warmth,
+    });
     if (moving) direction.normalize().multiplyScalar(speed);
     if (isMounted) {
       mountMotion.current = moving ? (sprinting ? 'Gallop' : 'Walk') : 'Idle';

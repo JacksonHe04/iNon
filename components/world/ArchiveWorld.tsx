@@ -2,18 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import {
-  ACESFilmicToneMapping,
-  SRGBColorSpace,
-  Vector3,
-} from 'three';
+import { ACESFilmicToneMapping, SRGBColorSpace, Vector3 } from 'three';
 import type { ReadmeData } from '@/types';
 import type { LayoutConfig } from '@/types/layout';
 import { DEFAULT_LAYOUT_CONFIG } from '@/lib/content/default-layout';
-import ArchiveGameScene, {
-  type GameTelemetry,
-  type GameTravelRequest,
-} from '@/components/world/ArchiveGameScene';
+import ArchiveGameScene, { type GameTelemetry, type GameTravelRequest } from '@/components/world/ArchiveGameScene';
 import ArchiveCodexPanel from '@/components/world/ArchiveCodexPanel';
 import ArchiveDialoguePanel from '@/components/world/ArchiveDialoguePanel';
 import ArchiveHomeRecordPanel from '@/components/world/ArchiveHomeRecordPanel';
@@ -28,19 +21,16 @@ import {
   type WorldWaypoint,
 } from '@/components/world/archiveWorldConfig';
 import { WORLD_PLAYER_SPAWN } from '@/components/world/archiveWorldConstants';
-import {
-  buildHomeExhibits,
-  type HomeRecordId,
-} from '@/components/world/archiveHomeRecords';
+import { buildHomeExhibits, type HomeRecordId } from '@/components/world/archiveHomeRecords';
 import { buildArchiveKeepsakes } from '@/components/world/archiveKeepsakes';
-import { buildWorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
-import type { WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
+import { buildWorldDialogueContext, type WorldDialogueContext } from '@/components/world/archiveWorldTelemetry';
 import { useArchiveFieldRoute } from '@/hooks/useArchiveFieldRoute';
 import type { CompanionTelemetry } from '@/components/world/ArchiveCompanionDog';
 import { useArchiveResting } from '@/hooks/useArchiveResting';
 import { useArchiveWorldClock } from '@/hooks/useArchiveWorldClock';
 import { useArchiveForaging } from '@/hooks/useArchiveForaging';
 import WorldFieldFeedback from '@/components/world/WorldFieldFeedback';
+import { useArchiveWarmth } from '@/hooks/useArchiveWarmth';
 
 interface ArchiveWorldProps {
   data: ReadmeData;
@@ -80,7 +70,11 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
   const lastRecoveredKeepsake = allKeepsakes.find((record) => record.id === lastKeepsake);
   const worldEnabled = mode === 'world' && !inventoryOpen && !selectedHomeRecord;
   const worldClock = useArchiveWorldClock({ owner: data.basic.name, running: worldEnabled });
-  const advanceAfterRest = useCallback(() => worldClock.advance(360), [worldClock.advance]);
+  const warmth = useArchiveWarmth({ owner: data.basic.name, telemetry, worldTime: worldClock, enabled: worldEnabled });
+  const advanceAfterRest = useCallback(() => {
+    worldClock.advance(360);
+    warmth.restore();
+  }, [warmth.restore, worldClock.advance]);
   const resting = useArchiveResting({
     owner: data.basic.name,
     telemetry,
@@ -103,6 +97,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
     collectedKeepsakeIds: collectedKeepsakes,
     worldTime: worldClock,
     forageIngredients: foraging.ingredients,
+    warmth: warmth.value,
   });
 
   useEffect(() => {
@@ -193,6 +188,7 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           <ArchiveGameScene
             entered={worldEnabled}
             worldTime={worldClock}
+            warmth={warmth.value}
             destinations={OUTDOOR_DESTINATIONS}
             playerPosition={playerPosition}
             travelRequest={travelRequest}
@@ -236,6 +232,9 @@ export default function ArchiveWorld({ data, layoutConfig }: ArchiveWorldProps) 
           recentFieldRouteStage={fieldRoute.recentStage}
           restSite={resting.restSite}
           worldTime={worldClock}
+          warmth={warmth.value}
+          warmthLabel={warmth.label}
+          warmthSource={warmth.source}
           foragePatch={foraging.nearbyPatch}
           forageIngredients={foraging.ingredients}
           cookSite={foraging.cookSite}

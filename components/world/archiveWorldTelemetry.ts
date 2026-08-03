@@ -7,6 +7,7 @@ import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import { worldBiomeAt, type WorldBiome } from '@/components/world/archiveWorldBiomes';
 import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
 import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
+import { worldWarmthLabel } from '@/components/world/archiveWorldWarmth';
 
 const BIOME_LABELS: Record<WorldBiome, string> = {
   coast: '灰绿海岸',
@@ -35,6 +36,8 @@ export interface WorldDialogueContext {
   clockLabel: string;
   phaseLabel: string;
   forageIngredients: number;
+  warmth: number;
+  warmthLabel: string;
   companionNearby: boolean;
   collectedKeepsakeIds: string[];
 }
@@ -73,6 +76,7 @@ export function buildWorldDialogueContext({
   collectedKeepsakeIds,
   worldTime,
   forageIngredients,
+  warmth,
 }: {
   telemetry: GameTelemetry;
   rations: number;
@@ -80,6 +84,7 @@ export function buildWorldDialogueContext({
   collectedKeepsakeIds: string[];
   worldTime: WorldTimeSnapshot;
   forageIngredients: number;
+  warmth: number;
 }): WorldDialogueContext {
   return {
     location: worldLocationLabel(telemetry),
@@ -94,6 +99,8 @@ export function buildWorldDialogueContext({
     clockLabel: worldTime.clockLabel,
     phaseLabel: worldTime.phaseLabel,
     forageIngredients,
+    warmth: Math.round(warmth),
+    warmthLabel: worldWarmthLabel(warmth),
     companionNearby,
     collectedKeepsakeIds,
   };

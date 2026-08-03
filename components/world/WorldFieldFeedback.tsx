@@ -30,7 +30,7 @@ export default function WorldFieldFeedback({
       {restFeedback && !forageFeedback && (
         <div className="archive-world-keepsake-toast is-rest" role="status">
           <span>{restFeedback.site.folio}</span>
-          <strong>{restFeedback.status === 'rested' ? '体力已经恢复' : '背包里没有足够口粮'}</strong>
+          <strong>{restFeedback.status === 'rested' ? '体力与体温已经恢复' : '背包里没有足够口粮'}</strong>
           <small>{restFeedback.status === 'rested'
             ? `${restFeedback.site.title} · ${restFeedback.site.rationCost ? '口粮 -1' : '家园补给'} · 时间 +6H`
             : '返回主屋补给，或在背包中检查物资'}</small>

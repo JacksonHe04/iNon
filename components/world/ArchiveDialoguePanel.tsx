@@ -62,7 +62,7 @@ export default function ArchiveDialoguePanel({
           DAY {worldContext.day} · {worldContext.phaseLabel} {worldContext.clockLabel} · {worldContext.motion} · X {worldContext.x} / Z {worldContext.z} · ALT {worldContext.y.toFixed(1)} M · 朝向 {worldContext.heading}°
         </p>
         <small>
-          体力 {worldContext.stamina} · 口粮 {worldContext.rations} · 食材 {worldContext.forageIngredients} / 3 · 田野札记 {worldContext.collectedKeepsakeIds.length} / 18 · {worldContext.companionNearby ? '苔苔就在身边' : '苔苔正在循着气味赶来'}
+          体力 {worldContext.stamina} · 体温 {worldContext.warmth}（{worldContext.warmthLabel}） · 口粮 {worldContext.rations} · 食材 {worldContext.forageIngredients} / 3 · 田野札记 {worldContext.collectedKeepsakeIds.length} / 18 · {worldContext.companionNearby ? '苔苔就在身边' : '苔苔正在循着气味赶来'}
         </small>
       </aside>
 

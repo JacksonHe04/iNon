@@ -77,6 +77,7 @@ function Diagnostics({ onReport }: { onReport: (message: string) => void }) {
 export default function ArchiveGameScene({
   entered,
   worldTime,
+  warmth,
   destinations,
   playerPosition,
   travelRequest,
@@ -160,6 +161,7 @@ export default function ArchiveGameScene({
           </Suspense>
           <FirstPersonExplorer
             enabled={entered}
+            warmth={warmth}
             destinations={destinations}
             playerPosition={playerPosition}
             travelRequest={travelRequest}
