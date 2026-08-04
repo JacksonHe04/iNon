@@ -57,6 +57,7 @@ export default function ArchiveCompanionDog({
   const obstacles = useRef<CompanionObstacle[]>([]);
   const obstacleCell = useRef('');
   const lastTelemetryAt = useRef(-Infinity);
+  const lastTelemetry = useRef<CompanionTelemetry | null>(null);
   const animationDelta = useRef(0);
 
   useEffect(() => {
@@ -196,12 +197,21 @@ export default function ArchiveCompanionDog({
     }
     if (clock.elapsedTime - lastTelemetryAt.current >= 0.75) {
       lastTelemetryAt.current = clock.elapsedTime;
-      onTelemetry({
+      const nextTelemetry = {
         x: group.position.x,
         y: group.position.y,
         z: group.position.z,
         behavior,
-      });
+      };
+      const previous = lastTelemetry.current;
+      if (!previous || previous.behavior !== behavior || Math.hypot(
+        previous.x - nextTelemetry.x,
+        previous.y - nextTelemetry.y,
+        previous.z - nextTelemetry.z,
+      ) >= 0.08) {
+        lastTelemetry.current = nextTelemetry;
+        onTelemetry(nextTelemetry);
+      }
     }
   });
 
