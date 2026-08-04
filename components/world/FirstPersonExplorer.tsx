@@ -262,7 +262,7 @@ export default function FirstPersonExplorer({
     ) < 4.6;
 
     telemetryFrame.current += 1;
-    if (telemetryFrame.current % 6 === 0) {
+    if (telemetryFrame.current % 10 === 0) {
       const terrain = terrainKindAt(translation.x, translation.z, groundHeight);
       const nextTelemetry: GameTelemetry = {
         x: translation.x,
