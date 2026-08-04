@@ -17,16 +17,20 @@ export function useArchiveWarmth({
   const [warmth, setWarmth] = useState(INITIAL_WARMTH);
   const [ready, setReady] = useState(false);
   const warmthRef = useRef(INITIAL_WARMTH);
-  const climateRef = useRef(worldWarmthState(telemetry, worldTime, warmth));
-  const persistTick = useRef(0);
   const climate = worldWarmthState(telemetry, worldTime, warmth);
+  const climateRef = useRef(climate);
+  const persistTick = useRef(0);
+  const persistedWarmth = useRef<number | null>(null);
   climateRef.current = climate;
 
   const update = useCallback((next: number, persist = false) => {
     const safe = Math.max(0, Math.min(100, Math.round(next * 10) / 10));
-    warmthRef.current = safe;
-    setWarmth(safe);
-    if (!persist) return;
+    if (safe !== warmthRef.current) {
+      warmthRef.current = safe;
+      setWarmth(safe);
+    }
+    if (!persist || persistedWarmth.current === safe) return;
+    persistedWarmth.current = safe;
     try { window.localStorage.setItem(storageKey, String(safe)); } catch { /* Keep warmth in memory. */ }
   }, [storageKey]);
 
