@@ -3,7 +3,6 @@ import ShellLayout from '@/components/layout/ShellLayout';
 import PublicBlockRenderer from '@/components/blocks/PublicBlockRenderer';
 import PageViewTracker from '@/components/analytics/PageViewTracker';
 import { Analytics } from '@vercel/analytics/next';
-import { deduplicateReadmeData } from '@/lib/content/deduplicate';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +13,7 @@ interface UserPublicPageProps {
 export default async function UserPublicPage({ params }: UserPublicPageProps) {
   const { slug } = await params;
   const pageData = await getPublicPageData(slug);
-  const data = deduplicateReadmeData(pageData.data);
+  const data = pageData.data;
 
   return (
     <ShellLayout

@@ -6,6 +6,7 @@ import { DEFAULT_PROFILE_SLUG } from './constants';
 import { getReadmeData, mapReadmeData } from './index';
 import { getLayoutConfig, mergeWithDefaultLayoutConfig } from './layout';
 import { normalizeAggregatedSourceData } from './readme-source-data';
+import { deduplicateReadmeData } from './deduplicate';
 import { PUBLIC_PAGE_CACHE_TAG } from './public-cache';
 import type { ReadmeData } from '@/types';
 import type { ProfileRow } from '@/types/database';
@@ -39,7 +40,7 @@ async function loadLegacyPublicPageData(slug: string): Promise<PublicPageData> {
     getLayoutConfig(slug),
     getProfileIdBySlug(slug),
   ]);
-  return { data, layoutConfig, profileId: profileId ?? '' };
+  return { data: deduplicateReadmeData(data), layoutConfig, profileId: profileId ?? '' };
 }
 
 async function loadPublicPageData(slug: string): Promise<PublicPageData> {
@@ -57,7 +58,7 @@ async function loadPublicPageData(slug: string): Promise<PublicPageData> {
   if (!payload.profile?.id || !source) return loadLegacyPublicPageData(slug);
 
   return {
-    data: mapReadmeData(payload.profile, source),
+    data: deduplicateReadmeData(mapReadmeData(payload.profile, source)),
     layoutConfig: resolvedLayout(slug, payload),
     profileId: payload.profile.id,
   };

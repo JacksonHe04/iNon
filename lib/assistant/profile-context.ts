@@ -1,12 +1,11 @@
 import { unstable_cache } from 'next/cache';
-import { deduplicateReadmeData } from '@/lib/content/deduplicate';
 import { getPublicPageData } from '@/lib/content/public-page-data';
 import { PUBLIC_PAGE_CACHE_TAG } from '@/lib/content/public-cache';
 import { readmeDataToMarkdown } from '@/lib/markdown';
 
 async function loadAssistantProfileContext() {
   const pageData = await getPublicPageData('');
-  const readmeData = deduplicateReadmeData(pageData.data);
+  const readmeData = pageData.data;
   return {
     readmeData,
     profileMarkdown: readmeDataToMarkdown(readmeData),
