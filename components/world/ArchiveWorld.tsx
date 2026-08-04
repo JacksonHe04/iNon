@@ -1,4 +1,9 @@
 'use client';
+import '@/app/styles/world-navigation.css';
+import '@/app/styles/world-panels-hud.css';
+import '@/app/styles/world-inventory-responsive.css';
+import '@/app/styles/world-collection-realms.css';
+import '@/app/styles/world-interior-overlay.css';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { ACESFilmicToneMapping, SRGBColorSpace, Vector3 } from 'three';

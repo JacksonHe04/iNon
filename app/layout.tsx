@@ -13,11 +13,6 @@ import './styles/archive-dashboard-admin.css';
 import './styles/archive-responsive.css';
 import './styles/world-foundation.css';
 import './styles/archive-field-panels.css';
-import './styles/world-navigation.css';
-import './styles/world-panels-hud.css';
-import './styles/world-inventory-responsive.css';
-import './styles/world-collection-realms.css';
-import './styles/world-interior-overlay.css';
 import './styles/public-atmosphere.css';
 
 export const dynamic = 'force-dynamic';
