@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { ReactNode, createContext, useContext } from 'react';
 
 export const GlassCardContext = createContext({ hoverEnabled: true });
@@ -17,12 +16,12 @@ export default function GlassCard({ children, className = '', hover = true, onCl
   const shouldHover = hover && hoverEnabled;
 
   return (
-    <motion.div
+    <div
       className={`archive-paper-surface p-6 ${className}`}
       data-hover={shouldHover ? 'true' : 'false'}
       onClick={onClick}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
