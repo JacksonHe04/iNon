@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import GlassCard from '@/components/GlassCard';
 import { Tag, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface TagsBlockProps {
   keywords: string[];
@@ -72,16 +71,14 @@ export default function TagsBlock({
         {allTags.map((tag, idx) => {
           const isActive = activeTags.has(tag);
           return (
-            <motion.button
+            <button
               key={idx}
               onClick={() => toggleTag(tag)}
-              className={`flex flex-col justify-between p-2.5 rounded-xl border text-left text-xs transition-all duration-300 select-none relative overflow-hidden ${
+              className={`flex flex-col justify-between p-2.5 rounded-xl border text-left text-xs transition-all duration-300 select-none relative overflow-hidden hover:-translate-y-0.5 active:scale-[0.96] ${
                 isActive
                   ? 'border-purple-500/40 bg-gradient-to-br from-purple-500/15 to-pink-500/10 text-purple-600 dark:text-purple-300 shadow-md'
                   : 'border-white/20 bg-white/30 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 hover:border-purple-400/30 hover:bg-white/50 dark:hover:bg-gray-800/50'
               }`}
-              whileHover={{ y: -3 }}
-              whileTap={{ scale: 0.96 }}
             >
               <div className="flex items-center justify-between w-full mb-1">
                 <span className="text-[9px] uppercase tracking-wide text-gray-400/70 font-mono">
@@ -90,7 +87,7 @@ export default function TagsBlock({
                 {isActive && <Sparkles className="w-3 h-3 text-purple-500 animate-pulse" />}
               </div>
               <p className="font-bold leading-tight truncate w-full">{tag}</p>
-            </motion.button>
+            </button>
           );
         })}
       </div>

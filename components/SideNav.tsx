@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { scrollToElement } from '@/lib/utils';
 import type { BlockConfig, NavSectionConfig, BlockType } from '@/types/layout';
 import { getBlockTitle, getBlockIcon } from '@/lib/blocks/registry';
@@ -37,12 +36,6 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
   const [activeSection, setActiveSection] = useState<string>(
     navItems[0]?.id ?? 'bio'
   );
-
-  // 避免 framer-motion 在 SSR 阶段渲染初始 transform 导致 hydration mismatch
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const isClickScrolling = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -104,10 +97,7 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
   }
 
   return (
-    <motion.nav
-      initial={mounted ? { x: -24, opacity: 0 } : false}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+    <nav
       className="fixed left-2 lg:left-4 -translate-y-1/2 z-40 hidden md:block"
       style={{ top: 'calc(50% + 40px)' }}
     >
@@ -149,10 +139,8 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
                   <span>{section.label}</span>
                 </div>
                 {activeSection === section.id && (
-                  <motion.div
-                    layoutId="activeSection"
-                    className="absolute inset-0 bg-teal-500/10 border-l-2 border-teal-500/70"
-                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                  <div
+                    className="absolute inset-0 bg-teal-500/10 border-l-2 border-teal-500/70 transition-colors duration-300"
                   />
                 )}
               </button>
@@ -160,6 +148,6 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
           })}
         </div>
       </div>
-    </motion.nav>
+    </nav>
   );
 }

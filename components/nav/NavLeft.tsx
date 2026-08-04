@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { MapPin, RefreshCw } from 'lucide-react';
 import type { ReadmeData } from '@/types';
 
@@ -48,10 +47,9 @@ export function NavLeft({
         <div className="w-10 h-10 flex items-center justify-center rounded-lg border border-white/40 bg-white/30 text-gray-700 dark:text-gray-200 font-bold text-sm">
           {data.basic.name[0]}
         </div>
-        <motion.button
+        <button
           type="button"
-          whileHover={{ scale: 1.04, y: -2 }}
-          className="hidden h-10 sm:flex flex-col justify-center text-left text-gray-700 rounded-xl px-3 bg-white/30 border border-white/40 cursor-pointer"
+          className="hidden h-10 sm:flex flex-col justify-center text-left text-gray-700 rounded-xl px-3 bg-white/30 border border-white/40 cursor-pointer transition-transform hover:-translate-y-0.5 hover:scale-[1.04]"
           onClick={() => {
             if (distance !== null) {
               setShowLocationModal(true);
@@ -74,11 +72,10 @@ export function NavLeft({
           ) : (
             <span className="text-xs text-gray-500/80 hover:text-green-600 transition-colors">算算离我多远？</span>
           )}
-        </motion.button>
-        <motion.button
+        </button>
+        <button
           type="button"
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="hidden h-10 md:flex flex-col justify-center text-left text-gray-700 rounded-xl px-3 bg-white/30 border border-white/40"
+          className="hidden h-10 md:flex flex-col justify-center text-left text-gray-700 rounded-xl px-3 bg-white/30 border border-white/40 transition-transform hover:-translate-y-0.5 hover:scale-[1.02]"
           onClick={() => setShowLevelModal(true)}
         >
           <span className="flex items-center gap-2 text-xs lg:text-sm font-medium">
@@ -88,14 +85,12 @@ export function NavLeft({
             </span>
           </span>
           <div className="w-28 lg:w-32 h-1.5 bg-gray-200/80 rounded-full overflow-hidden mt-1">
-            <motion.div
-              className="h-full bg-gradient-to-r from-green-500 to-teal-500"
-              initial={{ width: 0 }}
-              animate={{ width: isMounted ? `${yearProgress.percentage}%` : '0%' }}
-              transition={{ duration: 1 }}
+            <div
+              className="h-full bg-gradient-to-r from-green-500 to-teal-500 transition-[width] duration-1000"
+              style={{ width: isMounted ? `${yearProgress.percentage}%` : '0%' }}
             />
           </div>
-        </motion.button>
+        </button>
       </div>
     </div>
   );

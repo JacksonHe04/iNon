@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import type { ReadmeData } from '@/types';
@@ -15,11 +15,12 @@ import useUserDistance from '@/hooks/useUserDistance';
 import useAIAssistant from '@/hooks/useAIAssistant';
 import NavLeft from './nav/NavLeft';
 import NavRight from './nav/NavRight';
-import NavModals from './nav/NavModals';
-import FloatingAIPanel from './nav/FloatingAIPanel';
 import type { TopNavSession } from './nav/types';
 import WorldModeSwitch from './world/WorldModeSwitch';
 import { useUniversalTopNav } from './nav/useUniversalTopNav';
+
+const NavModals = dynamic(() => import('./nav/NavModals'), { ssr: false });
+const FloatingAIPanel = dynamic(() => import('./nav/FloatingAIPanel'), { ssr: false });
 
 interface TopNavProps {
   data: ReadmeData;
@@ -104,6 +105,12 @@ export default function TopNav({ data, className, blocks, publicPath = '/' }: To
     handleInputKeyDown,
     getInputPlaceholder,
   } = useAIAssistant({ data });
+  const shouldMountNavModals = showAuthModal
+    || showNotifications
+    || showLocationModal
+    || showLevelModal
+    || showMobilePanel
+    || aiState === 'docked';
 
   const handleExperienceModeChange = (mode: 'world' | 'archive' | 'dialogue') => {
     if (experience) {
@@ -158,10 +165,7 @@ export default function TopNav({ data, className, blocks, publicPath = '/' }: To
 
   return (
     <>
-      <motion.nav
-        initial={{ y: -24, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      <nav
         className={className || "fixed top-0 left-0 right-0 z-50 border-b border-[var(--archive-line-strong)] bg-[rgb(var(--archive-paper-rgb)/0.96)] archive-top-nav"}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -199,9 +203,9 @@ export default function TopNav({ data, className, blocks, publicPath = '/' }: To
             />
           </div>
         </div>
-      </motion.nav>
+      </nav>
 
-      <NavModals
+      {shouldMountNavModals ? <NavModals
         data={data}
         userEmail={session?.email ?? null}
         age={age}
@@ -225,9 +229,9 @@ export default function TopNav({ data, className, blocks, publicPath = '/' }: To
         setShowMobilePanel={setShowMobilePanel}
         aiState={aiState}
         setAIState={setAIState}
-      />
+      /> : null}
 
-      <FloatingAIPanel
+      {aiState === 'floating' ? <FloatingAIPanel
         aiState={aiState}
         setAIState={setAIState}
         messages={messages}
@@ -239,7 +243,7 @@ export default function TopNav({ data, className, blocks, publicPath = '/' }: To
         handleInputKeyDown={handleInputKeyDown}
         getInputPlaceholder={getInputPlaceholder}
         nickname={nickname}
-      />
+      /> : null}
     </>
   );
 }
