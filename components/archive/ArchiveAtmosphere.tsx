@@ -16,7 +16,7 @@ const PROFILE_RELICS = [
 export default function ArchiveAtmosphere({ profile = false }: { profile?: boolean }) {
   return (
     <div
-      className={`archive-atmosphere${profile ? ' archive-atmosphere--profile' : ''}`}
+      className={`archive-atmosphere archive-atmosphere--${profile ? 'profile' : 'global'}`}
       aria-hidden="true"
     >
       <div className="archive-atmosphere__landscape" />

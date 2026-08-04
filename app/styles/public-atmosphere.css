@@ -1,4 +1,8 @@
 /* Public archive atmosphere — a gently moving, weathered specimen table. */
+body:has(.public-experience) > .archive-atmosphere--global {
+  display: none;
+}
+
 .public-experience > .archive-atmosphere--profile {
   position: absolute;
   z-index: 1;
