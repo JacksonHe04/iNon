@@ -5,16 +5,23 @@ interface BlockImageProps {
   alt: string;
   className?: string;
   fallback: React.ReactNode;
+  active?: boolean;
 }
 
-export default function BlockImage({ src, alt, className = "aspect-square rounded-lg mb-2 object-cover w-full", fallback }: BlockImageProps) {
+export default function BlockImage({
+  src,
+  alt,
+  className = "aspect-square rounded-lg mb-2 object-cover w-full",
+  fallback,
+  active = true,
+}: BlockImageProps) {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     setHasError(false);
   }, [src]);
 
-  if (!src || hasError) {
+  if (!active || !src || hasError) {
     return <>{fallback}</>;
   }
 

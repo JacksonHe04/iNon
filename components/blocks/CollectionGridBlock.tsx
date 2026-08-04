@@ -179,6 +179,7 @@ export default function CollectionGridBlock({
                   <BlockImage
                     src={item.image_url || item.imageUrl}
                     alt={meta.title}
+                    active={sceneActivation.active}
                     fallback={
                       <div className={`aspect-square rounded-lg mb-2 bg-gradient-to-br ${getGradient(idx)} opacity-80`} />
                     }
