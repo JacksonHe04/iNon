@@ -75,8 +75,8 @@ function terrainTilesAround(chunkX: number, chunkZ: number) {
 
 function TerrainSurfaceMaterial() {
   const groundTexture = useTexture('/archive-world/forest-floor-albedo-v2.webp');
-  const rockTexture = useTexture('/archive-world/polyhaven-mountain/rocky_terrain_03_diff_1k.jpg');
-  const snowTexture = useTexture('/archive-world/polyhaven-mountain/snow_02_diff_1k.jpg');
+  const rockTexture = useTexture('/archive-world/polyhaven-mountain/rocky_terrain_03_diff_1k.webp');
+  const snowTexture = useTexture('/archive-world/polyhaven-mountain/snow_02_diff_1k.webp');
   groundTexture.wrapS = RepeatWrapping;
   groundTexture.wrapT = RepeatWrapping;
   groundTexture.colorSpace = SRGBColorSpace;
