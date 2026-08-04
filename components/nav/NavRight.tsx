@@ -8,13 +8,12 @@ import type { ReadmeData } from '@/types';
 import type { TopNavSession } from './types';
 import { APP_EVENTS, addAppEventListener, dispatchAppEvent } from '@/lib/dom-events';
 import { useUniversalTopNav } from './useUniversalTopNav';
+import CurrentTime from './CurrentTime';
 
 interface NavRightProps {
   data: ReadmeData;
   session: TopNavSession | null;
   shouldShowBadge: boolean;
-  isMounted: boolean;
-  currentTime: string;
   theme: string | undefined;
   setTheme: (theme: string) => void;
   setShowNotifications: Dispatch<SetStateAction<boolean>>;
@@ -35,8 +34,6 @@ export function NavRight({
   data,
   session,
   shouldShowBadge,
-  isMounted,
-  currentTime,
   theme,
   setTheme,
   setShowNotifications,
@@ -109,7 +106,7 @@ export function NavRight({
         {theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-700" />}
       </button>
 
-      <div className="hidden md:block text-xs lg:text-sm font-mono">{isMounted ? currentTime : ''}</div>
+      <CurrentTime />
 
       <UserInfoMenu
         session={session}

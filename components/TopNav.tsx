@@ -10,7 +10,7 @@ import type { BlockConfig } from '@/types/layout';
 import { getBlockTitle } from '@/lib/blocks/registry';
 import { APP_EVENTS, addAppEventListener } from '@/lib/dom-events';
 
-import useClockAndYearProgress from '@/hooks/useClockAndYearProgress';
+import useYearProgress from '@/hooks/useYearProgress';
 import useUserDistance from '@/hooks/useUserDistance';
 import useAIAssistant from '@/hooks/useAIAssistant';
 import NavLeft from './nav/NavLeft';
@@ -83,7 +83,7 @@ export default function TopNav({ data, className, blocks, publicPath = '/' }: To
   const age = calculateAge(data.life.birth_date);
   const shouldShowBadge = data.notifications.length > notificationsViewed;
 
-  const { currentTime, yearProgress, isMounted } = useClockAndYearProgress();
+  const { yearProgress, isMounted } = useYearProgress();
   const {
     distance,
     userCoords,
@@ -193,8 +193,6 @@ export default function TopNav({ data, className, blocks, publicPath = '/' }: To
               data={data}
               session={session}
               shouldShowBadge={shouldShowBadge}
-              isMounted={isMounted}
-              currentTime={currentTime}
               theme={theme}
               setTheme={setTheme}
               setShowNotifications={setShowNotifications}
