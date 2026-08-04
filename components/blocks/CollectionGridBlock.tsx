@@ -75,6 +75,7 @@ export default function CollectionGridBlock({
   const activeTabConfig = tabs.find((t) => t.id === activeTab) || tabs[0];
   const items = activeTabConfig?.items || [];
   const TabIcon = activeTabConfig?.icon;
+  const placeholderRows = Math.max(1, Math.ceil(items.length / (colSpan === 2 ? 4 : 2)));
 
   // Custom border hover class mapping to bypass Tailwind dynamic class compilation limitations
   const hoverBorderClasses: Record<string, string> = {
@@ -153,7 +154,7 @@ export default function CollectionGridBlock({
       </div>
 
       <div className="space-y-3 min-h-[160px]">
-        <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4' : 'grid-cols-2'}`}>
+        {sceneActivation.active ? <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4' : 'grid-cols-2'}`}>
           {items.map((item, idx) => {
             const meta = activeTabConfig.getCardMeta(item);
             return (
@@ -192,7 +193,9 @@ export default function CollectionGridBlock({
               </div>
             );
           })}
-        </div>
+        </div> : (
+          <div style={{ minHeight: `${placeholderRows * 190}px` }} aria-hidden="true" />
+        )}
       </div>
 
       <Modal open={!!selectedDetail} onClose={() => setSelectedDetail(null)}>
