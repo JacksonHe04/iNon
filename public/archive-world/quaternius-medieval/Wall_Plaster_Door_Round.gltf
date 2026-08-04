@@ -145,47 +145,47 @@
 		{
 			"mimeType":"image/png",
 			"name":"T_WoodTrim_Normal",
-			"uri":"T_WoodTrim_Normal.png"
+			"uri":"T_WoodTrim_Normal.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_WoodTrim_BaseColor",
-			"uri":"T_WoodTrim_BaseColor.png"
+			"uri":"T_WoodTrim_BaseColor.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_WoodTrim_Roughness",
-			"uri":"T_WoodTrim_Roughness.png"
+			"uri":"T_WoodTrim_Roughness.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_Plaster_Normal",
-			"uri":"T_Plaster_Normal.png"
+			"uri":"T_Plaster_Normal.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_Plaster_BaseColor",
-			"uri":"T_Plaster_BaseColor.png"
+			"uri":"T_Plaster_BaseColor.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_Plaster_ORM",
-			"uri":"T_Plaster_ORM.png"
+			"uri":"T_Plaster_ORM.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_RockTrim_Normal",
-			"uri":"T_RockTrim_Normal.png"
+			"uri":"T_RockTrim_Normal.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_RockTrim_BaseColor",
-			"uri":"T_RockTrim_BaseColor.png"
+			"uri":"T_RockTrim_BaseColor.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_RockTrim_ORM",
-			"uri":"T_RockTrim_ORM.png"
+			"uri":"T_RockTrim_ORM.webp"
 		}
 	],
 	"accessors":[

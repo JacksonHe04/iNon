@@ -106,32 +106,32 @@
 		{
 			"mimeType":"image/png",
 			"name":"T_RockTrim_Normal",
-			"uri":"T_RockTrim_Normal.png"
+			"uri":"T_RockTrim_Normal.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_RockTrim_BaseColor",
-			"uri":"T_RockTrim_BaseColor.png"
+			"uri":"T_RockTrim_BaseColor.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_RockTrim_ORM",
-			"uri":"T_RockTrim_ORM.png"
+			"uri":"T_RockTrim_ORM.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_Brick_Normal",
-			"uri":"T_Brick_Normal.png"
+			"uri":"T_Brick_Normal.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_Brick_BaseColor",
-			"uri":"T_Brick_BaseColor.png"
+			"uri":"T_Brick_BaseColor.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_Brick_Roughness",
-			"uri":"T_Brick_Roughness.png"
+			"uri":"T_Brick_Roughness.webp"
 		}
 	],
 	"accessors":[

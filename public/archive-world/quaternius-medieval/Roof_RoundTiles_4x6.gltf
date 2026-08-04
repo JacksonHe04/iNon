@@ -109,32 +109,32 @@
 		{
 			"mimeType":"image/png",
 			"name":"T_WoodTrim_Normal",
-			"uri":"T_WoodTrim_Normal.png"
+			"uri":"T_WoodTrim_Normal.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_WoodTrim_BaseColor",
-			"uri":"T_WoodTrim_BaseColor.png"
+			"uri":"T_WoodTrim_BaseColor.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_WoodTrim_Roughness",
-			"uri":"T_WoodTrim_Roughness.png"
+			"uri":"T_WoodTrim_Roughness.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_RoundTiles_Normal",
-			"uri":"T_RoundTiles_Normal.png"
+			"uri":"T_RoundTiles_Normal.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_RoundTiles_BaseColor",
-			"uri":"T_RoundTiles_BaseColor.png"
+			"uri":"T_RoundTiles_BaseColor.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_RoundTiles_Roughness",
-			"uri":"T_RoundTiles_Roughness.png"
+			"uri":"T_RoundTiles_Roughness.webp"
 		}
 	],
 	"accessors":[

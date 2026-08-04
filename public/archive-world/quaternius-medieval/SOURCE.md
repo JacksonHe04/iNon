@@ -9,5 +9,7 @@
 
 Only the glTF modules used by the archive cottage, observation deck, station,
 record installation, and river footbridge are included. Source textures were
-resized to 1024px for real-time web delivery; model geometry and material
-assignments are unchanged.
+resized to 1024px for real-time web delivery. Runtime textures use WebP:
+normal maps are lossless, while color, roughness, ORM, and transparent foliage
+use quality-90 encoding with lossless alpha. Model geometry, texture resolution,
+and material assignments are unchanged.

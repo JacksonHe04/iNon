@@ -64,8 +64,8 @@
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"T_VineLeaf.png",
-			"uri":"T_VineLeaf_png.png"
+			"name":"T_VineLeaf.webp",
+			"uri":"T_VineLeaf_png.webp"
 		}
 	],
 	"accessors":[
