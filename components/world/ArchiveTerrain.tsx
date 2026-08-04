@@ -19,7 +19,11 @@ import {
 import { TERRAIN_CHUNK_SIZE, TERRAIN_SEGMENTS, WATER_LEVEL } from '@/components/world/archiveWorldConstants';
 import { terrainHeightAt } from '@/components/world/archiveTerrainMath';
 import { terrainFragment, terrainVertex, waterFragment, waterVertex } from '@/components/world/archiveWorldShaders';
-import { useWorldLightTarget } from '@/components/world/ArchiveWorldLighting';
+import {
+  useWorldLightTarget,
+  WORLD_LIGHTING_STEP,
+  worldLightEasing,
+} from '@/components/world/ArchiveWorldLighting';
 import type { WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
 
 interface TerrainTile {
@@ -134,14 +138,18 @@ export function MountainPanorama({
   const group = useRef<Group>(null);
   const material = useRef<MeshBasicMaterial>(null);
   const lightTarget = useWorldLightTarget(worldTime);
+  const lightDelta = useRef(0);
   texture.colorSpace = SRGBColorSpace;
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
   texture.offset.y = -0.12;
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (!group.current) return;
     group.current.position.set(playerPosition.current.x, 18, playerPosition.current.z);
-    material.current?.color.lerp(lightTarget.panorama, 0.025);
+    lightDelta.current += delta;
+    if (lightDelta.current < WORLD_LIGHTING_STEP) return;
+    material.current?.color.lerp(lightTarget.panorama, worldLightEasing(lightDelta.current));
+    lightDelta.current = 0;
   });
   return (
     <group ref={group}>

@@ -5,6 +5,11 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { AmbientLight, Color, DirectionalLight, Fog, HemisphereLight } from 'three';
 import { worldLightFrame, type WorldTimeSnapshot } from '@/components/world/archiveWorldTime';
 
+export const WORLD_LIGHTING_STEP = 1 / 15;
+export function worldLightEasing(elapsed: number) {
+  return 1 - Math.exp(-1.52 * elapsed);
+}
+
 function blendColor(from: string, to: string, mix: number) {
   return new Color(from).lerp(new Color(to), mix);
 }
@@ -34,6 +39,7 @@ export default function ArchiveWorldLighting({ worldTime }: { worldTime: WorldTi
   const sun = useRef<DirectionalLight>(null);
   const { scene, gl } = useThree();
   const target = useWorldLightTarget(worldTime);
+  const lightDelta = useRef(0);
 
   useEffect(() => {
     const background = new Color('#919d8b');
@@ -45,8 +51,11 @@ export default function ArchiveWorldLighting({ worldTime }: { worldTime: WorldTi
     };
   }, [scene]);
 
-  useFrame(() => {
-    const easing = 0.025;
+  useFrame((_, delta) => {
+    lightDelta.current += delta;
+    if (lightDelta.current < WORLD_LIGHTING_STEP) return;
+    const easing = worldLightEasing(lightDelta.current);
+    lightDelta.current = 0;
     if (scene.background instanceof Color) scene.background.lerp(target.background, easing);
     if (scene.fog instanceof Fog) scene.fog.color.lerp(target.fog, easing);
     if (ambient.current) {
