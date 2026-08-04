@@ -8,12 +8,12 @@ by Quaternius.
 - License: CC0 1.0 Universal
 - Original formats include glTF, FBX, OBJ, and Blend.
 - Included here: only the animal files used by the archive-world wildlife
-  system. The original embedded glTF files were losslessly repacked as GLB with
-  `scripts/convert-embedded-gltf-to-glb.mjs`; geometry, materials, skins, and all
-  animation clips are unchanged.
+  system. The original embedded glTF files were repacked as GLB with
+  `scripts/convert-embedded-gltf-to-glb.mjs`, then encoded with medium Meshopt
+  compression for runtime delivery. No mesh simplification is applied;
+  materials, skins, and all animation clips are preserved.
 
-The models are redistributed without converting or removing their animation
-clips. Runtime movement, animation state changes, material treatment, and animal
+Runtime movement, animation state changes, material treatment, and animal
 behaviour are implemented in the project.
 
 ## Quaternius Farm Animal Pack
