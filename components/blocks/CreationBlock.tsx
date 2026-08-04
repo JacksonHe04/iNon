@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import GlassCard from '@/components/GlassCard';
 import { PenTool, Video, FileText, Mic, BookOpen, Quote, Eye, EyeOff } from 'lucide-react';
-import CreationGalaxy from '@/components/scenes/CreationGalaxy';
 import VideoGrid from './creation/VideoGrid';
 import type { VideoItem } from './creation/VideoGrid';
 import ArticleGrid from './creation/ArticleGrid';
@@ -11,6 +11,12 @@ import type { ArticleItem } from './creation/ArticleGrid';
 import SpeechGrid from './creation/SpeechGrid';
 import type { SpeechItem } from './creation/SpeechGrid';
 import MottoAndQuoteGrid from './creation/MottoAndQuoteGrid';
+import useNearViewportActivation from '@/hooks/useNearViewportActivation';
+
+const CreationGalaxy = dynamic(() => import('@/components/scenes/CreationGalaxy'), {
+  ssr: false,
+  loading: () => <div className="min-h-[280px]" aria-hidden="true" />,
+});
 
 interface CreationBlockProps {
   videos: VideoItem[];
@@ -41,6 +47,7 @@ export default function CreationBlock({
 }: CreationBlockProps) {
   const [activeCategory, setActiveCategory] = useState<string>('videos');
   const [showScene, setShowScene] = useState(true);
+  const contentActivation = useNearViewportActivation();
 
   const getCount = (catId: string) => {
     switch (catId) {
@@ -61,7 +68,7 @@ export default function CreationBlock({
 
   return (
     <GlassCard className="p-5 space-y-5 hover:border-purple-400/40 transition-all duration-300">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div ref={contentActivation.targetRef} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
             <PenTool className="w-5 h-5" />
@@ -94,11 +101,11 @@ export default function CreationBlock({
 
       {colSpan === 2 && showScene && (
         <div className="archive-embedded-field-panel">
-          <CreationGalaxy
+          {contentActivation.active ? <CreationGalaxy
             activeCategory={activeCategory}
             categories={categoryOrder.map((c) => ({ id: c.id, label: c.label }))}
             onChange={setActiveCategory}
-          />
+          /> : <div className="min-h-[280px]" aria-hidden="true" />}
         </div>
       )}
 
@@ -127,6 +134,7 @@ export default function CreationBlock({
 
       {/* Category Content */}
       <div className="space-y-3 min-h-[160px]">
+        {contentActivation.active ? <>
         {activeCategory === 'videos' && (
           <VideoGrid videos={videos} colSpan={colSpan} />
         )}
@@ -146,6 +154,7 @@ export default function CreationBlock({
         {activeCategory === 'quotes' && (
           <MottoAndQuoteGrid items={quotes} />
         )}
+        </> : <div className="min-h-[160px]" aria-hidden="true" />}
       </div>
     </GlassCard>
   );

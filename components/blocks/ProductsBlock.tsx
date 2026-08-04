@@ -1,12 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { Monitor, Heart, Star, Laptop, Compass, Eye, EyeOff, ExternalLink } from 'lucide-react';
-import ProductDeskScene from '@/components/scenes/ProductDeskScene';
 import ProductCard from './products/ProductCard';
 import HardwareGrid from './products/HardwareGrid';
+import useNearViewportActivation from '@/hooks/useNearViewportActivation';
+
+const ProductDeskScene = dynamic(() => import('@/components/scenes/ProductDeskScene'), {
+  ssr: false,
+  loading: () => <div className="min-h-[280px]" aria-hidden="true" />,
+});
 
 export interface ProductItem {
   name: string;
@@ -61,10 +67,11 @@ export default function ProductsBlock({
   const [activeTab, setActiveTab] = useState<'favorite' | 'recommended' | 'hardware' | 'brands'>(
     'favorite'
   );
+  const contentActivation = useNearViewportActivation();
 
   return (
     <GlassCard className="p-5 space-y-5 hover:border-amber-400/40 transition-all duration-300">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div ref={contentActivation.targetRef} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
             <Monitor className="w-5 h-5" />
@@ -97,7 +104,7 @@ export default function ProductsBlock({
 
       {colSpan === 2 && showScene && (
         <div className="archive-embedded-field-panel">
-          <ProductDeskScene
+          {contentActivation.active ? <ProductDeskScene
             favoriteProducts={favoriteProducts}
             recommendedProducts={recommendedProducts}
             hardware={myHardware}
@@ -110,7 +117,7 @@ export default function ProductsBlock({
                 link: detail.link,
               })
             }
-          />
+          /> : <div className="min-h-[280px]" aria-hidden="true" />}
         </div>
       )}
 
@@ -145,6 +152,7 @@ export default function ProductsBlock({
 
       {/* Content based on Active Tab */}
       <div className="space-y-3 min-h-[180px]">
+        {contentActivation.active ? <>
         {activeTab === 'favorite' && (
           <div className={`grid gap-3 ${colSpan === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {favoriteProducts.map((prod, idx) => (
@@ -214,6 +222,7 @@ export default function ProductsBlock({
             ))}
           </div>
         )}
+        </> : <div className="min-h-[180px]" aria-hidden="true" />}
       </div>
 
       <Modal open={!!selectedProduct} onClose={() => setSelectedProduct(null)}>
