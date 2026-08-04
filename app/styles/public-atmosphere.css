@@ -48,6 +48,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
+  filter: saturate(0.58) sepia(0.18) contrast(0.9);
 }
 
 .archive-relic {
@@ -60,7 +61,6 @@
   background-image: url("/archive-assets/archive-relics-sheet-v1.webp");
   background-repeat: no-repeat;
   background-size: 400% 300%;
-  filter: saturate(0.58) sepia(0.18) contrast(0.9);
   mix-blend-mode: multiply;
   transform: rotate(var(--relic-rotation));
 }
