@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import GlassCard from '@/components/GlassCard';
 import { Tag, Sparkles } from 'lucide-react';
+import useNearViewportActivation from '@/hooks/useNearViewportActivation';
 
 interface TagsBlockProps {
   keywords: string[];
@@ -41,6 +42,7 @@ export default function TagsBlock({
   ).filter(Boolean);
 
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
+  const contentActivation = useNearViewportActivation('800px 0px');
 
   const toggleTag = (tag: string) => {
     const newActiveTags = new Set(activeTags);
@@ -54,7 +56,7 @@ export default function TagsBlock({
 
   return (
     <GlassCard className="p-5 space-y-4 hover:border-purple-400/40 transition-all duration-300">
-      <div className="flex items-center justify-between">
+      <div ref={contentActivation.targetRef} className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
             <Tag className="w-5 h-5" />
@@ -67,7 +69,7 @@ export default function TagsBlock({
         <span className="text-xs text-gray-400 font-mono">{activeTags.size} / {allTags.length} 已点亮</span>
       </div>
 
-      <div className={`grid gap-2 ${colSpan === 2 ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6' : 'grid-cols-2 sm:grid-cols-3'}`}>
+      {contentActivation.active ? <div className={`grid gap-2 ${colSpan === 2 ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6' : 'grid-cols-2 sm:grid-cols-3'}`}>
         {allTags.map((tag, idx) => {
           const isActive = activeTags.has(tag);
           return (
@@ -90,7 +92,12 @@ export default function TagsBlock({
             </button>
           );
         })}
-      </div>
+      </div> : (
+        <div
+          className={colSpan === 2 ? 'min-h-[520px]' : 'min-h-[760px]'}
+          aria-hidden="true"
+        />
+      )}
     </GlassCard>
   );
 }
