@@ -81,17 +81,17 @@
 		{
 			"mimeType":"image/png",
 			"name":"T_Trim_Props_Normal",
-			"uri":"T_Trim_Props_Normal.png"
+			"uri":"T_Trim_Props_Normal.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_Trim_Props_BaseColor",
-			"uri":"T_Trim_Props_BaseColor.png"
+			"uri":"T_Trim_Props_BaseColor.webp"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"T_Trim_Props_ORM",
-			"uri":"T_Trim_Props_ORM.png"
+			"uri":"T_Trim_Props_ORM.webp"
 		}
 	],
 	"accessors":[
