@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import type { ReadmeData } from '@/types';
 import type { BlockConfig, ThemeType } from '@/types/layout';
 import TopNav from '@/components/TopNav';
-import SideNav from '@/components/SideNav';
 import { APP_EVENTS, dispatchAppEvent, addAppEventListener } from '@/lib/dom-events';
+
+const SideNav = dynamic(() => import('@/components/SideNav'), { ssr: false });
 
 interface ShellLayoutProps {
   children: ReactNode;

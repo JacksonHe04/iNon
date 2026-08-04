@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { scrollToElement } from '@/lib/utils';
 import type { BlockConfig, NavSectionConfig, BlockType } from '@/types/layout';
 import { getBlockTitle, getBlockIcon } from '@/lib/blocks/registry';
@@ -20,18 +20,18 @@ interface SideNavProps {
 
 export default function SideNav({ blocks, navSections, customItems }: SideNavProps) {
   // 每个可见的 block 在导航中独立成项；title 全部从 registry 单一事实源读取
-  const navItems: NavItem[] = customItems
+  const navItems = useMemo<NavItem[]>(() => customItems
     ? customItems
     : blocks && blocks.length > 0
-    ? blocks
-        .filter((block) => block.visible)
-        .map((block) => ({
-          id: block.id,
-          scrollId: block.sectionId || block.id,
-          label: getBlockTitle(block.blockType),
-          blockType: block.blockType,
-        }))
-    : [];
+      ? blocks
+          .filter((block) => block.visible)
+          .map((block) => ({
+            id: block.id,
+            scrollId: block.sectionId || block.id,
+            label: getBlockTitle(block.blockType),
+            blockType: block.blockType,
+          }))
+      : [], [blocks, customItems]);
 
   const [activeSection, setActiveSection] = useState<string>(
     navItems[0]?.id ?? 'bio'
@@ -39,58 +39,45 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
 
   const isClickScrolling = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const visibleSectionIds = useRef(new Set<string>());
+
+  const activateFirstVisibleSection = useCallback(() => {
+    const nextActive = navItems.find((item) => visibleSectionIds.current.has(item.id));
+    if (nextActive) setActiveSection(nextActive.id);
+  }, [navItems]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      // 如果是点击触发的平滑滚动，在滚动完成前不根据位置重新计算激活项，防止高亮框乱跳
-      if (isClickScrolling.current) return;
-
-      // 1. 优先判断是否滚动到了页面底部
-      const isAtBottom =
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 50;
-      if (isAtBottom && navItems.length > 0) {
-        setActiveSection(navItems[navItems.length - 1].id);
-        return;
+    const sectionIds = visibleSectionIds.current;
+    sectionIds.clear();
+    const observedSections = new Map<Element, string>();
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const id = observedSections.get(entry.target);
+        if (!id) continue;
+        if (entry.isIntersecting) sectionIds.add(id);
+        else sectionIds.delete(id);
       }
+      if (!isClickScrolling.current) activateFirstVisibleSection();
+    }, {
+      rootMargin: '-120px 0px -60% 0px',
+      threshold: 0,
+    });
 
-      // 2. 正常滚动情况：找到当前最符合可见性的 section
-      let activeId = navItems[0]?.id;
-      let minDiff = Infinity;
-      const targetLine = 120; // 触发线：距离视口顶部 120px 处（避开顶栏高度）
+    for (const item of navItems) {
+      const element = document.getElementById(item.scrollId);
+      if (!element) continue;
+      observedSections.set(element, item.id);
+      observer.observe(element);
+    }
 
-      for (const item of navItems) {
-        const element = document.getElementById(item.scrollId);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          // 如果元素刚好跨越触发线，则当前激活项必定是它
-          if (rect.top <= targetLine && rect.bottom >= targetLine) {
-            activeId = item.id;
-            break;
-          }
-
-          // 否则，找到距离触发线最近的元素
-          const diff = Math.abs(rect.top - targetLine);
-          if (diff < minDiff) {
-            minDiff = diff;
-            activeId = item.id;
-          }
-        }
-      }
-
-      if (activeId) {
-        setActiveSection(activeId);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+      sectionIds.clear();
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, [navItems]);
+  }, [activateFirstVisibleSection, navItems]);
 
   if (navItems.length === 0) {
     return null;
@@ -118,6 +105,7 @@ export default function SideNav({ blocks, navSections, customItems }: SideNavPro
                   }
                   scrollTimeoutRef.current = setTimeout(() => {
                     isClickScrolling.current = false;
+                    activateFirstVisibleSection();
                   }, 800);
                 }}
                 className={`relative px-3 py-1.5 text-[10px] tracking-wide font-medium transition-all text-left whitespace-nowrap cursor-pointer ${

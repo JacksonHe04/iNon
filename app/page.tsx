@@ -13,7 +13,7 @@ export default async function Home() {
     <ShellLayout
       data={data}
       publicPath="/"
-      showSideNav={true}
+      showSideNav={false}
       blocks={pageData.layoutConfig.blocks}
       theme={pageData.layoutConfig.theme}
     >

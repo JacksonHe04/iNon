@@ -20,7 +20,7 @@ export default async function UserPublicPage({ params }: UserPublicPageProps) {
     <ShellLayout
       data={data}
       publicPath={`/${slug}`}
-      showSideNav={true}
+      showSideNav={false}
       blocks={pageData.layoutConfig.blocks}
       theme={pageData.layoutConfig.theme}
     >
