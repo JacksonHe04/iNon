@@ -104,9 +104,12 @@ function TerrainSurfaceMaterial() {
 export function InfiniteTerrain({ playerPosition }: { playerPosition: MutableRefObject<Vector3> }) {
   const [chunk, setChunk] = useState({ x: 0, z: 0 });
   const chunkRef = useRef(chunk);
+  const chunkFrame = useRef(0);
   const tiles = useMemo(() => terrainTilesAround(chunk.x, chunk.z), [chunk.x, chunk.z]);
 
   useFrame(() => {
+    chunkFrame.current = (chunkFrame.current + 1) % 8;
+    if (chunkFrame.current !== 0) return;
     const x = Math.round(playerPosition.current.x / TERRAIN_CHUNK_SIZE);
     const z = Math.round(playerPosition.current.z / TERRAIN_CHUNK_SIZE);
     if (x === chunkRef.current.x && z === chunkRef.current.z) return;

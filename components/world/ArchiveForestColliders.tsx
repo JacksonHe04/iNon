@@ -48,6 +48,7 @@ export default function ArchiveForestColliders({
 }) {
   const [chunks, setChunks] = useState(() => chunksAt(playerPosition.current));
   const chunksRef = useRef(chunks);
+  const chunkFrame = useRef(0);
   const treeColliders = useMemo(() => treePlacementsAround({
     centerX: chunks.treeX,
     centerZ: chunks.treeZ,
@@ -71,6 +72,8 @@ export default function ArchiveForestColliders({
   ]);
 
   useFrame(() => {
+    chunkFrame.current = (chunkFrame.current + 1) % 8;
+    if (chunkFrame.current !== 0) return;
     const next = chunksAt(playerPosition.current);
     const current = chunksRef.current;
     if (
