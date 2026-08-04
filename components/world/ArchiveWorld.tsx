@@ -208,7 +208,9 @@ export default function ArchiveWorld({ active, data, onModeChange }: ArchiveWorl
         </Canvas>
       </div>
 
-      <output className="sr-only" aria-label="3D 运行状态">{diagnostics}</output>
+      {process.env.NODE_ENV !== 'production' && (
+        <output className="sr-only" aria-label="3D 运行状态">{diagnostics}</output>
+      )}
       <output className="sr-only" aria-label="苔苔伙伴状态">
         {companionTelemetry.behavior} · X {companionTelemetry.x.toFixed(1)} · Y {companionTelemetry.y.toFixed(1)} · Z {companionTelemetry.z.toFixed(1)}
       </output>

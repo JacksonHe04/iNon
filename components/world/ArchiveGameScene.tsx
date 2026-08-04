@@ -115,7 +115,7 @@ function ArchiveGameScene({
   return (
     <>
       <ArchiveWorldLighting worldTime={worldTime} />
-      <Diagnostics onReport={onDiagnostics} />
+      {process.env.NODE_ENV !== 'production' && <Diagnostics onReport={onDiagnostics} />}
       <Suspense fallback={null}>
         <MountainPanorama playerPosition={playerPosition} worldTime={worldTime} />
       </Suspense>
