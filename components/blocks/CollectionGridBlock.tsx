@@ -6,6 +6,7 @@ import Modal from '@/components/Modal';
 import { ExternalLink } from 'lucide-react';
 import BlockImage from './BlockImage';
 import ArchiveSectionHeading from '@/components/archive/ArchiveSectionHeading';
+import useNearViewportActivation from '@/hooks/useNearViewportActivation';
 
 export interface CollectionItem {
   id?: string;
@@ -59,6 +60,7 @@ export default function CollectionGridBlock({
     comment: string;
     link?: string;
   } | null>(null);
+  const sceneActivation = useNearViewportActivation();
 
   const getGradient = (idx: number) => {
     const gradients = gradientColors || [
@@ -109,7 +111,7 @@ export default function CollectionGridBlock({
 
   return (
     <GlassCard className={`p-5 space-y-5 transition-all duration-300 ${hoverBorderClasses[themeColorClass] || hoverBorderClasses.indigo}`}>
-      <div className="relative">
+      <div ref={sceneActivation.targetRef} className="relative">
         <ArchiveSectionHeading title={title} icon={BlockIcon} count={items.length} />
         {onToggleScene && interactiveScene && colSpan === 2 && (
           <button
@@ -123,7 +125,9 @@ export default function CollectionGridBlock({
 
       {colSpan === 2 && showScene && interactiveScene && (
         <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-indigo-50/50 to-purple-50/30 dark:from-indigo-950/20 dark:to-purple-950/10 p-2">
-          {interactiveScene}
+          {sceneActivation.active
+            ? interactiveScene
+            : <div className="min-h-[300px]" aria-hidden="true" />}
         </div>
       )}
 

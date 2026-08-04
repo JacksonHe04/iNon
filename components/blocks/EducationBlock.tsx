@@ -4,6 +4,7 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import GlassCard from '@/components/GlassCard';
 import { GraduationCap, Landmark, HelpCircle, Eye, EyeOff } from 'lucide-react';
+import useNearViewportActivation from '@/hooks/useNearViewportActivation';
 
 const EducationScene = dynamic(() => import('@/components/scenes/EducationScene'), {
   ssr: false,
@@ -36,10 +37,11 @@ export default function EducationBlock({
   mode = 'readonly',
 }: EducationBlockProps) {
   const [showScene, setShowScene] = useState(true);
+  const sceneActivation = useNearViewportActivation();
 
   return (
     <GlassCard className="p-5 space-y-5 hover:border-blue-400/40 transition-all duration-300">
-      <div className="flex items-center justify-between">
+      <div ref={sceneActivation.targetRef} className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
             <GraduationCap className="w-5 h-5" />
@@ -71,7 +73,9 @@ export default function EducationBlock({
 
       {colSpan === 2 && showScene && (
         <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10 p-2">
-          <EducationScene schools={schools} mode={mode} />
+          {sceneActivation.active
+            ? <EducationScene schools={schools} mode={mode} />
+            : <div className="min-h-[300px]" aria-hidden="true" />}
         </div>
       )}
 

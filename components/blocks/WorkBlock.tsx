@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { Briefcase, ChevronRight, MapPin, Eye, EyeOff } from 'lucide-react';
+import useNearViewportActivation from '@/hooks/useNearViewportActivation';
 
 const WorkScene = dynamic(() => import('@/components/scenes/WorkScene'), {
   ssr: false,
@@ -41,10 +42,11 @@ export default function WorkBlock({
 }: WorkBlockProps) {
   const [selectedJob, setSelectedJob] = useState<JobItem | null>(null);
   const [showScene, setShowScene] = useState(true);
+  const sceneActivation = useNearViewportActivation();
 
   return (
     <GlassCard className="p-5 space-y-5 hover:border-teal-400/40 transition-all duration-300">
-      <div className="flex items-center justify-between">
+      <div ref={sceneActivation.targetRef} className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
             <Briefcase className="w-5 h-5" />
@@ -79,12 +81,14 @@ export default function WorkBlock({
 
       {colSpan === 2 && showScene && (
         <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-teal-50/50 to-emerald-50/30 dark:from-teal-950/20 dark:to-emerald-950/10 p-2">
-          <WorkScene
-            jobs={jobs}
-            onSelectJob={setSelectedJob}
-            activeJobId={selectedJob?.company_name}
-            mode={mode}
-          />
+          {sceneActivation.active ? (
+            <WorkScene
+              jobs={jobs}
+              onSelectJob={setSelectedJob}
+              activeJobId={selectedJob?.company_name}
+              mode={mode}
+            />
+          ) : <div className="min-h-[300px]" aria-hidden="true" />}
           <p className="text-[10px] text-gray-400 text-center mt-2">
             💡 点击上方 2D 关卡中的公司图标，可查看详细履历。
           </p>
