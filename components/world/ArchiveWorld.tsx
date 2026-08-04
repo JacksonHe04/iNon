@@ -73,7 +73,10 @@ export default function ArchiveWorld({ active, data, onModeChange }: ArchiveWorl
   const keepsakeStorageKey = `inon-world-keepsakes-${data.basic.name}`;
   const allKeepsakes = useMemo(() => buildArchiveKeepsakes(data), [data]);
   const homeExhibits = useMemo(() => buildHomeExhibits(data), [data]);
-  const recoveredKeepsakes = allKeepsakes.filter((record) => collectedKeepsakes.includes(record.id));
+  const recoveredKeepsakes = useMemo(
+    () => allKeepsakes.filter((record) => collectedKeepsakes.includes(record.id)),
+    [allKeepsakes, collectedKeepsakes],
+  );
   const fieldRoute = useArchiveFieldRoute({
     owner: data.basic.name,
     telemetry,
@@ -106,18 +109,6 @@ export default function ArchiveWorld({ active, data, onModeChange }: ArchiveWorl
     restSite: resting.restSite,
     onCookRation: resting.addRation,
   });
-  const worldDialogueContext = buildWorldDialogueContext({
-    telemetry,
-    rations: resting.rations,
-    companionNearby,
-    collectedKeepsakeIds: collectedKeepsakes,
-    worldTime: worldClock,
-    forageIngredients: foraging.ingredients,
-    warmth: warmth.value,
-    vitality: vitality.value,
-    observedSpeciesIds: speciesJournal.observedIds,
-  });
-
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(keepsakeStorageKey);
@@ -149,7 +140,12 @@ export default function ArchiveWorld({ active, data, onModeChange }: ArchiveWorl
     releasePointerLock();
     setInventoryOpen(false);
     setSelectedHomeRecord(null);
-    onModeChange(nextMode, nextMode === 'dialogue' ? worldDialogueContext : undefined, persona);
+    const dialogueContext = nextMode === 'dialogue' ? buildWorldDialogueContext({
+      telemetry, rations: resting.rations, companionNearby, collectedKeepsakeIds: collectedKeepsakes,
+      worldTime: worldClock, forageIngredients: foraging.ingredients, warmth: warmth.value,
+      vitality: vitality.value, observedSpeciesIds: speciesJournal.observedIds,
+    }) : undefined;
+    onModeChange(nextMode, dialogueContext, persona);
   };
 
   const travelTo = (waypoint: WorldWaypoint) => {
