@@ -98,8 +98,11 @@ export default function QuaterniusForest({
   const baseMatrix = useMemo(() => new Matrix4(), []);
   const finalMatrix = useMemo(() => new Matrix4(), []);
   const fadeScale = useMemo(() => new Vector3(), []);
+  const visibilityFrame = useRef(0);
 
   useFrame(({ camera }) => {
+    visibilityFrame.current = (visibilityFrame.current + 1) % 2;
+    if (visibilityFrame.current !== 0) return;
     const centerX = Math.floor(playerPosition.current.x / TREE_CHUNK_SIZE);
     const centerZ = Math.floor(playerPosition.current.z / TREE_CHUNK_SIZE);
     const chunkKey = `${centerX}:${centerZ}`;

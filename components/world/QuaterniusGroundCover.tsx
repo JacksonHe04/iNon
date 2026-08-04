@@ -71,8 +71,11 @@ export default function QuaterniusGroundCover({
   const baseMatrix = useMemo(() => new Matrix4(), []);
   const finalMatrix = useMemo(() => new Matrix4(), []);
   const fadeScale = useMemo(() => new Vector3(), []);
+  const visibilityFrame = useRef(0);
 
   useFrame(({ camera }) => {
+    visibilityFrame.current = (visibilityFrame.current + 1) % 2;
+    if (visibilityFrame.current !== 0) return;
     const centerX = Math.floor(playerPosition.current.x / GROUND_CHUNK_SIZE);
     const centerZ = Math.floor(playerPosition.current.z / GROUND_CHUNK_SIZE);
     const chunkKey = `${centerX}:${centerZ}`;
