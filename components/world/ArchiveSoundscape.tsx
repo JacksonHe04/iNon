@@ -5,8 +5,8 @@ import type { GameTelemetry } from '@/components/world/archiveGameTypes';
 import { coastlineXAt, riverCenterAt } from '@/components/world/archiveTerrainMath';
 import { isInsideArchiveHome } from '@/components/world/archiveWorldZones';
 
-const FOREST_TRACK = '/archive-world/ambient-audio/forest-ambience-source.ogg';
-const WATER_TRACK = '/archive-world/ambient-audio/water-ambience-source.mp3';
+const FOREST_TRACK = '/archive-world/ambient-audio/forest-ambience-v2.m4a';
+const WATER_TRACK = '/archive-world/ambient-audio/water-ambience-v2.m4a';
 
 function proximity(distance: number, radius: number) {
   return Math.max(0, Math.min(1, 1 - distance / radius));
