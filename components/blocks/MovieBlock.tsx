@@ -1,11 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Film, User } from 'lucide-react';
-import FilmDeskScene from '@/components/scenes/FilmDeskScene';
 import CollectionGridBlock, { type CollectionTabConfig } from './CollectionGridBlock';
 import { getBlockTitle } from '@/lib/blocks/registry';
 import type { LibraryItemDTO } from '@/types';
+
+const FilmDeskScene = dynamic(() => import('@/components/scenes/FilmDeskScene'), {
+  ssr: false,
+  loading: () => <div className="min-h-[340px]" aria-hidden="true" />,
+});
 
 interface MovieBlockProps {
   films?: LibraryItemDTO[];

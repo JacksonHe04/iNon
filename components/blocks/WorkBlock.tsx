@@ -1,10 +1,15 @@
 'use client';
 
 import { useState, Fragment } from 'react';
+import dynamic from 'next/dynamic';
 import GlassCard from '@/components/GlassCard';
 import Modal from '@/components/Modal';
 import { Briefcase, ChevronRight, MapPin, Eye, EyeOff } from 'lucide-react';
-import WorkScene from '@/components/scenes/WorkScene';
+
+const WorkScene = dynamic(() => import('@/components/scenes/WorkScene'), {
+  ssr: false,
+  loading: () => <div className="min-h-[300px]" aria-hidden="true" />,
+});
 
 export interface JobItem {
   company_name: string;

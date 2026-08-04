@@ -1,11 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { BookOpen, User } from 'lucide-react';
-import ReadingDeskScene from '@/components/scenes/ReadingDeskScene';
 import CollectionGridBlock, { type CollectionTabConfig } from './CollectionGridBlock';
 import { getBlockTitle } from '@/lib/blocks/registry';
 import type { LibraryItemDTO } from '@/types';
+
+const ReadingDeskScene = dynamic(() => import('@/components/scenes/ReadingDeskScene'), {
+  ssr: false,
+  loading: () => <div className="min-h-[280px]" aria-hidden="true" />,
+});
 
 interface BookBlockProps {
   books?: LibraryItemDTO[];

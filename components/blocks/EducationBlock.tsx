@@ -1,9 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import GlassCard from '@/components/GlassCard';
 import { GraduationCap, Landmark, HelpCircle, Eye, EyeOff } from 'lucide-react';
-import EducationScene from '@/components/scenes/EducationScene';
+
+const EducationScene = dynamic(() => import('@/components/scenes/EducationScene'), {
+  ssr: false,
+  loading: () => <div className="min-h-[300px]" aria-hidden="true" />,
+});
 
 export interface SchoolItem {
   degree: string;
