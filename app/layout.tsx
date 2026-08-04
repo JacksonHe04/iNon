@@ -11,6 +11,7 @@ import './styles/archive-composition.css';
 import './styles/archive-block-ornaments.css';
 import './styles/archive-dashboard-admin.css';
 import './styles/archive-responsive.css';
+import './styles/archive-codex-panels.css';
 import './styles/world-foundation.css';
 import './styles/archive-field-panels.css';
 import './styles/public-atmosphere.css';
