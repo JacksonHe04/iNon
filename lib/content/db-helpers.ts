@@ -1,9 +1,9 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
 import type { QueryResult, MaybeSingleResult, ProfileRow } from '@/types/database';
 
 export async function listTable<T>(table: string, profileId: string, select = '*'): Promise<QueryResult<T>> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const response = await supabase
     .from(table)
     .select(select)
@@ -17,7 +17,7 @@ export async function listTable<T>(table: string, profileId: string, select = '*
 }
 
 export async function maybeSingleByProfile<T>(table: string, profileId: string, select = '*'): Promise<MaybeSingleResult<T>> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const response = await supabase
     .from(table)
     .select(select)
@@ -40,7 +40,7 @@ export async function listByForeignIds<T>(
     return { data: [], error: null };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const response = await supabase
     .from(table)
     .select(select)
@@ -54,7 +54,7 @@ export async function listByForeignIds<T>(
 }
 
 export async function loadProfile(identifier: string): Promise<MaybeSingleResult<ProfileRow>> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // 1. Check profiles by slug or username
   let query = supabase
