@@ -81,14 +81,14 @@
 }
 
 .archive-top-nav {
-  --archive-ink: #f2ead6;
-  --archive-muted: #c8c8ad;
-  --archive-umber: #e8dfc9;
-  --archive-paper-light: #d8d5bd;
-  --archive-line: rgba(242, 234, 214, 0.2);
-  --archive-line-strong: rgba(242, 234, 214, 0.38);
-  --theme-primary: #c2c69f;
-  --theme-primary-hover: #f2ead6;
+  --archive-ink: var(--tone-forest-ink);
+  --archive-muted: color-mix(in srgb, var(--tone-forest-ink) 72%, transparent);
+  --archive-umber: color-mix(in srgb, var(--tone-forest-ink) 88%, transparent);
+  --archive-paper-light: color-mix(in srgb, var(--tone-forest-ink) 64%, transparent);
+  --archive-line: color-mix(in srgb, var(--tone-forest-ink) 16%, transparent);
+  --archive-line-strong: color-mix(in srgb, var(--tone-forest-ink) 32%, transparent);
+  --theme-primary: var(--archive-lichen);
+  --theme-primary-hover: var(--tone-forest-ink);
   color: var(--archive-ink);
   border-color: rgba(242, 234, 214, 0.18) !important;
   background: rgba(24, 36, 27, 0.86) !important;

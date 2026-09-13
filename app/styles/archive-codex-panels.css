@@ -2,9 +2,9 @@
 .archive-world-codex {
   position: absolute;
   z-index: 15;
-  color: #213328;
+  color: var(--archive-ink);
   background:
-    linear-gradient(rgba(221, 212, 184, 0.96), rgba(204, 198, 166, 0.98)),
+    linear-gradient(var(--archive-paper-light), var(--archive-paper)),
     url("/archive-assets/aged-paper-texture.webp");
   box-shadow: -24px 0 70px rgba(9, 20, 13, 0.48);
 }
@@ -15,7 +15,7 @@
   bottom: 18px;
   width: min(720px, calc(100vw - 36px));
   overflow: hidden;
-  border: 1px solid rgba(41, 63, 48, 0.4);
+  border: 1px solid var(--archive-line-strong);
   transform: rotate(0.18deg);
 }
 
@@ -27,7 +27,7 @@
 .archive-world-codex {
   inset: 0;
   overflow: hidden;
-  background: #6f7b63;
+  background: var(--archive-canvas);
 }
 
 .archive-world-dossier > header,
@@ -39,14 +39,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  border-bottom: 1px solid rgba(39, 59, 45, 0.35);
+  border-bottom: 1px solid var(--archive-line-strong);
   padding: 16px 24px;
-  background: rgba(207, 199, 166, 0.92);
+  background: color-mix(in srgb, var(--archive-sand) 92%, transparent);
 }
 
 .archive-world-codex > header {
-  color: #f1ead5;
-  background: #26382c;
+  color: var(--tone-forest-ink);
+  background: var(--tone-forest-surface);
 }
 
 .archive-world-dossier > header p,
@@ -80,5 +80,5 @@
 
 .archive-world-codex__scroll {
   padding: 0 clamp(12px, 3vw, 44px) 80px;
-  background: #6f7b63;
+  background: var(--archive-canvas);
 }

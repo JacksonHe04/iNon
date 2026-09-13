@@ -8,7 +8,10 @@ body:has(.public-experience) > .archive-atmosphere--global {
   z-index: 1;
   background:
     radial-gradient(circle at 28% 16%, rgba(194, 198, 159, 0.2), transparent 34%),
-    linear-gradient(112deg, #7f8974 0%, #68745f 45%, #56644f 100%);
+    linear-gradient(112deg,
+      color-mix(in srgb, var(--archive-forest-surface) 22%, var(--archive-sage)) 0%,
+      color-mix(in srgb, var(--archive-forest-surface) 48%, var(--archive-sage)) 45%,
+      color-mix(in srgb, var(--archive-forest-surface) 72%, var(--archive-sage)) 100%);
 }
 
 .archive-atmosphere--profile .archive-atmosphere__landscape {
@@ -46,6 +49,59 @@ body:has(.public-experience) > .archive-atmosphere--global {
     radial-gradient(circle at 72% 24%, rgba(226, 211, 173, 0.3) 0 0.7px, transparent 1.4px),
     radial-gradient(circle at 91% 67%, rgba(42, 54, 41, 0.28) 0 1.2px, transparent 2px);
   background-size: 83px 97px, 131px 109px, 157px 137px, 191px 173px;
+}
+
+.archive-atmosphere__leaves {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.archive-leaf {
+  position: absolute;
+  top: -8%;
+  will-change: transform;
+  animation-name: leaf-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.archive-leaf__sway {
+  display: block;
+  animation: leaf-sway var(--sway-duration) ease-in-out infinite alternate;
+}
+
+.archive-leaf__blade {
+  display: block;
+  width: var(--size, 12px);
+  height: var(--size, 12px);
+  border-radius: 0 68% 6% 68%;
+  opacity: 0.55;
+  animation: leaf-spin var(--spin-duration) linear infinite;
+}
+
+.archive-leaf[data-tone='ochre'] .archive-leaf__blade { background: linear-gradient(135deg, #c79a52, #8f6a33); }
+.archive-leaf[data-tone='rust'] .archive-leaf__blade { background: linear-gradient(135deg, #9c6b4f, #6e4630); }
+.archive-leaf[data-tone='sage'] .archive-leaf__blade { background: linear-gradient(135deg, #b2baa2, #7d8a6d); }
+.archive-leaf[data-tone='lichen'] .archive-leaf__blade { background: linear-gradient(135deg, #c2c69f, #8f9468); }
+.archive-leaf[data-tone='seal'] .archive-leaf__blade { background: linear-gradient(135deg, #a86a4f, #763e32); }
+
+@keyframes leaf-fall {
+  to { transform: translate3d(var(--drift, 5vw), 116vh, 0); }
+}
+
+@keyframes leaf-sway {
+  from { transform: translateX(calc(var(--sway, 20px) * -1)); }
+  to { transform: translateX(var(--sway, 20px)); }
+}
+
+@keyframes leaf-spin {
+  to { transform: rotate(var(--spin, 320deg)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-atmosphere__leaves { display: none; }
 }
 
 .archive-atmosphere__relics {
@@ -92,7 +148,7 @@ body:has(.public-experience) > .archive-atmosphere--global {
 }
 
 .public-experience .archive-world-codex__scroll {
-  background-color: rgb(111 123 99 / 0.32);
+  background-color: color-mix(in srgb, var(--archive-canvas) 32%, transparent);
 }
 
 @media (max-width: 720px) {

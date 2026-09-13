@@ -3,8 +3,8 @@
   min-height: clamp(340px, 52vw, 590px);
   overflow: hidden;
   border: 1px solid var(--archive-line-strong);
-  background: var(--archive-forest-deep);
-  color: #eee6d4;
+  background: var(--archive-forest-surface);
+  color: var(--tone-forest-ink);
 }
 
 .archive-hero__image {
@@ -30,12 +30,12 @@
 }
 
 .archive-hero__copy .archive-kicker {
-  color: #d8caa7;
+  color: var(--archive-ochre);
 }
 
 .archive-hero__copy h1 {
   margin: 10px 0 16px;
-  color: #f3efe2;
+  color: var(--tone-forest-ink);
   font-size: clamp(46px, 6.6vw, 86px);
   font-weight: 500;
   letter-spacing: -0.055em;
@@ -45,7 +45,7 @@
 .archive-hero__copy > p:last-child {
   max-width: 38ch;
   margin: 0;
-  color: #e9e1cc;
+  color: var(--tone-forest-ink);
   font-size: clamp(12px, 1.4vw, 15px);
   line-height: 1.7;
 }
@@ -59,9 +59,9 @@
   width: 88px;
   height: 88px;
   place-items: center;
-  border: 1px solid rgba(233, 225, 204, 0.7);
+  border: 1px solid color-mix(in srgb, var(--tone-forest-ink) 60%, transparent);
   border-radius: 50%;
-  color: #e9e1cc;
+  color: var(--tone-forest-ink);
   font-family: var(--font-geist-mono), monospace;
   font-size: 9px;
   letter-spacing: 0.12em;
@@ -234,8 +234,8 @@
 }
 
 .archive-deepwater {
-  color: #e9e1cc;
-  background: #182119;
+  color: var(--tone-forest-ink);
+  background: var(--archive-forest-surface);
   isolation: isolate;
 }
 
@@ -252,8 +252,8 @@
   align-items: center;
   gap: 18px;
   padding: 14px 18px;
-  border: 1px solid rgba(233, 225, 204, 0.42);
-  color: #e9e1cc;
+  border: 1px solid color-mix(in srgb, var(--tone-forest-ink) 40%, transparent);
+  color: var(--tone-forest-ink);
 }
 
 .archive-deepwater__unsealed span {
@@ -264,11 +264,11 @@
 
 .archive-deepwater__unsealed p {
   margin: 0;
-  color: #d8caa7;
+  color: var(--archive-ochre);
   font-size: 12px;
 }
 
 .archive-deepwater .archive-paper-surface {
   color: var(--archive-ink);
-  background: #e9e1cc;
+  background: var(--archive-paper-light);
 }
