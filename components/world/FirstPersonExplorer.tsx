@@ -59,6 +59,7 @@ export default function FirstPersonExplorer({
   const lookTarget = useMemo(() => new Vector3(), []);
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
+      if (!enabled) return;
       keys.current.add(event.code);
       if (event.code === 'KeyE' && nearest.current) onOpen(nearest.current.blockType);
       if (event.code === 'KeyV' && !event.repeat && !mountedRef.current) {
@@ -97,9 +98,8 @@ export default function FirstPersonExplorer({
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
     };
-  }, [heightAt, onOpen]);
+  }, [enabled, heightAt, onOpen]);
   useExplorerPointerLook({ enabled, canvas: gl.domElement, yaw, pitch });
-
   useEffect(() => {
     const travel = (event: Event) => {
       const detail = (event as CustomEvent<GameTravelRequest>).detail;
