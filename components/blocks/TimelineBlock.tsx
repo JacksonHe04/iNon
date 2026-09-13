@@ -26,12 +26,12 @@ export default function TimelineBlock({ items, title = getBlockTitle('timeline')
         {items.map((item) => (
           <div key={item.id} className="relative group">
             <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-pink-500 ring-4 ring-pink-500/20 group-hover:scale-125 transition" />
-            <div className="flex items-center gap-2 text-xs font-semibold text-pink-600 dark:text-pink-400 font-mono">
+            <div className="flex items-center gap-2 text-xs font-semibold text-theme-primary font-mono">
               <Calendar className="w-3.5 h-3.5" />
               <span>{item.date}</span>
-              {item.city && <span className="text-gray-400">· {item.city}</span>}
+              {item.city && <span className="text-gray-500">· {item.city}</span>}
             </div>
-            <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">
+            <p className="text-xs text-gray-900 mt-1 leading-relaxed">
               {item.description}
             </p>
           </div>
