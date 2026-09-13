@@ -1,9 +1,21 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
 import type { QueryResult, MaybeSingleResult, ProfileRow } from '@/types/database';
 
-export async function listTable<T>(table: string, profileId: string, select = '*'): Promise<QueryResult<T>> {
-  const supabase = createAdminClient();
+type AnyClient = SupabaseClient;
+
+async function resolveClient(client?: AnyClient | null): Promise<AnyClient> {
+  if (client) return client;
+  return createAdminClient();
+}
+
+export async function listTable<T>(
+  table: string,
+  profileId: string,
+  select = '*',
+  client?: AnyClient | null,
+): Promise<QueryResult<T>> {
+  const supabase = await resolveClient(client);
   const response = await supabase
     .from(table)
     .select(select)
@@ -16,8 +28,13 @@ export async function listTable<T>(table: string, profileId: string, select = '*
   };
 }
 
-export async function maybeSingleByProfile<T>(table: string, profileId: string, select = '*'): Promise<MaybeSingleResult<T>> {
-  const supabase = createAdminClient();
+export async function maybeSingleByProfile<T>(
+  table: string,
+  profileId: string,
+  select = '*',
+  client?: AnyClient | null,
+): Promise<MaybeSingleResult<T>> {
+  const supabase = await resolveClient(client);
   const response = await supabase
     .from(table)
     .select(select)
@@ -34,13 +51,14 @@ export async function listByForeignIds<T>(
   table: string,
   key: string,
   ids: string[],
-  select = '*'
+  select = '*',
+  client?: AnyClient | null,
 ): Promise<QueryResult<T>> {
   if (!ids.length) {
     return { data: [], error: null };
   }
 
-  const supabase = createAdminClient();
+  const supabase = await resolveClient(client);
   const response = await supabase
     .from(table)
     .select(select)
@@ -53,8 +71,11 @@ export async function listByForeignIds<T>(
   };
 }
 
-export async function loadProfile(identifier: string): Promise<MaybeSingleResult<ProfileRow>> {
-  const supabase = createAdminClient();
+export async function loadProfile(
+  identifier: string,
+  client?: AnyClient | null,
+): Promise<MaybeSingleResult<ProfileRow>> {
+  const supabase = await resolveClient(client);
 
   // 1. Check profiles by slug or username
   let query = supabase

@@ -86,11 +86,14 @@ export const EMPTY_README_DATA: ReadmeData = {
 };
 
 async function loadLegacyPublicPageData(slug: string): Promise<PublicPageData | null> {
+  // 整个函数运行在 unstable_cache 内，禁止 cookies()；
+  // 公开数据只读，统一使用 admin client 贯穿回退链路。
+  const client = createAdminClient();
   try {
     const [data, layoutConfig, profileId] = await Promise.all([
-      getReadmeData(slug),
+      getReadmeData(slug, client),
       getLayoutConfig(slug),
-      getProfileIdBySlug(slug),
+      getProfileIdBySlug(slug, client),
     ]);
     return { data: deduplicateReadmeData(data), layoutConfig, profileId: profileId ?? '' };
   } catch (err) {

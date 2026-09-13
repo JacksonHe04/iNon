@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { loadProfile } from '@/lib/content/db-helpers';
 
 /**
@@ -5,7 +6,10 @@ import { loadProfile } from '@/lib/content/db-helpers';
  * 与 getReadmeData 同源，但只查 profiles 表，少一次大查询。
  * 找不到返回 null（页面应正常降级，不阻塞）。
  */
-export async function getProfileIdBySlug(slug: string): Promise<string | null> {
-  const { data } = await loadProfile(slug);
+export async function getProfileIdBySlug(
+  slug: string,
+  client?: SupabaseClient | null,
+): Promise<string | null> {
+  const { data } = await loadProfile(slug, client);
   return data?.id ?? null;
 }

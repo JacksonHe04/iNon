@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { DEFAULT_PROFILE_SLUG } from '@/lib/content/constants';
 import type { ReadmeData } from '@/types';
 import type { ProfileRow } from '@/types/database';
@@ -20,27 +21,28 @@ import {
 } from './mappers';
 import { loadReadmeSourceData, type ReadmeSourceData } from './readme-source-data';
 
-const loadResolvedProfile = cache(async (slug: string): Promise<ProfileRow> => {
-  let profileResult = await loadProfile(slug);
-  if (!profileResult.data && slug !== DEFAULT_PROFILE_SLUG) {
-    profileResult = await loadProfile(DEFAULT_PROFILE_SLUG);
-  }
-  if (!profileResult.data) {
-    profileResult = await loadProfile('');
-  }
-  if (profileResult.error || !profileResult.data) {
-    throw profileResult.error ?? new Error(`Profile "${slug}" not found`);
-  }
-  return profileResult.data;
-});
+const loadResolvedProfile = cache(
+  async (slug: string, client?: SupabaseClient | null): Promise<ProfileRow> => {
+    let profileResult = await loadProfile(slug, client);
+    if (!profileResult.data && slug !== DEFAULT_PROFILE_SLUG) {
+      profileResult = await loadProfile(DEFAULT_PROFILE_SLUG, client);
+    }
+    if (!profileResult.data) {
+      profileResult = await loadProfile('', client);
+    }
+    if (profileResult.error || !profileResult.data) {
+      throw profileResult.error ?? new Error(`Profile "${slug}" not found`);
+    }
+    return profileResult.data;
+  },
+);
 
-export async function getSiteMetadata() {
-  const profile = await loadResolvedProfile(DEFAULT_PROFILE_SLUG);
-  return {
+export function getSiteMetadata(client?: SupabaseClient | null) {
+  return loadResolvedProfile(DEFAULT_PROFILE_SLUG, client).then((profile) => ({
     title: profile.meta_title,
     description: profile.meta_description,
     author: profile.meta_author,
-  };
+  }));
 }
 
 export function mapReadmeData(profile: ProfileRow, sourceData: ReadmeSourceData): ReadmeData {
@@ -69,10 +71,13 @@ export function mapReadmeData(profile: ProfileRow, sourceData: ReadmeSourceData)
   };
 }
 
-export async function getReadmeData(slug = DEFAULT_PROFILE_SLUG): Promise<ReadmeData> {
+export async function getReadmeData(
+  slug = DEFAULT_PROFILE_SLUG,
+  client?: SupabaseClient | null,
+): Promise<ReadmeData> {
   try {
-    const profile = await loadResolvedProfile(slug);
-    const sourceData = await loadReadmeSourceData(profile.id);
+    const profile = await loadResolvedProfile(slug, client);
+    const sourceData = await loadReadmeSourceData(profile.id, client);
     return mapReadmeData(profile, sourceData);
   } catch (error) {
     throw new Error(`Failed to load readme data from Supabase: ${(error as Error).message}`);

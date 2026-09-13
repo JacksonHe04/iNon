@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { listVisibleMessages } from './messages';
 import { groupByKey, sortByOrder } from './mappers';
 import { listByForeignIds, listTable, maybeSingleByProfile } from './db-helpers';
@@ -102,13 +103,21 @@ async function loadAggregatedSourceData(profileId: string): Promise<ReadmeSource
   return error ? null : normalizeAggregatedSourceData(data);
 }
 
-export async function loadReadmeSourceData(profileId: string): Promise<ReadmeSourceData> {
+export async function loadReadmeSourceData(
+  profileId: string,
+  client?: SupabaseClient | null,
+): Promise<ReadmeSourceData> {
+  // 传入 client 时（公开页缓存路径），回退链路也复用它，避免在 unstable_cache 内触发 cookies()；
+  // 未传时由聚合 RPC 路径自行使用 admin client，legacy 回退退化为 cookie client（控制台路径）。
   const aggregated = await loadAggregatedSourceData(profileId);
   if (aggregated) return aggregated;
-  return loadLegacyReadmeSourceData(profileId);
+  return loadLegacyReadmeSourceData(profileId, client ?? undefined);
 }
 
-async function loadLegacyReadmeSourceData(profileId: string): Promise<ReadmeSourceData> {
+async function loadLegacyReadmeSourceData(
+  profileId: string,
+  client?: SupabaseClient,
+): Promise<ReadmeSourceData> {
   const [
     lifeResult,
     tagsResult,
@@ -132,27 +141,27 @@ async function loadLegacyReadmeSourceData(profileId: string): Promise<ReadmeSour
     thoughtQaResult,
     notificationsResult,
   ] = await Promise.all([
-    maybeSingleByProfile<ProfileLifeRow>('profile_life', profileId),
-    listTable<TagRow>('profile_tags', profileId),
-    listTable<ListRow>('profile_list_items', profileId),
-    listTable<ExperienceRow>('experiences', profileId),
-    listTable<SchoolRow>('schools', profileId),
-    maybeSingleByProfile<EducationMetaRow>('education_meta', profileId),
-    maybeSingleByProfile<WorkMetaRow>('work_meta', profileId),
-    listTable<JobRow>('jobs', profileId),
-    listTable<DevelopmentSkillRow>('development_skills', profileId),
-    listTable<ProjectRow>('projects', profileId),
-    listTable<DevToolRow>('dev_tools', profileId),
-    listTable<ProductItemRow>('product_items', profileId),
-    listTable<HardwareItemRow>('hardware_items', profileId),
-    listTable<CreationItemRow>('creation_items', profileId),
-    listTable<LibraryItemRow>('library_items', profileId),
-    listTable<LibraryCategoryRow>('library_categories', profileId),
-    listTable<PerformanceRow>('performances', profileId),
-    listTable<ContactMethodRow>('contact_methods', profileId),
-    listTable<PlatformAccountRow>('platform_accounts', profileId),
-    listTable<ThoughtQaRow>('thought_qa', profileId),
-    listTable<NotificationRow>('notifications', profileId),
+    maybeSingleByProfile<ProfileLifeRow>('profile_life', profileId, '*', client),
+    listTable<TagRow>('profile_tags', profileId, '*', client),
+    listTable<ListRow>('profile_list_items', profileId, '*', client),
+    listTable<ExperienceRow>('experiences', profileId, '*', client),
+    listTable<SchoolRow>('schools', profileId, '*', client),
+    maybeSingleByProfile<EducationMetaRow>('education_meta', profileId, '*', client),
+    maybeSingleByProfile<WorkMetaRow>('work_meta', profileId, '*', client),
+    listTable<JobRow>('jobs', profileId, '*', client),
+    listTable<DevelopmentSkillRow>('development_skills', profileId, '*', client),
+    listTable<ProjectRow>('projects', profileId, '*', client),
+    listTable<DevToolRow>('dev_tools', profileId, '*', client),
+    listTable<ProductItemRow>('product_items', profileId, '*', client),
+    listTable<HardwareItemRow>('hardware_items', profileId, '*', client),
+    listTable<CreationItemRow>('creation_items', profileId, '*', client),
+    listTable<LibraryItemRow>('library_items', profileId, '*', client),
+    listTable<LibraryCategoryRow>('library_categories', profileId, '*', client),
+    listTable<PerformanceRow>('performances', profileId, '*', client),
+    listTable<ContactMethodRow>('contact_methods', profileId, '*', client),
+    listTable<PlatformAccountRow>('platform_accounts', profileId, '*', client),
+    listTable<ThoughtQaRow>('thought_qa', profileId, '*', client),
+    listTable<NotificationRow>('notifications', profileId, '*', client),
   ]);
 
   const baseError = firstError([
@@ -198,10 +207,10 @@ async function loadLegacyReadmeSourceData(profileId: string): Promise<ReadmeSour
     devToolTagsResult,
     productItemTagsResult,
   ] = await Promise.all([
-    listByForeignIds<ProjectListRow>('project_roles', 'project_id', projectIds, 'project_id, value, sort_order'),
-    listByForeignIds<ProjectListRow>('project_tech_stack', 'project_id', projectIds, 'project_id, value, sort_order'),
-    listByForeignIds<DevToolTagRow>('dev_tool_tags', 'dev_tool_id', devToolIds, 'dev_tool_id, value, sort_order'),
-    listByForeignIds<ProductItemTagRow>('product_item_tags', 'product_item_id', productItemIds, 'product_item_id, value, sort_order'),
+    listByForeignIds<ProjectListRow>('project_roles', 'project_id', projectIds, 'project_id, value, sort_order', client),
+    listByForeignIds<ProjectListRow>('project_tech_stack', 'project_id', projectIds, 'project_id, value, sort_order', client),
+    listByForeignIds<DevToolTagRow>('dev_tool_tags', 'dev_tool_id', devToolIds, 'dev_tool_id, value, sort_order', client),
+    listByForeignIds<ProductItemTagRow>('product_item_tags', 'product_item_id', productItemIds, 'product_item_id, value, sort_order', client),
   ]);
 
   const relationError = firstError([
