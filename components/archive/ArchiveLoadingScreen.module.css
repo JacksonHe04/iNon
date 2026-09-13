@@ -1,0 +1,196 @@
+.screen {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #ece4cb;
+  background: linear-gradient(124deg, #1c2b22 0%, #24362a 52%, #2b3a2d 100%);
+}
+
+.texture {
+  position: absolute;
+  inset: 0;
+  background: url("/archive-assets/aged-paper-texture.webp") center / 640px auto repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.14;
+}
+
+.dust {
+  position: absolute;
+  inset: -14%;
+  opacity: 0.4;
+  background-image:
+    radial-gradient(circle at 8% 18%, rgba(235, 225, 193, 0.32) 0 0.8px, transparent 1.5px),
+    radial-gradient(circle at 34% 72%, rgba(226, 211, 173, 0.28) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 72% 24%, rgba(226, 211, 173, 0.24) 0 0.7px, transparent 1.4px),
+    radial-gradient(circle at 91% 67%, rgba(235, 225, 193, 0.26) 0 1.2px, transparent 2px);
+  background-size: 89px 103px, 137px 113px, 163px 141px, 197px 179px;
+  animation: dust-drift 60s linear infinite alternate;
+}
+
+.core {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 0 24px;
+  text-align: center;
+  animation: rise-in 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #c5b16f;
+  font: 10px/1 var(--font-mono), monospace;
+  letter-spacing: 0.32em;
+}
+
+.dial {
+  width: clamp(140px, 22vw, 188px);
+  aspect-ratio: 1;
+}
+
+.dialSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 10px 26px rgba(10, 22, 15, 0.5));
+}
+
+.cardinal {
+  fill: #c5b16f;
+  font: 500 8.5px/1 var(--font-mono), monospace;
+  letter-spacing: 0.1em;
+}
+
+.rose {
+  transform-origin: 60px 60px;
+  animation: rose-turn 96s linear infinite;
+}
+
+.needle {
+  transform-origin: 60px 60px;
+  animation: needle-seek 3.6s ease-in-out infinite alternate;
+}
+
+.title {
+  margin: 4px 0 0;
+  color: #ece4cb;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(22px, 3.4vw, 32px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.coords {
+  margin: 0;
+  color: rgba(197, 177, 111, 0.86);
+  font: 10.5px/1.8 var(--font-mono), monospace;
+  letter-spacing: 0.18em;
+}
+
+.coordsDash {
+  animation: dash-blink 1.6s steps(2, jump-none) infinite;
+}
+
+.coordsSep {
+  margin: 0 0.7em;
+  animation: dash-blink 1.6s steps(2, jump-none) infinite;
+  animation-delay: 0.8s;
+}
+
+.rule {
+  position: relative;
+  width: min(320px, 64vw);
+  height: 1px;
+  overflow: hidden;
+  background: rgba(236, 228, 203, 0.14);
+}
+
+.ruleScan {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -38%;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, #c9bd91, transparent);
+  animation: rule-scan 2.4s ease-in-out infinite;
+}
+
+.statuses {
+  position: relative;
+  height: 1.4em;
+  min-width: 12em;
+}
+
+.status {
+  position: absolute;
+  inset: 0;
+  color: rgba(236, 228, 203, 0.55);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  animation: status-cycle 6s linear infinite;
+  opacity: 0;
+}
+
+.status:nth-child(2) { animation-delay: 2s; }
+.status:nth-child(3) { animation-delay: 4s; }
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rose-turn {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes needle-seek {
+  from { transform: rotate(-26deg); }
+  to { transform: rotate(34deg); }
+}
+
+@keyframes dash-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.28; }
+}
+
+@keyframes rule-scan {
+  0% { left: -38%; }
+  62%, 100% { left: 100%; }
+}
+
+@keyframes status-cycle {
+  0%, 30% { opacity: 0; }
+  6%, 24% { opacity: 1; }
+  36%, 100% { opacity: 0; }
+}
+
+@keyframes dust-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-1.6%, -1%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .core,
+  .rose,
+  .needle,
+  .ruleScan,
+  .coordsDash,
+  .coordsSep,
+  .dust {
+    animation: none;
+  }
+
+  .status {
+    animation: none;
+    opacity: 1;
+  }
+
+  .status:not(:first-child) {
+    display: none;
+  }
+}
