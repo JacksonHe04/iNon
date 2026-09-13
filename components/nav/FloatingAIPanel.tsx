@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ChatMessage } from '@/hooks/useAIAssistant';
 
@@ -29,6 +29,28 @@ export function FloatingAIPanel({
   getInputPlaceholder,
   nickname,
 }: FloatingAIPanelProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const stickToBottom = useRef(true);
+  const prevMessageCount = useRef(0);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    // 流式期间用户上滑回看时不强制拉底；有新消息进列表（新提问/新回复占位）则回到最新
+    const hasNewMessage = messages.length > prevMessageCount.current;
+    prevMessageCount.current = messages.length;
+    if (!stickToBottom.current && !hasNewMessage) return;
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+  }, [messages]);
+
   return (
     <AnimatePresence>
       {aiState === 'floating' && (
@@ -54,7 +76,7 @@ export function FloatingAIPanel({
               </button>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
             {messages.length === 0 && (
               <div className="rounded-2xl bg-white/50 p-4 text-sm text-gray-600 shadow-inner">
                 你可以问"小{nickname}"关于作品、经历、音乐、阅读或任何和 {nickname} 相关的故事。

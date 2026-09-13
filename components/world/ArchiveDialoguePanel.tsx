@@ -27,6 +27,8 @@ export default function ArchiveDialoguePanel({
     ? '在主屋地毯旁，与苔苔说话'
     : `在${worldContext.location}停下，与苔苔说话`;
   const scroll = useRef<HTMLDivElement>(null);
+  const stickToBottom = useRef(true);
+  const prevMessageCount = useRef(0);
   const {
     messages,
     aiInput,
@@ -37,6 +39,20 @@ export default function ArchiveDialoguePanel({
   } = useAIAssistant({ data, persona, worldContext });
 
   useEffect(() => {
+    const el = scroll.current;
+    if (!el) return;
+    const onScroll = () => {
+      stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    // 流式期间用户上滑回看时不强制拉底；有新消息进列表（新提问/新回复占位）则回到最新
+    const hasNewMessage = messages.length > prevMessageCount.current;
+    prevMessageCount.current = messages.length;
+    if (!stickToBottom.current && !hasNewMessage) return;
     scroll.current?.scrollTo({ top: scroll.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
